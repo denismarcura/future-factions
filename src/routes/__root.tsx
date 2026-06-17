@@ -84,10 +84,15 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         content:
           "Rede social de previsões com Tokens virtuais. Aposte com amigos em palpites malucos da Copa, política, tech e mais. Fase de testes.",
       },
-      { property: "og:title", content: "EU ACHO QUE VAI DAR @#&" },
-      { property: "og:description", content: "Aposte com seus amigos na nossa fase de testes." },
+      { property: "og:title", content: "EU ACHO QUE VAI DAR @#& — Aposte com seus amigos" },
+      { property: "og:description", content: "A social prediction platform where users bet virtual tokens on future events." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "EU ACHO QUE VAI DAR @#& — Aposte com seus amigos" },
+      { name: "description", content: "A social prediction platform where users bet virtual tokens on future events." },
+      { name: "twitter:description", content: "A social prediction platform where users bet virtual tokens on future events." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/4909781e-c988-4408-92c2-43ff1b38c416/id-preview-68a7de82--5e034da4-3897-4ee0-875d-d4c073a58bb4.lovable.app-1781657436250.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/4909781e-c988-4408-92c2-43ff1b38c416/id-preview-68a7de82--5e034da4-3897-4ee0-875d-d4c073a58bb4.lovable.app-1781657436250.png" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
