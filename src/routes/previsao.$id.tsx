@@ -4,10 +4,10 @@ import {
   Clock, Users, Flame, Heart, MessageCircle, Share2, Coins, TrendingUp, ArrowLeft,
 } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
-import { CURRENT_USER, formatTokens, getPrediction, PREDICTIONS, timeLeft, USERS } from "@/lib/mock-data";
+import { CURRENT_USER, formatTokens, getPrediction, PREDICTIONS, type Prediction, timeLeft, USERS } from "@/lib/mock-data";
 
 export const Route = createFileRoute("/previsao/$id")({
-  loader: ({ params }) => {
+  loader: ({ params }): Prediction => {
     const p = getPrediction(params.id);
     if (!p) throw notFound();
     return p;
