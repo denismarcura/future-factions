@@ -39,8 +39,8 @@ export const Route = createFileRoute("/previsao/$id")({
 });
 
 function PredictionPage() {
-  const p = Route.useLoaderData();
-  const totalPool = p.options.reduce((s, o) => s + o.pool, 0);
+  const p = Route.useLoaderData() as Prediction;
+  const totalPool = p.options.reduce((s: number, o) => s + o.pool, 0);
   const [selected, setSelected] = useState(p.options[0].id);
   const [amount, setAmount] = useState(p.minTokens);
 
