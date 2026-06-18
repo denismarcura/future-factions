@@ -1,6 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import {
-  Flame,
   Home,
   Trophy,
   Target,
@@ -9,34 +8,57 @@ import {
   Search,
   Coins,
   Bell,
-  Rocket,
+  Crown,
+  ShoppingBag,
+  Building2,
+  HelpCircle,
+  BookOpen,
+  Flame,
+  ListChecks,
 } from "lucide-react";
 import type { ReactNode } from "react";
 import { CURRENT_USER, formatTokens } from "@/lib/mock-data";
+import logoAsset from "@/assets/logo-desafio.png.asset.json";
 
 const NAV = [
-  { to: "/", label: "Feed", icon: Home },
+  { to: "/", label: "Home", icon: Home },
+  { to: "/como-funciona", label: "Como Funciona", icon: BookOpen },
+  { to: "/desafios", label: "Desafios", icon: ListChecks },
+  { to: "/criar", label: "Criar Desafio", icon: Plus },
   { to: "/ranking", label: "Ranking", icon: Trophy },
+  { to: "/top100", label: "Top 100", icon: Crown },
+  { to: "/shop", label: "Shop de Prêmios", icon: ShoppingBag },
+  { to: "/empresas", label: "Empresas", icon: Building2 },
   { to: "/missoes", label: "Missões", icon: Target },
   { to: "/perfil", label: "Perfil", icon: UserIcon },
+  { to: "/faq", label: "FAQ", icon: HelpCircle },
+];
+
+const MOBILE_NAV = [
+  { to: "/", label: "Home", icon: Home },
+  { to: "/desafios", label: "Desafios", icon: ListChecks },
+  { to: "/shop", label: "Shop", icon: ShoppingBag },
+  { to: "/ranking", label: "Ranking", icon: Trophy },
 ];
 
 function Logo() {
   return (
-    <Link to="/" className="flex items-center gap-2 group">
+    <Link to="/" className="flex items-center gap-3 group">
       <div className="relative">
-        <div className="absolute inset-0 bg-gradient-brand blur-md opacity-60 group-hover:opacity-100 transition" />
-        <div className="relative h-9 w-9 rounded-lg bg-gradient-brand grid place-items-center text-primary-foreground font-black">
-          <Rocket className="h-5 w-5" />
-        </div>
+        <div className="absolute inset-0 bg-primary/40 blur-lg opacity-60 group-hover:opacity-100 transition" />
+        <img
+          src={logoAsset.url}
+          alt="Desafio dos Palpites"
+          className="relative h-12 w-12 object-contain drop-shadow-[0_0_8px_rgba(0,230,118,0.55)]"
+        />
       </div>
-      <div className="leading-none">
+      <div className="leading-none hidden sm:block">
         <div className="font-display font-black text-sm tracking-tight">
-          EU ACHO QUE <span className="text-gradient-brand">VAI DAR</span>{" "}
-          <span className="text-destructive">@#&amp;</span>
+          DESAFIO <span className="text-gradient-brand">DOS</span>{" "}
+          <span className="text-gradient-silver">PALPITES</span>
         </div>
         <div className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground mt-0.5">
-          Beta · Aposte com seus amigos
+          100% grátis · Só Tokens, sem dinheiro real
         </div>
       </div>
     </Link>
@@ -60,22 +82,21 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-screen bg-background bg-radial-brand">
-      {/* Top bar */}
-      <header className="sticky top-0 z-40 backdrop-blur-xl bg-background/70 border-b border-border/60">
-        <div className="max-w-7xl mx-auto px-4 h-16 flex items-center gap-4">
+      <header className="sticky top-0 z-40 backdrop-blur-xl bg-background/75 border-b border-border/60">
+        <div className="max-w-7xl mx-auto px-4 h-18 py-2 flex items-center gap-4">
           <Logo />
 
-          <div className="hidden md:flex flex-1 max-w-md ml-6">
+          <div className="hidden lg:flex flex-1 max-w-md ml-6">
             <div className="relative w-full">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <input
-                placeholder="Buscar previsões, categorias, profetas…"
+                placeholder="Buscar desafios, empresas, palpiteiros…"
                 className="w-full h-10 pl-9 pr-4 rounded-full bg-card border border-border/60 text-sm focus:outline-none focus:ring-2 focus:ring-primary/60"
               />
             </div>
           </div>
 
-          <div className="flex-1 md:hidden" />
+          <div className="flex-1 lg:hidden" />
 
           <div className="flex items-center gap-3">
             <TokenPill />
@@ -87,15 +108,14 @@ export function AppShell({ children }: { children: ReactNode }) {
               className="hidden sm:inline-flex items-center gap-2 h-10 px-4 rounded-full bg-gradient-brand text-primary-foreground font-bold text-sm shadow-glow hover:scale-[1.02] transition"
             >
               <Plus className="h-4 w-4" />
-              Criar previsão
+              Criar desafio
             </Link>
           </div>
         </div>
       </header>
 
       <div className="max-w-7xl mx-auto px-4 pb-24 md:pb-12 md:flex md:gap-8 pt-6">
-        {/* Sidebar */}
-        <aside className="hidden md:block w-56 shrink-0">
+        <aside className="hidden md:block w-60 shrink-0">
           <nav className="sticky top-24 space-y-1">
             {NAV.map(({ to, label, icon: Icon }) => {
               const active = to === "/" ? pathname === "/" : pathname.startsWith(to);
@@ -119,7 +139,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 <Flame className="h-4 w-4" /> Profeta da Copa
               </div>
               <p className="text-xs text-muted-foreground mt-2">
-                Acerte previsões improváveis e ganhe um selo dourado. Compartilhe com seus amigos.
+                Acerte palpites improváveis e ganhe um selo dourado. Compartilhe com seus amigos.
               </p>
             </div>
           </nav>
@@ -128,10 +148,9 @@ export function AppShell({ children }: { children: ReactNode }) {
         <main className="flex-1 min-w-0">{children}</main>
       </div>
 
-      {/* Mobile bottom nav */}
-      <nav className="md:hidden fixed bottom-0 inset-x-0 z-40 backdrop-blur-xl bg-background/85 border-t border-border/60">
+      <nav className="md:hidden fixed bottom-0 inset-x-0 z-40 backdrop-blur-xl bg-background/90 border-t border-border/60">
         <div className="grid grid-cols-5">
-          {NAV.slice(0, 2).map(({ to, label, icon: Icon }) => {
+          {MOBILE_NAV.slice(0, 2).map(({ to, label, icon: Icon }) => {
             const active = to === "/" ? pathname === "/" : pathname.startsWith(to);
             return (
               <Link
@@ -149,13 +168,13 @@ export function AppShell({ children }: { children: ReactNode }) {
           <Link
             to="/criar"
             className="flex items-center justify-center -mt-6"
-            aria-label="Criar previsão"
+            aria-label="Criar desafio"
           >
             <span className="h-14 w-14 rounded-full bg-gradient-brand grid place-items-center shadow-glow text-primary-foreground">
               <Plus className="h-6 w-6" />
             </span>
           </Link>
-          {NAV.slice(2).map(({ to, label, icon: Icon }) => {
+          {MOBILE_NAV.slice(2).map(({ to, label, icon: Icon }) => {
             const active = pathname.startsWith(to);
             return (
               <Link

@@ -9,13 +9,29 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as Top100RouteImport } from './routes/top100'
+import { Route as ShopRouteImport } from './routes/shop'
 import { Route as RankingRouteImport } from './routes/ranking'
 import { Route as PerfilRouteImport } from './routes/perfil'
 import { Route as MissoesRouteImport } from './routes/missoes'
+import { Route as FaqRouteImport } from './routes/faq'
+import { Route as EmpresasRouteImport } from './routes/empresas'
+import { Route as DesafiosRouteImport } from './routes/desafios'
 import { Route as CriarRouteImport } from './routes/criar'
+import { Route as ComoFuncionaRouteImport } from './routes/como-funciona'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PrevisaoIdRouteImport } from './routes/previsao.$id'
 
+const Top100Route = Top100RouteImport.update({
+  id: '/top100',
+  path: '/top100',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ShopRoute = ShopRouteImport.update({
+  id: '/shop',
+  path: '/shop',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RankingRoute = RankingRouteImport.update({
   id: '/ranking',
   path: '/ranking',
@@ -31,9 +47,29 @@ const MissoesRoute = MissoesRouteImport.update({
   path: '/missoes',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FaqRoute = FaqRouteImport.update({
+  id: '/faq',
+  path: '/faq',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EmpresasRoute = EmpresasRouteImport.update({
+  id: '/empresas',
+  path: '/empresas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DesafiosRoute = DesafiosRouteImport.update({
+  id: '/desafios',
+  path: '/desafios',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CriarRoute = CriarRouteImport.update({
   id: '/criar',
   path: '/criar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ComoFuncionaRoute = ComoFuncionaRouteImport.update({
+  id: '/como-funciona',
+  path: '/como-funciona',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -49,61 +85,123 @@ const PrevisaoIdRoute = PrevisaoIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/como-funciona': typeof ComoFuncionaRoute
   '/criar': typeof CriarRoute
+  '/desafios': typeof DesafiosRoute
+  '/empresas': typeof EmpresasRoute
+  '/faq': typeof FaqRoute
   '/missoes': typeof MissoesRoute
   '/perfil': typeof PerfilRoute
   '/ranking': typeof RankingRoute
+  '/shop': typeof ShopRoute
+  '/top100': typeof Top100Route
   '/previsao/$id': typeof PrevisaoIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/como-funciona': typeof ComoFuncionaRoute
   '/criar': typeof CriarRoute
+  '/desafios': typeof DesafiosRoute
+  '/empresas': typeof EmpresasRoute
+  '/faq': typeof FaqRoute
   '/missoes': typeof MissoesRoute
   '/perfil': typeof PerfilRoute
   '/ranking': typeof RankingRoute
+  '/shop': typeof ShopRoute
+  '/top100': typeof Top100Route
   '/previsao/$id': typeof PrevisaoIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/como-funciona': typeof ComoFuncionaRoute
   '/criar': typeof CriarRoute
+  '/desafios': typeof DesafiosRoute
+  '/empresas': typeof EmpresasRoute
+  '/faq': typeof FaqRoute
   '/missoes': typeof MissoesRoute
   '/perfil': typeof PerfilRoute
   '/ranking': typeof RankingRoute
+  '/shop': typeof ShopRoute
+  '/top100': typeof Top100Route
   '/previsao/$id': typeof PrevisaoIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/como-funciona'
     | '/criar'
+    | '/desafios'
+    | '/empresas'
+    | '/faq'
     | '/missoes'
     | '/perfil'
     | '/ranking'
+    | '/shop'
+    | '/top100'
     | '/previsao/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/criar' | '/missoes' | '/perfil' | '/ranking' | '/previsao/$id'
+  to:
+    | '/'
+    | '/como-funciona'
+    | '/criar'
+    | '/desafios'
+    | '/empresas'
+    | '/faq'
+    | '/missoes'
+    | '/perfil'
+    | '/ranking'
+    | '/shop'
+    | '/top100'
+    | '/previsao/$id'
   id:
     | '__root__'
     | '/'
+    | '/como-funciona'
     | '/criar'
+    | '/desafios'
+    | '/empresas'
+    | '/faq'
     | '/missoes'
     | '/perfil'
     | '/ranking'
+    | '/shop'
+    | '/top100'
     | '/previsao/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ComoFuncionaRoute: typeof ComoFuncionaRoute
   CriarRoute: typeof CriarRoute
+  DesafiosRoute: typeof DesafiosRoute
+  EmpresasRoute: typeof EmpresasRoute
+  FaqRoute: typeof FaqRoute
   MissoesRoute: typeof MissoesRoute
   PerfilRoute: typeof PerfilRoute
   RankingRoute: typeof RankingRoute
+  ShopRoute: typeof ShopRoute
+  Top100Route: typeof Top100Route
   PrevisaoIdRoute: typeof PrevisaoIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/top100': {
+      id: '/top100'
+      path: '/top100'
+      fullPath: '/top100'
+      preLoaderRoute: typeof Top100RouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/shop': {
+      id: '/shop'
+      path: '/shop'
+      fullPath: '/shop'
+      preLoaderRoute: typeof ShopRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/ranking': {
       id: '/ranking'
       path: '/ranking'
@@ -125,11 +223,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MissoesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/faq': {
+      id: '/faq'
+      path: '/faq'
+      fullPath: '/faq'
+      preLoaderRoute: typeof FaqRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/empresas': {
+      id: '/empresas'
+      path: '/empresas'
+      fullPath: '/empresas'
+      preLoaderRoute: typeof EmpresasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/desafios': {
+      id: '/desafios'
+      path: '/desafios'
+      fullPath: '/desafios'
+      preLoaderRoute: typeof DesafiosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/criar': {
       id: '/criar'
       path: '/criar'
       fullPath: '/criar'
       preLoaderRoute: typeof CriarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/como-funciona': {
+      id: '/como-funciona'
+      path: '/como-funciona'
+      fullPath: '/como-funciona'
+      preLoaderRoute: typeof ComoFuncionaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -151,22 +277,18 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ComoFuncionaRoute: ComoFuncionaRoute,
   CriarRoute: CriarRoute,
+  DesafiosRoute: DesafiosRoute,
+  EmpresasRoute: EmpresasRoute,
+  FaqRoute: FaqRoute,
   MissoesRoute: MissoesRoute,
   PerfilRoute: PerfilRoute,
   RankingRoute: RankingRoute,
+  ShopRoute: ShopRoute,
+  Top100Route: Top100Route,
   PrevisaoIdRoute: PrevisaoIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
