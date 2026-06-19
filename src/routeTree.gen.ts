@@ -23,6 +23,7 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as PrevisaoIdRouteImport } from './routes/previsao.$id'
+import { Route as AdminCadastrosRouteImport } from './routes/admin.cadastros'
 
 const Top100Route = Top100RouteImport.update({
   id: '/top100',
@@ -94,6 +95,11 @@ const PrevisaoIdRoute = PrevisaoIdRouteImport.update({
   path: '/previsao/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminCadastrosRoute = AdminCadastrosRouteImport.update({
+  id: '/cadastros',
+  path: '/cadastros',
+  getParentRoute: () => AdminRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -108,6 +114,7 @@ export interface FileRoutesByFullPath {
   '/ranking': typeof RankingRoute
   '/shop': typeof ShopRoute
   '/top100': typeof Top100Route
+  '/admin/cadastros': typeof AdminCadastrosRoute
   '/previsao/$id': typeof PrevisaoIdRoute
   '/admin/': typeof AdminIndexRoute
 }
@@ -123,6 +130,7 @@ export interface FileRoutesByTo {
   '/ranking': typeof RankingRoute
   '/shop': typeof ShopRoute
   '/top100': typeof Top100Route
+  '/admin/cadastros': typeof AdminCadastrosRoute
   '/previsao/$id': typeof PrevisaoIdRoute
   '/admin': typeof AdminIndexRoute
 }
@@ -140,6 +148,7 @@ export interface FileRoutesById {
   '/ranking': typeof RankingRoute
   '/shop': typeof ShopRoute
   '/top100': typeof Top100Route
+  '/admin/cadastros': typeof AdminCadastrosRoute
   '/previsao/$id': typeof PrevisaoIdRoute
   '/admin/': typeof AdminIndexRoute
 }
@@ -158,6 +167,7 @@ export interface FileRouteTypes {
     | '/ranking'
     | '/shop'
     | '/top100'
+    | '/admin/cadastros'
     | '/previsao/$id'
     | '/admin/'
   fileRoutesByTo: FileRoutesByTo
@@ -173,6 +183,7 @@ export interface FileRouteTypes {
     | '/ranking'
     | '/shop'
     | '/top100'
+    | '/admin/cadastros'
     | '/previsao/$id'
     | '/admin'
   id:
@@ -189,6 +200,7 @@ export interface FileRouteTypes {
     | '/ranking'
     | '/shop'
     | '/top100'
+    | '/admin/cadastros'
     | '/previsao/$id'
     | '/admin/'
   fileRoutesById: FileRoutesById
@@ -309,14 +321,23 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PrevisaoIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/cadastros': {
+      id: '/admin/cadastros'
+      path: '/cadastros'
+      fullPath: '/admin/cadastros'
+      preLoaderRoute: typeof AdminCadastrosRouteImport
+      parentRoute: typeof AdminRoute
+    }
   }
 }
 
 interface AdminRouteChildren {
+  AdminCadastrosRoute: typeof AdminCadastrosRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminCadastrosRoute: AdminCadastrosRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
 
