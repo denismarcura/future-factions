@@ -15,6 +15,7 @@ import {
   BookOpen,
   Flame,
   ListChecks,
+  Shield,
 } from "lucide-react";
 import type { ReactNode } from "react";
 import { CURRENT_USER, formatTokens } from "@/lib/mock-data";
@@ -32,6 +33,7 @@ const NAV = [
   { to: "/missoes", label: "Missões", icon: Target },
   { to: "/perfil", label: "Perfil", icon: UserIcon },
   { to: "/faq", label: "FAQ", icon: HelpCircle },
+  { to: "/admin", label: "Administrativo", icon: Shield },
 ];
 
 const MOBILE_NAV = [
