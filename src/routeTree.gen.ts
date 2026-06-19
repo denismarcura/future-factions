@@ -24,6 +24,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as PrevisaoIdRouteImport } from './routes/previsao.$id'
 import { Route as AdminCadastrosRouteImport } from './routes/admin.cadastros'
+import { Route as AdminApisRouteImport } from './routes/admin.apis'
 
 const Top100Route = Top100RouteImport.update({
   id: '/top100',
@@ -100,6 +101,11 @@ const AdminCadastrosRoute = AdminCadastrosRouteImport.update({
   path: '/cadastros',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminApisRoute = AdminApisRouteImport.update({
+  id: '/apis',
+  path: '/apis',
+  getParentRoute: () => AdminRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -114,6 +120,7 @@ export interface FileRoutesByFullPath {
   '/ranking': typeof RankingRoute
   '/shop': typeof ShopRoute
   '/top100': typeof Top100Route
+  '/admin/apis': typeof AdminApisRoute
   '/admin/cadastros': typeof AdminCadastrosRoute
   '/previsao/$id': typeof PrevisaoIdRoute
   '/admin/': typeof AdminIndexRoute
@@ -130,6 +137,7 @@ export interface FileRoutesByTo {
   '/ranking': typeof RankingRoute
   '/shop': typeof ShopRoute
   '/top100': typeof Top100Route
+  '/admin/apis': typeof AdminApisRoute
   '/admin/cadastros': typeof AdminCadastrosRoute
   '/previsao/$id': typeof PrevisaoIdRoute
   '/admin': typeof AdminIndexRoute
@@ -148,6 +156,7 @@ export interface FileRoutesById {
   '/ranking': typeof RankingRoute
   '/shop': typeof ShopRoute
   '/top100': typeof Top100Route
+  '/admin/apis': typeof AdminApisRoute
   '/admin/cadastros': typeof AdminCadastrosRoute
   '/previsao/$id': typeof PrevisaoIdRoute
   '/admin/': typeof AdminIndexRoute
@@ -167,6 +176,7 @@ export interface FileRouteTypes {
     | '/ranking'
     | '/shop'
     | '/top100'
+    | '/admin/apis'
     | '/admin/cadastros'
     | '/previsao/$id'
     | '/admin/'
@@ -183,6 +193,7 @@ export interface FileRouteTypes {
     | '/ranking'
     | '/shop'
     | '/top100'
+    | '/admin/apis'
     | '/admin/cadastros'
     | '/previsao/$id'
     | '/admin'
@@ -200,6 +211,7 @@ export interface FileRouteTypes {
     | '/ranking'
     | '/shop'
     | '/top100'
+    | '/admin/apis'
     | '/admin/cadastros'
     | '/previsao/$id'
     | '/admin/'
@@ -328,15 +340,24 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminCadastrosRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/apis': {
+      id: '/admin/apis'
+      path: '/apis'
+      fullPath: '/admin/apis'
+      preLoaderRoute: typeof AdminApisRouteImport
+      parentRoute: typeof AdminRoute
+    }
   }
 }
 
 interface AdminRouteChildren {
+  AdminApisRoute: typeof AdminApisRoute
   AdminCadastrosRoute: typeof AdminCadastrosRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminApisRoute: AdminApisRoute,
   AdminCadastrosRoute: AdminCadastrosRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
