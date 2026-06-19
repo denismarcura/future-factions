@@ -19,6 +19,7 @@ import { Route as EmpresasRouteImport } from './routes/empresas'
 import { Route as DesafiosRouteImport } from './routes/desafios'
 import { Route as CriarRouteImport } from './routes/criar'
 import { Route as ComoFuncionaRouteImport } from './routes/como-funciona'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PrevisaoIdRouteImport } from './routes/previsao.$id'
 
@@ -72,6 +73,11 @@ const ComoFuncionaRoute = ComoFuncionaRouteImport.update({
   path: '/como-funciona',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -85,6 +91,7 @@ const PrevisaoIdRoute = PrevisaoIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/como-funciona': typeof ComoFuncionaRoute
   '/criar': typeof CriarRoute
   '/desafios': typeof DesafiosRoute
@@ -99,6 +106,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/como-funciona': typeof ComoFuncionaRoute
   '/criar': typeof CriarRoute
   '/desafios': typeof DesafiosRoute
@@ -114,6 +122,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/como-funciona': typeof ComoFuncionaRoute
   '/criar': typeof CriarRoute
   '/desafios': typeof DesafiosRoute
@@ -130,6 +139,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin'
     | '/como-funciona'
     | '/criar'
     | '/desafios'
@@ -144,6 +154,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/admin'
     | '/como-funciona'
     | '/criar'
     | '/desafios'
@@ -158,6 +169,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/admin'
     | '/como-funciona'
     | '/criar'
     | '/desafios'
@@ -173,6 +185,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRoute
   ComoFuncionaRoute: typeof ComoFuncionaRoute
   CriarRoute: typeof CriarRoute
   DesafiosRoute: typeof DesafiosRoute
@@ -258,6 +271,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ComoFuncionaRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -277,6 +297,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRoute,
   ComoFuncionaRoute: ComoFuncionaRoute,
   CriarRoute: CriarRoute,
   DesafiosRoute: DesafiosRoute,
