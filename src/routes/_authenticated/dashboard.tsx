@@ -909,9 +909,19 @@ function InvitePromoSection({
       <div className="grid lg:grid-cols-2 gap-4">
         {/* WhatsApp */}
         <div className="rounded-xl bg-card border border-border/60 p-4 space-y-2">
-          <div className="flex items-center gap-2">
-            <MessageCircle className="h-4 w-4 text-[#25D366]" />
-            <div className="text-sm font-bold">Texto para WhatsApp</div>
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <MessageCircle className="h-4 w-4 text-[#25D366]" />
+              <div className="text-sm font-bold">Texto para WhatsApp</div>
+            </div>
+            <button
+              onClick={() => gerarTextoIA("whatsapp")}
+              disabled={aiBusy === "whatsapp"}
+              className="h-7 px-2.5 rounded-full bg-background border border-primary/40 text-[11px] font-bold text-primary inline-flex items-center gap-1.5 disabled:opacity-60"
+            >
+              {aiBusy === "whatsapp" ? <Loader2 className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3 w-3" />}
+              Gerar com IA
+            </button>
           </div>
           <textarea
             value={whatsText}
@@ -937,9 +947,19 @@ function InvitePromoSection({
 
         {/* Email */}
         <div className="rounded-xl bg-card border border-border/60 p-4 space-y-2">
-          <div className="flex items-center gap-2">
-            <Mail className="h-4 w-4 text-primary" />
-            <div className="text-sm font-bold">Texto para e-mail</div>
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <Mail className="h-4 w-4 text-primary" />
+              <div className="text-sm font-bold">Texto para e-mail</div>
+            </div>
+            <button
+              onClick={() => gerarTextoIA("email")}
+              disabled={aiBusy === "email"}
+              className="h-7 px-2.5 rounded-full bg-background border border-primary/40 text-[11px] font-bold text-primary inline-flex items-center gap-1.5 disabled:opacity-60"
+            >
+              {aiBusy === "email" ? <Loader2 className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3 w-3" />}
+              Gerar com IA
+            </button>
           </div>
           <input
             value={emailSubject}
