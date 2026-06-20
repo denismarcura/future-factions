@@ -1,29 +1,71 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppShell } from "@/components/layout/AppShell";
 import { signOut } from "@/hooks/use-auth";
 import {
-  LogOut, Target, Coins, Plus, ListChecks, ShoppingBag,
-  Pencil, Save, X, Users, Send, MessageCircle, Sparkles, Loader2,
-  CheckCircle2, Circle, UserPlus, Trash2, ExternalLink, Gift, Rocket,
-  Copy, Download, Mail, Image as ImageIcon,
+  LogOut,
+  Target,
+  Coins,
+  Plus,
+  ListChecks,
+  ShoppingBag,
+  Pencil,
+  Save,
+  X,
+  Users,
+  Send,
+  MessageCircle,
+  Sparkles,
+  Loader2,
+  CheckCircle2,
+  Circle,
+  UserPlus,
+  Trash2,
+  ExternalLink,
+  Gift,
+  Rocket,
+  Copy,
+  Download,
+  Mail,
+  Image as ImageIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 import { CATEGORIES, formatTokens, type Category } from "@/lib/mock-data";
 import { PRODUCTS } from "@/lib/mock-extra";
-import { listMissions, listMyClaims, type Mission, type MissionClaim, PLATFORM_LABEL, ACTION_LABEL } from "@/lib/missions";
 import {
-  listFriends, addFriend, removeFriend, markInviteSent, toggleRegistered,
-  whatsappLink, type Friend,
+  listMissions,
+  listMyClaims,
+  type Mission,
+  type MissionClaim,
+  PLATFORM_LABEL,
+  ACTION_LABEL,
+} from "@/lib/missions";
+import {
+  listFriends,
+  addFriend,
+  removeFriend,
+  markInviteSent,
+  toggleRegistered,
+  whatsappLink,
+  type Friend,
 } from "@/lib/friends";
 import { getUserChallenges, saveUserChallenge } from "@/lib/user-challenges";
 import { generateChallenges, type GeneratedChallenge } from "@/lib/generate-challenges.functions";
 import { generateInvitePromoText } from "@/lib/invite-ai.functions";
 import { listParticipations, type MyParticipation } from "@/lib/my-participations";
 import type { Prediction } from "@/lib/mock-data";
-import logoAsset from "@/assets/logo-desafio.png.asset.json";
+import arte01 from "@/assets/dashboard-arte-01.png.asset.json";
+import arte02 from "@/assets/dashboard-arte-02.png.asset.json";
+import arte03 from "@/assets/dashboard-arte-03.png.asset.json";
+import arte04 from "@/assets/dashboard-arte-04.png.asset.json";
+import arte05 from "@/assets/dashboard-arte-05.png.asset.json";
+import arte06 from "@/assets/dashboard-arte-06.png.asset.json";
+import arte07 from "@/assets/dashboard-arte-07.png.asset.json";
+import arte08 from "@/assets/dashboard-arte-08.png.asset.json";
+import arte09 from "@/assets/dashboard-arte-09.png.asset.json";
+import arte10 from "@/assets/dashboard-arte-10.png.asset.json";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   component: Dashboard,
@@ -51,7 +93,9 @@ function Dashboard() {
 
   useEffect(() => {
     (async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) return;
       const [{ data: prof }, ms, cl] = await Promise.all([
         supabase.from("profiles").select("*").eq("id", user.id).maybeSingle(),
@@ -87,7 +131,12 @@ function Dashboard() {
   const missionsTodo = missions.filter((m) => !claimedIds.has(m.id)).length;
 
   const name = profile?.full_name ?? "Palpiteiro";
-  const initials = name.split(" ").map((s) => s[0]).slice(0, 2).join("").toUpperCase();
+  const initials = name
+    .split(" ")
+    .map((s) => s[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
 
   return (
     <AppShell>
@@ -96,14 +145,20 @@ function Dashboard() {
         <div className="glass-card rounded-2xl p-6 border border-border/60 flex flex-col sm:flex-row items-start sm:items-center gap-4 justify-between">
           <div className="flex items-center gap-4">
             {profile?.avatar_url ? (
-              <img src={profile.avatar_url} alt="" className="h-16 w-16 rounded-full object-cover ring-2 ring-primary/60" />
+              <img
+                src={profile.avatar_url}
+                alt=""
+                className="h-16 w-16 rounded-full object-cover ring-2 ring-primary/60"
+              />
             ) : (
               <div className="h-16 w-16 rounded-full bg-gradient-brand grid place-items-center text-primary-foreground font-display font-black text-xl">
                 {initials || "P"}
               </div>
             )}
             <div>
-              <div className="text-xs uppercase tracking-wider text-muted-foreground">Bem-vindo</div>
+              <div className="text-xs uppercase tracking-wider text-muted-foreground">
+                Bem-vindo
+              </div>
               <h1 className="font-display font-black text-2xl">{name}</h1>
               <p className="text-xs text-muted-foreground">
                 {profile?.email} {profile?.provider && `· via ${profile.provider}`}
@@ -129,8 +184,18 @@ function Dashboard() {
 
         {/* QUICK ACTIONS */}
         <div className="grid sm:grid-cols-3 gap-4">
-          <ActionCard to="/criar" icon={Plus} title="Criar desafio" desc="Monte seu próprio palpite" />
-          <ActionCard to="/desafios" icon={ListChecks} title="Participar" desc="Veja desafios abertos" />
+          <ActionCard
+            to="/criar"
+            icon={Plus}
+            title="Criar desafio"
+            desc="Monte seu próprio palpite"
+          />
+          <ActionCard
+            to="/desafios"
+            icon={ListChecks}
+            title="Participar"
+            desc="Veja desafios abertos"
+          />
           <ActionCard to="/shop" icon={ShoppingBag} title="Trocar tokens" desc="Brindes na loja" />
         </div>
 
@@ -161,7 +226,7 @@ function Dashboard() {
           onChange={() => setFriends(listFriends())}
         />
 
-        {/* INVITE PROMO (email + whatsapp + instagram creative) */}
+        {/* INVITE PROMO (email + whatsapp + artes prontas) */}
         <InvitePromoSection inviterName={name} myChallenges={myChallenges} />
 
         {/* SHOP PREVIEW */}
@@ -174,22 +239,43 @@ function Dashboard() {
 /* ---------- Header bits ---------- */
 
 function Stat({
-  icon: Icon, label, value, accent,
-}: { icon: React.ComponentType<{ className?: string }>; label: string; value: string; accent?: string }) {
+  icon: Icon,
+  label,
+  value,
+  accent,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  value: string;
+  accent?: string;
+}) {
   return (
     <div className="glass-card rounded-2xl p-4 border border-border/60">
       <Icon className={`h-5 w-5 ${accent ?? "text-primary"}`} />
-      <div className={`font-display font-black text-2xl mt-2 tabular-nums ${accent ?? ""}`}>{value}</div>
+      <div className={`font-display font-black text-2xl mt-2 tabular-nums ${accent ?? ""}`}>
+        {value}
+      </div>
       <div className="text-xs uppercase tracking-wider text-muted-foreground">{label}</div>
     </div>
   );
 }
 
 function ActionCard({
-  to, icon: Icon, title, desc,
-}: { to: string; icon: React.ComponentType<{ className?: string }>; title: string; desc: string }) {
+  to,
+  icon: Icon,
+  title,
+  desc,
+}: {
+  to: string;
+  icon: React.ComponentType<{ className?: string }>;
+  title: string;
+  desc: string;
+}) {
   return (
-    <Link to={to} className="glass-card rounded-2xl p-5 border border-border/60 hover:border-primary/60 transition group">
+    <Link
+      to={to}
+      className="glass-card rounded-2xl p-5 border border-border/60 hover:border-primary/60 transition group"
+    >
       <Icon className="h-6 w-6 text-primary group-hover:scale-110 transition" />
       <div className="font-display font-bold mt-3">{title}</div>
       <div className="text-xs text-muted-foreground mt-1">{desc}</div>
@@ -198,8 +284,16 @@ function ActionCard({
 }
 
 function SectionTitle({
-  icon: Icon, title, hint, right,
-}: { icon: React.ComponentType<{ className?: string }>; title: string; hint?: string; right?: React.ReactNode }) {
+  icon: Icon,
+  title,
+  hint,
+  right,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  title: string;
+  hint?: string;
+  right?: React.ReactNode;
+}) {
   return (
     <div className="flex items-end justify-between mb-3 gap-3">
       <div>
@@ -216,8 +310,12 @@ function SectionTitle({
 /* ---------- Profile editor ---------- */
 
 function ProfileEditor({
-  profile, onSaved,
-}: { profile: Profile | null; onSaved: (p: Profile) => void }) {
+  profile,
+  onSaved,
+}: {
+  profile: Profile | null;
+  onSaved: (p: Profile) => void;
+}) {
   const [editing, setEditing] = useState(false);
   const [fullName, setFullName] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
@@ -273,7 +371,12 @@ function ProfileEditor({
                 disabled={saving}
                 className="inline-flex items-center gap-1.5 text-xs font-bold px-3 h-8 rounded-full bg-gradient-brand text-primary-foreground shadow-glow disabled:opacity-60"
               >
-                {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />} Salvar
+                {saving ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <Save className="h-3.5 w-3.5" />
+                )}{" "}
+                Salvar
               </button>
               <button
                 onClick={() => setEditing(false)}
@@ -287,7 +390,13 @@ function ProfileEditor({
       />
       <div className="grid sm:grid-cols-2 gap-3">
         <Field label="Nome" value={fullName} onChange={setFullName} disabled={!editing} />
-        <Field label="WhatsApp" value={whatsapp} onChange={setWhatsapp} disabled={!editing} placeholder="(11) 98888-7777" />
+        <Field
+          label="WhatsApp"
+          value={whatsapp}
+          onChange={setWhatsapp}
+          disabled={!editing}
+          placeholder="(11) 98888-7777"
+        />
         <Field label="E-mail" value={profile.email ?? ""} onChange={() => {}} disabled />
         <Field label="Foto (URL)" value={avatar} onChange={setAvatar} disabled={!editing} />
       </div>
@@ -296,8 +405,18 @@ function ProfileEditor({
 }
 
 function Field({
-  label, value, onChange, disabled, placeholder,
-}: { label: string; value: string; onChange: (v: string) => void; disabled?: boolean; placeholder?: string }) {
+  label,
+  value,
+  onChange,
+  disabled,
+  placeholder,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  disabled?: boolean;
+  placeholder?: string;
+}) {
   return (
     <label className="block">
       <span className="text-[11px] uppercase tracking-wider text-muted-foreground">{label}</span>
@@ -315,8 +434,16 @@ function Field({
 /* ---------- Missions ---------- */
 
 function MissionsSection({
-  missions, claimedIds, done, todo,
-}: { missions: Mission[]; claimedIds: Set<string>; done: number; todo: number }) {
+  missions,
+  claimedIds,
+  done,
+  todo,
+}: {
+  missions: Mission[];
+  claimedIds: Set<string>;
+  done: number;
+  todo: number;
+}) {
   const todoList = missions.filter((m) => !claimedIds.has(m.id)).slice(0, 6);
   const doneList = missions.filter((m) => claimedIds.has(m.id)).slice(0, 6);
 
@@ -327,26 +454,37 @@ function MissionsSection({
         title="Missões"
         hint={`Ganhe mais tokens participando de missões · ${done} feitas · ${todo} para fazer`}
         right={
-          <Link to="/missoes" className="text-xs font-bold text-primary hover:underline inline-flex items-center gap-1">
+          <Link
+            to="/missoes"
+            className="text-xs font-bold text-primary hover:underline inline-flex items-center gap-1"
+          >
             Ver todas <ExternalLink className="h-3 w-3" />
           </Link>
         }
       />
       <div className="grid md:grid-cols-2 gap-4">
         <div>
-          <h3 className="text-xs uppercase tracking-wider text-muted-foreground mb-2">Para fazer</h3>
+          <h3 className="text-xs uppercase tracking-wider text-muted-foreground mb-2">
+            Para fazer
+          </h3>
           <div className="space-y-2">
             {todoList.length === 0 ? (
               <Empty>Nenhuma missão disponível agora.</Empty>
-            ) : todoList.map((m) => <MissionRow key={m.id} m={m} done={false} />)}
+            ) : (
+              todoList.map((m) => <MissionRow key={m.id} m={m} done={false} />)
+            )}
           </div>
         </div>
         <div>
-          <h3 className="text-xs uppercase tracking-wider text-muted-foreground mb-2">Concluídas</h3>
+          <h3 className="text-xs uppercase tracking-wider text-muted-foreground mb-2">
+            Concluídas
+          </h3>
           <div className="space-y-2">
             {doneList.length === 0 ? (
               <Empty>Você ainda não concluiu missões.</Empty>
-            ) : doneList.map((m) => <MissionRow key={m.id} m={m} done />)}
+            ) : (
+              doneList.map((m) => <MissionRow key={m.id} m={m} done />)
+            )}
           </div>
         </div>
       </div>
@@ -399,7 +537,11 @@ function MyChallengesSection({ items }: { items: Prediction[] }) {
       />
       {items.length === 0 ? (
         <Empty>
-          Você ainda não tem desafios. <Link to="/criar" className="text-primary underline">Criar agora</Link>.
+          Você ainda não tem desafios.{" "}
+          <Link to="/criar" className="text-primary underline">
+            Criar agora
+          </Link>
+          .
         </Empty>
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -410,7 +552,9 @@ function MyChallengesSection({ items }: { items: Prediction[] }) {
               params={{ id: c.id }}
               className="p-4 rounded-xl bg-card border border-border/60 hover:border-primary/60 transition block"
             >
-              <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{c.category}</div>
+              <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                {c.category}
+              </div>
               <div className="font-display font-bold mt-1 line-clamp-2">{c.title}</div>
               <div className="text-[11px] text-muted-foreground mt-2">{c.bettors} apostadores</div>
             </Link>
@@ -479,14 +623,22 @@ function RecommendationsSection() {
           onChange={(e) => setTaste(e.target.value as Category)}
           className="h-10 px-3 rounded-xl bg-card border border-border/60 text-sm"
         >
-          {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+          {CATEGORIES.map((c) => (
+            <option key={c} value={c}>
+              {c}
+            </option>
+          ))}
         </select>
         <button
           onClick={run}
           disabled={loading}
           className="h-10 px-4 rounded-full bg-gradient-brand text-primary-foreground text-sm font-bold inline-flex items-center gap-2 shadow-glow disabled:opacity-60"
         >
-          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+          {loading ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Sparkles className="h-4 w-4" />
+          )}
           Gerar 5 ideias
         </button>
       </div>
@@ -498,7 +650,10 @@ function RecommendationsSection() {
             const isEditing = editingIdx === i;
             const isPublished = publishedIdx.has(i);
             return (
-              <div key={i} className="p-4 rounded-xl bg-card border border-border/60 flex flex-col gap-2">
+              <div
+                key={i}
+                className="p-4 rounded-xl bg-card border border-border/60 flex flex-col gap-2"
+              >
                 {isEditing ? (
                   <>
                     <input
@@ -528,7 +683,9 @@ function RecommendationsSection() {
                             placeholder={`Opção ${j + 1}`}
                           />
                           <button
-                            onClick={() => updateItem(i, { options: c.options.filter((_, k) => k !== j) })}
+                            onClick={() =>
+                              updateItem(i, { options: c.options.filter((_, k) => k !== j) })
+                            }
                             className="h-8 w-8 rounded-lg border border-border/60 inline-flex items-center justify-center text-muted-foreground hover:text-destructive"
                             aria-label="Remover opção"
                           >
@@ -557,10 +714,15 @@ function RecommendationsSection() {
                 ) : (
                   <>
                     <div className="font-display font-bold line-clamp-2">{c.title}</div>
-                    <div className="text-xs text-muted-foreground line-clamp-2">{c.description}</div>
+                    <div className="text-xs text-muted-foreground line-clamp-2">
+                      {c.description}
+                    </div>
                     <div className="flex flex-wrap gap-1">
                       {c.options.map((o, j) => (
-                        <span key={j} className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-background border border-border/60">
+                        <span
+                          key={j}
+                          className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-background border border-border/60"
+                        >
                           {o}
                         </span>
                       ))}
@@ -589,7 +751,15 @@ function RecommendationsSection() {
                     disabled={isPublished}
                     className="h-8 px-3 rounded-full bg-gradient-brand text-primary-foreground text-xs font-bold inline-flex items-center gap-1 shadow-glow disabled:opacity-60"
                   >
-                    {isPublished ? <><CheckCircle2 className="h-3.5 w-3.5" /> Publicado</> : <><Rocket className="h-3.5 w-3.5" /> Publicar</>}
+                    {isPublished ? (
+                      <>
+                        <CheckCircle2 className="h-3.5 w-3.5" /> Publicado
+                      </>
+                    ) : (
+                      <>
+                        <Rocket className="h-3.5 w-3.5" /> Publicar
+                      </>
+                    )}
                   </button>
                 </div>
               </div>
@@ -604,8 +774,14 @@ function RecommendationsSection() {
 /* ---------- Friends ---------- */
 
 function FriendsSection({
-  friends, inviterName, onChange,
-}: { friends: Friend[]; inviterName: string; onChange: () => void }) {
+  friends,
+  inviterName,
+  onChange,
+}: {
+  friends: Friend[];
+  inviterName: string;
+  onChange: () => void;
+}) {
   const [name, setName] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
   const [email, setEmail] = useState("");
@@ -619,7 +795,9 @@ function FriendsSection({
     e.preventDefault();
     if (!name.trim()) return;
     addFriend({ name, whatsapp, email });
-    setName(""); setWhatsapp(""); setEmail("");
+    setName("");
+    setWhatsapp("");
+    setEmail("");
     onChange();
     toast.success("Amigo adicionado à lista");
   }
@@ -655,15 +833,22 @@ function FriendsSection({
 
       <form onSubmit={handleAdd} className="grid sm:grid-cols-4 gap-2 mb-4">
         <input
-          value={name} onChange={(e) => setName(e.target.value)} placeholder="Nome do amigo"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="Nome do amigo"
           className="h-10 px-3 rounded-xl bg-card border border-border/60 text-sm sm:col-span-1"
         />
         <input
-          value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} placeholder="WhatsApp (DDD+número)"
+          value={whatsapp}
+          onChange={(e) => setWhatsapp(e.target.value)}
+          placeholder="WhatsApp (DDD+número)"
           className="h-10 px-3 rounded-xl bg-card border border-border/60 text-sm sm:col-span-1"
         />
         <input
-          value={email} onChange={(e) => setEmail(e.target.value)} placeholder="E-mail (opcional)" type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="E-mail (opcional)"
+          type="email"
           className="h-10 px-3 rounded-xl bg-card border border-border/60 text-sm sm:col-span-1"
         />
         <button
@@ -676,13 +861,17 @@ function FriendsSection({
 
       <div className="grid md:grid-cols-2 gap-4">
         <div>
-          <h3 className="text-xs uppercase tracking-wider text-muted-foreground mb-2">Cadastrados</h3>
+          <h3 className="text-xs uppercase tracking-wider text-muted-foreground mb-2">
+            Cadastrados
+          </h3>
           <div className="space-y-2">
             {registered.length === 0 ? (
               <Empty>Nenhum amigo cadastrado ainda.</Empty>
-            ) : registered.map((f) => (
-              <FriendRow key={f.id} f={f} onChange={onChange} onInvite={sendInvite} />
-            ))}
+            ) : (
+              registered.map((f) => (
+                <FriendRow key={f.id} f={f} onChange={onChange} onInvite={sendInvite} />
+              ))
+            )}
           </div>
         </div>
         <div>
@@ -692,9 +881,11 @@ function FriendsSection({
           <div className="space-y-2">
             {pending.length === 0 ? (
               <Empty>Convide alguém e acompanhe aqui.</Empty>
-            ) : pending.map((f) => (
-              <FriendRow key={f.id} f={f} onChange={onChange} onInvite={sendInvite} />
-            ))}
+            ) : (
+              pending.map((f) => (
+                <FriendRow key={f.id} f={f} onChange={onChange} onInvite={sendInvite} />
+              ))
+            )}
           </div>
         </div>
       </div>
@@ -703,8 +894,14 @@ function FriendsSection({
 }
 
 function FriendRow({
-  f, onChange, onInvite,
-}: { f: Friend; onChange: () => void; onInvite: (f: Friend) => void }) {
+  f,
+  onChange,
+  onInvite,
+}: {
+  f: Friend;
+  onChange: () => void;
+  onInvite: (f: Friend) => void;
+}) {
   return (
     <div className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border/60">
       <div className="h-9 w-9 rounded-full bg-gradient-brand grid place-items-center text-primary-foreground text-xs font-black">
@@ -714,7 +911,9 @@ function FriendRow({
         <div className="text-sm font-semibold truncate">{f.name}</div>
         <div className="text-[11px] text-muted-foreground truncate">
           {f.whatsapp || f.email || "Sem contato"}
-          {f.lastInviteAt && <> · convite reenviado em {new Date(f.lastInviteAt).toLocaleDateString("pt-BR")}</>}
+          {f.lastInviteAt && (
+            <> · convite reenviado em {new Date(f.lastInviteAt).toLocaleDateString("pt-BR")}</>
+          )}
         </div>
       </div>
       {!f.registered && (
@@ -727,14 +926,20 @@ function FriendRow({
         </button>
       )}
       <button
-        onClick={() => { toggleRegistered(f.id); onChange(); }}
+        onClick={() => {
+          toggleRegistered(f.id);
+          onChange();
+        }}
         className="text-[11px] font-bold px-2 h-8 rounded-full border border-border/60"
         title="Marcar/desmarcar como cadastrado"
       >
         {f.registered ? "Cadastrado" : "Pendente"}
       </button>
       <button
-        onClick={() => { removeFriend(f.id); onChange(); }}
+        onClick={() => {
+          removeFriend(f.id);
+          onChange();
+        }}
         className="text-muted-foreground hover:text-destructive p-1"
         title="Remover"
       >
@@ -755,7 +960,10 @@ function ShopPreviewSection({ tokens }: { tokens: number }) {
         title="Prêmios que você pode trocar"
         hint={`Seu saldo: ${formatTokens(tokens)} tokens`}
         right={
-          <Link to="/shop" className="text-xs font-bold text-primary hover:underline inline-flex items-center gap-1">
+          <Link
+            to="/shop"
+            className="text-xs font-bold text-primary hover:underline inline-flex items-center gap-1"
+          >
             Ver todos <ExternalLink className="h-3 w-3" />
           </Link>
         }
@@ -764,18 +972,30 @@ function ShopPreviewSection({ tokens }: { tokens: number }) {
         {items.map((p) => {
           const can = tokens >= p.cost;
           return (
-            <div key={p.id} className={`p-3 rounded-xl border ${can ? "border-primary/60 bg-card" : "border-border/60 bg-card opacity-70"}`}>
+            <div
+              key={p.id}
+              className={`p-3 rounded-xl border ${can ? "border-primary/60 bg-card" : "border-border/60 bg-card opacity-70"}`}
+            >
               <div className="aspect-square rounded-lg bg-background grid place-items-center text-4xl overflow-hidden">
                 {p.image ? (
-                  <img src={p.image} alt={p.name} className="w-full h-full object-contain p-2" loading="lazy" />
-                ) : <span>{p.emoji}</span>}
+                  <img
+                    src={p.image}
+                    alt={p.name}
+                    className="w-full h-full object-contain p-2"
+                    loading="lazy"
+                  />
+                ) : (
+                  <span>{p.emoji}</span>
+                )}
               </div>
               <div className="text-sm font-semibold mt-2 line-clamp-2">{p.name}</div>
               <div className="flex items-center justify-between mt-2">
                 <span className="inline-flex items-center gap-1 text-gold font-display font-black text-sm">
                   <Coins className="h-3.5 w-3.5" /> {formatTokens(p.cost)}
                 </span>
-                <span className={`text-[10px] font-bold uppercase ${can ? "text-primary" : "text-muted-foreground"}`}>
+                <span
+                  className={`text-[10px] font-bold uppercase ${can ? "text-primary" : "text-muted-foreground"}`}
+                >
                   {can ? "Disponível" : "Faltam tokens"}
                 </span>
               </div>
@@ -795,16 +1015,9 @@ function Empty({ children }: { children: React.ReactNode }) {
   );
 }
 
-/* ---------- Invite Promo (email + whatsapp + instagram creative) ---------- */
+/* ---------- Invite Promo (email + whatsapp + artes prontas) ---------- */
 
 const SITE_URL = "https://future-factions.lovable.app";
-const PRIZES = [
-  { emoji: "📱", label: "iPhone" },
-  { emoji: "📺", label: "TV LED" },
-  { emoji: "🎮", label: "PS5" },
-  { emoji: "💻", label: "Notebook" },
-  { emoji: "👕", label: "Camiseta da Copa" },
-];
 
 function InvitePromoSection({
   inviterName,
@@ -820,12 +1033,22 @@ function InvitePromoSection({
   const [whatsText, setWhatsText] = useState(defaultWhats);
   const [emailText, setEmailText] = useState(defaultEmail);
   const [emailSubject, setEmailSubject] = useState("Vem jogar comigo no Desafio dos Palpites 🏆");
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const [creativeUrl, setCreativeUrl] = useState<string | null>(null);
-  const [creating, setCreating] = useState(false);
   const [aiBusy, setAiBusy] = useState<"whatsapp" | "email" | null>(null);
 
   const generateAi = useServerFn(generateInvitePromoText);
+
+  const galleryItems = [
+    { src: arte01.url, name: "Brasil x Escócia — versão 1" },
+    { src: arte02.url, name: "Brasil x Escócia — versão 2" },
+    { src: arte03.url, name: "Palpites fechados" },
+    { src: arte04.url, name: "Acerte o placar" },
+    { src: arte05.url, name: "Desafios dos patrocinadores" },
+    { src: arte06.url, name: "Todo jogo vale tokens" },
+    { src: arte07.url, name: "Ranking e premiações" },
+    { src: arte08.url, name: "Desafie seus amigos" },
+    { src: arte09.url, name: "Faça seus palpites" },
+    { src: arte10.url, name: "Candidatos 2026" },
+  ];
 
   // Build the lists the AI uses: my challenges + the 3 expiring soonest
   const meta = useMemo(() => {
@@ -882,7 +1105,6 @@ function InvitePromoSection({
   }
 
   function openWhats() {
-    // api.whatsapp.com/send opens the contact picker reliably on web.
     const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(whatsText)}`;
     window.open(url, "_blank", "noopener,noreferrer");
   }
@@ -892,32 +1114,15 @@ function InvitePromoSection({
     window.location.href = url;
   }
 
-  async function gerarCriativo() {
-    setCreating(true);
-    try {
-      const url = await renderInviteCreative(canvasRef.current, {
-        inviter: inviterName,
-        logoUrl: logoAsset.url,
-        link,
-      });
-      setCreativeUrl(url);
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Erro ao gerar imagem");
-    } finally {
-      setCreating(false);
-    }
-  }
-
   return (
     <section className="glass-card rounded-2xl p-5 border border-border/60 space-y-5">
       <SectionTitle
         icon={Sparkles}
         title="Divulgue e convide"
-        hint="Textos prontos pra WhatsApp e e-mail + imagem pronta pra postar no Instagram."
+        hint="Textos prontos pra WhatsApp e e-mail + artes prontas para baixar e postar."
       />
 
       <div className="grid lg:grid-cols-2 gap-4">
-        {/* WhatsApp */}
         <div className="rounded-xl bg-card border border-border/60 p-4 space-y-2">
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2">
@@ -929,7 +1134,11 @@ function InvitePromoSection({
               disabled={aiBusy === "whatsapp"}
               className="h-7 px-2.5 rounded-full bg-background border border-primary/40 text-[11px] font-bold text-primary inline-flex items-center gap-1.5 disabled:opacity-60"
             >
-              {aiBusy === "whatsapp" ? <Loader2 className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3 w-3" />}
+              {aiBusy === "whatsapp" ? (
+                <Loader2 className="h-3 w-3 animate-spin" />
+              ) : (
+                <Sparkles className="h-3 w-3" />
+              )}
               Gerar com IA
             </button>
           </div>
@@ -955,7 +1164,6 @@ function InvitePromoSection({
           </div>
         </div>
 
-        {/* Email */}
         <div className="rounded-xl bg-card border border-border/60 p-4 space-y-2">
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2">
@@ -967,7 +1175,11 @@ function InvitePromoSection({
               disabled={aiBusy === "email"}
               className="h-7 px-2.5 rounded-full bg-background border border-primary/40 text-[11px] font-bold text-primary inline-flex items-center gap-1.5 disabled:opacity-60"
             >
-              {aiBusy === "email" ? <Loader2 className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3 w-3" />}
+              {aiBusy === "email" ? (
+                <Loader2 className="h-3 w-3 animate-spin" />
+              ) : (
+                <Sparkles className="h-3 w-3" />
+              )}
               Gerar com IA
             </button>
           </div>
@@ -1000,179 +1212,43 @@ function InvitePromoSection({
         </div>
       </div>
 
-      {/* Instagram creative */}
-      <div className="rounded-xl bg-card border border-border/60 p-4">
-        <div className="flex items-center gap-2 mb-3">
+      <div className="rounded-xl bg-card border border-border/60 p-4 space-y-4">
+        <div className="flex items-center gap-2">
           <ImageIcon className="h-4 w-4 text-primary" />
-          <div className="text-sm font-bold">Imagem para Instagram</div>
+          <div className="text-sm font-bold">Artes prontas para divulgação</div>
         </div>
-        <div className="grid sm:grid-cols-[1fr_auto] gap-4 items-start">
-          <div className="aspect-square w-full max-w-[360px] rounded-xl border border-border/60 bg-background overflow-hidden grid place-items-center">
-            {creativeUrl ? (
-              <img src={creativeUrl} alt="Criativo" className="w-full h-full object-cover" />
-            ) : (
-              <div className="p-6 text-center text-xs text-muted-foreground">
-                Clique em "Gerar imagem" para criar uma arte 1080×1080 com o logo, os prêmios e a chamada para participar.
-              </div>
-            )}
-          </div>
-          <canvas ref={canvasRef} width={1080} height={1080} className="hidden" />
-          <div className="flex flex-col gap-2 min-w-[180px]">
-            <button
-              onClick={gerarCriativo}
-              disabled={creating}
-              className="h-10 px-4 rounded-full bg-gradient-brand text-primary-foreground text-sm font-bold inline-flex items-center justify-center gap-2 shadow-glow disabled:opacity-60"
+        <p className="text-xs text-muted-foreground">
+          Removemos o criador de imagens com IA daqui e cadastramos suas peças prontas para download
+          e postagem.
+        </p>
+        <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4">
+          {galleryItems.map((item) => (
+            <article
+              key={item.src}
+              className="rounded-xl border border-border/60 bg-background overflow-hidden"
             >
-              {creating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-              {creating ? "Gerando…" : "Gerar imagem"}
-            </button>
-            {creativeUrl && (
-              <a
-                href={creativeUrl}
-                download="desafio-dos-palpites.png"
-                className="h-10 px-4 rounded-full bg-background border border-border/60 text-sm font-bold inline-flex items-center justify-center gap-2"
-              >
-                <Download className="h-4 w-4" /> Baixar
-              </a>
-            )}
-            <div className="text-[11px] text-muted-foreground leading-relaxed">
-              Salve a imagem e poste no seu Instagram (Feed ou Stories). Use o texto do WhatsApp/e-mail acima como legenda.
-            </div>
-          </div>
+              <img
+                src={item.src}
+                alt={item.name}
+                className="w-full aspect-[4/5] object-cover"
+                loading="lazy"
+              />
+              <div className="p-3 flex items-center justify-between gap-3">
+                <div className="text-xs font-semibold leading-tight">{item.name}</div>
+                <a
+                  href={item.src}
+                  download={item.name.toLowerCase().replace(/\s+/g, "-") + ".png"}
+                  className="shrink-0 h-9 px-3 rounded-full bg-gradient-brand text-primary-foreground text-xs font-bold inline-flex items-center gap-1.5"
+                >
+                  <Download className="h-3.5 w-3.5" /> Baixar
+                </a>
+              </div>
+            </article>
+          ))}
         </div>
       </div>
     </section>
   );
-}
-
-function loadImg(src: string): Promise<HTMLImageElement> {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.crossOrigin = "anonymous";
-    img.onload = () => resolve(img);
-    img.onerror = () => reject(new Error("Falha ao carregar imagem"));
-    img.src = src;
-  });
-}
-
-async function renderInviteCreative(
-  canvas: HTMLCanvasElement | null,
-  data: { inviter: string; logoUrl: string; link: string },
-): Promise<string> {
-  if (!canvas) throw new Error("Canvas indisponível");
-  const ctx = canvas.getContext("2d");
-  if (!ctx) throw new Error("Contexto 2D indisponível");
-  const W = canvas.width, H = canvas.height;
-
-  // Background
-  const grad = ctx.createLinearGradient(0, 0, W, H);
-  grad.addColorStop(0, "#031309");
-  grad.addColorStop(0.5, "#0f3d22");
-  grad.addColorStop(1, "#031309");
-  ctx.fillStyle = grad;
-  ctx.fillRect(0, 0, W, H);
-
-  // Glow
-  const glow = ctx.createRadialGradient(W / 2, H * 0.35, 30, W / 2, H * 0.35, 700);
-  glow.addColorStop(0, "rgba(34,197,94,0.35)");
-  glow.addColorStop(1, "rgba(0,0,0,0)");
-  ctx.fillStyle = glow;
-  ctx.fillRect(0, 0, W, H);
-
-  // Border
-  ctx.strokeStyle = "rgba(34,197,94,0.6)";
-  ctx.lineWidth = 6;
-  ctx.strokeRect(24, 24, W - 48, H - 48);
-
-  // Logo (centered top)
-  try {
-    const logo = await loadImg(data.logoUrl);
-    const logoH = 180;
-    const logoW = (logo.width / logo.height) * logoH;
-    ctx.drawImage(logo, (W - logoW) / 2, 70, logoW, logoH);
-  } catch {
-    ctx.fillStyle = "#22c55e";
-    ctx.font = "900 64px system-ui, sans-serif";
-    ctx.textAlign = "center";
-    ctx.fillText("DESAFIO DOS PALPITES", W / 2, 160);
-    ctx.textAlign = "start";
-  }
-
-  // Headline
-  ctx.fillStyle = "#ffffff";
-  ctx.font = "900 88px system-ui, sans-serif";
-  ctx.textAlign = "center";
-  ctx.fillText("DÊ SEU PALPITE", W / 2, 320);
-  ctx.fillStyle = "#facc15";
-  ctx.font = "900 88px system-ui, sans-serif";
-  ctx.fillText("GANHE PRÊMIOS", W / 2, 410);
-
-  // Prizes grid
-  ctx.textAlign = "center";
-  const prizes = PRIZES;
-  const cols = prizes.length;
-  const cellW = (W - 140) / cols;
-  const cellY = 490;
-  const cellH = 260;
-  for (let i = 0; i < prizes.length; i++) {
-    const cx = 70 + i * cellW + cellW / 2;
-    // box
-    ctx.fillStyle = "rgba(34,197,94,0.12)";
-    ctx.strokeStyle = "rgba(34,197,94,0.55)";
-    ctx.lineWidth = 2;
-    const bx = 70 + i * cellW + 10;
-    const bw = cellW - 20;
-    ctx.beginPath();
-    const r = 18;
-    ctx.moveTo(bx + r, cellY);
-    ctx.arcTo(bx + bw, cellY, bx + bw, cellY + cellH, r);
-    ctx.arcTo(bx + bw, cellY + cellH, bx, cellY + cellH, r);
-    ctx.arcTo(bx, cellY + cellH, bx, cellY, r);
-    ctx.arcTo(bx, cellY, bx + bw, cellY, r);
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
-    // emoji
-    ctx.font = "120px system-ui, 'Apple Color Emoji', 'Segoe UI Emoji'";
-    ctx.fillText(prizes[i].emoji, cx, cellY + 140);
-    // label
-    ctx.fillStyle = "#ffffff";
-    ctx.font = "700 22px system-ui, sans-serif";
-    ctx.fillText(prizes[i].label, cx, cellY + 220);
-  }
-
-  // CTA box
-  const boxY = H - 280;
-  ctx.fillStyle = "rgba(250,204,21,0.18)";
-  ctx.strokeStyle = "#facc15";
-  ctx.lineWidth = 4;
-  const bx = 70, bw = W - 140, bh = 100, br = 24;
-  ctx.beginPath();
-  ctx.moveTo(bx + br, boxY);
-  ctx.arcTo(bx + bw, boxY, bx + bw, boxY + bh, br);
-  ctx.arcTo(bx + bw, boxY + bh, bx, boxY + bh, br);
-  ctx.arcTo(bx, boxY + bh, bx, boxY, br);
-  ctx.arcTo(bx, boxY, bx + bw, boxY, br);
-  ctx.closePath();
-  ctx.fill();
-  ctx.stroke();
-  ctx.fillStyle = "#facc15";
-  ctx.font = "900 56px system-ui, sans-serif";
-  ctx.textBaseline = "middle";
-  ctx.fillText("PARTICIPE — É DE GRAÇA!", W / 2, boxY + bh / 2);
-  ctx.textBaseline = "top";
-
-  // Footer
-  ctx.fillStyle = "#ffffff";
-  ctx.font = "700 32px system-ui, sans-serif";
-  const inviter = (data.inviter || "Um amigo").trim();
-  ctx.fillText(`${inviter} te convidou`, W / 2, H - 150);
-  ctx.fillStyle = "rgba(255,255,255,0.85)";
-  ctx.font = "600 26px system-ui, sans-serif";
-  ctx.fillText(data.link, W / 2, H - 100);
-  ctx.textAlign = "start";
-
-  return canvas.toDataURL("image/png");
 }
 
 /* ---------- My Participations ---------- */
@@ -1185,7 +1261,10 @@ function MyParticipationsSection({ items }: { items: MyParticipation[] }) {
         title="Meus palpites e resultados"
         hint="Acompanhe os desafios em que você participou e veja os resultados quando saírem."
         right={
-          <Link to="/desafios" className="text-xs font-bold text-primary hover:underline inline-flex items-center gap-1">
+          <Link
+            to="/desafios"
+            className="text-xs font-bold text-primary hover:underline inline-flex items-center gap-1"
+          >
             Mais desafios <ExternalLink className="h-3 w-3" />
           </Link>
         }
@@ -1193,7 +1272,10 @@ function MyParticipationsSection({ items }: { items: MyParticipation[] }) {
       {items.length === 0 ? (
         <Empty>
           Você ainda não fez nenhum palpite.{" "}
-          <Link to="/desafios" className="text-primary underline">Participar agora</Link>.
+          <Link to="/desafios" className="text-primary underline">
+            Participar agora
+          </Link>
+          .
         </Empty>
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -1227,7 +1309,8 @@ function MyParticipationsSection({ items }: { items: MyParticipation[] }) {
                 <div className="mt-3 text-[11px] text-muted-foreground space-y-0.5">
                   {p.optionLabel ? (
                     <div>
-                      Sua escolha: <span className="text-foreground font-semibold">{p.optionLabel}</span>
+                      Sua escolha:{" "}
+                      <span className="text-foreground font-semibold">{p.optionLabel}</span>
                     </div>
                   ) : (
                     <div>{answersCount} palpites enviados</div>
