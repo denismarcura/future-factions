@@ -21,6 +21,7 @@ import {
 import { getUserChallenges, saveUserChallenge } from "@/lib/user-challenges";
 import { generateChallenges, type GeneratedChallenge } from "@/lib/generate-challenges.functions";
 import { generateInvitePromoText } from "@/lib/invite-ai.functions";
+import { listParticipations, type MyParticipation } from "@/lib/my-participations";
 import type { Prediction } from "@/lib/mock-data";
 import logoAsset from "@/assets/logo-desafio.png.asset.json";
 
