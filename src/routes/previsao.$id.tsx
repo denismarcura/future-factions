@@ -187,6 +187,30 @@ function PredictionPage() {
                 </div>
               ))}
 
+              {bonusMission && (
+                <div className="rounded-xl border-2 border-pink-500/40 bg-gradient-to-br from-pink-500/10 to-purple-500/10 p-4">
+                  <div className="flex items-center gap-2 text-sm font-display font-black mb-1">
+                    <Instagram className="h-4 w-4 text-pink-400" />
+                    <span className="text-pink-300">Palpite extra grátis</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground mb-3">
+                    <strong>{ACTION_LABEL[bonusMission.action_type]}</strong> {bonusMission.sponsor_name} no Instagram e ganhe <strong className="text-gold">+1 palpite</strong> neste desafio.
+                  </p>
+                  <button
+                    onClick={handleBonusClaim}
+                    disabled={bonusDone || bonusBusy}
+                    className={`w-full h-10 rounded-lg font-bold text-sm inline-flex items-center justify-center gap-2 transition ${
+                      bonusDone
+                        ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30"
+                        : "bg-gradient-to-r from-pink-500 to-purple-500 text-white shadow-glow hover:scale-[1.02]"
+                    }`}
+                  >
+                    {bonusBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : bonusDone ? <Check className="h-4 w-4" /> : <ExternalLink className="h-4 w-4" />}
+                    {bonusDone ? "Palpite extra liberado!" : bonusMission.title}
+                  </button>
+                </div>
+              )}
+
               <div className="rounded-xl border border-primary/30 bg-primary/5 p-4">
                 <div className="font-display font-bold text-sm mb-2 text-primary">⚡ Ganhe mais chances</div>
                 <p className="text-xs text-muted-foreground mb-3">
