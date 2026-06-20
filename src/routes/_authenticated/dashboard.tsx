@@ -5,18 +5,51 @@ import { supabase } from "@/integrations/supabase/client";
 import { AppShell } from "@/components/layout/AppShell";
 import { signOut } from "@/hooks/use-auth";
 import {
-  LogOut, Target, Coins, Plus, ListChecks, ShoppingBag,
-  Pencil, Save, X, Users, Send, MessageCircle, Sparkles, Loader2,
-  CheckCircle2, Circle, UserPlus, Trash2, ExternalLink, Gift, Rocket,
-  Copy, Download, Mail, Image as ImageIcon,
+  LogOut,
+  Target,
+  Coins,
+  Plus,
+  ListChecks,
+  ShoppingBag,
+  Pencil,
+  Save,
+  X,
+  Users,
+  Send,
+  MessageCircle,
+  Sparkles,
+  Loader2,
+  CheckCircle2,
+  Circle,
+  UserPlus,
+  Trash2,
+  ExternalLink,
+  Gift,
+  Rocket,
+  Copy,
+  Download,
+  Mail,
+  Image as ImageIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 import { CATEGORIES, formatTokens, type Category } from "@/lib/mock-data";
 import { PRODUCTS } from "@/lib/mock-extra";
-import { listMissions, listMyClaims, type Mission, type MissionClaim, PLATFORM_LABEL, ACTION_LABEL } from "@/lib/missions";
 import {
-  listFriends, addFriend, removeFriend, markInviteSent, toggleRegistered,
-  whatsappLink, type Friend,
+  listMissions,
+  listMyClaims,
+  type Mission,
+  type MissionClaim,
+  PLATFORM_LABEL,
+  ACTION_LABEL,
+} from "@/lib/missions";
+import {
+  listFriends,
+  addFriend,
+  removeFriend,
+  markInviteSent,
+  toggleRegistered,
+  whatsappLink,
+  type Friend,
 } from "@/lib/friends";
 import { getUserChallenges, saveUserChallenge } from "@/lib/user-challenges";
 import { generateChallenges, type GeneratedChallenge } from "@/lib/generate-challenges.functions";
@@ -33,7 +66,6 @@ import arte07 from "@/assets/dashboard-arte-07.png.asset.json";
 import arte08 from "@/assets/dashboard-arte-08.png.asset.json";
 import arte09 from "@/assets/dashboard-arte-09.png.asset.json";
 import arte10 from "@/assets/dashboard-arte-10.png.asset.json";
-
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   component: Dashboard,
@@ -61,7 +93,9 @@ function Dashboard() {
 
   useEffect(() => {
     (async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) return;
       const [{ data: prof }, ms, cl] = await Promise.all([
         supabase.from("profiles").select("*").eq("id", user.id).maybeSingle(),
@@ -97,7 +131,12 @@ function Dashboard() {
   const missionsTodo = missions.filter((m) => !claimedIds.has(m.id)).length;
 
   const name = profile?.full_name ?? "Palpiteiro";
-  const initials = name.split(" ").map((s) => s[0]).slice(0, 2).join("").toUpperCase();
+  const initials = name
+    .split(" ")
+    .map((s) => s[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
 
   return (
     <AppShell>
@@ -106,14 +145,20 @@ function Dashboard() {
         <div className="glass-card rounded-2xl p-6 border border-border/60 flex flex-col sm:flex-row items-start sm:items-center gap-4 justify-between">
           <div className="flex items-center gap-4">
             {profile?.avatar_url ? (
-              <img src={profile.avatar_url} alt="" className="h-16 w-16 rounded-full object-cover ring-2 ring-primary/60" />
+              <img
+                src={profile.avatar_url}
+                alt=""
+                className="h-16 w-16 rounded-full object-cover ring-2 ring-primary/60"
+              />
             ) : (
               <div className="h-16 w-16 rounded-full bg-gradient-brand grid place-items-center text-primary-foreground font-display font-black text-xl">
                 {initials || "P"}
               </div>
             )}
             <div>
-              <div className="text-xs uppercase tracking-wider text-muted-foreground">Bem-vindo</div>
+              <div className="text-xs uppercase tracking-wider text-muted-foreground">
+                Bem-vindo
+              </div>
               <h1 className="font-display font-black text-2xl">{name}</h1>
               <p className="text-xs text-muted-foreground">
                 {profile?.email} {profile?.provider && `· via ${profile.provider}`}
@@ -139,8 +184,18 @@ function Dashboard() {
 
         {/* QUICK ACTIONS */}
         <div className="grid sm:grid-cols-3 gap-4">
-          <ActionCard to="/criar" icon={Plus} title="Criar desafio" desc="Monte seu próprio palpite" />
-          <ActionCard to="/desafios" icon={ListChecks} title="Participar" desc="Veja desafios abertos" />
+          <ActionCard
+            to="/criar"
+            icon={Plus}
+            title="Criar desafio"
+            desc="Monte seu próprio palpite"
+          />
+          <ActionCard
+            to="/desafios"
+            icon={ListChecks}
+            title="Participar"
+            desc="Veja desafios abertos"
+          />
           <ActionCard to="/shop" icon={ShoppingBag} title="Trocar tokens" desc="Brindes na loja" />
         </div>
 
@@ -174,7 +229,6 @@ function Dashboard() {
         {/* INVITE PROMO (email + whatsapp + artes prontas) */}
         <InvitePromoSection inviterName={name} myChallenges={myChallenges} />
 
-
         {/* SHOP PREVIEW */}
         <ShopPreviewSection tokens={tokens} />
       </div>
@@ -185,22 +239,43 @@ function Dashboard() {
 /* ---------- Header bits ---------- */
 
 function Stat({
-  icon: Icon, label, value, accent,
-}: { icon: React.ComponentType<{ className?: string }>; label: string; value: string; accent?: string }) {
+  icon: Icon,
+  label,
+  value,
+  accent,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  value: string;
+  accent?: string;
+}) {
   return (
     <div className="glass-card rounded-2xl p-4 border border-border/60">
       <Icon className={`h-5 w-5 ${accent ?? "text-primary"}`} />
-      <div className={`font-display font-black text-2xl mt-2 tabular-nums ${accent ?? ""}`}>{value}</div>
+      <div className={`font-display font-black text-2xl mt-2 tabular-nums ${accent ?? ""}`}>
+        {value}
+      </div>
       <div className="text-xs uppercase tracking-wider text-muted-foreground">{label}</div>
     </div>
   );
 }
 
 function ActionCard({
-  to, icon: Icon, title, desc,
-}: { to: string; icon: React.ComponentType<{ className?: string }>; title: string; desc: string }) {
+  to,
+  icon: Icon,
+  title,
+  desc,
+}: {
+  to: string;
+  icon: React.ComponentType<{ className?: string }>;
+  title: string;
+  desc: string;
+}) {
   return (
-    <Link to={to} className="glass-card rounded-2xl p-5 border border-border/60 hover:border-primary/60 transition group">
+    <Link
+      to={to}
+      className="glass-card rounded-2xl p-5 border border-border/60 hover:border-primary/60 transition group"
+    >
       <Icon className="h-6 w-6 text-primary group-hover:scale-110 transition" />
       <div className="font-display font-bold mt-3">{title}</div>
       <div className="text-xs text-muted-foreground mt-1">{desc}</div>
@@ -209,8 +284,16 @@ function ActionCard({
 }
 
 function SectionTitle({
-  icon: Icon, title, hint, right,
-}: { icon: React.ComponentType<{ className?: string }>; title: string; hint?: string; right?: React.ReactNode }) {
+  icon: Icon,
+  title,
+  hint,
+  right,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  title: string;
+  hint?: string;
+  right?: React.ReactNode;
+}) {
   return (
     <div className="flex items-end justify-between mb-3 gap-3">
       <div>
@@ -227,8 +310,12 @@ function SectionTitle({
 /* ---------- Profile editor ---------- */
 
 function ProfileEditor({
-  profile, onSaved,
-}: { profile: Profile | null; onSaved: (p: Profile) => void }) {
+  profile,
+  onSaved,
+}: {
+  profile: Profile | null;
+  onSaved: (p: Profile) => void;
+}) {
   const [editing, setEditing] = useState(false);
   const [fullName, setFullName] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
@@ -284,7 +371,12 @@ function ProfileEditor({
                 disabled={saving}
                 className="inline-flex items-center gap-1.5 text-xs font-bold px-3 h-8 rounded-full bg-gradient-brand text-primary-foreground shadow-glow disabled:opacity-60"
               >
-                {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />} Salvar
+                {saving ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <Save className="h-3.5 w-3.5" />
+                )}{" "}
+                Salvar
               </button>
               <button
                 onClick={() => setEditing(false)}
@@ -298,7 +390,13 @@ function ProfileEditor({
       />
       <div className="grid sm:grid-cols-2 gap-3">
         <Field label="Nome" value={fullName} onChange={setFullName} disabled={!editing} />
-        <Field label="WhatsApp" value={whatsapp} onChange={setWhatsapp} disabled={!editing} placeholder="(11) 98888-7777" />
+        <Field
+          label="WhatsApp"
+          value={whatsapp}
+          onChange={setWhatsapp}
+          disabled={!editing}
+          placeholder="(11) 98888-7777"
+        />
         <Field label="E-mail" value={profile.email ?? ""} onChange={() => {}} disabled />
         <Field label="Foto (URL)" value={avatar} onChange={setAvatar} disabled={!editing} />
       </div>
@@ -307,8 +405,18 @@ function ProfileEditor({
 }
 
 function Field({
-  label, value, onChange, disabled, placeholder,
-}: { label: string; value: string; onChange: (v: string) => void; disabled?: boolean; placeholder?: string }) {
+  label,
+  value,
+  onChange,
+  disabled,
+  placeholder,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  disabled?: boolean;
+  placeholder?: string;
+}) {
   return (
     <label className="block">
       <span className="text-[11px] uppercase tracking-wider text-muted-foreground">{label}</span>
@@ -326,8 +434,16 @@ function Field({
 /* ---------- Missions ---------- */
 
 function MissionsSection({
-  missions, claimedIds, done, todo,
-}: { missions: Mission[]; claimedIds: Set<string>; done: number; todo: number }) {
+  missions,
+  claimedIds,
+  done,
+  todo,
+}: {
+  missions: Mission[];
+  claimedIds: Set<string>;
+  done: number;
+  todo: number;
+}) {
   const todoList = missions.filter((m) => !claimedIds.has(m.id)).slice(0, 6);
   const doneList = missions.filter((m) => claimedIds.has(m.id)).slice(0, 6);
 
@@ -338,26 +454,37 @@ function MissionsSection({
         title="Missões"
         hint={`Ganhe mais tokens participando de missões · ${done} feitas · ${todo} para fazer`}
         right={
-          <Link to="/missoes" className="text-xs font-bold text-primary hover:underline inline-flex items-center gap-1">
+          <Link
+            to="/missoes"
+            className="text-xs font-bold text-primary hover:underline inline-flex items-center gap-1"
+          >
             Ver todas <ExternalLink className="h-3 w-3" />
           </Link>
         }
       />
       <div className="grid md:grid-cols-2 gap-4">
         <div>
-          <h3 className="text-xs uppercase tracking-wider text-muted-foreground mb-2">Para fazer</h3>
+          <h3 className="text-xs uppercase tracking-wider text-muted-foreground mb-2">
+            Para fazer
+          </h3>
           <div className="space-y-2">
             {todoList.length === 0 ? (
               <Empty>Nenhuma missão disponível agora.</Empty>
-            ) : todoList.map((m) => <MissionRow key={m.id} m={m} done={false} />)}
+            ) : (
+              todoList.map((m) => <MissionRow key={m.id} m={m} done={false} />)
+            )}
           </div>
         </div>
         <div>
-          <h3 className="text-xs uppercase tracking-wider text-muted-foreground mb-2">Concluídas</h3>
+          <h3 className="text-xs uppercase tracking-wider text-muted-foreground mb-2">
+            Concluídas
+          </h3>
           <div className="space-y-2">
             {doneList.length === 0 ? (
               <Empty>Você ainda não concluiu missões.</Empty>
-            ) : doneList.map((m) => <MissionRow key={m.id} m={m} done />)}
+            ) : (
+              doneList.map((m) => <MissionRow key={m.id} m={m} done />)
+            )}
           </div>
         </div>
       </div>
@@ -410,7 +537,11 @@ function MyChallengesSection({ items }: { items: Prediction[] }) {
       />
       {items.length === 0 ? (
         <Empty>
-          Você ainda não tem desafios. <Link to="/criar" className="text-primary underline">Criar agora</Link>.
+          Você ainda não tem desafios.{" "}
+          <Link to="/criar" className="text-primary underline">
+            Criar agora
+          </Link>
+          .
         </Empty>
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -421,7 +552,9 @@ function MyChallengesSection({ items }: { items: Prediction[] }) {
               params={{ id: c.id }}
               className="p-4 rounded-xl bg-card border border-border/60 hover:border-primary/60 transition block"
             >
-              <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{c.category}</div>
+              <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                {c.category}
+              </div>
               <div className="font-display font-bold mt-1 line-clamp-2">{c.title}</div>
               <div className="text-[11px] text-muted-foreground mt-2">{c.bettors} apostadores</div>
             </Link>
@@ -490,14 +623,22 @@ function RecommendationsSection() {
           onChange={(e) => setTaste(e.target.value as Category)}
           className="h-10 px-3 rounded-xl bg-card border border-border/60 text-sm"
         >
-          {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+          {CATEGORIES.map((c) => (
+            <option key={c} value={c}>
+              {c}
+            </option>
+          ))}
         </select>
         <button
           onClick={run}
           disabled={loading}
           className="h-10 px-4 rounded-full bg-gradient-brand text-primary-foreground text-sm font-bold inline-flex items-center gap-2 shadow-glow disabled:opacity-60"
         >
-          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+          {loading ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Sparkles className="h-4 w-4" />
+          )}
           Gerar 5 ideias
         </button>
       </div>
@@ -509,7 +650,10 @@ function RecommendationsSection() {
             const isEditing = editingIdx === i;
             const isPublished = publishedIdx.has(i);
             return (
-              <div key={i} className="p-4 rounded-xl bg-card border border-border/60 flex flex-col gap-2">
+              <div
+                key={i}
+                className="p-4 rounded-xl bg-card border border-border/60 flex flex-col gap-2"
+              >
                 {isEditing ? (
                   <>
                     <input
@@ -539,7 +683,9 @@ function RecommendationsSection() {
                             placeholder={`Opção ${j + 1}`}
                           />
                           <button
-                            onClick={() => updateItem(i, { options: c.options.filter((_, k) => k !== j) })}
+                            onClick={() =>
+                              updateItem(i, { options: c.options.filter((_, k) => k !== j) })
+                            }
                             className="h-8 w-8 rounded-lg border border-border/60 inline-flex items-center justify-center text-muted-foreground hover:text-destructive"
                             aria-label="Remover opção"
                           >
@@ -568,10 +714,15 @@ function RecommendationsSection() {
                 ) : (
                   <>
                     <div className="font-display font-bold line-clamp-2">{c.title}</div>
-                    <div className="text-xs text-muted-foreground line-clamp-2">{c.description}</div>
+                    <div className="text-xs text-muted-foreground line-clamp-2">
+                      {c.description}
+                    </div>
                     <div className="flex flex-wrap gap-1">
                       {c.options.map((o, j) => (
-                        <span key={j} className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-background border border-border/60">
+                        <span
+                          key={j}
+                          className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-background border border-border/60"
+                        >
                           {o}
                         </span>
                       ))}
@@ -600,7 +751,15 @@ function RecommendationsSection() {
                     disabled={isPublished}
                     className="h-8 px-3 rounded-full bg-gradient-brand text-primary-foreground text-xs font-bold inline-flex items-center gap-1 shadow-glow disabled:opacity-60"
                   >
-                    {isPublished ? <><CheckCircle2 className="h-3.5 w-3.5" /> Publicado</> : <><Rocket className="h-3.5 w-3.5" /> Publicar</>}
+                    {isPublished ? (
+                      <>
+                        <CheckCircle2 className="h-3.5 w-3.5" /> Publicado
+                      </>
+                    ) : (
+                      <>
+                        <Rocket className="h-3.5 w-3.5" /> Publicar
+                      </>
+                    )}
                   </button>
                 </div>
               </div>
@@ -615,8 +774,14 @@ function RecommendationsSection() {
 /* ---------- Friends ---------- */
 
 function FriendsSection({
-  friends, inviterName, onChange,
-}: { friends: Friend[]; inviterName: string; onChange: () => void }) {
+  friends,
+  inviterName,
+  onChange,
+}: {
+  friends: Friend[];
+  inviterName: string;
+  onChange: () => void;
+}) {
   const [name, setName] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
   const [email, setEmail] = useState("");
@@ -630,7 +795,9 @@ function FriendsSection({
     e.preventDefault();
     if (!name.trim()) return;
     addFriend({ name, whatsapp, email });
-    setName(""); setWhatsapp(""); setEmail("");
+    setName("");
+    setWhatsapp("");
+    setEmail("");
     onChange();
     toast.success("Amigo adicionado à lista");
   }
@@ -666,15 +833,22 @@ function FriendsSection({
 
       <form onSubmit={handleAdd} className="grid sm:grid-cols-4 gap-2 mb-4">
         <input
-          value={name} onChange={(e) => setName(e.target.value)} placeholder="Nome do amigo"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="Nome do amigo"
           className="h-10 px-3 rounded-xl bg-card border border-border/60 text-sm sm:col-span-1"
         />
         <input
-          value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} placeholder="WhatsApp (DDD+número)"
+          value={whatsapp}
+          onChange={(e) => setWhatsapp(e.target.value)}
+          placeholder="WhatsApp (DDD+número)"
           className="h-10 px-3 rounded-xl bg-card border border-border/60 text-sm sm:col-span-1"
         />
         <input
-          value={email} onChange={(e) => setEmail(e.target.value)} placeholder="E-mail (opcional)" type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="E-mail (opcional)"
+          type="email"
           className="h-10 px-3 rounded-xl bg-card border border-border/60 text-sm sm:col-span-1"
         />
         <button
@@ -687,13 +861,17 @@ function FriendsSection({
 
       <div className="grid md:grid-cols-2 gap-4">
         <div>
-          <h3 className="text-xs uppercase tracking-wider text-muted-foreground mb-2">Cadastrados</h3>
+          <h3 className="text-xs uppercase tracking-wider text-muted-foreground mb-2">
+            Cadastrados
+          </h3>
           <div className="space-y-2">
             {registered.length === 0 ? (
               <Empty>Nenhum amigo cadastrado ainda.</Empty>
-            ) : registered.map((f) => (
-              <FriendRow key={f.id} f={f} onChange={onChange} onInvite={sendInvite} />
-            ))}
+            ) : (
+              registered.map((f) => (
+                <FriendRow key={f.id} f={f} onChange={onChange} onInvite={sendInvite} />
+              ))
+            )}
           </div>
         </div>
         <div>
@@ -703,9 +881,11 @@ function FriendsSection({
           <div className="space-y-2">
             {pending.length === 0 ? (
               <Empty>Convide alguém e acompanhe aqui.</Empty>
-            ) : pending.map((f) => (
-              <FriendRow key={f.id} f={f} onChange={onChange} onInvite={sendInvite} />
-            ))}
+            ) : (
+              pending.map((f) => (
+                <FriendRow key={f.id} f={f} onChange={onChange} onInvite={sendInvite} />
+              ))
+            )}
           </div>
         </div>
       </div>
@@ -714,8 +894,14 @@ function FriendsSection({
 }
 
 function FriendRow({
-  f, onChange, onInvite,
-}: { f: Friend; onChange: () => void; onInvite: (f: Friend) => void }) {
+  f,
+  onChange,
+  onInvite,
+}: {
+  f: Friend;
+  onChange: () => void;
+  onInvite: (f: Friend) => void;
+}) {
   return (
     <div className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border/60">
       <div className="h-9 w-9 rounded-full bg-gradient-brand grid place-items-center text-primary-foreground text-xs font-black">
@@ -725,7 +911,9 @@ function FriendRow({
         <div className="text-sm font-semibold truncate">{f.name}</div>
         <div className="text-[11px] text-muted-foreground truncate">
           {f.whatsapp || f.email || "Sem contato"}
-          {f.lastInviteAt && <> · convite reenviado em {new Date(f.lastInviteAt).toLocaleDateString("pt-BR")}</>}
+          {f.lastInviteAt && (
+            <> · convite reenviado em {new Date(f.lastInviteAt).toLocaleDateString("pt-BR")}</>
+          )}
         </div>
       </div>
       {!f.registered && (
@@ -738,14 +926,20 @@ function FriendRow({
         </button>
       )}
       <button
-        onClick={() => { toggleRegistered(f.id); onChange(); }}
+        onClick={() => {
+          toggleRegistered(f.id);
+          onChange();
+        }}
         className="text-[11px] font-bold px-2 h-8 rounded-full border border-border/60"
         title="Marcar/desmarcar como cadastrado"
       >
         {f.registered ? "Cadastrado" : "Pendente"}
       </button>
       <button
-        onClick={() => { removeFriend(f.id); onChange(); }}
+        onClick={() => {
+          removeFriend(f.id);
+          onChange();
+        }}
         className="text-muted-foreground hover:text-destructive p-1"
         title="Remover"
       >
@@ -766,7 +960,10 @@ function ShopPreviewSection({ tokens }: { tokens: number }) {
         title="Prêmios que você pode trocar"
         hint={`Seu saldo: ${formatTokens(tokens)} tokens`}
         right={
-          <Link to="/shop" className="text-xs font-bold text-primary hover:underline inline-flex items-center gap-1">
+          <Link
+            to="/shop"
+            className="text-xs font-bold text-primary hover:underline inline-flex items-center gap-1"
+          >
             Ver todos <ExternalLink className="h-3 w-3" />
           </Link>
         }
@@ -775,18 +972,30 @@ function ShopPreviewSection({ tokens }: { tokens: number }) {
         {items.map((p) => {
           const can = tokens >= p.cost;
           return (
-            <div key={p.id} className={`p-3 rounded-xl border ${can ? "border-primary/60 bg-card" : "border-border/60 bg-card opacity-70"}`}>
+            <div
+              key={p.id}
+              className={`p-3 rounded-xl border ${can ? "border-primary/60 bg-card" : "border-border/60 bg-card opacity-70"}`}
+            >
               <div className="aspect-square rounded-lg bg-background grid place-items-center text-4xl overflow-hidden">
                 {p.image ? (
-                  <img src={p.image} alt={p.name} className="w-full h-full object-contain p-2" loading="lazy" />
-                ) : <span>{p.emoji}</span>}
+                  <img
+                    src={p.image}
+                    alt={p.name}
+                    className="w-full h-full object-contain p-2"
+                    loading="lazy"
+                  />
+                ) : (
+                  <span>{p.emoji}</span>
+                )}
               </div>
               <div className="text-sm font-semibold mt-2 line-clamp-2">{p.name}</div>
               <div className="flex items-center justify-between mt-2">
                 <span className="inline-flex items-center gap-1 text-gold font-display font-black text-sm">
                   <Coins className="h-3.5 w-3.5" /> {formatTokens(p.cost)}
                 </span>
-                <span className={`text-[10px] font-bold uppercase ${can ? "text-primary" : "text-muted-foreground"}`}>
+                <span
+                  className={`text-[10px] font-bold uppercase ${can ? "text-primary" : "text-muted-foreground"}`}
+                >
                   {can ? "Disponível" : "Faltam tokens"}
                 </span>
               </div>
@@ -809,7 +1018,6 @@ function Empty({ children }: { children: React.ReactNode }) {
 /* ---------- Invite Promo (email + whatsapp + artes prontas) ---------- */
 
 const SITE_URL = "https://future-factions.lovable.app";
-
 
 function InvitePromoSection({
   inviterName,
@@ -926,7 +1134,11 @@ function InvitePromoSection({
               disabled={aiBusy === "whatsapp"}
               className="h-7 px-2.5 rounded-full bg-background border border-primary/40 text-[11px] font-bold text-primary inline-flex items-center gap-1.5 disabled:opacity-60"
             >
-              {aiBusy === "whatsapp" ? <Loader2 className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3 w-3" />}
+              {aiBusy === "whatsapp" ? (
+                <Loader2 className="h-3 w-3 animate-spin" />
+              ) : (
+                <Sparkles className="h-3 w-3" />
+              )}
               Gerar com IA
             </button>
           </div>
@@ -963,7 +1175,11 @@ function InvitePromoSection({
               disabled={aiBusy === "email"}
               className="h-7 px-2.5 rounded-full bg-background border border-primary/40 text-[11px] font-bold text-primary inline-flex items-center gap-1.5 disabled:opacity-60"
             >
-              {aiBusy === "email" ? <Loader2 className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3 w-3" />}
+              {aiBusy === "email" ? (
+                <Loader2 className="h-3 w-3 animate-spin" />
+              ) : (
+                <Sparkles className="h-3 w-3" />
+              )}
               Gerar com IA
             </button>
           </div>
@@ -1002,12 +1218,21 @@ function InvitePromoSection({
           <div className="text-sm font-bold">Artes prontas para divulgação</div>
         </div>
         <p className="text-xs text-muted-foreground">
-          Removemos o criador de imagens com IA daqui e cadastramos suas peças prontas para download e postagem.
+          Removemos o criador de imagens com IA daqui e cadastramos suas peças prontas para download
+          e postagem.
         </p>
         <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4">
           {galleryItems.map((item) => (
-            <article key={item.src} className="rounded-xl border border-border/60 bg-background overflow-hidden">
-              <img src={item.src} alt={item.name} className="w-full aspect-[4/5] object-cover" loading="lazy" />
+            <article
+              key={item.src}
+              className="rounded-xl border border-border/60 bg-background overflow-hidden"
+            >
+              <img
+                src={item.src}
+                alt={item.name}
+                className="w-full aspect-[4/5] object-cover"
+                loading="lazy"
+              />
               <div className="p-3 flex items-center justify-between gap-3">
                 <div className="text-xs font-semibold leading-tight">{item.name}</div>
                 <a
@@ -1026,8 +1251,6 @@ function InvitePromoSection({
   );
 }
 
-
-
 /* ---------- My Participations ---------- */
 
 function MyParticipationsSection({ items }: { items: MyParticipation[] }) {
@@ -1038,7 +1261,10 @@ function MyParticipationsSection({ items }: { items: MyParticipation[] }) {
         title="Meus palpites e resultados"
         hint="Acompanhe os desafios em que você participou e veja os resultados quando saírem."
         right={
-          <Link to="/desafios" className="text-xs font-bold text-primary hover:underline inline-flex items-center gap-1">
+          <Link
+            to="/desafios"
+            className="text-xs font-bold text-primary hover:underline inline-flex items-center gap-1"
+          >
             Mais desafios <ExternalLink className="h-3 w-3" />
           </Link>
         }
@@ -1046,7 +1272,10 @@ function MyParticipationsSection({ items }: { items: MyParticipation[] }) {
       {items.length === 0 ? (
         <Empty>
           Você ainda não fez nenhum palpite.{" "}
-          <Link to="/desafios" className="text-primary underline">Participar agora</Link>.
+          <Link to="/desafios" className="text-primary underline">
+            Participar agora
+          </Link>
+          .
         </Empty>
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -1080,7 +1309,8 @@ function MyParticipationsSection({ items }: { items: MyParticipation[] }) {
                 <div className="mt-3 text-[11px] text-muted-foreground space-y-0.5">
                   {p.optionLabel ? (
                     <div>
-                      Sua escolha: <span className="text-foreground font-semibold">{p.optionLabel}</span>
+                      Sua escolha:{" "}
+                      <span className="text-foreground font-semibold">{p.optionLabel}</span>
                     </div>
                   ) : (
                     <div>{answersCount} palpites enviados</div>
