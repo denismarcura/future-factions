@@ -73,6 +73,7 @@ function Criar() {
   }, [availableSubs, subcategory]);
 
   const [endsAt, setEndsAt] = useState("");
+  const [prizeName, setPrizeName] = useState("");
   const [socialLink, setSocialLink] = useState("");
   const [subs, setSubs] = useState<SubCat[]>([
     { id: uid(), question: "Quem ganha o jogo Brasil x Haiti?", options: ["Brasil", "Empate", "Haiti"] },
