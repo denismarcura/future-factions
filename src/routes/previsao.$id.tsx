@@ -1,4 +1,4 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import {
   Clock, Users, Flame, Heart, MessageCircle, Share2, Coins, TrendingUp, ArrowLeft, Instagram, Check, ExternalLink, Loader2,
@@ -42,6 +42,7 @@ export const Route = createFileRoute("/previsao/$id")({
 });
 
 function PredictionPage() {
+  const navigate = useNavigate();
   const p = Route.useLoaderData() as Prediction;
   const { user } = useAuth();
   const totalPool = p.options.reduce((s: number, o) => s + o.pool, 0);
@@ -307,6 +308,9 @@ function PredictionPage() {
                     }
                     setConfirmed(true);
                     toast.success(`🎯 Participação confirmada! ${p.entryFee} TKN debitados.`);
+                    setTimeout(() => {
+                      navigate({ to: "/" });
+                    }, 1200);
                   }}
                   disabled={isClosed || confirmed || Object.keys(subAnswers).length < p.subPredictions.length}
                   className="mt-5 w-full h-12 rounded-xl bg-gradient-brand text-primary-foreground font-display font-black tracking-wide shadow-glow hover:scale-[1.01] transition disabled:opacity-50 disabled:cursor-not-allowed"
