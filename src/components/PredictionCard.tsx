@@ -1,5 +1,5 @@
-import { Link } from "@tanstack/react-router";
-import { Flame, MessageCircle, Heart, Share2, Users, Clock } from "lucide-react";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { Flame, MessageCircle, Heart, Share2, Users, Clock, Plus } from "lucide-react";
 import { type Prediction, formatTokens, timeLeft } from "@/lib/mock-data";
 
 export function PredictionCard({ prediction: p }: { prediction: Prediction }) {
