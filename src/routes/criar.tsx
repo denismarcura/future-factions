@@ -358,6 +358,67 @@ function Criar() {
         <aside className="lg:sticky lg:top-24 lg:self-start space-y-4">
           <div className="rounded-2xl glass-card p-5 space-y-3">
             <div className="text-xs uppercase tracking-wider font-bold text-gold">Resumo</div>
+          </Section>
+
+          {/* Convide Amigos */}
+          <Section
+            title="Convide amigos"
+            description="Cada amigo cadastrado = 100 tokens para você. Se ele criar um Desafio, vocês dois ganham +100 tokens cada. Convide quantos amigos quiser e aumente suas chances de ganhar prêmios."
+          >
+            <div className="rounded-xl border border-gold/30 bg-gold/5 p-3 mb-3 flex items-start gap-2.5">
+              <Users className="h-4 w-4 text-gold mt-0.5 shrink-0" />
+              <p className="text-xs text-muted-foreground">
+                <span className="text-gold font-bold">+100 tokens</span> por amigo cadastrado ·{" "}
+                <span className="text-gold font-bold">+100 tokens</span> para cada um quando seu amigo criar um desafio.
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              {friends.map((f, idx) => (
+                <div key={f.id} className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_auto] gap-2 items-stretch">
+                  <input
+                    value={f.name}
+                    onChange={(e) => updateFriend(f.id, { name: e.target.value })}
+                    placeholder={`Nome do amigo #${idx + 1}`}
+                    className="input"
+                  />
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                    <input
+                      type="email"
+                      value={f.email}
+                      onChange={(e) => updateFriend(f.id, { email: e.target.value })}
+                      placeholder="email@exemplo.com"
+                      className="input pl-9"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => removeFriend(f.id)}
+                    disabled={friends.length <= 1}
+                    className="h-11 w-11 rounded-lg border border-border/60 grid place-items-center text-muted-foreground hover:text-destructive hover:border-destructive/60 disabled:opacity-40 justify-self-end"
+                    aria-label="Remover amigo"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
+              ))}
+
+              <button
+                type="button"
+                onClick={addFriend}
+                className="w-full inline-flex items-center justify-center gap-2 h-12 rounded-xl border-2 border-dashed border-primary/40 bg-primary/5 text-primary text-sm font-bold hover:bg-primary/10 hover:border-primary/60 transition"
+              >
+                <UserPlus className="h-4 w-4" /> + convide mais amigos
+              </button>
+            </div>
+          </Section>
+        </div>
+
+        {/* Sidebar */}
+        <aside className="lg:sticky lg:top-24 lg:self-start space-y-4">
+          <div className="rounded-2xl glass-card p-5 space-y-3">
+            <div className="text-xs uppercase tracking-wider font-bold text-gold">Resumo</div>
             <Row label="Custo de criação" value={`${COST} Tokens`} />
             <Row label="Sub-categorias" value={`${totalQuestions}/5`} />
             <Row label="Prêmio em tokens (auto)" value={`${AUTO_PRIZE.toLocaleString("pt-BR")} Tokens`} />
