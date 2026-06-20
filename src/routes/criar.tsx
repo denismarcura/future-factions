@@ -12,6 +12,7 @@ import { generateInviteText } from "@/lib/invite.functions";
 import { saveUserChallenge } from "@/lib/user-challenges";
 import { improveTitle } from "@/lib/title-ai.functions";
 import { listCategories, listSubcategories, type ChallengeCategory, type ChallengeSubcategory } from "@/lib/challenge-categories";
+import { generateChallenge } from "@/lib/challenge-ai.functions";
 
 export const Route = createFileRoute("/criar")({
   head: () => ({
