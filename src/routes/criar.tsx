@@ -1,12 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import {
   Plus, Trash2, Sparkles, Upload, Wand2, Calendar as CalIcon,
   Gift, Coins, Instagram, Facebook, Youtube, Music2, Globe, Lock,
-  CheckCircle2, Share2, Copy, AlertCircle, UserPlus, Mail, Users,
+  CheckCircle2, Share2, Copy, AlertCircle, UserPlus, Mail, Users, Loader2,
 } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { CATEGORIES } from "@/lib/mock-data";
+import { generateInviteText } from "@/lib/invite.functions";
 
 export const Route = createFileRoute("/criar")({
   head: () => ({
