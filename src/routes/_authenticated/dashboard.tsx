@@ -171,8 +171,9 @@ function Dashboard() {
           onChange={() => setFriends(listFriends())}
         />
 
-        {/* INVITE PROMO (email + whatsapp + instagram creative) */}
+        {/* INVITE PROMO (email + whatsapp + artes prontas) */}
         <InvitePromoSection inviterName={name} myChallenges={myChallenges} />
+
 
         {/* SHOP PREVIEW */}
         <ShopPreviewSection tokens={tokens} />
@@ -830,12 +831,22 @@ function InvitePromoSection({
   const [whatsText, setWhatsText] = useState(defaultWhats);
   const [emailText, setEmailText] = useState(defaultEmail);
   const [emailSubject, setEmailSubject] = useState("Vem jogar comigo no Desafio dos Palpites 🏆");
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const [creativeUrl, setCreativeUrl] = useState<string | null>(null);
-  const [creating, setCreating] = useState(false);
   const [aiBusy, setAiBusy] = useState<"whatsapp" | "email" | null>(null);
 
   const generateAi = useServerFn(generateInvitePromoText);
+
+  const galleryItems = [
+    { src: arte01.url, name: "Brasil x Escócia — versão 1" },
+    { src: arte02.url, name: "Brasil x Escócia — versão 2" },
+    { src: arte03.url, name: "Palpites fechados" },
+    { src: arte04.url, name: "Acerte o placar" },
+    { src: arte05.url, name: "Desafios dos patrocinadores" },
+    { src: arte06.url, name: "Todo jogo vale tokens" },
+    { src: arte07.url, name: "Ranking e premiações" },
+    { src: arte08.url, name: "Desafie seus amigos" },
+    { src: arte09.url, name: "Faça seus palpites" },
+    { src: arte10.url, name: "Candidatos 2026" },
+  ];
 
   // Build the lists the AI uses: my challenges + the 3 expiring soonest
   const meta = useMemo(() => {
@@ -892,7 +903,6 @@ function InvitePromoSection({
   }
 
   function openWhats() {
-    // api.whatsapp.com/send opens the contact picker reliably on web.
     const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(whatsText)}`;
     window.open(url, "_blank", "noopener,noreferrer");
   }
@@ -902,32 +912,15 @@ function InvitePromoSection({
     window.location.href = url;
   }
 
-  async function gerarCriativo() {
-    setCreating(true);
-    try {
-      const url = await renderInviteCreative(canvasRef.current, {
-        inviter: inviterName,
-        logoUrl: logoAsset.url,
-        link,
-      });
-      setCreativeUrl(url);
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Erro ao gerar imagem");
-    } finally {
-      setCreating(false);
-    }
-  }
-
   return (
     <section className="glass-card rounded-2xl p-5 border border-border/60 space-y-5">
       <SectionTitle
         icon={Sparkles}
         title="Divulgue e convide"
-        hint="Textos prontos pra WhatsApp e e-mail + imagem pronta pra postar no Instagram."
+        hint="Textos prontos pra WhatsApp e e-mail + artes prontas para baixar e postar."
       />
 
       <div className="grid lg:grid-cols-2 gap-4">
-        {/* WhatsApp */}
         <div className="rounded-xl bg-card border border-border/60 p-4 space-y-2">
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2">
@@ -965,7 +958,6 @@ function InvitePromoSection({
           </div>
         </div>
 
-        {/* Email */}
         <div className="rounded-xl bg-card border border-border/60 p-4 space-y-2">
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2">
@@ -1010,180 +1002,37 @@ function InvitePromoSection({
         </div>
       </div>
 
-      {/* Instagram creative */}
-      <div className="rounded-xl bg-card border border-border/60 p-4">
-        <div className="flex items-center gap-2 mb-3">
+      <div className="rounded-xl bg-card border border-border/60 p-4 space-y-4">
+        <div className="flex items-center gap-2">
           <ImageIcon className="h-4 w-4 text-primary" />
-          <div className="text-sm font-bold">Imagem para Instagram</div>
+          <div className="text-sm font-bold">Artes prontas para divulgação</div>
         </div>
-        <div className="grid sm:grid-cols-[1fr_auto] gap-4 items-start">
-          <div className="aspect-square w-full max-w-[360px] rounded-xl border border-border/60 bg-background overflow-hidden grid place-items-center">
-            {creativeUrl ? (
-              <img src={creativeUrl} alt="Criativo" className="w-full h-full object-cover" />
-            ) : (
-              <div className="p-6 text-center text-xs text-muted-foreground">
-                Clique em "Gerar imagem" para criar uma arte 1080×1080 com o logo, os prêmios e a chamada para participar.
+        <p className="text-xs text-muted-foreground">
+          Removemos o criador de imagens com IA daqui e cadastramos suas peças prontas para download e postagem.
+        </p>
+        <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4">
+          {galleryItems.map((item) => (
+            <article key={item.src} className="rounded-xl border border-border/60 bg-background overflow-hidden">
+              <img src={item.src} alt={item.name} className="w-full aspect-[4/5] object-cover" loading="lazy" />
+              <div className="p-3 flex items-center justify-between gap-3">
+                <div className="text-xs font-semibold leading-tight">{item.name}</div>
+                <a
+                  href={item.src}
+                  download={item.name.toLowerCase().replace(/\s+/g, "-") + ".png"}
+                  className="shrink-0 h-9 px-3 rounded-full bg-gradient-brand text-primary-foreground text-xs font-bold inline-flex items-center gap-1.5"
+                >
+                  <Download className="h-3.5 w-3.5" /> Baixar
+                </a>
               </div>
-            )}
-          </div>
-          <canvas ref={canvasRef} width={1080} height={1080} className="hidden" />
-          <div className="flex flex-col gap-2 min-w-[180px]">
-            <button
-              onClick={gerarCriativo}
-              disabled={creating}
-              className="h-10 px-4 rounded-full bg-gradient-brand text-primary-foreground text-sm font-bold inline-flex items-center justify-center gap-2 shadow-glow disabled:opacity-60"
-            >
-              {creating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-              {creating ? "Gerando…" : "Gerar imagem"}
-            </button>
-            {creativeUrl && (
-              <a
-                href={creativeUrl}
-                download="desafio-dos-palpites.png"
-                className="h-10 px-4 rounded-full bg-background border border-border/60 text-sm font-bold inline-flex items-center justify-center gap-2"
-              >
-                <Download className="h-4 w-4" /> Baixar
-              </a>
-            )}
-            <div className="text-[11px] text-muted-foreground leading-relaxed">
-              Salve a imagem e poste no seu Instagram (Feed ou Stories). Use o texto do WhatsApp/e-mail acima como legenda.
-            </div>
-          </div>
+            </article>
+          ))}
         </div>
       </div>
     </section>
   );
 }
 
-function loadImg(src: string): Promise<HTMLImageElement> {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.crossOrigin = "anonymous";
-    img.onload = () => resolve(img);
-    img.onerror = () => reject(new Error("Falha ao carregar imagem"));
-    img.src = src;
-  });
-}
 
-async function renderInviteCreative(
-  canvas: HTMLCanvasElement | null,
-  data: { inviter: string; logoUrl: string; link: string },
-): Promise<string> {
-  if (!canvas) throw new Error("Canvas indisponível");
-  const ctx = canvas.getContext("2d");
-  if (!ctx) throw new Error("Contexto 2D indisponível");
-  const W = canvas.width, H = canvas.height;
-
-  // Background
-  const grad = ctx.createLinearGradient(0, 0, W, H);
-  grad.addColorStop(0, "#031309");
-  grad.addColorStop(0.5, "#0f3d22");
-  grad.addColorStop(1, "#031309");
-  ctx.fillStyle = grad;
-  ctx.fillRect(0, 0, W, H);
-
-  // Glow
-  const glow = ctx.createRadialGradient(W / 2, H * 0.35, 30, W / 2, H * 0.35, 700);
-  glow.addColorStop(0, "rgba(34,197,94,0.35)");
-  glow.addColorStop(1, "rgba(0,0,0,0)");
-  ctx.fillStyle = glow;
-  ctx.fillRect(0, 0, W, H);
-
-  // Border
-  ctx.strokeStyle = "rgba(34,197,94,0.6)";
-  ctx.lineWidth = 6;
-  ctx.strokeRect(24, 24, W - 48, H - 48);
-
-  // Logo (centered top)
-  try {
-    const logo = await loadImg(data.logoUrl);
-    const logoH = 180;
-    const logoW = (logo.width / logo.height) * logoH;
-    ctx.drawImage(logo, (W - logoW) / 2, 70, logoW, logoH);
-  } catch {
-    ctx.fillStyle = "#22c55e";
-    ctx.font = "900 64px system-ui, sans-serif";
-    ctx.textAlign = "center";
-    ctx.fillText("DESAFIO DOS PALPITES", W / 2, 160);
-    ctx.textAlign = "start";
-  }
-
-  // Headline
-  ctx.fillStyle = "#ffffff";
-  ctx.font = "900 88px system-ui, sans-serif";
-  ctx.textAlign = "center";
-  ctx.fillText("DÊ SEU PALPITE", W / 2, 320);
-  ctx.fillStyle = "#facc15";
-  ctx.font = "900 88px system-ui, sans-serif";
-  ctx.fillText("GANHE PRÊMIOS", W / 2, 410);
-
-  // Prizes grid
-  ctx.textAlign = "center";
-  const prizes = PRIZES;
-  const cols = prizes.length;
-  const cellW = (W - 140) / cols;
-  const cellY = 490;
-  const cellH = 260;
-  for (let i = 0; i < prizes.length; i++) {
-    const cx = 70 + i * cellW + cellW / 2;
-    // box
-    ctx.fillStyle = "rgba(34,197,94,0.12)";
-    ctx.strokeStyle = "rgba(34,197,94,0.55)";
-    ctx.lineWidth = 2;
-    const bx = 70 + i * cellW + 10;
-    const bw = cellW - 20;
-    ctx.beginPath();
-    const r = 18;
-    ctx.moveTo(bx + r, cellY);
-    ctx.arcTo(bx + bw, cellY, bx + bw, cellY + cellH, r);
-    ctx.arcTo(bx + bw, cellY + cellH, bx, cellY + cellH, r);
-    ctx.arcTo(bx, cellY + cellH, bx, cellY, r);
-    ctx.arcTo(bx, cellY, bx + bw, cellY, r);
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
-    // emoji
-    ctx.font = "120px system-ui, 'Apple Color Emoji', 'Segoe UI Emoji'";
-    ctx.fillText(prizes[i].emoji, cx, cellY + 140);
-    // label
-    ctx.fillStyle = "#ffffff";
-    ctx.font = "700 22px system-ui, sans-serif";
-    ctx.fillText(prizes[i].label, cx, cellY + 220);
-  }
-
-  // CTA box
-  const boxY = H - 280;
-  ctx.fillStyle = "rgba(250,204,21,0.18)";
-  ctx.strokeStyle = "#facc15";
-  ctx.lineWidth = 4;
-  const bx = 70, bw = W - 140, bh = 100, br = 24;
-  ctx.beginPath();
-  ctx.moveTo(bx + br, boxY);
-  ctx.arcTo(bx + bw, boxY, bx + bw, boxY + bh, br);
-  ctx.arcTo(bx + bw, boxY + bh, bx, boxY + bh, br);
-  ctx.arcTo(bx, boxY + bh, bx, boxY, br);
-  ctx.arcTo(bx, boxY, bx + bw, boxY, br);
-  ctx.closePath();
-  ctx.fill();
-  ctx.stroke();
-  ctx.fillStyle = "#facc15";
-  ctx.font = "900 56px system-ui, sans-serif";
-  ctx.textBaseline = "middle";
-  ctx.fillText("PARTICIPE — É DE GRAÇA!", W / 2, boxY + bh / 2);
-  ctx.textBaseline = "top";
-
-  // Footer
-  ctx.fillStyle = "#ffffff";
-  ctx.font = "700 32px system-ui, sans-serif";
-  const inviter = (data.inviter || "Um amigo").trim();
-  ctx.fillText(`${inviter} te convidou`, W / 2, H - 150);
-  ctx.fillStyle = "rgba(255,255,255,0.85)";
-  ctx.font = "600 26px system-ui, sans-serif";
-  ctx.fillText(data.link, W / 2, H - 100);
-  ctx.textAlign = "start";
-
-  return canvas.toDataURL("image/png");
-}
 
 /* ---------- My Participations ---------- */
 
