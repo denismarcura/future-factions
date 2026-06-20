@@ -9,6 +9,7 @@ import {
 import { AppShell } from "@/components/layout/AppShell";
 import { CATEGORIES } from "@/lib/mock-data";
 import { generateInviteText } from "@/lib/invite.functions";
+import { saveUserChallenge } from "@/lib/user-challenges";
 
 export const Route = createFileRoute("/criar")({
   head: () => ({
@@ -109,6 +110,16 @@ function Criar() {
     }
     setErrors([]);
     const id = uid();
+    saveUserChallenge({
+      id,
+      name: name.trim(),
+      category: category as never,
+      endsAt,
+      isOpen,
+      subs,
+      prizeName: prizeName.trim() || undefined,
+      prizeImg,
+    });
     setPublished({ id, name: name.trim() });
     window.scrollTo({ top: 0, behavior: "smooth" });
   };

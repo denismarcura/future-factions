@@ -1,9 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AppShell } from "@/components/layout/AppShell";
 import { PredictionCard } from "@/components/PredictionCard";
-import { CATEGORIES, PREDICTIONS } from "@/lib/mock-data";
+import { CATEGORIES, PREDICTIONS, type Prediction } from "@/lib/mock-data";
 import { COMPANY_CHALLENGES } from "@/lib/mock-extra";
+import { getUserChallenges } from "@/lib/user-challenges";
 import { ListChecks, Building2, Users, Lock, Globe2 } from "lucide-react";
 
 export const Route = createFileRoute("/desafios")({
@@ -19,14 +20,26 @@ export const Route = createFileRoute("/desafios")({
 function DesafiosPage() {
   const [tab, setTab] = useState<"todos" | "publicos" | "empresas" | "privados">("todos");
   const [cat, setCat] = useState<string>("Todas");
+  const [userChallenges, setUserChallenges] = useState<Prediction[]>([]);
+
+  useEffect(() => {
+    const sync = () => setUserChallenges(getUserChallenges());
+    sync();
+    window.addEventListener("ddp:user-challenges-updated", sync);
+    window.addEventListener("storage", sync);
+    return () => {
+      window.removeEventListener("ddp:user-challenges-updated", sync);
+      window.removeEventListener("storage", sync);
+    };
+  }, []);
 
   const items = useMemo(() => {
     if (tab === "empresas") return [];
-    let list = [...PREDICTIONS];
+    let list = [...userChallenges, ...PREDICTIONS];
     if (cat !== "Todas") list = list.filter((p) => p.category === cat);
     if (tab === "privados") list = list.slice(0, 6); // mock
     return list;
-  }, [tab, cat]);
+  }, [tab, cat, userChallenges]);
 
   return (
     <AppShell>
