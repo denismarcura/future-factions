@@ -1,7 +1,8 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { Flame, MessageCircle, Heart, Share2, Users, Clock, Plus } from "lucide-react";
-import { type Prediction, formatTokens, timeLeft } from "@/lib/mock-data";
+import { type Prediction, formatTokens } from "@/lib/mock-data";
 import { CATEGORY_IMAGES } from "@/lib/category-images";
+import { CountdownTimer } from "@/components/CountdownTimer";
 
 export function PredictionCard({ prediction: p }: { prediction: Prediction }) {
   const navigate = useNavigate();
@@ -23,7 +24,7 @@ export function PredictionCard({ prediction: p }: { prediction: Prediction }) {
             </span>
           )}
           <span className="ml-auto inline-flex items-center gap-1 text-muted-foreground">
-            <Clock className="h-3 w-3" /> {timeLeft(p.closesAt)}
+            <Clock className="h-3 w-3" /> <CountdownTimer closesAt={p.closesAt} />
           </span>
         </div>
 
