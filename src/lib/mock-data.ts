@@ -31,8 +31,17 @@ export const CATEGORIES: Category[] = [
   "Mundo",
 ];
 
-export { USERS, LEVELS, type User } from "@/lib/mock-users";
-import { USERS } from "@/lib/mock-users";
+import { USERS, LEVELS, type User } from "@/lib/mock-users";
+export { USERS, LEVELS, type User };
+
+function seededRandom(seed: number) {
+  let s = seed;
+  return () => {
+    s = (s * 9301 + 49297) % 233280;
+    return s / 233280;
+  };
+}
+
 
 
 export const CURRENT_USER: User = {
