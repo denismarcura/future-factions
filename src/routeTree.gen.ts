@@ -17,6 +17,7 @@ import { Route as PerfilRouteImport } from './routes/perfil'
 import { Route as MissoesRouteImport } from './routes/missoes'
 import { Route as FaqRouteImport } from './routes/faq'
 import { Route as EmpresasRouteImport } from './routes/empresas'
+import { Route as DesafiosEmpresasRouteImport } from './routes/desafios-empresas'
 import { Route as DesafiosRouteImport } from './routes/desafios'
 import { Route as CriarRouteImport } from './routes/criar'
 import { Route as ComoFuncionaRouteImport } from './routes/como-funciona'
@@ -74,6 +75,11 @@ const FaqRoute = FaqRouteImport.update({
 const EmpresasRoute = EmpresasRouteImport.update({
   id: '/empresas',
   path: '/empresas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DesafiosEmpresasRoute = DesafiosEmpresasRouteImport.update({
+  id: '/desafios-empresas',
+  path: '/desafios-empresas',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DesafiosRoute = DesafiosRouteImport.update({
@@ -173,6 +179,7 @@ export interface FileRoutesByFullPath {
   '/como-funciona': typeof ComoFuncionaRoute
   '/criar': typeof CriarRoute
   '/desafios': typeof DesafiosRoute
+  '/desafios-empresas': typeof DesafiosEmpresasRoute
   '/empresas': typeof EmpresasRoute
   '/faq': typeof FaqRoute
   '/missoes': typeof MissoesRoute
@@ -199,6 +206,7 @@ export interface FileRoutesByTo {
   '/como-funciona': typeof ComoFuncionaRoute
   '/criar': typeof CriarRoute
   '/desafios': typeof DesafiosRoute
+  '/desafios-empresas': typeof DesafiosEmpresasRoute
   '/empresas': typeof EmpresasRoute
   '/faq': typeof FaqRoute
   '/missoes': typeof MissoesRoute
@@ -228,6 +236,7 @@ export interface FileRoutesById {
   '/como-funciona': typeof ComoFuncionaRoute
   '/criar': typeof CriarRoute
   '/desafios': typeof DesafiosRoute
+  '/desafios-empresas': typeof DesafiosEmpresasRoute
   '/empresas': typeof EmpresasRoute
   '/faq': typeof FaqRoute
   '/missoes': typeof MissoesRoute
@@ -257,6 +266,7 @@ export interface FileRouteTypes {
     | '/como-funciona'
     | '/criar'
     | '/desafios'
+    | '/desafios-empresas'
     | '/empresas'
     | '/faq'
     | '/missoes'
@@ -283,6 +293,7 @@ export interface FileRouteTypes {
     | '/como-funciona'
     | '/criar'
     | '/desafios'
+    | '/desafios-empresas'
     | '/empresas'
     | '/faq'
     | '/missoes'
@@ -311,6 +322,7 @@ export interface FileRouteTypes {
     | '/como-funciona'
     | '/criar'
     | '/desafios'
+    | '/desafios-empresas'
     | '/empresas'
     | '/faq'
     | '/missoes'
@@ -340,6 +352,7 @@ export interface RootRouteChildren {
   ComoFuncionaRoute: typeof ComoFuncionaRoute
   CriarRoute: typeof CriarRoute
   DesafiosRoute: typeof DesafiosRoute
+  DesafiosEmpresasRoute: typeof DesafiosEmpresasRoute
   EmpresasRoute: typeof EmpresasRoute
   FaqRoute: typeof FaqRoute
   MissoesRoute: typeof MissoesRoute
@@ -407,6 +420,13 @@ declare module '@tanstack/react-router' {
       path: '/empresas'
       fullPath: '/empresas'
       preLoaderRoute: typeof EmpresasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/desafios-empresas': {
+      id: '/desafios-empresas'
+      path: '/desafios-empresas'
+      fullPath: '/desafios-empresas'
+      preLoaderRoute: typeof DesafiosEmpresasRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/desafios': {
@@ -583,6 +603,7 @@ const rootRouteChildren: RootRouteChildren = {
   ComoFuncionaRoute: ComoFuncionaRoute,
   CriarRoute: CriarRoute,
   DesafiosRoute: DesafiosRoute,
+  DesafiosEmpresasRoute: DesafiosEmpresasRoute,
   EmpresasRoute: EmpresasRoute,
   FaqRoute: FaqRoute,
   MissoesRoute: MissoesRoute,

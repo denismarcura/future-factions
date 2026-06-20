@@ -111,6 +111,31 @@ function Feed() {
         </div>
       </section>
 
+      {/* Destaque: Desafios para Empresas */}
+      <section className="mb-6">
+        <Link
+          to="/desafios-empresas"
+          className="group block rounded-2xl border border-gold/40 glass-card p-5 sm:p-6 hover:border-gold hover:shadow-glow transition relative overflow-hidden"
+        >
+          <div className="absolute -top-16 -right-16 h-48 w-48 rounded-full bg-gold/20 blur-3xl" />
+          <div className="relative flex flex-wrap items-center gap-4 justify-between">
+            <div className="flex items-center gap-4">
+              <div className="h-12 w-12 rounded-xl bg-gold/15 border border-gold/40 grid place-items-center">
+                <Trophy className="h-6 w-6 text-gold" />
+              </div>
+              <div>
+                <div className="text-[11px] uppercase tracking-wider text-gold font-bold">NOVO · EMPRESAS</div>
+                <div className="font-display font-black text-lg sm:text-xl">Desafio dos Palpites para Empresas</div>
+                <div className="text-sm text-muted-foreground">Crie desafios personalizados, distribua prêmios e amplie sua marca.</div>
+              </div>
+            </div>
+            <span className="inline-flex items-center gap-2 h-10 px-5 rounded-full bg-gradient-brand text-primary-foreground text-xs font-black uppercase shadow-glow group-hover:scale-[1.03] transition">
+              Saiba mais →
+            </span>
+          </div>
+        </Link>
+      </section>
+
       {/* Quick links */}
       <section className="mb-8 grid sm:grid-cols-3 gap-3">
         {[
