@@ -1,6 +1,11 @@
-import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, useRouterState, useNavigate } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
+import { useEffect, useState } from "react";
 import { AppShell } from "@/components/layout/AppShell";
-import { Users, KeyRound, Mail, LayoutDashboard, Shield, ListChecks, Sparkles, Target } from "lucide-react";
+import { Users, KeyRound, Mail, LayoutDashboard, Shield, ListChecks, Sparkles, Target, Loader2, Lock } from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
+import { checkIsAdmin, claimAdminIfNone } from "@/lib/admin.functions";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
