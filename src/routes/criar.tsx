@@ -100,9 +100,20 @@ function Criar() {
   const [inviterName, setInviterName] = useState("");
   const [genLoading, setGenLoading] = useState(false);
   const [genError, setGenError] = useState<string | null>(null);
+  const [bulkEmails, setBulkEmails] = useState("");
+  const [privateDescription, setPrivateDescription] = useState("");
+  const [improvingDesc, setImprovingDesc] = useState(false);
+  const [whatsText, setWhatsText] = useState("");
+  const [whatsLoading, setWhatsLoading] = useState(false);
+  const [whatsCopied, setWhatsCopied] = useState(false);
+  const [creativeUrl, setCreativeUrl] = useState<string | null>(null);
+  const [creatingCreative, setCreatingCreative] = useState(false);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const generateInvite = useServerFn(generateInviteText);
   const improveTitleFn = useServerFn(improveTitle);
   const generateChallengeFn = useServerFn(generateChallenge);
+  const improveDescriptionFn = useServerFn(improveDescription);
+  const generateWhatsFn = useServerFn(generateWhatsAppInvite);
 
   // AI Challenge Generator state
   const [aiOpen, setAiOpen] = useState(false);
