@@ -7,7 +7,7 @@ import { signOut } from "@/hooks/use-auth";
 import {
   LogOut, Target, Coins, Plus, ListChecks, ShoppingBag,
   Pencil, Save, X, Users, Send, MessageCircle, Sparkles, Loader2,
-  CheckCircle2, Circle, UserPlus, Trash2, ExternalLink, Gift,
+  CheckCircle2, Circle, UserPlus, Trash2, ExternalLink, Gift, Rocket,
 } from "lucide-react";
 import { toast } from "sonner";
 import { CATEGORIES, formatTokens, type Category } from "@/lib/mock-data";
