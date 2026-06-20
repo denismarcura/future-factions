@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppShell } from "@/components/layout/AppShell";
 import { signOut } from "@/hooks/use-auth";
@@ -23,7 +23,17 @@ import { generateChallenges, type GeneratedChallenge } from "@/lib/generate-chal
 import { generateInvitePromoText } from "@/lib/invite-ai.functions";
 import { listParticipations, type MyParticipation } from "@/lib/my-participations";
 import type { Prediction } from "@/lib/mock-data";
-import logoAsset from "@/assets/logo-desafio.png.asset.json";
+import arte01 from "@/assets/dashboard-arte-01.png.asset.json";
+import arte02 from "@/assets/dashboard-arte-02.png.asset.json";
+import arte03 from "@/assets/dashboard-arte-03.png.asset.json";
+import arte04 from "@/assets/dashboard-arte-04.png.asset.json";
+import arte05 from "@/assets/dashboard-arte-05.png.asset.json";
+import arte06 from "@/assets/dashboard-arte-06.png.asset.json";
+import arte07 from "@/assets/dashboard-arte-07.png.asset.json";
+import arte08 from "@/assets/dashboard-arte-08.png.asset.json";
+import arte09 from "@/assets/dashboard-arte-09.png.asset.json";
+import arte10 from "@/assets/dashboard-arte-10.png.asset.json";
+
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   component: Dashboard,
