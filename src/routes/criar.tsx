@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import {
   Plus, Trash2, Sparkles, Upload, Wand2, Calendar as CalIcon,
@@ -11,6 +11,7 @@ import { CATEGORIES } from "@/lib/mock-data";
 import { generateInviteText } from "@/lib/invite.functions";
 import { saveUserChallenge } from "@/lib/user-challenges";
 import { improveTitle } from "@/lib/title-ai.functions";
+import { listCategories, listSubcategories, type ChallengeCategory, type ChallengeSubcategory } from "@/lib/challenge-categories";
 
 export const Route = createFileRoute("/criar")({
   head: () => ({
