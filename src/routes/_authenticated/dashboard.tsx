@@ -64,13 +64,17 @@ function Dashboard() {
     })();
     setFriends(listFriends());
     setMyChallenges(getUserChallenges());
+    setParticipations(listParticipations());
     const onF = () => setFriends(listFriends());
     const onC = () => setMyChallenges(getUserChallenges());
+    const onP = () => setParticipations(listParticipations());
     window.addEventListener("ddp:friends-updated", onF);
     window.addEventListener("ddp:user-challenges-updated", onC);
+    window.addEventListener("ddp:participations-updated", onP);
     return () => {
       window.removeEventListener("ddp:friends-updated", onF);
       window.removeEventListener("ddp:user-challenges-updated", onC);
+      window.removeEventListener("ddp:participations-updated", onP);
     };
   }, []);
 
