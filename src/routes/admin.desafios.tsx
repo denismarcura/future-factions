@@ -5,6 +5,9 @@ import {
   getUserChallenges,
   updateUserChallenge,
   deleteUserChallenge,
+  applyPlatformOverrides,
+  setPlatformOverride,
+  deletePlatformChallenge,
 } from "@/lib/user-challenges";
 import { ListChecks, Search, Pencil, Trash2, Save, X, Coins, Users as UsersIcon } from "lucide-react";
 import { toast } from "sonner";
@@ -15,12 +18,16 @@ export const Route = createFileRoute("/admin/desafios")({
 
 function AdminDesafios() {
   const [userItems, setUserItems] = useState<Prediction[]>([]);
+  const [platformItems, setPlatformItems] = useState<Prediction[]>(PREDICTIONS);
   const [q, setQ] = useState("");
   const [filter, setFilter] = useState<"todos" | "usuarios" | "plataforma">("todos");
   const [editing, setEditing] = useState<Prediction | null>(null);
 
   useEffect(() => {
-    const sync = () => setUserItems(getUserChallenges());
+    const sync = () => {
+      setUserItems(getUserChallenges());
+      setPlatformItems(applyPlatformOverrides(PREDICTIONS));
+    };
     sync();
     window.addEventListener("ddp:user-challenges-updated", sync);
     window.addEventListener("storage", sync);
@@ -32,9 +39,9 @@ function AdminDesafios() {
 
   const all = useMemo(() => {
     if (filter === "usuarios") return userItems;
-    if (filter === "plataforma") return PREDICTIONS;
-    return [...userItems, ...PREDICTIONS];
-  }, [userItems, filter]);
+    if (filter === "plataforma") return platformItems;
+    return [...userItems, ...platformItems];
+  }, [userItems, platformItems, filter]);
 
   const filtered = all.filter(
     (p) =>
@@ -45,22 +52,21 @@ function AdminDesafios() {
   function handleDelete(id: string) {
     if (!confirm("Excluir este desafio? Esta ação não pode ser desfeita.")) return;
     const isUser = userItems.some((u) => u.id === id);
-    if (!isUser) {
-      toast.error("Desafios da plataforma não podem ser excluídos por aqui.");
-      return;
+    if (isUser) {
+      deleteUserChallenge(id);
+    } else {
+      deletePlatformChallenge(id);
     }
-    deleteUserChallenge(id);
     toast.success("Desafio excluído.");
   }
 
   function handleSaveEdit(updated: Prediction) {
     const isUser = userItems.some((u) => u.id === updated.id);
-    if (!isUser) {
-      toast.error("Apenas desafios criados por usuários são editáveis.");
-      setEditing(null);
-      return;
+    if (isUser) {
+      updateUserChallenge(updated.id, updated);
+    } else {
+      setPlatformOverride(updated.id, updated);
     }
-    updateUserChallenge(updated.id, updated);
     setEditing(null);
     toast.success("Desafio atualizado.");
   }
