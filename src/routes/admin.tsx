@@ -21,6 +21,7 @@ const ADMIN_NAV = [
   { to: "/admin", label: "Painel", icon: LayoutDashboard, exact: true },
   { to: "/admin/cadastros", label: "Cadastros", icon: Users },
   { to: "/admin/desafios", label: "Desafios", icon: ListChecks },
+  { to: "/admin/empresas", label: "Desafios p/ Empresas", icon: Building2 },
   { to: "/admin/categorias", label: "Categorias Desafios", icon: FolderTree },
   { to: "/admin/banners", label: "Banners", icon: ImageIcon },
   { to: "/admin/regras-ia", label: "Regras IA", icon: Sparkles },
