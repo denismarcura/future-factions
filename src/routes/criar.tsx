@@ -127,22 +127,49 @@ function Criar() {
         </div>
       </header>
 
-      <form className="grid lg:grid-cols-[1fr_360px] gap-6" onSubmit={(e) => e.preventDefault()}>
+      {published ? (
+        <PublishedSuccess
+          name={published.name}
+          id={published.id}
+          onCreateAnother={() => {
+            setPublished(null);
+            setName("");
+            setPrizeName("");
+            setEndsAt("");
+            setSubs([{ id: uid(), question: "", options: ["Sim", "Não"] }]);
+            setPrizeImg(null);
+            setAiPrompt("");
+          }}
+        />
+      ) : (
+      <>
+      {errors.length > 0 && (
+        <div className="mb-5 rounded-xl border border-destructive/40 bg-destructive/10 p-4">
+          <div className="flex items-center gap-2 text-destructive font-bold mb-1">
+            <AlertCircle className="h-4 w-4" /> Corrija para publicar
+          </div>
+          <ul className="text-sm text-destructive/90 list-disc pl-5 space-y-0.5">
+            {errors.map((er, i) => <li key={i}>{er}</li>)}
+          </ul>
+        </div>
+      )}
+
+      <form className="grid lg:grid-cols-[1fr_360px] gap-6" onSubmit={handleSubmit}>
         <div className="space-y-5">
           {/* Básico */}
           <Section title="Informações do desafio">
             <Field label="Nome do desafio">
-              <input placeholder="Ex.: Brasil x Haiti — Quem leva?" className="input" />
+              <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Ex.: Brasil x Haiti — Quem leva?" className="input" />
             </Field>
             <div className="grid sm:grid-cols-2 gap-4">
               <Field label="Categoria">
-                <select className="input">
+                <select value={category} onChange={(e) => setCategory(e.target.value)} className="input">
                   {CATEGORIES.map((c) => <option key={c}>{c}</option>)}
                 </select>
               </Field>
               <Field label="Fim do desafio">
                 <div className="relative">
-                  <input type="datetime-local" className="input pr-9" />
+                  <input value={endsAt} onChange={(e) => setEndsAt(e.target.value)} type="datetime-local" className="input pr-9" />
                   <CalIcon className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
                 </div>
               </Field>
