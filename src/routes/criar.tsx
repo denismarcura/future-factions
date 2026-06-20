@@ -39,8 +39,40 @@ function Criar() {
   const [isOpen, setIsOpen] = useState(true);
   const [name, setName] = useState("");
   const [category, setCategory] = useState<string>(CATEGORIES[0]);
+  const [subcategory, setSubcategory] = useState<string>("");
+  const [dbCategories, setDbCategories] = useState<ChallengeCategory[]>([]);
+  const [dbSubcategories, setDbSubcategories] = useState<ChallengeSubcategory[]>([]);
+  const [loadingCats, setLoadingCats] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    Promise.all([listCategories(), listSubcategories()])
+      .then(([c, s]) => {
+        if (cancelled) return;
+        setDbCategories(c);
+        setDbSubcategories(s);
+        if (c.length && !c.some(x => x.name === category)) setCategory(c[0].name);
+      })
+      .catch(() => {})
+      .finally(() => { if (!cancelled) setLoadingCats(false); });
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const currentCategoryId = useMemo(
+    () => dbCategories.find(c => c.name === category)?.id ?? null,
+    [dbCategories, category],
+  );
+  const availableSubs = useMemo(
+    () => dbSubcategories.filter(s => s.category_id === currentCategoryId),
+    [dbSubcategories, currentCategoryId],
+  );
+
+  useEffect(() => {
+    if (!availableSubs.some(s => s.name === subcategory)) setSubcategory("");
+  }, [availableSubs, subcategory]);
+
   const [endsAt, setEndsAt] = useState("");
-  const [prizeName, setPrizeName] = useState("");
   const [socialLink, setSocialLink] = useState("");
   const [subs, setSubs] = useState<SubCat[]>([
     { id: uid(), question: "Quem ganha o jogo Brasil x Haiti?", options: ["Brasil", "Empate", "Haiti"] },
