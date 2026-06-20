@@ -11,7 +11,8 @@ export type Category =
   | "Entretenimento"
   | "Brasil"
   | "Mundo"
-  | "Palpites Malucos da Copa";
+  | "Palpites Malucos da Copa"
+  | "Desafios Diamante";
 
 export const CATEGORIES: Category[] = [
   "Copa do Mundo 2026",
