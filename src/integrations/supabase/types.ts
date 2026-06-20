@@ -14,6 +14,83 @@ export type Database = {
   }
   public: {
     Tables: {
+      mission_claims: {
+        Row: {
+          context: string
+          created_at: string
+          id: string
+          mission_id: string
+          tokens_awarded: number
+          user_id: string
+        }
+        Insert: {
+          context?: string
+          created_at?: string
+          id?: string
+          mission_id: string
+          tokens_awarded?: number
+          user_id: string
+        }
+        Update: {
+          context?: string
+          created_at?: string
+          id?: string
+          mission_id?: string
+          tokens_awarded?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mission_claims_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "missions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      missions: {
+        Row: {
+          action_type: string
+          active: boolean
+          bonus_tokens: number
+          created_at: string
+          id: string
+          link: string
+          platform: string
+          sponsor_name: string
+          title: string
+          tokens: number
+          updated_at: string
+        }
+        Insert: {
+          action_type: string
+          active?: boolean
+          bonus_tokens?: number
+          created_at?: string
+          id?: string
+          link: string
+          platform: string
+          sponsor_name: string
+          title: string
+          tokens?: number
+          updated_at?: string
+        }
+        Update: {
+          action_type?: string
+          active?: boolean
+          bonus_tokens?: number
+          created_at?: string
+          id?: string
+          link?: string
+          platform?: string
+          sponsor_name?: string
+          title?: string
+          tokens?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
