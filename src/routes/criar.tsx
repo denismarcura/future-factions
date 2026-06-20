@@ -333,7 +333,7 @@ function Criar() {
               <MissionBlock icon={<Music2 className="h-4 w-4" />} name="TikTok" />
             </div>
             <Field label="Link das redes sociais do desafio">
-              <input placeholder="https://instagram.com/seu-perfil" className="input" />
+              <input value={socialLink} onChange={(e) => setSocialLink(e.target.value)} placeholder="https://instagram.com/seu-perfil" className="input" />
             </Field>
           </Section>
         </div>
