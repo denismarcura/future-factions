@@ -3,6 +3,7 @@ import { useState } from "react";
 import {
   Plus, Trash2, Sparkles, Upload, Wand2, Calendar as CalIcon,
   Gift, Coins, Instagram, Facebook, Youtube, Music2, Globe, Lock,
+  CheckCircle2, Share2, Copy, AlertCircle,
 } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { CATEGORIES } from "@/lib/mock-data";
@@ -31,6 +32,11 @@ function uid() { return Math.random().toString(36).slice(2, 9); }
 
 function Criar() {
   const [isOpen, setIsOpen] = useState(true);
+  const [name, setName] = useState("");
+  const [category, setCategory] = useState<string>(CATEGORIES[0]);
+  const [endsAt, setEndsAt] = useState("");
+  const [prizeName, setPrizeName] = useState("");
+  const [socialLink, setSocialLink] = useState("");
   const [subs, setSubs] = useState<SubCat[]>([
     { id: uid(), question: "Quem ganha o jogo Brasil x Haiti?", options: ["Brasil", "Empate", "Haiti"] },
     { id: uid(), question: "Neymar vai jogar?", options: ["Sim", "Não"] },
@@ -38,6 +44,29 @@ function Criar() {
   const [prizeImg, setPrizeImg] = useState<string | null>(null);
   const [aiPrompt, setAiPrompt] = useState("");
   const [generating, setGenerating] = useState(false);
+  const [errors, setErrors] = useState<string[]>([]);
+  const [published, setPublished] = useState<null | { id: string; name: string }>(null);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const errs: string[] = [];
+    if (!name.trim()) errs.push("Informe o nome do desafio.");
+    if (!endsAt) errs.push("Defina a data e hora de encerramento.");
+    if (subs.length === 0) errs.push("Adicione pelo menos 1 sub-categoria.");
+    subs.forEach((s, i) => {
+      if (!s.question.trim()) errs.push(`Pergunta vazia no palpite #${i + 1}.`);
+      if (s.options.filter(o => o.trim()).length < 2) errs.push(`Palpite #${i + 1} precisa de pelo menos 2 opções preenchidas.`);
+    });
+    if (errs.length) {
+      setErrors(errs);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+    setErrors([]);
+    const id = uid();
+    setPublished({ id, name: name.trim() });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   const addSub = () => {
     if (subs.length >= 5) return;
@@ -98,22 +127,49 @@ function Criar() {
         </div>
       </header>
 
-      <form className="grid lg:grid-cols-[1fr_360px] gap-6" onSubmit={(e) => e.preventDefault()}>
+      {published ? (
+        <PublishedSuccess
+          name={published.name}
+          id={published.id}
+          onCreateAnother={() => {
+            setPublished(null);
+            setName("");
+            setPrizeName("");
+            setEndsAt("");
+            setSubs([{ id: uid(), question: "", options: ["Sim", "Não"] }]);
+            setPrizeImg(null);
+            setAiPrompt("");
+          }}
+        />
+      ) : (
+      <>
+      {errors.length > 0 && (
+        <div className="mb-5 rounded-xl border border-destructive/40 bg-destructive/10 p-4">
+          <div className="flex items-center gap-2 text-destructive font-bold mb-1">
+            <AlertCircle className="h-4 w-4" /> Corrija para publicar
+          </div>
+          <ul className="text-sm text-destructive/90 list-disc pl-5 space-y-0.5">
+            {errors.map((er, i) => <li key={i}>{er}</li>)}
+          </ul>
+        </div>
+      )}
+
+      <form className="grid lg:grid-cols-[1fr_360px] gap-6" onSubmit={handleSubmit}>
         <div className="space-y-5">
           {/* Básico */}
           <Section title="Informações do desafio">
             <Field label="Nome do desafio">
-              <input placeholder="Ex.: Brasil x Haiti — Quem leva?" className="input" />
+              <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Ex.: Brasil x Haiti — Quem leva?" className="input" />
             </Field>
             <div className="grid sm:grid-cols-2 gap-4">
               <Field label="Categoria">
-                <select className="input">
+                <select value={category} onChange={(e) => setCategory(e.target.value)} className="input">
                   {CATEGORIES.map((c) => <option key={c}>{c}</option>)}
                 </select>
               </Field>
               <Field label="Fim do desafio">
                 <div className="relative">
-                  <input type="datetime-local" className="input pr-9" />
+                  <input value={endsAt} onChange={(e) => setEndsAt(e.target.value)} type="datetime-local" className="input pr-9" />
                   <CalIcon className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
                 </div>
               </Field>
@@ -215,7 +271,7 @@ function Criar() {
             description={`Automaticamente daremos ${AUTO_PRIZE.toLocaleString("pt-BR")} tokens para quem fizer a maior pontuação. Você pode adicionar um prêmio físico extra (opcional).`}
           >
             <Field label="Nome do prêmio extra (opcional)">
-              <input placeholder="Ex.: 1 Camiseta do Brasil" className="input" />
+              <input value={prizeName} onChange={(e) => setPrizeName(e.target.value)} placeholder="Ex.: 1 Camiseta do Brasil" className="input" />
             </Field>
 
             <div className="grid sm:grid-cols-2 gap-4">
@@ -277,7 +333,7 @@ function Criar() {
               <MissionBlock icon={<Music2 className="h-4 w-4" />} name="TikTok" />
             </div>
             <Field label="Link das redes sociais do desafio">
-              <input placeholder="https://instagram.com/seu-perfil" className="input" />
+              <input value={socialLink} onChange={(e) => setSocialLink(e.target.value)} placeholder="https://instagram.com/seu-perfil" className="input" />
             </Field>
           </Section>
         </div>
@@ -323,6 +379,8 @@ function Criar() {
         textarea.input { height: auto; padding: 10px 12px; }
         .input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px color-mix(in oklab, var(--primary) 25%, transparent); }
       `}</style>
+      </>
+      )}
     </AppShell>
   );
 }
@@ -381,6 +439,40 @@ function MissionBlock({ icon, name }: { icon: React.ReactNode; name: string }) {
             {k === "follow" ? "Seguir" : k === "like" ? "Curtir" : "Comentar"}
           </button>
         ))}
+      </div>
+    </div>
+  );
+}
+
+function PublishedSuccess({ name, id, onCreateAnother }: { name: string; id: string; onCreateAnother: () => void }) {
+  const [copied, setCopied] = useState(false);
+  const link = typeof window !== "undefined" ? `${window.location.origin}/previsao/${id}` : `/previsao/${id}`;
+  const copy = async () => {
+    try { await navigator.clipboard.writeText(link); setCopied(true); setTimeout(() => setCopied(false), 1500); } catch {}
+  };
+  return (
+    <div className="max-w-2xl mx-auto text-center py-10">
+      <div className="mx-auto h-20 w-20 rounded-full bg-primary/15 grid place-items-center mb-5 shadow-glow">
+        <CheckCircle2 className="h-10 w-10 text-primary" />
+      </div>
+      <h1 className="font-display text-3xl font-black mb-2">Desafio publicado!</h1>
+      <p className="text-muted-foreground mb-6">
+        <span className="text-foreground font-semibold">"{name}"</span> está no ar. 100 Tokens foram debitados da sua carteira.
+      </p>
+      <div className="rounded-2xl glass-card p-4 flex items-center gap-2 mb-6">
+        <Share2 className="h-4 w-4 text-gold shrink-0" />
+        <input readOnly value={link} className="flex-1 bg-transparent text-sm outline-none truncate" />
+        <button onClick={copy} className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg bg-primary/15 text-primary border border-primary/30 text-sm font-semibold hover:bg-primary/20">
+          <Copy className="h-4 w-4" /> {copied ? "Copiado" : "Copiar"}
+        </button>
+      </div>
+      <div className="flex flex-wrap gap-3 justify-center">
+        <Link to="/desafios" className="h-11 px-5 rounded-xl bg-gradient-brand text-primary-foreground font-display font-bold inline-flex items-center shadow-glow">
+          Ver desafios
+        </Link>
+        <button onClick={onCreateAnother} className="h-11 px-5 rounded-xl border border-border font-semibold inline-flex items-center hover:border-primary hover:text-primary">
+          Criar outro
+        </button>
       </div>
     </div>
   );
