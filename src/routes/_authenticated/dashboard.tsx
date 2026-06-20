@@ -136,6 +136,9 @@ function Dashboard() {
         {/* PROFILE EDITOR */}
         <ProfileEditor profile={profile} onSaved={setProfile} />
 
+        {/* MY PARTICIPATIONS */}
+        <MyParticipationsSection items={participations} />
+
         {/* MISSIONS */}
         <MissionsSection
           missions={missions}
