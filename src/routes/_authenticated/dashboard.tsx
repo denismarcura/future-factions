@@ -17,7 +17,7 @@ import {
   listFriends, addFriend, removeFriend, markInviteSent, toggleRegistered,
   whatsappLink, type Friend,
 } from "@/lib/friends";
-import { getUserChallenges } from "@/lib/user-challenges";
+import { getUserChallenges, saveUserChallenge } from "@/lib/user-challenges";
 import { generateChallenges, type GeneratedChallenge } from "@/lib/generate-challenges.functions";
 import type { Prediction } from "@/lib/mock-data";
 
