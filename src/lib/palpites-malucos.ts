@@ -1,5 +1,26 @@
 import { USERS } from "@/lib/mock-users";
 import type { Prediction, PredictionOption } from "@/lib/mock-data";
+import imgRed from "@/assets/pm-red-card.jpg";
+import imgGk from "@/assets/pm-goalkeeper.jpg";
+import imgZebra from "@/assets/pm-zebra.jpg";
+import imgHat from "@/assets/pm-hattrick.jpg";
+import imgPenalty from "@/assets/pm-penalty.jpg";
+import imgYellow from "@/assets/pm-yellow-card.jpg";
+import imgRain from "@/assets/pm-rain.jpg";
+import imgFK from "@/assets/pm-free-kick.jpg";
+import imgSoccer from "@/assets/pm-soccer.jpg";
+
+const EMOJI_IMG: Record<string, string> = {
+  "🟥": imgRed,
+  "🥅": imgGk,
+  "🦓": imgZebra,
+  "🏆": imgPenalty,
+  "🟨": imgYellow,
+  "🏟️": imgHat,
+  "🌧️": imgRain,
+  "🔥": imgFK,
+  "⚽": imgSoccer,
+};
 
 type Maluco = {
   emoji: string;
@@ -116,4 +137,5 @@ export const PALPITES_MALUCOS: Prediction[] = MALUCOS.map((m, i) => ({
   tags: ["palpites-malucos", "copa", "2026"],
   hot: true,
   prizeTiers: [{ hits: 1, tokens: m.prize }],
+  imageUrl: EMOJI_IMG[m.emoji] ?? imgSoccer,
 }));
