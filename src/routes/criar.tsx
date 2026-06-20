@@ -33,7 +33,7 @@ function uid() { return Math.random().toString(36).slice(2, 9); }
 function Criar() {
   const [isOpen, setIsOpen] = useState(true);
   const [name, setName] = useState("");
-  const [category, setCategory] = useState(CATEGORIES[0]);
+  const [category, setCategory] = useState<string>(CATEGORIES[0]);
   const [endsAt, setEndsAt] = useState("");
   const [prizeName, setPrizeName] = useState("");
   const [socialLink, setSocialLink] = useState("");
