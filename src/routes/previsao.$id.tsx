@@ -8,6 +8,7 @@ import { AppShell } from "@/components/layout/AppShell";
 import { CURRENT_USER, formatTokens, getPrediction, PREDICTIONS, type Prediction, timeLeft } from "@/lib/mock-data";
 import { listMissions, listMyClaims, claimMission, pickRandomFor, type Mission, ACTION_LABEL } from "@/lib/missions";
 import { useAuth } from "@/hooks/use-auth";
+import { hasParticipated, saveParticipation } from "@/lib/my-participations";
 
 export const Route = createFileRoute("/previsao/$id")({
   loader: ({ params }): Prediction => {
@@ -53,6 +54,10 @@ function PredictionPage() {
   const [bonusDone, setBonusDone] = useState(false);
   const [bonusBusy, setBonusBusy] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
+
+  useEffect(() => {
+    if (hasParticipated(p.id)) setConfirmed(true);
+  }, [p.id]);
 
   useEffect(() => {
     (async () => {
@@ -307,9 +312,18 @@ function PredictionPage() {
                       return;
                     }
                     setConfirmed(true);
+                    saveParticipation({
+                      id: p.id,
+                      title: p.title,
+                      category: p.category,
+                      entryFee: p.entryFee ?? 0,
+                      answers: subAnswers,
+                      closesAt: p.closesAt,
+                      participatedAt: new Date().toISOString(),
+                    });
                     toast.success(`🎯 Participação confirmada! ${p.entryFee} TKN debitados.`);
                     setTimeout(() => {
-                      navigate({ to: "/" });
+                      navigate({ to: "/dashboard" });
                     }, 1200);
                   }}
                   disabled={isClosed || confirmed || Object.keys(subAnswers).length < p.subPredictions.length}
@@ -359,7 +373,19 @@ function PredictionPage() {
                 </div>
 
                 <button
-                  onClick={() => toast.success(`✅ Aposta de ${amount} TKN em "${sel.label}" confirmada!`)}
+                  onClick={() => {
+                    saveParticipation({
+                      id: p.id,
+                      title: p.title,
+                      category: p.category,
+                      entryFee: amount,
+                      answers: {},
+                      optionLabel: sel.label,
+                      closesAt: p.closesAt,
+                      participatedAt: new Date().toISOString(),
+                    });
+                    toast.success(`✅ Aposta de ${amount} TKN em "${sel.label}" confirmada!`);
+                  }}
                   className="mt-5 w-full h-12 rounded-xl bg-gradient-brand text-primary-foreground font-display font-black tracking-wide shadow-glow hover:scale-[1.01] transition"
                 >
                   APOSTAR {amount} TOKENS
