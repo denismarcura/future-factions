@@ -312,7 +312,7 @@ function PredictionPage() {
                   {isClosed ? "APOSTAS ENCERRADAS" : `PARTICIPAR POR ${p.entryFee} TOKENS`}
                 </button>
                 <p className="mt-3 text-[11px] text-center text-muted-foreground">
-                  Apostas encerram 1h antes do jogo. Tokens virtuais, sem dinheiro real.
+                  Apostas encerram 10 minutos antes do jogo. Tokens virtuais, sem dinheiro real.
                 </p>
               </>
             ) : (
