@@ -100,6 +100,58 @@ function Criar() {
   const [genError, setGenError] = useState<string | null>(null);
   const generateInvite = useServerFn(generateInviteText);
   const improveTitleFn = useServerFn(improveTitle);
+  const generateChallengeFn = useServerFn(generateChallenge);
+
+  // AI Challenge Generator state
+  const [aiOpen, setAiOpen] = useState(false);
+  const [aiTheme, setAiTheme] = useState("");
+  const [aiCount, setAiCount] = useState(5);
+  const [aiUseExistingSubs, setAiUseExistingSubs] = useState(true);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState<string | null>(null);
+
+  const handleGenerateChallenge = async () => {
+    setAiError(null);
+    if (!aiTheme.trim()) {
+      setAiError("Descreva o tema do desafio.");
+      return;
+    }
+    setAiLoading(true);
+    try {
+      const userSubs = aiUseExistingSubs
+        ? subs
+            .map((s) => ({
+              question: s.question.trim(),
+              options: s.options.map((o) => o.trim()).filter(Boolean),
+            }))
+            .filter((s) => s.question.length > 0)
+        : [];
+      const result = await generateChallengeFn({
+        data: {
+          theme: aiTheme.trim(),
+          category,
+          subcategory: subcategory || undefined,
+          userSubs: userSubs.length ? userSubs : undefined,
+          count: aiCount,
+          prizeName: prizeName.trim() || undefined,
+          endsAt: endsAt || undefined,
+        },
+      });
+      if (result.name) setName(result.name);
+      setSubs(
+        result.subs.map((s) => ({
+          id: uid(),
+          question: s.question,
+          options: s.options.slice(0, 3),
+        })),
+      );
+      setAiOpen(false);
+    } catch (err) {
+      setAiError(err instanceof Error ? err.message : "Não foi possível gerar agora.");
+    } finally {
+      setAiLoading(false);
+    }
+  };
 
   const handleGenerateInvite = async () => {
     setGenError(null);
