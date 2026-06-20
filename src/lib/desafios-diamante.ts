@@ -1,4 +1,5 @@
-import { USERS, type Prediction, type PredictionOption, type SubPrediction } from "@/lib/mock-data";
+import { USERS } from "@/lib/mock-users";
+import type { Prediction, PredictionOption, SubPrediction } from "@/lib/mock-data";
 
 const REQUIREMENTS = [
   "🎯 Ter feito todas as missões",

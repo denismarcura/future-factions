@@ -1,4 +1,5 @@
-import { USERS, type Prediction, type PredictionOption } from "@/lib/mock-data";
+import { USERS } from "@/lib/mock-users";
+import type { Prediction, PredictionOption } from "@/lib/mock-data";
 
 type Maluco = {
   emoji: string;
