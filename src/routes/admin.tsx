@@ -1,6 +1,6 @@
 import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
 import { AppShell } from "@/components/layout/AppShell";
-import { Users, KeyRound, Mail, LayoutDashboard, Shield } from "lucide-react";
+import { Users, KeyRound, Mail, LayoutDashboard, Shield, ListChecks, Sparkles } from "lucide-react";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -15,7 +15,9 @@ export const Route = createFileRoute("/admin")({
 const ADMIN_NAV = [
   { to: "/admin", label: "Painel", icon: LayoutDashboard, exact: true },
   { to: "/admin/cadastros", label: "Cadastros", icon: Users },
-  { to: "/admin/apis", label: "Cadastro de APIs", icon: KeyRound },
+  { to: "/admin/desafios", label: "Desafios", icon: ListChecks },
+  { to: "/admin/regras-ia", label: "Regras IA", icon: Sparkles },
+  { to: "/admin/apis", label: "APIs", icon: KeyRound },
   { to: "/admin/email-marketing", label: "E-mail Marketing", icon: Mail },
 ];
 
