@@ -150,6 +150,9 @@ function Dashboard() {
           onChange={() => setFriends(listFriends())}
         />
 
+        {/* INVITE PROMO (email + whatsapp + instagram creative) */}
+        <InvitePromoSection inviterName={name} />
+
         {/* SHOP PREVIEW */}
         <ShopPreviewSection tokens={tokens} />
       </div>
