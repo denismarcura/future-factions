@@ -158,7 +158,7 @@ function Criar() {
           options: s.options.slice(0, 3),
         })),
       );
-      setAiOpen(false);
+      // mantém a janela aberta para o usuário revisar; ele fecha manualmente.
     } catch (err) {
       setAiError(err instanceof Error ? err.message : "Não foi possível gerar agora.");
     } finally {
