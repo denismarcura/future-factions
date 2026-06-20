@@ -1,10 +1,13 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
-  Clock, Users, Flame, Heart, MessageCircle, Share2, Coins, TrendingUp, ArrowLeft,
+  Clock, Users, Flame, Heart, MessageCircle, Share2, Coins, TrendingUp, ArrowLeft, Instagram, Check, ExternalLink, Loader2,
 } from "lucide-react";
+import { toast } from "sonner";
 import { AppShell } from "@/components/layout/AppShell";
 import { CURRENT_USER, formatTokens, getPrediction, PREDICTIONS, type Prediction, timeLeft } from "@/lib/mock-data";
+import { listMissions, listMyClaims, claimMission, pickRandomFor, type Mission, ACTION_LABEL } from "@/lib/missions";
+import { useAuth } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/previsao/$id")({
   loader: ({ params }): Prediction => {
@@ -40,10 +43,49 @@ export const Route = createFileRoute("/previsao/$id")({
 
 function PredictionPage() {
   const p = Route.useLoaderData() as Prediction;
+  const { user } = useAuth();
   const totalPool = p.options.reduce((s: number, o) => s + o.pool, 0);
   const [selected, setSelected] = useState(p.options[0].id);
   const [amount, setAmount] = useState(p.entryFee ?? p.minTokens);
   const [subAnswers, setSubAnswers] = useState<Record<string, string>>({});
+  const [bonusMission, setBonusMission] = useState<Mission | null>(null);
+  const [bonusDone, setBonusDone] = useState(false);
+  const [bonusBusy, setBonusBusy] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const igMissions = await listMissions({ platform: "instagram", activeOnly: true });
+        const pick = pickRandomFor(igMissions, p.id);
+        setBonusMission(pick);
+        if (pick && user) {
+          const claims = await listMyClaims(`challenge:${p.id}`);
+          if (claims.some((c) => c.mission_id === pick.id)) setBonusDone(true);
+        }
+      } catch {
+        // silently ignore mission load failures on this page
+      }
+    })();
+  }, [p.id, user]);
+
+  async function handleBonusClaim() {
+    if (!bonusMission) return;
+    if (!user) {
+      toast.error("Faça login para ganhar o palpite extra.");
+      return;
+    }
+    setBonusBusy(true);
+    window.open(bonusMission.link, "_blank", "noopener,noreferrer");
+    try {
+      await claimMission(bonusMission.id, `challenge:${p.id}`, bonusMission.tokens);
+      setBonusDone(true);
+      toast.success("🎯 +1 palpite extra liberado neste desafio!");
+    } catch (e: any) {
+      toast.error(e.message ?? "Erro");
+    } finally {
+      setBonusBusy(false);
+    }
+  }
 
   const sel = p.options.find((o) => o.id === selected)!;
   const newPool = totalPool + amount;
@@ -144,6 +186,30 @@ function PredictionPage() {
                   </div>
                 </div>
               ))}
+
+              {bonusMission && (
+                <div className="rounded-xl border-2 border-pink-500/40 bg-gradient-to-br from-pink-500/10 to-purple-500/10 p-4">
+                  <div className="flex items-center gap-2 text-sm font-display font-black mb-1">
+                    <Instagram className="h-4 w-4 text-pink-400" />
+                    <span className="text-pink-300">Palpite extra grátis</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground mb-3">
+                    <strong>{ACTION_LABEL[bonusMission.action_type]}</strong> {bonusMission.sponsor_name} no Instagram e ganhe <strong className="text-gold">+1 palpite</strong> neste desafio.
+                  </p>
+                  <button
+                    onClick={handleBonusClaim}
+                    disabled={bonusDone || bonusBusy}
+                    className={`w-full h-10 rounded-lg font-bold text-sm inline-flex items-center justify-center gap-2 transition ${
+                      bonusDone
+                        ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30"
+                        : "bg-gradient-to-r from-pink-500 to-purple-500 text-white shadow-glow hover:scale-[1.02]"
+                    }`}
+                  >
+                    {bonusBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : bonusDone ? <Check className="h-4 w-4" /> : <ExternalLink className="h-4 w-4" />}
+                    {bonusDone ? "Palpite extra liberado!" : bonusMission.title}
+                  </button>
+                </div>
+              )}
 
               <div className="rounded-xl border border-primary/30 bg-primary/5 p-4">
                 <div className="font-display font-bold text-sm mb-2 text-primary">⚡ Ganhe mais chances</div>

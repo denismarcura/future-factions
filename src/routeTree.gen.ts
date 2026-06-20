@@ -26,6 +26,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as PrevisaoIdRouteImport } from './routes/previsao.$id'
 import { Route as AdminRegrasIaRouteImport } from './routes/admin.regras-ia'
+import { Route as AdminMissoesRouteImport } from './routes/admin.missoes'
 import { Route as AdminEmailMarketingRouteImport } from './routes/admin.email-marketing'
 import { Route as AdminDesafiosRouteImport } from './routes/admin.desafios'
 import { Route as AdminCadastrosRouteImport } from './routes/admin.cadastros'
@@ -116,6 +117,11 @@ const AdminRegrasIaRoute = AdminRegrasIaRouteImport.update({
   path: '/regras-ia',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminMissoesRoute = AdminMissoesRouteImport.update({
+  id: '/missoes',
+  path: '/missoes',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminEmailMarketingRoute = AdminEmailMarketingRouteImport.update({
   id: '/email-marketing',
   path: '/email-marketing',
@@ -161,6 +167,7 @@ export interface FileRoutesByFullPath {
   '/admin/cadastros': typeof AdminCadastrosRoute
   '/admin/desafios': typeof AdminDesafiosRoute
   '/admin/email-marketing': typeof AdminEmailMarketingRoute
+  '/admin/missoes': typeof AdminMissoesRoute
   '/admin/regras-ia': typeof AdminRegrasIaRoute
   '/previsao/$id': typeof PrevisaoIdRoute
   '/admin/': typeof AdminIndexRoute
@@ -183,6 +190,7 @@ export interface FileRoutesByTo {
   '/admin/cadastros': typeof AdminCadastrosRoute
   '/admin/desafios': typeof AdminDesafiosRoute
   '/admin/email-marketing': typeof AdminEmailMarketingRoute
+  '/admin/missoes': typeof AdminMissoesRoute
   '/admin/regras-ia': typeof AdminRegrasIaRoute
   '/previsao/$id': typeof PrevisaoIdRoute
   '/admin': typeof AdminIndexRoute
@@ -208,6 +216,7 @@ export interface FileRoutesById {
   '/admin/cadastros': typeof AdminCadastrosRoute
   '/admin/desafios': typeof AdminDesafiosRoute
   '/admin/email-marketing': typeof AdminEmailMarketingRoute
+  '/admin/missoes': typeof AdminMissoesRoute
   '/admin/regras-ia': typeof AdminRegrasIaRoute
   '/previsao/$id': typeof PrevisaoIdRoute
   '/admin/': typeof AdminIndexRoute
@@ -233,6 +242,7 @@ export interface FileRouteTypes {
     | '/admin/cadastros'
     | '/admin/desafios'
     | '/admin/email-marketing'
+    | '/admin/missoes'
     | '/admin/regras-ia'
     | '/previsao/$id'
     | '/admin/'
@@ -255,6 +265,7 @@ export interface FileRouteTypes {
     | '/admin/cadastros'
     | '/admin/desafios'
     | '/admin/email-marketing'
+    | '/admin/missoes'
     | '/admin/regras-ia'
     | '/previsao/$id'
     | '/admin'
@@ -279,6 +290,7 @@ export interface FileRouteTypes {
     | '/admin/cadastros'
     | '/admin/desafios'
     | '/admin/email-marketing'
+    | '/admin/missoes'
     | '/admin/regras-ia'
     | '/previsao/$id'
     | '/admin/'
@@ -423,6 +435,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminRegrasIaRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/missoes': {
+      id: '/admin/missoes'
+      path: '/missoes'
+      fullPath: '/admin/missoes'
+      preLoaderRoute: typeof AdminMissoesRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/email-marketing': {
       id: '/admin/email-marketing'
       path: '/email-marketing'
@@ -477,6 +496,7 @@ interface AdminRouteChildren {
   AdminCadastrosRoute: typeof AdminCadastrosRoute
   AdminDesafiosRoute: typeof AdminDesafiosRoute
   AdminEmailMarketingRoute: typeof AdminEmailMarketingRoute
+  AdminMissoesRoute: typeof AdminMissoesRoute
   AdminRegrasIaRoute: typeof AdminRegrasIaRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
@@ -486,6 +506,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminCadastrosRoute: AdminCadastrosRoute,
   AdminDesafiosRoute: AdminDesafiosRoute,
   AdminEmailMarketingRoute: AdminEmailMarketingRoute,
+  AdminMissoesRoute: AdminMissoesRoute,
   AdminRegrasIaRoute: AdminRegrasIaRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
