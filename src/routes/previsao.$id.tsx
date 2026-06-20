@@ -137,7 +137,7 @@ function PredictionPage() {
                 Início: <span className="text-foreground font-semibold">{new Date(p.match.kickoff).toLocaleString("pt-BR", { dateStyle: "full", timeStyle: "short" })}</span>
               </div>
               <div className="mt-1 text-center text-xs text-destructive font-semibold">
-                Apostas encerram 1h antes do jogo
+                Apostas encerram 10 minutos antes do jogo
               </div>
             </div>
           )}
@@ -312,7 +312,7 @@ function PredictionPage() {
                   {isClosed ? "APOSTAS ENCERRADAS" : `PARTICIPAR POR ${p.entryFee} TOKENS`}
                 </button>
                 <p className="mt-3 text-[11px] text-center text-muted-foreground">
-                  Apostas encerram 1h antes do jogo. Tokens virtuais, sem dinheiro real.
+                  Apostas encerram 10 minutos antes do jogo. Tokens virtuais, sem dinheiro real.
                 </p>
               </>
             ) : (

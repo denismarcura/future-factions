@@ -206,7 +206,7 @@ function AuthPage() {
                 </div>
                 <div className="text-xs text-muted-foreground max-h-32 overflow-y-auto leading-relaxed space-y-1.5 pr-1">
                   <p>1. Cada CPF/pessoa pode ter apenas uma conta. Até 5 cadastros são permitidos por IP.</p>
-                  <p>2. Os palpites devem ser enviados até 1 hora antes do início do jogo.</p>
+                  <p>2. Os palpites devem ser enviados até 10 minutos antes do início do jogo.</p>
                   <p>3. Prêmios em tokens são creditados após confirmação oficial dos resultados.</p>
                   <p>4. Contas com dados falsos ou múltiplas contas serão suspensas e os tokens cancelados.</p>
                   <p>5. Ao aceitar, você autoriza o registro de data, hora, cidade e endereço IP deste cadastro como prova de aceite.</p>

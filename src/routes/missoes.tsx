@@ -71,8 +71,18 @@ function Missoes() {
     }
     if (claimed.has(m.id) || running) return;
     setRunning(m.id);
-    // open the target in a new tab so user actually performs the action
-    window.open(m.link, "_blank", "noopener,noreferrer");
+    // open the target in a new tab using a real anchor (more compatible inside iframes)
+    try {
+      const a = document.createElement("a");
+      a.href = m.link;
+      a.target = "_blank";
+      a.rel = "noopener noreferrer";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    } catch {
+      window.open(m.link, "_blank", "noopener,noreferrer");
+    }
     await new Promise((r) => setTimeout(r, 5000));
     try {
       const totalAward = m.tokens + (m.bonus_tokens || 0);

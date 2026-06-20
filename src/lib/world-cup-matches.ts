@@ -111,7 +111,7 @@ export function buildWorldCupChallenges(): Prediction[] {
       pool: 5000 + ((i * 137 + idx * 911) % 45000),
     }));
     const kickoff = new Date(m.kickoff).getTime();
-    const closesAt = new Date(kickoff - 60 * 60 * 1000).toISOString(); // 1h antes do jogo
+    const closesAt = new Date(kickoff - 10 * 60 * 1000).toISOString(); // 10 minutos antes do jogo
     return {
       id: m.id,
       title: `${m.home} x ${m.away} — Copa do Mundo 2026`,
