@@ -155,17 +155,15 @@ function AdminDesafios() {
                       <div className="flex gap-1 justify-end">
                         <button
                           onClick={() => setEditing(p)}
-                          disabled={!isUser}
-                          className="h-8 w-8 grid place-items-center rounded-lg border border-border/60 hover:border-primary/60 hover:text-primary disabled:opacity-40 disabled:cursor-not-allowed transition"
-                          title={isUser ? "Editar" : "Só desafios de usuários"}
+                          className="h-8 w-8 grid place-items-center rounded-lg border border-border/60 hover:border-primary/60 hover:text-primary transition"
+                          title="Editar"
                         >
                           <Pencil className="h-4 w-4" />
                         </button>
                         <button
                           onClick={() => handleDelete(p.id)}
-                          disabled={!isUser}
-                          className="h-8 w-8 grid place-items-center rounded-lg border border-border/60 hover:border-destructive/60 hover:text-destructive disabled:opacity-40 disabled:cursor-not-allowed transition"
-                          title={isUser ? "Excluir" : "Só desafios de usuários"}
+                          className="h-8 w-8 grid place-items-center rounded-lg border border-border/60 hover:border-destructive/60 hover:text-destructive transition"
+                          title="Excluir"
                         >
                           <Trash2 className="h-4 w-4" />
                         </button>
