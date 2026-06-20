@@ -89,3 +89,50 @@ export function deleteUserChallenge(id: string) {
   write(list);
 }
 
+// ===== Platform challenge overrides (admin edits to mock PREDICTIONS) =====
+const OVERRIDES_KEY = "ddp:platform-overrides";
+const DELETED_KEY = "ddp:platform-deleted";
+
+function readJSON<T>(key: string, fallback: T): T {
+  if (typeof window === "undefined") return fallback;
+  try {
+    const raw = window.localStorage.getItem(key);
+    return raw ? (JSON.parse(raw) as T) : fallback;
+  } catch {
+    return fallback;
+  }
+}
+function writeJSON(key: string, value: unknown) {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(key, JSON.stringify(value));
+    window.dispatchEvent(new Event("ddp:user-challenges-updated"));
+  } catch {
+    // ignore
+  }
+}
+
+export function getPlatformOverrides(): Record<string, Partial<Prediction>> {
+  return readJSON<Record<string, Partial<Prediction>>>(OVERRIDES_KEY, {});
+}
+export function getPlatformDeleted(): string[] {
+  return readJSON<string[]>(DELETED_KEY, []);
+}
+export function setPlatformOverride(id: string, patch: Partial<Prediction>) {
+  const all = getPlatformOverrides();
+  all[id] = { ...(all[id] ?? {}), ...patch };
+  writeJSON(OVERRIDES_KEY, all);
+}
+export function deletePlatformChallenge(id: string) {
+  const set = new Set(getPlatformDeleted());
+  set.add(id);
+  writeJSON(DELETED_KEY, Array.from(set));
+}
+export function applyPlatformOverrides(list: Prediction[]): Prediction[] {
+  const overrides = getPlatformOverrides();
+  const deleted = new Set(getPlatformDeleted());
+  return list
+    .filter((p) => !deleted.has(p.id))
+    .map((p) => (overrides[p.id] ? { ...p, ...overrides[p.id] } : p));
+}
+
