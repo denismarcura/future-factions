@@ -7,23 +7,60 @@ export const Route = createFileRoute("/admin/cadastros")({
   component: Cadastros,
 });
 
+type SortKey = "recent" | "tokens" | "invites" | "challenges" | "missions";
+
+const SORTS: { key: SortKey; label: string }[] = [
+  { key: "recent", label: "Mais recentes" },
+  { key: "tokens", label: "Mais pontos" },
+  { key: "invites", label: "Mais convites" },
+  { key: "challenges", label: "Mais desafios criados" },
+  { key: "missions", label: "Mais missões" },
+];
+
 function Cadastros() {
   const [q, setQ] = useState("");
+  const [sort, setSort] = useState<SortKey>("recent");
+
   const all = useMemo(() => {
     return USERS.map((u, i) => {
       const referrer = i === 0 ? CURRENT_USER.username : USERS[(i - 1) % USERS.length].username;
       const acc = u.acertos + u.erros > 0 ? (u.acertos / (u.acertos + u.erros)) * 100 : 0;
+      const joinedDate = new Date(2025, (i * 3) % 12, ((i * 7) % 27) + 1, (i * 13) % 24, (i * 7) % 60);
+      // deterministic pseudo-stats
+      const invites = ((i * 17) % 47) + (i % 5);
+      const challenges = ((i * 11) % 23) + (i % 3);
+      const missions = ((i * 29) % 60) + (i % 7);
       return {
         ...u,
         referrer,
         email: `${u.username.toLowerCase().replace(/\s+/g, ".")}@desafiodospalpites.com.br`,
-        joinedAt: new Date(2025, (i * 3) % 12, ((i * 7) % 27) + 1).toLocaleDateString("pt-BR"),
+        joinedDate,
+        joinedAt: joinedDate.toLocaleDateString("pt-BR"),
         accuracy: acc,
+        invites,
+        challenges,
+        missions,
       };
-    });
+    }).sort((a, b) => b.joinedDate.getTime() - a.joinedDate.getTime());
   }, []);
 
-  const filtered = all.filter(
+  const sorted = useMemo(() => {
+    const arr = [...all];
+    switch (sort) {
+      case "tokens":
+        return arr.sort((a, b) => b.tokens - a.tokens);
+      case "invites":
+        return arr.sort((a, b) => b.invites - a.invites);
+      case "challenges":
+        return arr.sort((a, b) => b.challenges - a.challenges);
+      case "missions":
+        return arr.sort((a, b) => b.missions - a.missions);
+      default:
+        return arr;
+    }
+  }, [all, sort]);
+
+  const filtered = sorted.filter(
     (u) =>
       u.username.toLowerCase().includes(q.toLowerCase()) ||
       u.email.toLowerCase().includes(q.toLowerCase()) ||
@@ -58,6 +95,22 @@ function Cadastros() {
         </div>
       </div>
 
+      <div className="flex flex-wrap gap-2">
+        {SORTS.map((s) => (
+          <button
+            key={s.key}
+            onClick={() => setSort(s.key)}
+            className={`h-9 px-4 rounded-full text-xs font-semibold border transition ${
+              sort === s.key
+                ? "bg-primary text-primary-foreground border-primary"
+                : "bg-card border-border/60 text-muted-foreground hover:border-primary/60 hover:text-foreground"
+            }`}
+          >
+            {s.label}
+          </button>
+        ))}
+      </div>
+
       <div className="glass-card rounded-2xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
@@ -69,6 +122,9 @@ function Cadastros() {
                 <th className="text-left p-3 font-semibold">Indicado por</th>
                 <th className="text-left p-3 font-semibold">Cadastro</th>
                 <th className="text-right p-3 font-semibold">Tokens</th>
+                <th className="text-right p-3 font-semibold">Convites</th>
+                <th className="text-right p-3 font-semibold">Desafios</th>
+                <th className="text-right p-3 font-semibold">Missões</th>
                 <th className="text-right p-3 font-semibold">Acertos</th>
                 <th className="text-right p-3 font-semibold">Erros</th>
                 <th className="text-right p-3 font-semibold">Acerto %</th>
@@ -93,6 +149,9 @@ function Cadastros() {
                   <td className="p-3 text-right tabular-nums font-semibold text-gold">
                     {u.tokens.toLocaleString("pt-BR")}
                   </td>
+                  <td className="p-3 text-right tabular-nums">{u.invites}</td>
+                  <td className="p-3 text-right tabular-nums">{u.challenges}</td>
+                  <td className="p-3 text-right tabular-nums">{u.missions}</td>
                   <td className="p-3 text-right tabular-nums">
                     <span className="inline-flex items-center gap-1 text-primary">
                       <TrendingUp className="h-3 w-3" /> {u.acertos}
