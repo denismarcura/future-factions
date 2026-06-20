@@ -264,6 +264,10 @@ COPA_LOUCA.forEach((title, i) => {
   });
 });
 
+import { WORLD_CUP_CHALLENGES } from "@/lib/world-cup-matches";
+
+predictions.unshift(...WORLD_CUP_CHALLENGES);
+
 export const PREDICTIONS = predictions;
 
 export function getPrediction(id: string) {
