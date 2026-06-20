@@ -24,7 +24,7 @@ export function PredictionCard({ prediction: p }: { prediction: Prediction }) {
             </span>
           )}
           <span className="ml-auto inline-flex items-center gap-1 text-muted-foreground">
-            <Clock className="h-3 w-3" /> {timeLeft(p.closesAt)}
+            <Clock className="h-3 w-3" /> <CountdownTimer closesAt={p.closesAt} />
           </span>
         </div>
 
