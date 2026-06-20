@@ -298,6 +298,14 @@ function PredictionPage() {
                   </div>
                 )}
                 <button
+                  onClick={() => {
+                    const filled = Object.keys(subAnswers).length;
+                    if (filled < p.subPredictions!.length) {
+                      toast.error(`Preencha todos os ${p.subPredictions!.length} palpites.`);
+                      return;
+                    }
+                    toast.success(`🎯 Participação confirmada! ${p.entryFee} TKN debitados.`);
+                  }}
                   disabled={isClosed || Object.keys(subAnswers).length < p.subPredictions.length}
                   className="mt-5 w-full h-12 rounded-xl bg-gradient-brand text-primary-foreground font-display font-black tracking-wide shadow-glow hover:scale-[1.01] transition disabled:opacity-50 disabled:cursor-not-allowed"
                 >
