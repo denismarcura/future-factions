@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as Top100RouteImport } from './routes/top100'
 import { Route as ShopRouteImport } from './routes/shop'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as RankingRouteImport } from './routes/ranking'
 import { Route as PerfilRouteImport } from './routes/perfil'
 import { Route as MissoesRouteImport } from './routes/missoes'
@@ -43,6 +44,11 @@ const Top100Route = Top100RouteImport.update({
 const ShopRoute = ShopRouteImport.update({
   id: '/shop',
   path: '/shop',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RankingRoute = RankingRouteImport.update({
@@ -172,6 +178,7 @@ export interface FileRoutesByFullPath {
   '/missoes': typeof MissoesRoute
   '/perfil': typeof PerfilRoute
   '/ranking': typeof RankingRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/shop': typeof ShopRoute
   '/top100': typeof Top100Route
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -197,6 +204,7 @@ export interface FileRoutesByTo {
   '/missoes': typeof MissoesRoute
   '/perfil': typeof PerfilRoute
   '/ranking': typeof RankingRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/shop': typeof ShopRoute
   '/top100': typeof Top100Route
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -225,6 +233,7 @@ export interface FileRoutesById {
   '/missoes': typeof MissoesRoute
   '/perfil': typeof PerfilRoute
   '/ranking': typeof RankingRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/shop': typeof ShopRoute
   '/top100': typeof Top100Route
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
@@ -253,6 +262,7 @@ export interface FileRouteTypes {
     | '/missoes'
     | '/perfil'
     | '/ranking'
+    | '/reset-password'
     | '/shop'
     | '/top100'
     | '/dashboard'
@@ -278,6 +288,7 @@ export interface FileRouteTypes {
     | '/missoes'
     | '/perfil'
     | '/ranking'
+    | '/reset-password'
     | '/shop'
     | '/top100'
     | '/dashboard'
@@ -305,6 +316,7 @@ export interface FileRouteTypes {
     | '/missoes'
     | '/perfil'
     | '/ranking'
+    | '/reset-password'
     | '/shop'
     | '/top100'
     | '/_authenticated/dashboard'
@@ -333,6 +345,7 @@ export interface RootRouteChildren {
   MissoesRoute: typeof MissoesRoute
   PerfilRoute: typeof PerfilRoute
   RankingRoute: typeof RankingRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   ShopRoute: typeof ShopRoute
   Top100Route: typeof Top100Route
   PrevisaoIdRoute: typeof PrevisaoIdRoute
@@ -352,6 +365,13 @@ declare module '@tanstack/react-router' {
       path: '/shop'
       fullPath: '/shop'
       preLoaderRoute: typeof ShopRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/ranking': {
@@ -568,6 +588,7 @@ const rootRouteChildren: RootRouteChildren = {
   MissoesRoute: MissoesRoute,
   PerfilRoute: PerfilRoute,
   RankingRoute: RankingRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   ShopRoute: ShopRoute,
   Top100Route: Top100Route,
   PrevisaoIdRoute: PrevisaoIdRoute,

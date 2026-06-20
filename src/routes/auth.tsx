@@ -51,6 +51,28 @@ function AuthPage() {
     }
   }
 
+  async function handleForgot() {
+    setError(null);
+    setInfo(null);
+    if (!email.trim()) {
+      setError("Digite seu e-mail acima para receber o link.");
+      return;
+    }
+    setBusy(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.origin + "/reset-password",
+      });
+      if (error) throw error;
+      setInfo(`Enviamos um link para ${email}. Abra o e-mail para criar uma nova senha.`);
+      toast.success("Link de recuperação enviado");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Não foi possível enviar o link.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function handleEmail(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
@@ -163,6 +185,18 @@ function AuthPage() {
             )}
             <Field icon={Mail} type="email" placeholder="E-mail" value={email} onChange={setEmail} required />
             <Field icon={Lock} type="password" placeholder="Senha" value={password} onChange={setPassword} required />
+
+            {mode === "login" && (
+              <div className="flex justify-end -mt-1">
+                <button
+                  type="button"
+                  onClick={handleForgot}
+                  className="text-xs font-semibold text-primary hover:underline"
+                >
+                  Esqueci minha senha
+                </button>
+              </div>
+            )}
 
             {mode === "signup" && (
               <div className="rounded-xl bg-card/60 border border-border/60 p-4 space-y-3">
