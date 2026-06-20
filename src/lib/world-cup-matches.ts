@@ -13,10 +13,10 @@ export type WCMatch = {
 // All times Brasília (UTC-03:00).
 export const WORLD_CUP_MATCHES: WCMatch[] = [
   // 20/06
-  { id: "wc-20a", home: "Holanda", away: "Suécia", homeCode: "nl", awayCode: "se", group: "F", kickoff: "2026-06-20T14:00:00-03:00" },
-  { id: "wc-20b", home: "Alemanha", away: "Costa do Marfim", homeCode: "de", awayCode: "ci", group: "E", kickoff: "2026-06-20T17:00:00-03:00" },
-  { id: "wc-20c", home: "Equador", away: "Curaçao", homeCode: "ec", awayCode: "cw", group: "E", kickoff: "2026-06-20T21:00:00-03:00" },
-  { id: "wc-20d", home: "Tunísia", away: "Japão", homeCode: "tn", awayCode: "jp", group: "F", kickoff: "2026-06-20T23:00:00-03:00" },
+  { id: "wc-20a", home: "Holanda", away: "Suécia", homeCode: "nl", awayCode: "se", group: "F", kickoff: "2026-06-20T19:00:00-03:00" },
+  { id: "wc-20b", home: "Alemanha", away: "Costa do Marfim", homeCode: "de", awayCode: "ci", group: "E", kickoff: "2026-06-20T20:30:00-03:00" },
+  { id: "wc-20c", home: "Equador", away: "Curaçao", homeCode: "ec", awayCode: "cw", group: "E", kickoff: "2026-06-20T22:00:00-03:00" },
+  { id: "wc-20d", home: "Tunísia", away: "Japão", homeCode: "tn", awayCode: "jp", group: "F", kickoff: "2026-06-20T23:30:00-03:00" },
   // 21/06
   { id: "wc-21a", home: "Espanha", away: "Arábia Saudita", homeCode: "es", awayCode: "sa", group: "H", kickoff: "2026-06-21T13:00:00-03:00" },
   { id: "wc-21b", home: "Uruguai", away: "Cabo Verde", homeCode: "uy", awayCode: "cv", group: "H", kickoff: "2026-06-21T19:00:00-03:00" },
