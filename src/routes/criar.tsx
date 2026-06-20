@@ -352,13 +352,12 @@ function Criar() {
               <input value={socialLink} onChange={(e) => setSocialLink(e.target.value)} placeholder="https://instagram.com/seu-perfil" className="input" />
             </Field>
           </Section>
-        </div>
 
-        {/* Sidebar */}
-        <aside className="lg:sticky lg:top-24 lg:self-start space-y-4">
-          <div className="rounded-2xl glass-card p-5 space-y-3">
-            <div className="text-xs uppercase tracking-wider font-bold text-gold">Resumo</div>
-          </Section>
+          {/* Convide Amigos */}
+          <Section
+            title="Convide amigos"
+            description="Cada amigo cadastrado = 100 tokens para você. Se ele criar um Desafio, vocês dois ganham +100 tokens cada. Convide quantos amigos quiser e aumente suas chances de ganhar prêmios."
+          >
 
           {/* Convide Amigos */}
           <Section
