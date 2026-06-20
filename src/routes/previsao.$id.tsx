@@ -373,7 +373,19 @@ function PredictionPage() {
                 </div>
 
                 <button
-                  onClick={() => toast.success(`✅ Aposta de ${amount} TKN em "${sel.label}" confirmada!`)}
+                  onClick={() => {
+                    saveParticipation({
+                      id: p.id,
+                      title: p.title,
+                      category: p.category,
+                      entryFee: amount,
+                      answers: {},
+                      optionLabel: sel.label,
+                      closesAt: p.closesAt,
+                      participatedAt: new Date().toISOString(),
+                    });
+                    toast.success(`✅ Aposta de ${amount} TKN em "${sel.label}" confirmada!`);
+                  }}
                   className="mt-5 w-full h-12 rounded-xl bg-gradient-brand text-primary-foreground font-display font-black tracking-wide shadow-glow hover:scale-[1.01] transition"
                 >
                   APOSTAR {amount} TOKENS
