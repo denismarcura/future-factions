@@ -31,6 +31,7 @@ import { Route as AdminEmailMarketingRouteImport } from './routes/admin.email-ma
 import { Route as AdminDesafiosRouteImport } from './routes/admin.desafios'
 import { Route as AdminCategoriasRouteImport } from './routes/admin.categorias'
 import { Route as AdminCadastrosRouteImport } from './routes/admin.cadastros'
+import { Route as AdminBannersRouteImport } from './routes/admin.banners'
 import { Route as AdminApisRouteImport } from './routes/admin.apis'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 
@@ -143,6 +144,11 @@ const AdminCadastrosRoute = AdminCadastrosRouteImport.update({
   path: '/cadastros',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminBannersRoute = AdminBannersRouteImport.update({
+  id: '/banners',
+  path: '/banners',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminApisRoute = AdminApisRouteImport.update({
   id: '/apis',
   path: '/apis',
@@ -170,6 +176,7 @@ export interface FileRoutesByFullPath {
   '/top100': typeof Top100Route
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/admin/apis': typeof AdminApisRoute
+  '/admin/banners': typeof AdminBannersRoute
   '/admin/cadastros': typeof AdminCadastrosRoute
   '/admin/categorias': typeof AdminCategoriasRoute
   '/admin/desafios': typeof AdminDesafiosRoute
@@ -194,6 +201,7 @@ export interface FileRoutesByTo {
   '/top100': typeof Top100Route
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/admin/apis': typeof AdminApisRoute
+  '/admin/banners': typeof AdminBannersRoute
   '/admin/cadastros': typeof AdminCadastrosRoute
   '/admin/categorias': typeof AdminCategoriasRoute
   '/admin/desafios': typeof AdminDesafiosRoute
@@ -221,6 +229,7 @@ export interface FileRoutesById {
   '/top100': typeof Top100Route
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/admin/apis': typeof AdminApisRoute
+  '/admin/banners': typeof AdminBannersRoute
   '/admin/cadastros': typeof AdminCadastrosRoute
   '/admin/categorias': typeof AdminCategoriasRoute
   '/admin/desafios': typeof AdminDesafiosRoute
@@ -248,6 +257,7 @@ export interface FileRouteTypes {
     | '/top100'
     | '/dashboard'
     | '/admin/apis'
+    | '/admin/banners'
     | '/admin/cadastros'
     | '/admin/categorias'
     | '/admin/desafios'
@@ -272,6 +282,7 @@ export interface FileRouteTypes {
     | '/top100'
     | '/dashboard'
     | '/admin/apis'
+    | '/admin/banners'
     | '/admin/cadastros'
     | '/admin/categorias'
     | '/admin/desafios'
@@ -298,6 +309,7 @@ export interface FileRouteTypes {
     | '/top100'
     | '/_authenticated/dashboard'
     | '/admin/apis'
+    | '/admin/banners'
     | '/admin/cadastros'
     | '/admin/categorias'
     | '/admin/desafios'
@@ -482,6 +494,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminCadastrosRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/banners': {
+      id: '/admin/banners'
+      path: '/banners'
+      fullPath: '/admin/banners'
+      preLoaderRoute: typeof AdminBannersRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/apis': {
       id: '/admin/apis'
       path: '/apis'
@@ -512,6 +531,7 @@ const AuthenticatedRouteRouteWithChildren =
 
 interface AdminRouteChildren {
   AdminApisRoute: typeof AdminApisRoute
+  AdminBannersRoute: typeof AdminBannersRoute
   AdminCadastrosRoute: typeof AdminCadastrosRoute
   AdminCategoriasRoute: typeof AdminCategoriasRoute
   AdminDesafiosRoute: typeof AdminDesafiosRoute
@@ -523,6 +543,7 @@ interface AdminRouteChildren {
 
 const AdminRouteChildren: AdminRouteChildren = {
   AdminApisRoute: AdminApisRoute,
+  AdminBannersRoute: AdminBannersRoute,
   AdminCadastrosRoute: AdminCadastrosRoute,
   AdminCategoriasRoute: AdminCategoriasRoute,
   AdminDesafiosRoute: AdminDesafiosRoute,
@@ -554,13 +575,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
