@@ -8,6 +8,7 @@ import { AppShell } from "@/components/layout/AppShell";
 import { CURRENT_USER, formatTokens, getPrediction, PREDICTIONS, type Prediction, timeLeft } from "@/lib/mock-data";
 import { listMissions, listMyClaims, claimMission, pickRandomFor, type Mission, ACTION_LABEL } from "@/lib/missions";
 import { useAuth } from "@/hooks/use-auth";
+import { hasParticipated, saveParticipation } from "@/lib/my-participations";
 
 export const Route = createFileRoute("/previsao/$id")({
   loader: ({ params }): Prediction => {
