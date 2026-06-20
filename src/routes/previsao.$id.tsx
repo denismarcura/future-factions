@@ -4,7 +4,7 @@ import {
   Clock, Users, Flame, Heart, MessageCircle, Share2, Coins, TrendingUp, ArrowLeft,
 } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
-import { CURRENT_USER, formatTokens, getPrediction, PREDICTIONS, type Prediction, timeLeft, USERS } from "@/lib/mock-data";
+import { CURRENT_USER, formatTokens, getPrediction, PREDICTIONS, type Prediction, timeLeft } from "@/lib/mock-data";
 
 export const Route = createFileRoute("/previsao/$id")({
   loader: ({ params }): Prediction => {
@@ -42,7 +42,8 @@ function PredictionPage() {
   const p = Route.useLoaderData() as Prediction;
   const totalPool = p.options.reduce((s: number, o) => s + o.pool, 0);
   const [selected, setSelected] = useState(p.options[0].id);
-  const [amount, setAmount] = useState(p.minTokens);
+  const [amount, setAmount] = useState(p.entryFee ?? p.minTokens);
+  const [subAnswers, setSubAnswers] = useState<Record<string, string>>({});
 
   const sel = p.options.find((o) => o.id === selected)!;
   const newPool = totalPool + amount;
@@ -51,6 +52,9 @@ function PredictionPage() {
   const possibleReturn = Math.floor(amount * odds);
 
   const related = PREDICTIONS.filter((x) => x.id !== p.id && x.category === p.category).slice(0, 4);
+
+  const deadlineMs = new Date(p.closesAt).getTime() - Date.now();
+  const isClosed = deadlineMs <= 0;
 
   return (
     <AppShell>
@@ -67,125 +71,222 @@ function PredictionPage() {
                 <Flame className="h-3 w-3" /> Em alta
               </span>
             )}
-            <span className="inline-flex items-center gap-1 text-muted-foreground"><Clock className="h-3 w-3" /> Encerra em {timeLeft(p.closesAt)}</span>
+            <span className="inline-flex items-center gap-1 text-muted-foreground"><Clock className="h-3 w-3" /> {isClosed ? "Apostas encerradas" : `Encerra em ${timeLeft(p.closesAt)}`}</span>
             <span className="inline-flex items-center gap-1 text-muted-foreground"><Users className="h-3 w-3" /> {p.bettors} apostadores</span>
           </div>
+
+          {p.match && (
+            <div className="mt-4 rounded-2xl border border-border/60 bg-gradient-to-br from-primary/10 via-background/40 to-gold/10 p-5">
+              <div className="flex items-center justify-around gap-3">
+                <div className="flex flex-col items-center gap-2">
+                  <img src={p.match.homeFlag} alt={p.match.home} className="h-16 w-24 object-cover rounded shadow-md" />
+                  <span className="font-display font-bold">{p.match.home}</span>
+                </div>
+                <div className="text-center">
+                  <div className="font-display text-4xl font-black text-gradient-brand">VS</div>
+                  <div className="text-xs text-muted-foreground mt-1">Grupo {p.match.group}</div>
+                </div>
+                <div className="flex flex-col items-center gap-2">
+                  <img src={p.match.awayFlag} alt={p.match.away} className="h-16 w-24 object-cover rounded shadow-md" />
+                  <span className="font-display font-bold">{p.match.away}</span>
+                </div>
+              </div>
+              <div className="mt-3 text-center text-sm text-muted-foreground">
+                Início: <span className="text-foreground font-semibold">{new Date(p.match.kickoff).toLocaleString("pt-BR", { dateStyle: "full", timeStyle: "short" })}</span>
+              </div>
+              <div className="mt-1 text-center text-xs text-destructive font-semibold">
+                Apostas encerram 1h antes do jogo
+              </div>
+            </div>
+          )}
 
           <h1 className="mt-4 font-display text-2xl sm:text-3xl font-black leading-tight">{p.title}</h1>
           <p className="mt-2 text-muted-foreground">{p.description}</p>
 
-          <div className="mt-6 flex items-center gap-3 p-3 rounded-xl bg-background/40 border border-border/60">
-            <img src={p.author.avatar} alt="" className="h-10 w-10 rounded-full" />
-            <div className="text-sm">
-              <div className="font-semibold">{p.author.username}</div>
-              <div className="text-xs text-muted-foreground">{p.author.city}/{p.author.state} · {p.author.level}</div>
+          {p.prizeTiers && (
+            <div className="mt-5 grid grid-cols-3 gap-3">
+              {p.prizeTiers.map((t) => (
+                <div key={t.hits} className="rounded-xl border border-gold/40 bg-gold/5 p-3 text-center">
+                  <div className="text-[11px] uppercase text-muted-foreground font-bold">{t.hits} acertos</div>
+                  <div className="font-display text-xl font-black text-gold">{t.tokens.toLocaleString("pt-BR")}</div>
+                  <div className="text-[10px] text-muted-foreground">TOKENS</div>
+                </div>
+              ))}
             </div>
-            <button className="ml-auto h-9 px-3 rounded-full border border-primary/60 text-primary text-xs font-bold hover:bg-primary/10">
-              Seguir
-            </button>
-          </div>
+          )}
 
-          <div className="mt-6 space-y-3">
-            {p.options.map((o) => {
-              const pct = totalPool ? Math.round((o.pool / totalPool) * 100) : 50;
-              const active = o.id === selected;
-              return (
-                <button
-                  key={o.id}
-                  onClick={() => setSelected(o.id)}
-                  className={`w-full text-left rounded-xl border p-4 transition ${
-                    active ? "border-primary shadow-glow bg-primary/5" : "border-border/60 hover:border-primary/40 bg-background/40"
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="font-display font-bold text-lg">{o.label}</div>
-                    <div className="text-right">
-                      <div className="font-display font-black text-gradient-brand">{pct}%</div>
-                      <div className="text-[10px] text-muted-foreground">{formatTokens(o.pool)} tokens</div>
+          {p.subPredictions ? (
+            <div className="mt-6 space-y-5">
+              <h2 className="font-display font-bold text-lg">Seus 5 palpites</h2>
+              {p.subPredictions.map((s, i) => (
+                <div key={s.id} className="rounded-xl border border-border/60 bg-background/40 p-4">
+                  <div className="text-sm font-bold mb-3">
+                    <span className="text-primary mr-1">{i + 1}.</span> {s.question}
+                  </div>
+                  <div className="grid gap-2 sm:grid-cols-3">
+                    {s.options.map((opt) => {
+                      const active = subAnswers[s.id] === opt;
+                      return (
+                        <button
+                          key={opt}
+                          onClick={() => setSubAnswers((prev) => ({ ...prev, [s.id]: opt }))}
+                          disabled={isClosed}
+                          className={`h-11 px-3 rounded-lg border text-sm font-semibold transition ${
+                            active
+                              ? "border-primary bg-primary/10 text-primary shadow-glow"
+                              : "border-border/60 hover:border-primary/40"
+                          } ${isClosed ? "opacity-50 cursor-not-allowed" : ""}`}
+                        >
+                          {opt}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+
+              <div className="rounded-xl border border-primary/30 bg-primary/5 p-4">
+                <div className="font-display font-bold text-sm mb-2 text-primary">⚡ Ganhe mais chances</div>
+                <p className="text-xs text-muted-foreground mb-3">
+                  Complete missões e convide amigos para ganhar tokens extras e palpites bônus neste desafio.
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  <Link
+                    to="/missoes"
+                    className="inline-flex items-center gap-1.5 h-9 px-3 rounded-full bg-gradient-brand text-primary-foreground text-xs font-bold shadow-glow hover:scale-[1.02] transition"
+                  >
+                    🎯 Fazer missões
+                  </Link>
+                  <Link
+                    to="/criar"
+                    className="inline-flex items-center gap-1.5 h-9 px-3 rounded-full border border-gold/60 text-gold text-xs font-bold hover:bg-gold/10"
+                  >
+                    👥 Convidar amigos
+                  </Link>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="mt-6 space-y-3">
+              {p.options.map((o) => {
+                const pct = totalPool ? Math.round((o.pool / totalPool) * 100) : 50;
+                const active = o.id === selected;
+                return (
+                  <button
+                    key={o.id}
+                    onClick={() => setSelected(o.id)}
+                    className={`w-full text-left rounded-xl border p-4 transition ${
+                      active ? "border-primary shadow-glow bg-primary/5" : "border-border/60 hover:border-primary/40 bg-background/40"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="font-display font-bold text-lg">{o.label}</div>
+                      <div className="text-right">
+                        <div className="font-display font-black text-gradient-brand">{pct}%</div>
+                        <div className="text-[10px] text-muted-foreground">{formatTokens(o.pool)} tokens</div>
+                      </div>
                     </div>
-                  </div>
-                  <div className="mt-3 h-2 rounded-full bg-background overflow-hidden">
-                    <div className="h-full bg-gradient-brand" style={{ width: `${pct}%` }} />
-                  </div>
-                </button>
-              );
-            })}
-          </div>
+                    <div className="mt-3 h-2 rounded-full bg-background overflow-hidden">
+                      <div className="h-full bg-gradient-brand" style={{ width: `${pct}%` }} />
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          )}
 
           <div className="mt-6 flex items-center gap-5 text-sm text-muted-foreground border-t border-border/60 pt-4">
             <button className="inline-flex items-center gap-1.5 hover:text-destructive"><Heart className="h-4 w-4" />{p.likes}</button>
             <button className="inline-flex items-center gap-1.5 hover:text-primary"><MessageCircle className="h-4 w-4" />{p.comments}</button>
             <button className="inline-flex items-center gap-1.5 hover:text-gold"><Share2 className="h-4 w-4" />{p.shares}</button>
-            <span className="ml-auto text-xs">Mín. aposta: <span className="text-gold font-semibold">{p.minTokens} tokens</span></span>
+            <span className="ml-auto text-xs">Entrada: <span className="text-gold font-semibold">{p.entryFee ?? p.minTokens} tokens</span></span>
           </div>
-
-          {/* Comentários mock */}
-          <section className="mt-8">
-            <h2 className="font-display font-bold text-lg mb-3">Comentários</h2>
-            <div className="space-y-3">
-              {USERS.slice(0, 4).map((u, i) => (
-                <div key={u.id} className="flex gap-3 p-3 rounded-xl bg-background/40 border border-border/60">
-                  <img src={u.avatar} className="h-9 w-9 rounded-full" alt="" />
-                  <div className="text-sm">
-                    <div className="font-semibold">{u.username} <span className="text-xs text-muted-foreground font-normal">· {u.level}</span></div>
-                    <p className="text-muted-foreground mt-1">
-                      {["Já apostei tudo!", "Vai dar zebra, com certeza.", "Apostei pesado no Sim 🚀", "Tá fácil demais, hein."][i]}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
         </article>
 
         {/* Bet widget */}
         <aside>
           <div className="sticky top-24 rounded-2xl bg-card border border-border/60 p-5 shadow-glow">
             <div className="flex items-center gap-2 text-xs uppercase tracking-wider text-gold font-bold">
-              <Coins className="h-4 w-4" /> Fazer aposta
+              <Coins className="h-4 w-4" /> {p.subPredictions ? "Participar do desafio" : "Fazer aposta"}
             </div>
-            <div className="mt-3 text-sm text-muted-foreground">Sua escolha</div>
-            <div className="mt-1 font-display text-xl font-black">{sel.label}</div>
 
-            <label className="mt-5 block text-xs uppercase tracking-wider text-muted-foreground font-bold">
-              Quantidade de Tokens
-            </label>
-            <div className="mt-2 flex items-center gap-2">
-              <input
-                type="number"
-                value={amount}
-                min={p.minTokens}
-                max={CURRENT_USER.tokens}
-                onChange={(e) => setAmount(Math.max(p.minTokens, Number(e.target.value) || 0))}
-                className="flex-1 h-11 px-3 rounded-lg bg-background border border-border/60 font-display font-bold tabular-nums focus:outline-none focus:ring-2 focus:ring-primary/60"
-              />
-              <span className="text-gold font-bold">TKN</span>
-            </div>
-            <div className="mt-2 flex gap-1.5">
-              {[10, 50, 100, 500].map((n) => (
+            {p.subPredictions ? (
+              <>
+                <div className="mt-3 text-sm text-muted-foreground">Custo de entrada</div>
+                <div className="mt-1 font-display text-3xl font-black text-gold">
+                  {p.entryFee} <span className="text-sm text-muted-foreground font-normal">TKN</span>
+                </div>
+                <div className="mt-4 space-y-2 text-sm">
+                  <Row label="Palpites preenchidos" value={`${Object.keys(subAnswers).length} / ${p.subPredictions.length}`} />
+                  <Row label="Seu saldo" value={`${formatTokens(CURRENT_USER.tokens)} TKN`} />
+                </div>
+                {p.prizeTiers && (
+                  <div className="mt-4 rounded-xl bg-background/40 border border-border/60 p-3 text-xs">
+                    <div className="font-bold text-foreground mb-1">Premiação</div>
+                    {p.prizeTiers.map((t) => (
+                      <div key={t.hits} className="flex justify-between text-muted-foreground">
+                        <span>{t.hits} acertos</span>
+                        <span className="text-gold font-bold">{t.tokens.toLocaleString("pt-BR")} TKN</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
                 <button
-                  key={n}
-                  onClick={() => setAmount(n)}
-                  className="flex-1 h-8 rounded-md text-xs font-semibold border border-border/60 hover:border-primary/60 hover:text-primary"
+                  disabled={isClosed || Object.keys(subAnswers).length < p.subPredictions.length}
+                  className="mt-5 w-full h-12 rounded-xl bg-gradient-brand text-primary-foreground font-display font-black tracking-wide shadow-glow hover:scale-[1.01] transition disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {n}
+                  {isClosed ? "APOSTAS ENCERRADAS" : `PARTICIPAR POR ${p.entryFee} TOKENS`}
                 </button>
-              ))}
-            </div>
+                <p className="mt-3 text-[11px] text-center text-muted-foreground">
+                  Apostas encerram 1h antes do jogo. Tokens virtuais, sem dinheiro real.
+                </p>
+              </>
+            ) : (
+              <>
+                <div className="mt-3 text-sm text-muted-foreground">Sua escolha</div>
+                <div className="mt-1 font-display text-xl font-black">{sel.label}</div>
 
-            <div className="mt-5 space-y-2 text-sm">
-              <Row label="Odds estimada" value={odds.toFixed(2) + "x"} />
-              <Row label="Possível retorno" value={`${formatTokens(possibleReturn)} TKN`} highlight />
-              <Row label="Seu saldo" value={`${formatTokens(CURRENT_USER.tokens)} TKN`} />
-            </div>
+                <label className="mt-5 block text-xs uppercase tracking-wider text-muted-foreground font-bold">
+                  Quantidade de Tokens
+                </label>
+                <div className="mt-2 flex items-center gap-2">
+                  <input
+                    type="number"
+                    value={amount}
+                    min={p.minTokens}
+                    max={CURRENT_USER.tokens}
+                    onChange={(e) => setAmount(Math.max(p.minTokens, Number(e.target.value) || 0))}
+                    className="flex-1 h-11 px-3 rounded-lg bg-background border border-border/60 font-display font-bold tabular-nums focus:outline-none focus:ring-2 focus:ring-primary/60"
+                  />
+                  <span className="text-gold font-bold">TKN</span>
+                </div>
+                <div className="mt-2 flex gap-1.5">
+                  {[10, 50, 100, 500].map((n) => (
+                    <button
+                      key={n}
+                      onClick={() => setAmount(n)}
+                      className="flex-1 h-8 rounded-md text-xs font-semibold border border-border/60 hover:border-primary/60 hover:text-primary"
+                    >
+                      {n}
+                    </button>
+                  ))}
+                </div>
 
-            <button className="mt-5 w-full h-12 rounded-xl bg-gradient-brand text-primary-foreground font-display font-black tracking-wide shadow-glow hover:scale-[1.01] transition">
-              APOSTAR {amount} TOKENS
-            </button>
+                <div className="mt-5 space-y-2 text-sm">
+                  <Row label="Odds estimada" value={odds.toFixed(2) + "x"} />
+                  <Row label="Possível retorno" value={`${formatTokens(possibleReturn)} TKN`} highlight />
+                  <Row label="Seu saldo" value={`${formatTokens(CURRENT_USER.tokens)} TKN`} />
+                </div>
 
-            <p className="mt-3 text-[11px] text-center text-muted-foreground">
-              Fase de testes. Tokens virtuais, sem dinheiro real.
-            </p>
+                <button className="mt-5 w-full h-12 rounded-xl bg-gradient-brand text-primary-foreground font-display font-black tracking-wide shadow-glow hover:scale-[1.01] transition">
+                  APOSTAR {amount} TOKENS
+                </button>
+
+                <p className="mt-3 text-[11px] text-center text-muted-foreground">
+                  Fase de testes. Tokens virtuais, sem dinheiro real.
+                </p>
+              </>
+            )}
           </div>
 
           <div className="mt-4 rounded-2xl glass-card p-4">

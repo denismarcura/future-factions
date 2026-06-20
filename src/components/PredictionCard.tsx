@@ -30,16 +30,50 @@ export function PredictionCard({ prediction: p }: { prediction: Prediction }) {
           <span>Desafio "{p.title}"</span>
         </h3>
 
-        {/* Prize image preview (deterministic by id) */}
-        <div className="mt-3 rounded-xl overflow-hidden border border-border/60 bg-background/40 aspect-[16/9]">
-          <img
-            src={`https://picsum.photos/seed/${encodeURIComponent(p.id)}/800/450`}
-            alt="Prêmio do desafio"
-            className="w-full h-full object-cover"
-            loading="lazy"
-          />
-        </div>
+        {p.match ? (
+          <div className="mt-3 rounded-xl overflow-hidden border border-border/60 bg-gradient-to-br from-primary/10 via-background/40 to-gold/10 p-4">
+            <div className="flex items-center justify-around gap-2">
+              <div className="flex flex-col items-center gap-1.5 flex-1 min-w-0">
+                <img src={p.match.homeFlag} alt={p.match.home} className="h-12 w-16 object-cover rounded shadow" loading="lazy" />
+                <span className="text-xs font-bold text-center truncate w-full">{p.match.home}</span>
+              </div>
+              <div className="text-center">
+                <div className="font-display text-2xl font-black text-gradient-brand">VS</div>
+                <div className="text-[10px] text-muted-foreground">Grupo {p.match.group}</div>
+              </div>
+              <div className="flex flex-col items-center gap-1.5 flex-1 min-w-0">
+                <img src={p.match.awayFlag} alt={p.match.away} className="h-12 w-16 object-cover rounded shadow" loading="lazy" />
+                <span className="text-xs font-bold text-center truncate w-full">{p.match.away}</span>
+              </div>
+            </div>
+            <div className="mt-2 text-center text-[11px] text-muted-foreground">
+              {new Date(p.match.kickoff).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })} (Brasília)
+            </div>
+          </div>
+        ) : (
+          <div className="mt-3 rounded-xl overflow-hidden border border-border/60 bg-background/40 aspect-[16/9]">
+            <img
+              src={`https://picsum.photos/seed/${encodeURIComponent(p.id)}/800/450`}
+              alt="Prêmio do desafio"
+              className="w-full h-full object-cover"
+              loading="lazy"
+            />
+          </div>
+        )}
         <p className="mt-1 text-sm text-muted-foreground line-clamp-2">{p.description}</p>
+
+        {p.entryFee && (
+          <div className="mt-2 flex items-center gap-2 text-xs">
+            <span className="px-2 py-0.5 rounded-full bg-gold/15 text-gold font-bold border border-gold/30">
+              Entrada: {p.entryFee} TKN
+            </span>
+            {p.prizeTiers && (
+              <span className="px-2 py-0.5 rounded-full bg-primary/15 text-primary font-bold border border-primary/30">
+                Prêmio: até {p.prizeTiers[0].tokens.toLocaleString("pt-BR")} TKN
+              </span>
+            )}
+          </div>
+        )}
 
         <div className="mt-4 space-y-2">
           {p.options.map((o) => {

@@ -114,6 +114,24 @@ export type PredictionOption = {
   pool: number; // tokens apostados
 };
 
+export type SubPrediction = {
+  id: string;
+  question: string;
+  options: string[];
+  answer?: string;
+};
+
+export type MatchInfo = {
+  home: string;
+  away: string;
+  homeFlag: string;
+  awayFlag: string;
+  kickoff: string;
+  group: string;
+};
+
+export type PrizeTier = { hits: number; tokens: number };
+
 export type Prediction = {
   id: string;
   title: string;
@@ -130,6 +148,10 @@ export type Prediction = {
   shares: number;
   tags: string[];
   hot?: boolean;
+  match?: MatchInfo;
+  subPredictions?: SubPrediction[];
+  entryFee?: number;
+  prizeTiers?: PrizeTier[];
 };
 
 const COPA_LOUCA = [
@@ -241,6 +263,10 @@ COPA_LOUCA.forEach((title, i) => {
     hot: i < 6,
   });
 });
+
+import { WORLD_CUP_CHALLENGES } from "@/lib/world-cup-matches";
+
+predictions.unshift(...WORLD_CUP_CHALLENGES);
 
 export const PREDICTIONS = predictions;
 
