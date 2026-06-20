@@ -488,17 +488,53 @@ function Criar() {
                   onClick={() => setIsOpen(true)}
                   className={`flex-1 h-11 rounded-lg border inline-flex items-center justify-center gap-2 text-sm font-semibold transition ${isOpen ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground"}`}
                 >
-                  <Globe className="h-4 w-4" /> Aberto a todos
+                  <Globe className="h-4 w-4" /> Desafio Aberto
                 </button>
                 <button
                   type="button"
                   onClick={() => setIsOpen(false)}
                   className={`flex-1 h-11 rounded-lg border inline-flex items-center justify-center gap-2 text-sm font-semibold transition ${!isOpen ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground"}`}
                 >
-                  <Lock className="h-4 w-4" /> Privado (amigos)
+                  <Lock className="h-4 w-4" /> Desafio Fechado (apenas convidados)
                 </button>
               </div>
             </Field>
+            {!isOpen && (
+              <Field
+                label="Descrição do desafio fechado"
+                action={
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      if (!privateDescription.trim()) return;
+                      setImprovingDesc(true);
+                      try {
+                        const { text } = await improveDescriptionFn({
+                          data: { text: privateDescription.trim(), context: name.trim() || undefined },
+                        });
+                        setPrivateDescription(text);
+                      } catch (err) {
+                        alert(err instanceof Error ? err.message : "Não foi possível melhorar agora.");
+                      } finally {
+                        setImprovingDesc(false);
+                      }
+                    }}
+                    disabled={improvingDesc || !privateDescription.trim()}
+                    className="inline-flex items-center gap-1 text-xs font-bold text-primary hover:text-primary/80 disabled:opacity-50"
+                  >
+                    {improvingDesc ? (<><Loader2 className="h-3 w-3 animate-spin" /> Melhorando…</>) : (<><Sparkles className="h-3 w-3" /> Melhorar com IA</>)}
+                  </button>
+                }
+              >
+                <textarea
+                  value={privateDescription}
+                  onChange={(e) => setPrivateDescription(e.target.value)}
+                  rows={3}
+                  placeholder="Conte para seus convidados do que se trata o desafio, quem está participando e o que está em jogo."
+                  className="input min-h-[88px] resize-y"
+                />
+              </Field>
+            )}
           </Section>
 
           {/* Sub-categorias */}
