@@ -262,6 +262,15 @@ function Criar() {
                   </div>
                 </div>
               ))}
+
+              <button
+                type="button"
+                onClick={addSub}
+                disabled={subs.length >= 5}
+                className="w-full inline-flex items-center justify-center gap-2 h-12 rounded-xl border-2 border-dashed border-primary/40 bg-primary/5 text-primary text-sm font-bold hover:bg-primary/10 hover:border-primary/60 disabled:opacity-40 disabled:cursor-not-allowed transition"
+              >
+                <Plus className="h-4 w-4" /> + mais Palpites {subs.length >= 5 ? "(máx. 5)" : `(${subs.length}/5)`}
+              </button>
             </div>
           </Section>
 
