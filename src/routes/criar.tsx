@@ -12,6 +12,7 @@ import { generateInviteText } from "@/lib/invite.functions";
 import { saveUserChallenge } from "@/lib/user-challenges";
 import { improveTitle } from "@/lib/title-ai.functions";
 import { listCategories, listSubcategories, type ChallengeCategory, type ChallengeSubcategory } from "@/lib/challenge-categories";
+import { generateChallenge } from "@/lib/challenge-ai.functions";
 
 export const Route = createFileRoute("/criar")({
   head: () => ({
@@ -99,6 +100,58 @@ function Criar() {
   const [genError, setGenError] = useState<string | null>(null);
   const generateInvite = useServerFn(generateInviteText);
   const improveTitleFn = useServerFn(improveTitle);
+  const generateChallengeFn = useServerFn(generateChallenge);
+
+  // AI Challenge Generator state
+  const [aiOpen, setAiOpen] = useState(false);
+  const [aiTheme, setAiTheme] = useState("");
+  const [aiCount, setAiCount] = useState(5);
+  const [aiUseExistingSubs, setAiUseExistingSubs] = useState(true);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState<string | null>(null);
+
+  const handleGenerateChallenge = async () => {
+    setAiError(null);
+    if (!aiTheme.trim()) {
+      setAiError("Descreva o tema do desafio.");
+      return;
+    }
+    setAiLoading(true);
+    try {
+      const userSubs = aiUseExistingSubs
+        ? subs
+            .map((s) => ({
+              question: s.question.trim(),
+              options: s.options.map((o) => o.trim()).filter(Boolean),
+            }))
+            .filter((s) => s.question.length > 0)
+        : [];
+      const result = await generateChallengeFn({
+        data: {
+          theme: aiTheme.trim(),
+          category,
+          subcategory: subcategory || undefined,
+          userSubs: userSubs.length ? userSubs : undefined,
+          count: aiCount,
+          prizeName: prizeName.trim() || undefined,
+          endsAt: endsAt || undefined,
+        },
+      });
+      if (result.name) setName(result.name);
+      setSubs(
+        result.subs.map((s) => ({
+          id: uid(),
+          question: s.question,
+          options: s.options.slice(0, 3),
+        })),
+      );
+      setAiOpen(false);
+    } catch (err) {
+      setAiError(err instanceof Error ? err.message : "Não foi possível gerar agora.");
+    } finally {
+      setAiLoading(false);
+    }
+  };
 
   const handleGenerateInvite = async () => {
     setGenError(null);
@@ -249,6 +302,96 @@ function Criar() {
 
       <form className="grid lg:grid-cols-[1fr_360px] gap-6" onSubmit={handleSubmit}>
         <div className="space-y-5">
+          {/* Gerador IA */}
+          <div className="rounded-xl border border-primary/40 bg-gradient-to-br from-primary/10 via-card to-card overflow-hidden">
+            <button
+              type="button"
+              onClick={() => setAiOpen((v) => !v)}
+              className="w-full flex items-center justify-between gap-3 p-4 text-left"
+            >
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-lg bg-primary/20 grid place-items-center text-primary">
+                  <Wand2 className="h-5 w-5" />
+                </div>
+                <div>
+                  <div className="font-display font-black text-base">Gere seu desafio com a IA</div>
+                  <div className="text-xs text-muted-foreground">
+                    Conte o tema, cadastre alguns palpites (opcional) ou peça para a IA criar tudo.
+                  </div>
+                </div>
+              </div>
+              <span className={`text-primary text-sm font-bold transition ${aiOpen ? "rotate-180" : ""}`}>▾</span>
+            </button>
+
+            {aiOpen && (
+              <div className="px-4 pb-4 space-y-3 border-t border-primary/20 pt-4">
+                <Field label="Tema do desafio">
+                  <textarea
+                    value={aiTheme}
+                    onChange={(e) => setAiTheme(e.target.value)}
+                    rows={3}
+                    placeholder="Ex.: Final da Copa do Mundo 2026 — Brasil x Argentina, polêmicas de arbitragem e gols."
+                    className="input min-h-[80px] resize-y"
+                  />
+                </Field>
+
+                <div className="grid sm:grid-cols-2 gap-3">
+                  <Field label="Quantidade total de palpites">
+                    <select
+                      value={aiCount}
+                      onChange={(e) => setAiCount(Number(e.target.value))}
+                      className="input"
+                    >
+                      {[1, 2, 3, 4, 5].map((n) => (
+                        <option key={n} value={n}>{n} palpite{n > 1 ? "s" : ""}</option>
+                      ))}
+                    </select>
+                  </Field>
+                  <Field label="Aproveitar palpites já cadastrados">
+                    <label className="flex items-center gap-2 h-11 px-3 rounded-lg border border-border bg-card cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={aiUseExistingSubs}
+                        onChange={(e) => setAiUseExistingSubs(e.target.checked)}
+                        className="h-4 w-4 accent-primary"
+                      />
+                      <span className="text-sm">Manter meus palpites e completar o restante</span>
+                    </label>
+                  </Field>
+                </div>
+
+                <p className="text-xs text-muted-foreground">
+                  A IA usará categoria, sub-categoria, prêmio e data já preenchidos como contexto. Você pode editar tudo depois.
+                </p>
+
+                {aiError && (
+                  <div className="text-sm text-destructive flex items-center gap-2">
+                    <AlertCircle className="h-4 w-4" /> {aiError}
+                  </div>
+                )}
+
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={handleGenerateChallenge}
+                    disabled={aiLoading || !aiTheme.trim()}
+                    className="inline-flex items-center gap-2 h-11 px-4 rounded-lg bg-gradient-brand text-primary-foreground font-bold shadow-glow disabled:opacity-50"
+                  >
+                    {aiLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+                    {aiLoading ? "Gerando…" : "Gerar desafio com IA"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setAiOpen(false)}
+                    className="h-11 px-4 rounded-lg border border-border text-sm font-semibold"
+                  >
+                    Fechar
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
           {/* Básico */}
           <Section title="Informações do desafio">
             <Field
