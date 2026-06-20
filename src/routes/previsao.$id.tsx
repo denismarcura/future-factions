@@ -51,6 +51,7 @@ function PredictionPage() {
   const [bonusMission, setBonusMission] = useState<Mission | null>(null);
   const [bonusDone, setBonusDone] = useState(false);
   const [bonusBusy, setBonusBusy] = useState(false);
+  const [confirmed, setConfirmed] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -134,7 +135,7 @@ function PredictionPage() {
                 </div>
               </div>
               <div className="mt-3 text-center text-sm text-muted-foreground">
-                Início: <span className="text-foreground font-semibold">{new Date(p.match.kickoff).toLocaleString("pt-BR", { dateStyle: "full", timeStyle: "short" })}</span>
+                Início: <span className="text-foreground font-semibold">{new Date(p.match.kickoff).toLocaleString("pt-BR", { dateStyle: "full", timeStyle: "short", timeZone: "America/Sao_Paulo" })}</span>
               </div>
               <div className="mt-1 text-center text-xs text-destructive font-semibold">
                 Apostas encerram 10 minutos antes do jogo
@@ -304,12 +305,13 @@ function PredictionPage() {
                       toast.error(`Preencha todos os ${p.subPredictions!.length} palpites.`);
                       return;
                     }
+                    setConfirmed(true);
                     toast.success(`🎯 Participação confirmada! ${p.entryFee} TKN debitados.`);
                   }}
-                  disabled={isClosed || Object.keys(subAnswers).length < p.subPredictions.length}
+                  disabled={isClosed || confirmed || Object.keys(subAnswers).length < p.subPredictions.length}
                   className="mt-5 w-full h-12 rounded-xl bg-gradient-brand text-primary-foreground font-display font-black tracking-wide shadow-glow hover:scale-[1.01] transition disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {isClosed ? "APOSTAS ENCERRADAS" : `PARTICIPAR POR ${p.entryFee} TOKENS`}
+                  {isClosed ? "APOSTAS ENCERRADAS" : confirmed ? "✓ PARTICIPAÇÃO CONFIRMADA" : `PARTICIPAR POR ${p.entryFee} TOKENS`}
                 </button>
                 <p className="mt-3 text-[11px] text-center text-muted-foreground">
                   Apostas encerram 10 minutos antes do jogo. Tokens virtuais, sem dinheiro real.
