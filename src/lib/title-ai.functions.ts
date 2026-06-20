@@ -30,3 +30,38 @@ Título atual: ${data.title}`;
     if (!improved) throw new Error("A IA não retornou um título válido. Tente novamente.");
     return { title: improved };
   });
+
+const BannerInput = z.object({
+  subtitle: z.string().trim().optional(),
+  ctaLabel: z.string().trim().optional(),
+  challengeTitle: z.string().trim().optional(),
+  current: z.string().trim().optional(),
+});
+
+export const generateBannerTitle = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) => BannerInput.parse(input))
+  .handler(async ({ data }) => {
+    const key = process.env.LOVABLE_API_KEY;
+    if (!key) throw new Error("Missing LOVABLE_API_KEY");
+
+    const { createLovableAiGatewayProvider } = await import("./ai-gateway.server");
+    const gateway = createLovableAiGatewayProvider(key);
+
+    const prompt = `Você cria títulos de banners promocionais para o site "Desafio dos Palpites".
+Gere UM título curto (até 60 caracteres), chamativo, em português brasileiro, sem aspas, sem emojis no início, sem markdown e sem explicações. Retorne APENAS o título.
+
+Contexto:
+- Subtítulo: ${data.subtitle || "(nenhum)"}
+- Texto do botão: ${data.ctaLabel || "(nenhum)"}
+- Desafio vinculado: ${data.challengeTitle || "(nenhum)"}
+- Título atual: ${data.current || "(em branco)"}`;
+
+    const { text } = await generateText({
+      model: gateway("google/gemini-3-flash-preview"),
+      prompt,
+    });
+
+    const title = text.trim().replace(/^["']|["']$/g, "").split("\n")[0].slice(0, 80);
+    if (!title) throw new Error("A IA não retornou um título válido. Tente novamente.");
+    return { title };
+  });
