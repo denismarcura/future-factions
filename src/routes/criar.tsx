@@ -46,6 +46,13 @@ function Criar() {
   const [generating, setGenerating] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
   const [published, setPublished] = useState<null | { id: string; name: string }>(null);
+  const [friends, setFriends] = useState<{ id: string; name: string; email: string }[]>([
+    { id: uid(), name: "", email: "" },
+  ]);
+  const addFriend = () => setFriends([...friends, { id: uid(), name: "", email: "" }]);
+  const removeFriend = (id: string) => setFriends(friends.filter(f => f.id !== id));
+  const updateFriend = (id: string, patch: Partial<{ name: string; email: string }>) =>
+    setFriends(friends.map(f => f.id === id ? { ...f, ...patch } : f));
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
