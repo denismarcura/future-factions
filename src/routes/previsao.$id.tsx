@@ -1,10 +1,13 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
-  Clock, Users, Flame, Heart, MessageCircle, Share2, Coins, TrendingUp, ArrowLeft,
+  Clock, Users, Flame, Heart, MessageCircle, Share2, Coins, TrendingUp, ArrowLeft, Instagram, Check, ExternalLink, Loader2,
 } from "lucide-react";
+import { toast } from "sonner";
 import { AppShell } from "@/components/layout/AppShell";
 import { CURRENT_USER, formatTokens, getPrediction, PREDICTIONS, type Prediction, timeLeft } from "@/lib/mock-data";
+import { listMissions, listMyClaims, claimMission, pickRandomFor, type Mission, ACTION_LABEL } from "@/lib/missions";
+import { useAuth } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/previsao/$id")({
   loader: ({ params }): Prediction => {
