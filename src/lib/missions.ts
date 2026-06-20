@@ -1,7 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 
-export type Platform = "instagram" | "youtube" | "google";
-export type ActionType = "follow" | "like" | "comment" | "share" | "tag" | "review";
+export type Platform = "instagram" | "facebook" | "youtube" | "tiktok" | "google";
+export type ActionType = "follow" | "like" | "comment" | "share" | "tag" | "review" | "like_comment" | "subscribe";
 
 export interface Mission {
   id: string;
@@ -27,35 +27,35 @@ export interface MissionClaim {
 }
 
 export const ACTION_LABEL: Record<ActionType, string> = {
-  follow: "Seguir",
+  follow: "Seguir perfil",
   like: "Curtir",
   comment: "Comentar",
   share: "Compartilhar",
   tag: "Marcar amigo",
   review: "Avaliar",
+  like_comment: "Curtir e comentar",
+  subscribe: "Inscrever-se",
 };
 
 export const PLATFORM_LABEL: Record<Platform, string> = {
   instagram: "Instagram",
+  facebook: "Facebook",
   youtube: "YouTube",
+  tiktok: "TikTok",
   google: "Google Meu Negócio",
 };
 
-export const PLATFORM_DEFAULT_ACTIONS: Record<Platform, { action: ActionType; tokens: number }[]> = {
-  instagram: [
-    { action: "follow", tokens: 50 },
-    { action: "like", tokens: 50 },
-    { action: "comment", tokens: 50 },
-    { action: "share", tokens: 50 },
-    { action: "tag", tokens: 50 },
-  ],
-  youtube: [
-    { action: "follow", tokens: 100 },
-    { action: "like", tokens: 100 },
-    { action: "comment", tokens: 100 },
-  ],
-  google: [{ action: "review", tokens: 100 }],
+export const PLATFORM_FOLLOW_ACTION: Record<Platform, ActionType> = {
+  instagram: "follow",
+  facebook: "follow",
+  youtube: "subscribe",
+  tiktok: "follow",
+  google: "review",
 };
+
+export const TOKEN_OPTIONS = [50, 100, 200] as const;
+export const DEFAULT_BONUS_TOKENS = 500;
+export const MAX_POSTS_PER_CAMPAIGN = 5;
 
 export async function listMissions(opts?: { platform?: Platform; activeOnly?: boolean }) {
   let q = supabase.from("missions").select("*").order("created_at", { ascending: false });
