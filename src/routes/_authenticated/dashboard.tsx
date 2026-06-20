@@ -314,7 +314,7 @@ function MissionsSection({
       <SectionTitle
         icon={Target}
         title="Missões"
-        hint={`${done} concluídas · ${todo} para fazer`}
+        hint={`Ganhe mais tokens participando de missões · ${done} feitas · ${todo} para fazer`}
         right={
           <Link to="/missoes" className="text-xs font-bold text-primary hover:underline inline-flex items-center gap-1">
             Ver todas <ExternalLink className="h-3 w-3" />
