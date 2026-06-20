@@ -1107,3 +1107,170 @@ function PublishedSuccess({ name, id, onCreateAnother }: { name: string; id: str
     </div>
   );
 }
+
+function loadImage(src: string): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => resolve(img);
+    img.onerror = () => reject(new Error("Falha ao carregar imagem"));
+    img.src = src;
+  });
+}
+
+function wrapText(ctx: CanvasRenderingContext2D, text: string, maxWidth: number, maxLines: number): string[] {
+  const words = text.split(/\s+/);
+  const lines: string[] = [];
+  let current = "";
+  for (const w of words) {
+    const test = current ? `${current} ${w}` : w;
+    if (ctx.measureText(test).width > maxWidth && current) {
+      lines.push(current);
+      current = w;
+      if (lines.length === maxLines - 1) break;
+    } else {
+      current = test;
+    }
+  }
+  if (current && lines.length < maxLines) lines.push(current);
+  if (lines.length === maxLines && words.length > lines.join(" ").split(/\s+/).length) {
+    lines[maxLines - 1] = lines[maxLines - 1].replace(/\s+\S*$/, "") + "…";
+  }
+  return lines;
+}
+
+async function renderCreative(
+  canvas: HTMLCanvasElement | null,
+  data: {
+    name: string;
+    category: string;
+    prizeName?: string;
+    autoPrize: number;
+    description?: string;
+    inviter?: string;
+    logoUrl: string;
+  },
+): Promise<string> {
+  if (!canvas) throw new Error("Canvas indisponível");
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("Contexto 2D indisponível");
+  const W = canvas.width, H = canvas.height;
+
+  // Background gradient
+  const grad = ctx.createLinearGradient(0, 0, W, H);
+  grad.addColorStop(0, "#0a1f12");
+  grad.addColorStop(0.5, "#0f3d22");
+  grad.addColorStop(1, "#031309");
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, W, H);
+
+  // Glow accents
+  const glow = ctx.createRadialGradient(W * 0.85, H * 0.15, 20, W * 0.85, H * 0.15, 600);
+  glow.addColorStop(0, "rgba(34,197,94,0.45)");
+  glow.addColorStop(1, "rgba(0,0,0,0)");
+  ctx.fillStyle = glow;
+  ctx.fillRect(0, 0, W, H);
+
+  // Border
+  ctx.strokeStyle = "rgba(34,197,94,0.6)";
+  ctx.lineWidth = 6;
+  ctx.strokeRect(24, 24, W - 48, H - 48);
+
+  // Logo
+  try {
+    const logo = await loadImage(data.logoUrl);
+    const logoH = 140;
+    const logoW = (logo.width / logo.height) * logoH;
+    ctx.drawImage(logo, 70, 70, logoW, logoH);
+  } catch {
+    ctx.fillStyle = "#22c55e";
+    ctx.font = "bold 56px system-ui, sans-serif";
+    ctx.fillText("DESAFIO DOS PALPITES", 70, 140);
+  }
+
+  // Category chip
+  ctx.fillStyle = "rgba(250,204,21,0.18)";
+  ctx.strokeStyle = "#facc15";
+  ctx.lineWidth = 2;
+  const chip = data.category.toUpperCase();
+  ctx.font = "bold 28px system-ui, sans-serif";
+  const cw = ctx.measureText(chip).width + 40;
+  ctx.beginPath();
+  const cx = 70, cy = 260, ch = 56, r = 14;
+  ctx.moveTo(cx + r, cy);
+  ctx.arcTo(cx + cw, cy, cx + cw, cy + ch, r);
+  ctx.arcTo(cx + cw, cy + ch, cx, cy + ch, r);
+  ctx.arcTo(cx, cy + ch, cx, cy, r);
+  ctx.arcTo(cx, cy, cx + cw, cy, r);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+  ctx.fillStyle = "#facc15";
+  ctx.textBaseline = "middle";
+  ctx.fillText(chip, cx + 20, cy + ch / 2);
+
+  // Title
+  ctx.fillStyle = "#ffffff";
+  ctx.font = "900 80px system-ui, sans-serif";
+  ctx.textBaseline = "top";
+  const titleLines = wrapText(ctx, data.name, W - 140, 3);
+  let y = 360;
+  for (const line of titleLines) {
+    ctx.fillText(line, 70, y);
+    y += 92;
+  }
+
+  // Description
+  if (data.description) {
+    ctx.fillStyle = "rgba(255,255,255,0.85)";
+    ctx.font = "400 36px system-ui, sans-serif";
+    const descLines = wrapText(ctx, data.description, W - 140, 4);
+    y += 20;
+    for (const line of descLines) {
+      ctx.fillText(line, 70, y);
+      y += 50;
+    }
+  }
+
+  // Prize box (bottom)
+  const boxY = H - 280;
+  ctx.fillStyle = "rgba(34,197,94,0.12)";
+  ctx.strokeStyle = "#22c55e";
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  const bx = 70, bw = W - 140, bh = 180, br = 20;
+  ctx.moveTo(bx + br, boxY);
+  ctx.arcTo(bx + bw, boxY, bx + bw, boxY + bh, br);
+  ctx.arcTo(bx + bw, boxY + bh, bx, boxY + bh, br);
+  ctx.arcTo(bx, boxY + bh, bx, boxY, br);
+  ctx.arcTo(bx, boxY, bx + bw, boxY, br);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+
+  ctx.fillStyle = "#facc15";
+  ctx.font = "bold 28px system-ui, sans-serif";
+  ctx.fillText("PRÊMIO", bx + 30, boxY + 24);
+
+  ctx.fillStyle = "#ffffff";
+  ctx.font = "900 56px system-ui, sans-serif";
+  const prizeLabel = data.prizeName
+    ? `${data.prizeName} + ${data.autoPrize.toLocaleString("pt-BR")} tokens`
+    : `${data.autoPrize.toLocaleString("pt-BR")} tokens para o líder`;
+  const prizeLines = wrapText(ctx, prizeLabel, bw - 60, 2);
+  let py = boxY + 60;
+  for (const line of prizeLines) {
+    ctx.fillText(line, bx + 30, py);
+    py += 60;
+  }
+
+  // Footer CTA
+  ctx.fillStyle = "rgba(255,255,255,0.9)";
+  ctx.font = "bold 32px system-ui, sans-serif";
+  const cta = data.inviter ? `${data.inviter} te convidou — participe grátis!` : "Participe grátis — só tokens, sem dinheiro real";
+  ctx.textAlign = "center";
+  ctx.fillText(cta, W / 2, H - 70);
+  ctx.textAlign = "start";
+
+  return canvas.toDataURL("image/png");
+}
