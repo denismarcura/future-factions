@@ -137,4 +137,5 @@ export const PALPITES_MALUCOS: Prediction[] = MALUCOS.map((m, i) => ({
   tags: ["palpites-malucos", "copa", "2026"],
   hot: true,
   prizeTiers: [{ hits: 1, tokens: m.prize }],
+  imageUrl: EMOJI_IMG[m.emoji] ?? imgSoccer,
 }));
