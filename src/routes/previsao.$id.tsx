@@ -308,6 +308,9 @@ function PredictionPage() {
                     }
                     setConfirmed(true);
                     toast.success(`🎯 Participação confirmada! ${p.entryFee} TKN debitados.`);
+                    setTimeout(() => {
+                      navigate({ to: "/" });
+                    }, 1200);
                   }}
                   disabled={isClosed || confirmed || Object.keys(subAnswers).length < p.subPredictions.length}
                   className="mt-5 w-full h-12 rounded-xl bg-gradient-brand text-primary-foreground font-display font-black tracking-wide shadow-glow hover:scale-[1.01] transition disabled:opacity-50 disabled:cursor-not-allowed"
