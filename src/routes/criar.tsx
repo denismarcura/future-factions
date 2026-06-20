@@ -416,7 +416,11 @@ function Criar() {
           </div>
 
           {/* Básico */}
-          <Section title="Informações do desafio">
+          <div id="manual-section" />
+          <Section
+            title="Informações do desafio"
+            description="Criar manualmente — preencha os campos abaixo. Você pode misturar com a IA acima."
+          >
             <Field
               label="Nome do desafio"
               action={
