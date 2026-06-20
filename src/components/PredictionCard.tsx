@@ -55,7 +55,7 @@ export function PredictionCard({ prediction: p }: { prediction: Prediction }) {
         ) : (
           <div className="mt-3 rounded-xl overflow-hidden border border-border/60 bg-background/40 aspect-[16/9]">
             <img
-              src={p.imageUrl ?? `https://picsum.photos/seed/${encodeURIComponent(p.id)}/800/450`}
+              src={p.imageUrl ?? CATEGORY_IMAGES[p.category] ?? `https://picsum.photos/seed/${encodeURIComponent(p.id)}/800/450`}
               alt="Prêmio do desafio"
               className="w-full h-full object-cover"
               loading="lazy"
