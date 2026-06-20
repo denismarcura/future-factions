@@ -210,7 +210,7 @@ function EmpresasTab({ companies, onChange }: { companies: Company[]; onChange: 
   );
 }
 
-function Input({ label, value, onChange, ...rest }: { label: string; value: string; onChange: (v: string) => void } & React.InputHTMLAttributes<HTMLInputElement>) {
+function TextField({ label, value, onChange, ...rest }: { label: string; value: string; onChange: (v: string) => void } & React.InputHTMLAttributes<HTMLInputElement>) {
   return (
     <label className="block text-sm">
       <span className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">{label}</span>
@@ -230,15 +230,15 @@ function CompanyForm({ value, onSave, onCancel }: { value: Company; onSave: (c: 
   return (
     <div className="glass-card rounded-2xl p-5 space-y-4 border border-primary/30">
       <div className="grid sm:grid-cols-2 gap-3">
-        <Input label="Razão social" value={c.razaoSocial} onChange={set("razaoSocial")} />
-        <Input label="Nome fantasia *" value={c.nomeFantasia} onChange={set("nomeFantasia")} />
-        <Input label="CNPJ" value={c.cnpj} onChange={set("cnpj")} />
-        <Input label="Responsável" value={c.responsavel} onChange={set("responsavel")} />
-        <Input label="E-mail" value={c.email} onChange={set("email")} type="email" />
-        <Input label="WhatsApp" value={c.whatsapp} onChange={set("whatsapp")} />
-        <Input label="Cidade" value={c.cidade} onChange={set("cidade")} />
-        <Input label="Estado" value={c.estado} onChange={set("estado")} maxLength={2} />
-        <Input label="Instagram" value={c.instagram} onChange={set("instagram")} placeholder="@empresa" />
+        <TextField label="Razão social" value={c.razaoSocial} onChange={set("razaoSocial")} />
+        <TextField label="Nome fantasia *" value={c.nomeFantasia} onChange={set("nomeFantasia")} />
+        <TextField label="CNPJ" value={c.cnpj} onChange={set("cnpj")} />
+        <TextField label="Responsável" value={c.responsavel} onChange={set("responsavel")} />
+        <TextField label="E-mail" value={c.email} onChange={set("email")} type="email" />
+        <TextField label="WhatsApp" value={c.whatsapp} onChange={set("whatsapp")} />
+        <TextField label="Cidade" value={c.cidade} onChange={set("cidade")} />
+        <TextField label="Estado" value={c.estado} onChange={set("estado")} maxLength={2} />
+        <TextField label="Instagram" value={c.instagram} onChange={set("instagram")} placeholder="@empresa" />
         <label className="block text-sm">
           <span className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Plano</span>
           <select value={c.plano} onChange={(e) => setC({ ...c, plano: e.target.value as Company["plano"] })}
@@ -332,8 +332,8 @@ function NovoDesafioTab({ companies, onCreate }: { companies: Company[]; onCreat
         </label>
 
         <div className="grid sm:grid-cols-2 gap-3">
-          <Input label="Título *" value={form.title} onChange={(v) => set("title", v)} />
-          <Input label="Subtítulo" value={form.subtitle} onChange={(v) => set("subtitle", v)} />
+          <TextField label="Título *" value={form.title} onChange={(v) => set("title", v)} />
+          <TextField label="Subtítulo" value={form.subtitle} onChange={(v) => set("subtitle", v)} />
         </div>
 
         <label className="block text-sm">
@@ -357,12 +357,12 @@ function NovoDesafioTab({ companies, onCreate }: { companies: Company[]; onCreat
               {["Aberto para todo Brasil", "Estado específico", "Cidade específica", "Apenas clientes", "Funcionários", "Privado por convite"].map((p) => <option key={p}>{p}</option>)}
             </select>
           </label>
-          <Input label="Vencedores" value={String(form.winners)} onChange={(v) => set("winners", Number(v) || 1)} type="number" min={1} />
+          <TextField label="Vencedores" value={String(form.winners)} onChange={(v) => set("winners", Number(v) || 1)} type="number" min={1} />
         </div>
 
         <div className="grid sm:grid-cols-2 gap-3">
-          <Input label="Cidade" value={form.cidade} onChange={(v) => set("cidade", v)} />
-          <Input label="Estado" value={form.estado} onChange={(v) => set("estado", v)} maxLength={2} />
+          <TextField label="Cidade" value={form.cidade} onChange={(v) => set("cidade", v)} />
+          <TextField label="Estado" value={form.estado} onChange={(v) => set("estado", v)} maxLength={2} />
         </div>
       </div>
 
@@ -376,17 +376,17 @@ function NovoDesafioTab({ companies, onCreate }: { companies: Company[]; onCreat
               {["Produto", "Serviço", "Vale-compras", "Dinheiro", "Voucher", "Ingresso", "Experiência", "Outro"].map((p) => <option key={p}>{p}</option>)}
             </select>
           </label>
-          <Input label="Nome do prêmio" value={form.prizeName} onChange={(v) => set("prizeName", v)} />
-          <Input label="Valor estimado (R$)" value={form.prizeValue} onChange={(v) => set("prizeValue", v)} />
+          <TextField label="Nome do prêmio" value={form.prizeName} onChange={(v) => set("prizeName", v)} />
+          <TextField label="Valor estimado (R$)" value={form.prizeValue} onChange={(v) => set("prizeValue", v)} />
         </div>
       </div>
 
       <div className="glass-card rounded-2xl p-5 space-y-4">
         <h3 className="font-display font-bold">Período</h3>
         <div className="grid sm:grid-cols-3 gap-3">
-          <Input label="Início" value={form.startsAt} onChange={(v) => set("startsAt", v)} type="datetime-local" />
-          <Input label="Encerramento" value={form.endsAt} onChange={(v) => set("endsAt", v)} type="datetime-local" />
-          <Input label="Apuração" value={form.awardAt} onChange={(v) => set("awardAt", v)} type="datetime-local" />
+          <TextField label="Início" value={form.startsAt} onChange={(v) => set("startsAt", v)} type="datetime-local" />
+          <TextField label="Encerramento" value={form.endsAt} onChange={(v) => set("endsAt", v)} type="datetime-local" />
+          <TextField label="Apuração" value={form.awardAt} onChange={(v) => set("awardAt", v)} type="datetime-local" />
         </div>
       </div>
 

@@ -29,6 +29,7 @@ import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as PrevisaoIdRouteImport } from './routes/previsao.$id'
 import { Route as AdminRegrasIaRouteImport } from './routes/admin.regras-ia'
 import { Route as AdminMissoesRouteImport } from './routes/admin.missoes'
+import { Route as AdminEmpresasRouteImport } from './routes/admin.empresas'
 import { Route as AdminEmailMarketingRouteImport } from './routes/admin.email-marketing'
 import { Route as AdminDesafiosRouteImport } from './routes/admin.desafios'
 import { Route as AdminCategoriasRouteImport } from './routes/admin.categorias'
@@ -136,6 +137,11 @@ const AdminMissoesRoute = AdminMissoesRouteImport.update({
   path: '/missoes',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminEmpresasRoute = AdminEmpresasRouteImport.update({
+  id: '/empresas',
+  path: '/empresas',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminEmailMarketingRoute = AdminEmailMarketingRouteImport.update({
   id: '/email-marketing',
   path: '/email-marketing',
@@ -195,6 +201,7 @@ export interface FileRoutesByFullPath {
   '/admin/categorias': typeof AdminCategoriasRoute
   '/admin/desafios': typeof AdminDesafiosRoute
   '/admin/email-marketing': typeof AdminEmailMarketingRoute
+  '/admin/empresas': typeof AdminEmpresasRoute
   '/admin/missoes': typeof AdminMissoesRoute
   '/admin/regras-ia': typeof AdminRegrasIaRoute
   '/previsao/$id': typeof PrevisaoIdRoute
@@ -222,6 +229,7 @@ export interface FileRoutesByTo {
   '/admin/categorias': typeof AdminCategoriasRoute
   '/admin/desafios': typeof AdminDesafiosRoute
   '/admin/email-marketing': typeof AdminEmailMarketingRoute
+  '/admin/empresas': typeof AdminEmpresasRoute
   '/admin/missoes': typeof AdminMissoesRoute
   '/admin/regras-ia': typeof AdminRegrasIaRoute
   '/previsao/$id': typeof PrevisaoIdRoute
@@ -252,6 +260,7 @@ export interface FileRoutesById {
   '/admin/categorias': typeof AdminCategoriasRoute
   '/admin/desafios': typeof AdminDesafiosRoute
   '/admin/email-marketing': typeof AdminEmailMarketingRoute
+  '/admin/empresas': typeof AdminEmpresasRoute
   '/admin/missoes': typeof AdminMissoesRoute
   '/admin/regras-ia': typeof AdminRegrasIaRoute
   '/previsao/$id': typeof PrevisaoIdRoute
@@ -282,6 +291,7 @@ export interface FileRouteTypes {
     | '/admin/categorias'
     | '/admin/desafios'
     | '/admin/email-marketing'
+    | '/admin/empresas'
     | '/admin/missoes'
     | '/admin/regras-ia'
     | '/previsao/$id'
@@ -309,6 +319,7 @@ export interface FileRouteTypes {
     | '/admin/categorias'
     | '/admin/desafios'
     | '/admin/email-marketing'
+    | '/admin/empresas'
     | '/admin/missoes'
     | '/admin/regras-ia'
     | '/previsao/$id'
@@ -338,6 +349,7 @@ export interface FileRouteTypes {
     | '/admin/categorias'
     | '/admin/desafios'
     | '/admin/email-marketing'
+    | '/admin/empresas'
     | '/admin/missoes'
     | '/admin/regras-ia'
     | '/previsao/$id'
@@ -506,6 +518,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminMissoesRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/empresas': {
+      id: '/admin/empresas'
+      path: '/empresas'
+      fullPath: '/admin/empresas'
+      preLoaderRoute: typeof AdminEmpresasRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/email-marketing': {
       id: '/admin/email-marketing'
       path: '/email-marketing'
@@ -576,6 +595,7 @@ interface AdminRouteChildren {
   AdminCategoriasRoute: typeof AdminCategoriasRoute
   AdminDesafiosRoute: typeof AdminDesafiosRoute
   AdminEmailMarketingRoute: typeof AdminEmailMarketingRoute
+  AdminEmpresasRoute: typeof AdminEmpresasRoute
   AdminMissoesRoute: typeof AdminMissoesRoute
   AdminRegrasIaRoute: typeof AdminRegrasIaRoute
   AdminIndexRoute: typeof AdminIndexRoute
@@ -588,6 +608,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminCategoriasRoute: AdminCategoriasRoute,
   AdminDesafiosRoute: AdminDesafiosRoute,
   AdminEmailMarketingRoute: AdminEmailMarketingRoute,
+  AdminEmpresasRoute: AdminEmpresasRoute,
   AdminMissoesRoute: AdminMissoesRoute,
   AdminRegrasIaRoute: AdminRegrasIaRoute,
   AdminIndexRoute: AdminIndexRoute,
