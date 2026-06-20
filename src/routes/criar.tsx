@@ -443,3 +443,37 @@ function MissionBlock({ icon, name }: { icon: React.ReactNode; name: string }) {
     </div>
   );
 }
+
+function PublishedSuccess({ name, id, onCreateAnother }: { name: string; id: string; onCreateAnother: () => void }) {
+  const [copied, setCopied] = useState(false);
+  const link = typeof window !== "undefined" ? `${window.location.origin}/previsao/${id}` : `/previsao/${id}`;
+  const copy = async () => {
+    try { await navigator.clipboard.writeText(link); setCopied(true); setTimeout(() => setCopied(false), 1500); } catch {}
+  };
+  return (
+    <div className="max-w-2xl mx-auto text-center py-10">
+      <div className="mx-auto h-20 w-20 rounded-full bg-primary/15 grid place-items-center mb-5 shadow-glow">
+        <CheckCircle2 className="h-10 w-10 text-primary" />
+      </div>
+      <h1 className="font-display text-3xl font-black mb-2">Desafio publicado!</h1>
+      <p className="text-muted-foreground mb-6">
+        <span className="text-foreground font-semibold">"{name}"</span> está no ar. 100 Tokens foram debitados da sua carteira.
+      </p>
+      <div className="rounded-2xl glass-card p-4 flex items-center gap-2 mb-6">
+        <Share2 className="h-4 w-4 text-gold shrink-0" />
+        <input readOnly value={link} className="flex-1 bg-transparent text-sm outline-none truncate" />
+        <button onClick={copy} className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg bg-primary/15 text-primary border border-primary/30 text-sm font-semibold hover:bg-primary/20">
+          <Copy className="h-4 w-4" /> {copied ? "Copiado" : "Copiar"}
+        </button>
+      </div>
+      <div className="flex flex-wrap gap-3 justify-center">
+        <Link to="/desafios" className="h-11 px-5 rounded-xl bg-gradient-brand text-primary-foreground font-display font-bold inline-flex items-center shadow-glow">
+          Ver desafios
+        </Link>
+        <button onClick={onCreateAnother} className="h-11 px-5 rounded-xl border border-border font-semibold inline-flex items-center hover:border-primary hover:text-primary">
+          Criar outro
+        </button>
+      </div>
+    </div>
+  );
+}
