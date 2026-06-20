@@ -1,6 +1,19 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { Plus, Trash2, Pencil, Image as ImageIcon, X, Check, Eye, EyeOff } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import {
+  Plus,
+  Trash2,
+  Pencil,
+  Image as ImageIcon,
+  X,
+  Check,
+  Eye,
+  EyeOff,
+  Sparkles,
+  Search,
+  Link2,
+  Loader2,
+} from "lucide-react";
 import { toast } from "sonner";
 import {
   type Banner,
@@ -9,6 +22,11 @@ import {
   updateBanner,
   deleteBanner,
 } from "@/lib/banners";
+import { generateBannerTitle } from "@/lib/title-ai.functions";
+import { useServerFn } from "@tanstack/react-start";
+import { getUserChallenges } from "@/lib/user-challenges";
+import { DESAFIOS_DIAMANTE } from "@/lib/desafios-diamante";
+import type { Prediction } from "@/lib/mock-data";
 
 export const Route = createFileRoute("/admin/banners")({
   head: () => ({
@@ -23,6 +41,8 @@ type Form = {
   imageUrl: string;
   ctaLabel: string;
   ctaLink: string;
+  challengeId: string;
+  challengeTitle: string;
   active: boolean;
   sortOrder: number;
 };
@@ -33,6 +53,8 @@ const EMPTY: Form = {
   imageUrl: "",
   ctaLabel: "",
   ctaLink: "",
+  challengeId: "",
+  challengeTitle: "",
   active: true,
   sortOrder: 1,
 };
@@ -42,6 +64,12 @@ function AdminBanners() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState<Form>(EMPTY);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [challengeQuery, setChallengeQuery] = useState("");
+  const [showResults, setShowResults] = useState(false);
+  const [allChallenges, setAllChallenges] = useState<Prediction[]>([]);
+
+  const generateTitleFn = useServerFn(generateBannerTitle);
 
   function reload() {
     setItems(listBanners());
@@ -49,11 +77,25 @@ function AdminBanners() {
 
   useEffect(() => {
     reload();
+    setAllChallenges([...getUserChallenges(), ...DESAFIOS_DIAMANTE]);
   }, []);
+
+  const challengeResults = useMemo(() => {
+    const q = challengeQuery.trim().toLowerCase();
+    if (!q) return allChallenges.slice(0, 8);
+    return allChallenges
+      .filter(
+        (c) =>
+          c.title.toLowerCase().includes(q) ||
+          (c.category && String(c.category).toLowerCase().includes(q)),
+      )
+      .slice(0, 10);
+  }, [challengeQuery, allChallenges]);
 
   function startCreate() {
     setEditingId(null);
     setForm({ ...EMPTY, sortOrder: items.length + 1 });
+    setChallengeQuery("");
     setShowForm(true);
   }
 
@@ -65,9 +107,12 @@ function AdminBanners() {
       imageUrl: b.imageUrl,
       ctaLabel: b.ctaLabel ?? "",
       ctaLink: b.ctaLink ?? "",
+      challengeId: b.challengeId ?? "",
+      challengeTitle: b.challengeTitle ?? "",
       active: b.active,
       sortOrder: b.sortOrder,
     });
+    setChallengeQuery("");
     setShowForm(true);
   }
 
@@ -75,6 +120,42 @@ function AdminBanners() {
     const reader = new FileReader();
     reader.onload = () => setForm((f) => ({ ...f, imageUrl: String(reader.result) }));
     reader.readAsDataURL(file);
+  }
+
+  async function handleGenerateTitle() {
+    try {
+      setAiLoading(true);
+      const res = await generateTitleFn({
+        data: {
+          subtitle: form.subtitle || undefined,
+          ctaLabel: form.ctaLabel || undefined,
+          challengeTitle: form.challengeTitle || undefined,
+          current: form.title || undefined,
+        },
+      });
+      setForm((f) => ({ ...f, title: res.title }));
+      toast.success("Título gerado pela IA");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Falha ao gerar título");
+    } finally {
+      setAiLoading(false);
+    }
+  }
+
+  function selectChallenge(c: Prediction) {
+    setForm((f) => ({
+      ...f,
+      challengeId: c.id,
+      challengeTitle: c.title,
+      ctaLink: `/previsao/${c.id}`,
+      ctaLabel: f.ctaLabel || "Participar",
+    }));
+    setChallengeQuery("");
+    setShowResults(false);
+  }
+
+  function clearChallenge() {
+    setForm((f) => ({ ...f, challengeId: "", challengeTitle: "" }));
   }
 
   function handleSubmit(e: React.FormEvent) {
@@ -89,6 +170,8 @@ function AdminBanners() {
       imageUrl: form.imageUrl.trim(),
       ctaLabel: form.ctaLabel.trim() || undefined,
       ctaLink: form.ctaLink.trim() || undefined,
+      challengeId: form.challengeId || undefined,
+      challengeTitle: form.challengeTitle || undefined,
       active: form.active,
       sortOrder: Number(form.sortOrder) || 1,
     };
@@ -156,19 +239,99 @@ function AdminBanners() {
           </div>
 
           <div className="grid md:grid-cols-2 gap-4">
-            <div>
+            <div className="md:col-span-2">
+              <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Vincular ao desafio
+              </label>
+              {form.challengeId ? (
+                <div className="mt-1 flex items-center gap-2 px-3 h-10 rounded-lg border border-primary/40 bg-primary/5">
+                  <Link2 className="h-4 w-4 text-primary" />
+                  <span className="text-sm font-semibold truncate flex-1">
+                    {form.challengeTitle}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={clearChallenge}
+                    className="h-7 w-7 grid place-items-center rounded-md hover:bg-muted"
+                    title="Remover vínculo"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              ) : (
+                <div className="relative mt-1">
+                  <div className="flex items-center gap-2 px-3 h-10 rounded-lg border border-border bg-background">
+                    <Search className="h-4 w-4 text-muted-foreground" />
+                    <input
+                      value={challengeQuery}
+                      onChange={(e) => {
+                        setChallengeQuery(e.target.value);
+                        setShowResults(true);
+                      }}
+                      onFocus={() => setShowResults(true)}
+                      onBlur={() => setTimeout(() => setShowResults(false), 200)}
+                      placeholder="Buscar desafio para vincular..."
+                      className="flex-1 bg-transparent outline-none text-sm"
+                    />
+                  </div>
+                  {showResults && challengeResults.length > 0 && (
+                    <div className="absolute z-20 left-0 right-0 mt-1 rounded-lg border border-border bg-popover shadow-lg max-h-64 overflow-auto">
+                      {challengeResults.map((c) => (
+                        <button
+                          key={c.id}
+                          type="button"
+                          onMouseDown={(e) => e.preventDefault()}
+                          onClick={() => selectChallenge(c)}
+                          className="w-full text-left px-3 py-2 hover:bg-muted text-sm flex items-center gap-2"
+                        >
+                          <Link2 className="h-3.5 w-3.5 text-primary shrink-0" />
+                          <span className="truncate flex-1">{c.title}</span>
+                          <span className="text-[10px] text-muted-foreground uppercase">
+                            {c.category}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  {showResults && challengeQuery && challengeResults.length === 0 && (
+                    <div className="absolute z-20 left-0 right-0 mt-1 rounded-lg border border-border bg-popover shadow-lg p-3 text-xs text-muted-foreground">
+                      Nenhum desafio encontrado.
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            <div className="md:col-span-2">
               <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 Título *
               </label>
-              <input
-                value={form.title}
-                onChange={(e) => setForm({ ...form, title: e.target.value })}
-                className="input mt-1 w-full"
-                placeholder="Ex: Não gaste R$ 1 real em palpites"
-                required
-              />
+              <div className="mt-1 flex gap-2">
+                <input
+                  value={form.title}
+                  onChange={(e) => setForm({ ...form, title: e.target.value })}
+                  className="input flex-1"
+                  placeholder="Ex: Não gaste R$ 1 real em palpites"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={handleGenerateTitle}
+                  disabled={aiLoading}
+                  className="inline-flex items-center gap-2 h-10 px-3 rounded-lg bg-gradient-brand text-primary-foreground font-bold text-xs shadow-glow disabled:opacity-60"
+                  title="Gerar título com a IA"
+                >
+                  {aiLoading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Sparkles className="h-4 w-4" />
+                  )}
+                  Gerar com IA
+                </button>
+              </div>
             </div>
-            <div>
+
+            <div className="md:col-span-2">
               <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 Subtítulo
               </label>
@@ -321,6 +484,11 @@ function AdminBanners() {
                   {b.ctaLink && (
                     <p className="text-[11px] text-muted-foreground truncate">
                       → {b.ctaLabel || "CTA"}: {b.ctaLink}
+                    </p>
+                  )}
+                  {b.challengeTitle && (
+                    <p className="text-[11px] text-primary truncate inline-flex items-center gap-1">
+                      <Link2 className="h-3 w-3" /> {b.challengeTitle}
                     </p>
                   )}
                 </div>
