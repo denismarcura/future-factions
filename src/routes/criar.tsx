@@ -32,6 +32,11 @@ function uid() { return Math.random().toString(36).slice(2, 9); }
 
 function Criar() {
   const [isOpen, setIsOpen] = useState(true);
+  const [name, setName] = useState("");
+  const [category, setCategory] = useState(CATEGORIES[0]);
+  const [endsAt, setEndsAt] = useState("");
+  const [prizeName, setPrizeName] = useState("");
+  const [socialLink, setSocialLink] = useState("");
   const [subs, setSubs] = useState<SubCat[]>([
     { id: uid(), question: "Quem ganha o jogo Brasil x Haiti?", options: ["Brasil", "Empate", "Haiti"] },
     { id: uid(), question: "Neymar vai jogar?", options: ["Sim", "Não"] },
@@ -39,6 +44,29 @@ function Criar() {
   const [prizeImg, setPrizeImg] = useState<string | null>(null);
   const [aiPrompt, setAiPrompt] = useState("");
   const [generating, setGenerating] = useState(false);
+  const [errors, setErrors] = useState<string[]>([]);
+  const [published, setPublished] = useState<null | { id: string; name: string }>(null);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const errs: string[] = [];
+    if (!name.trim()) errs.push("Informe o nome do desafio.");
+    if (!endsAt) errs.push("Defina a data e hora de encerramento.");
+    if (subs.length === 0) errs.push("Adicione pelo menos 1 sub-categoria.");
+    subs.forEach((s, i) => {
+      if (!s.question.trim()) errs.push(`Pergunta vazia no palpite #${i + 1}.`);
+      if (s.options.filter(o => o.trim()).length < 2) errs.push(`Palpite #${i + 1} precisa de pelo menos 2 opções preenchidas.`);
+    });
+    if (errs.length) {
+      setErrors(errs);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+    setErrors([]);
+    const id = uid();
+    setPublished({ id, name: name.trim() });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   const addSub = () => {
     if (subs.length >= 5) return;
