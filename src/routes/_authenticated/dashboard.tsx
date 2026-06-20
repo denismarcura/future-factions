@@ -47,6 +47,7 @@ function Dashboard() {
   const [claims, setClaims] = useState<MissionClaim[]>([]);
   const [friends, setFriends] = useState<Friend[]>([]);
   const [myChallenges, setMyChallenges] = useState<Prediction[]>([]);
+  const [participations, setParticipations] = useState<MyParticipation[]>([]);
 
   useEffect(() => {
     (async () => {
