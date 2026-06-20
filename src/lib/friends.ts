@@ -72,9 +72,14 @@ export function toggleRegistered(id: string) {
   write(list);
 }
 
-/** Builds a wa.me URL. Phone is stripped to digits; empty phone opens picker. */
+/** Builds a WhatsApp share URL.
+ *  - With a phone: uses wa.me/<digits> (opens the conversation directly).
+ *  - Without a phone: uses api.whatsapp.com/send, which opens the contact
+ *    picker reliably on web/desktop (wa.me/ with no number errors out on
+ *    several browsers). */
 export function whatsappLink(phone: string | undefined, message: string) {
   const digits = (phone ?? "").replace(/\D/g, "");
-  const base = digits ? `https://wa.me/${digits}` : "https://wa.me/";
-  return `${base}?text=${encodeURIComponent(message)}`;
+  const text = encodeURIComponent(message);
+  if (digits) return `https://wa.me/${digits}?text=${text}`;
+  return `https://api.whatsapp.com/send?text=${text}`;
 }
