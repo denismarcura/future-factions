@@ -119,8 +119,9 @@ function Dashboard() {
         </div>
 
         {/* STATS */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
           <Stat icon={Coins} label="Tokens" value={formatTokens(tokens)} accent="text-gold" />
+          <Stat icon={Target} label="Palpites feitos" value={String(participations.length)} />
           <Stat icon={Target} label="Missões feitas" value={String(missionsDone)} />
           <Stat icon={ListChecks} label="Desafios criados" value={String(myChallenges.length)} />
           <Stat icon={Users} label="Amigos" value={String(friends.length)} />
