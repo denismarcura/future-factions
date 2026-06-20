@@ -283,8 +283,10 @@ function Criar() {
             </Field>
             <div className="grid sm:grid-cols-2 gap-4">
               <Field label="Categoria">
-                <select value={category} onChange={(e) => setCategory(e.target.value)} className="input">
-                  {CATEGORIES.map((c) => <option key={c}>{c}</option>)}
+                <select value={category} onChange={(e) => setCategory(e.target.value)} className="input" disabled={loadingCats}>
+                  {dbCategories.length > 0
+                    ? dbCategories.map((c) => <option key={c.id} value={c.name}>{c.name}</option>)
+                    : CATEGORIES.map((c) => <option key={c}>{c}</option>)}
                 </select>
               </Field>
               <Field label="Fim do desafio">
@@ -294,6 +296,21 @@ function Criar() {
                 </div>
               </Field>
             </div>
+            {availableSubs.length > 0 && (
+              <Field
+                label="Sub-categoria"
+                action={
+                  <Link to="/admin/categorias" className="text-xs font-bold text-primary hover:text-primary/80">
+                    + Cadastrar
+                  </Link>
+                }
+              >
+                <select value={subcategory} onChange={(e) => setSubcategory(e.target.value)} className="input">
+                  <option value="">Selecione uma sub-categoria…</option>
+                  {availableSubs.map((s) => <option key={s.id} value={s.name}>{s.name}</option>)}
+                </select>
+              </Field>
+            )}
             <Field label="Visibilidade">
               <div className="flex gap-2">
                 <button
