@@ -144,19 +144,137 @@ const BUSINESS = [
   "Desafios exclusivos de marcas",
 ];
 
+const CHALLENGE_TYPES = [
+  {
+    icon: Target,
+    tag: "Aberto",
+    title: "Desafio Aberto",
+    desc: "Criado por patrocinadores, pela nossa equipe ou por você. Prêmios variam de uma pizza local até TVs de 50 polegadas — com desafios para sua cidade e para todo o Brasil.",
+    accent: "from-primary/30 to-accent/20",
+  },
+  {
+    icon: Users,
+    tag: "Privado",
+    title: "Desafio Privado",
+    desc: "Você mesmo cria — de um palpite sobre o casal de amigos voltar até bolões de futebol. Damos 500 Tokens para todos os participantes. Se passar de 100 participantes, o 1º colocado ganha prêmio e você ganha 10.000 Tokens.",
+    accent: "from-accent/30 to-primary/20",
+  },
+  {
+    icon: Building2,
+    tag: "Patrocinado",
+    title: "Desafio Patrocinado",
+    desc: "Empresas cadastram desafios e escolhem quantos brindes distribuir. Pode ser por cidade, estado, viagens, celulares, video games, ingressos de cinema e muito mais.",
+    accent: "from-primary/20 to-fuchsia-500/20",
+  },
+];
+
 function HowItWorks() {
   return (
     <AppShell>
       <header className="mb-10">
         <h1 className="font-display text-3xl sm:text-5xl font-black flex items-center gap-3">
-          <BookOpen className="h-8 w-8 text-primary" /> Como <span className="text-gradient-brand">funciona</span>
+          <BookOpen className="h-8 w-8 text-primary" /> Desafio dos <span className="text-gradient-brand">Palpites</span>
         </h1>
-        <p className="text-muted-foreground mt-2 max-w-2xl">
-          Plataforma 100% gratuita. Você não gasta R$ 1 real para palpitar. Toda a economia gira em torno dos{" "}
-          <strong className="text-foreground">Tokens</strong> — uma moeda virtual usada para participar, competir e
-          trocar por prêmios reais.
+        <p className="text-muted-foreground mt-3 max-w-3xl leading-relaxed">
+          Você já fez uma aposta com um amigo? Já participou de um bolão? O{" "}
+          <strong className="text-foreground">Desafio dos Palpites</strong> é a plataforma para você se divertir com seus
+          amigos, <strong className="text-foreground">sem gastar R$ 1 real</strong>, e ainda ganhar Tokens para trocar por
+          brindes fantásticos.
         </p>
       </header>
+
+      {/* 3 tipos de desafios */}
+      <section className="mb-12">
+        <div className="flex items-center gap-2 mb-5">
+          <Sparkles className="h-5 w-5 text-accent" />
+          <h2 className="font-display text-2xl sm:text-3xl font-black">
+            Os 3 tipos de <span className="text-gradient-brand">Desafios</span>
+          </h2>
+        </div>
+        <div className="grid md:grid-cols-3 gap-4">
+          {CHALLENGE_TYPES.map((t, i) => (
+            <div key={i} className={`glass-card rounded-2xl p-6 bg-gradient-to-br ${t.accent} relative overflow-hidden`}>
+              <span className="inline-block text-[10px] uppercase tracking-widest text-accent font-bold mb-2">
+                {t.tag}
+              </span>
+              <div className="flex items-center gap-3 mb-3">
+                <div className="h-10 w-10 rounded-lg bg-primary/20 border border-primary/40 flex items-center justify-center">
+                  <t.icon className="h-5 w-5 text-primary" />
+                </div>
+                <h3 className="font-display font-black text-xl">{t.title}</h3>
+              </div>
+              <p className="text-sm text-muted-foreground leading-relaxed">{t.desc}</p>
+            </div>
+          ))}
+        </div>
+        <p className="text-sm text-muted-foreground mt-5 max-w-3xl">
+          <Sparkles className="inline h-4 w-4 text-accent mr-1" />
+          <strong className="text-foreground">Missões</strong>: ao completar missões (seguir, curtir, comentar nas redes
+          sociais) você ganha créditos extras para dar mais palpites.
+        </p>
+      </section>
+
+      {/* Prêmio mérito iPhone 17 */}
+      <section className="glass-card rounded-2xl p-6 sm:p-8 mb-12 bg-gradient-to-br from-primary/15 via-accent/10 to-fuchsia-500/15 border border-primary/30">
+        <div className="flex items-start gap-4">
+          <div className="h-12 w-12 rounded-xl bg-primary/20 border border-primary/40 flex items-center justify-center shrink-0">
+            <Crown className="h-6 w-6 text-primary" />
+          </div>
+          <div className="flex-1">
+            <span className="inline-block text-[10px] uppercase tracking-widest text-accent font-bold mb-1">
+              Ranking por mérito
+            </span>
+            <h2 className="font-display text-2xl sm:text-3xl font-black leading-tight">
+              Prêmio: <span className="text-gradient-brand">iPhone 17</span>
+            </h2>
+            <p className="text-muted-foreground text-sm mt-2 max-w-3xl leading-relaxed">
+              Teremos um ranking que avalia os usuários que mais participam, acertam e convidam amigos — com premiação
+              alta de Tokens para quem indicar o Desafio dos Palpites para empresas, restaurantes etc. O prêmio é um{" "}
+              <strong className="text-foreground">iPhone 17</strong>, e{" "}
+              <strong className="text-foreground">não é sorteio — é mérito</strong>. A data será divulgada 1 mês antes.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Exemplo de Desafio Aberto */}
+      <section className="glass-card rounded-2xl p-6 sm:p-8 mb-12">
+        <div className="flex items-start gap-4 mb-5">
+          <div className="h-12 w-12 rounded-xl bg-primary/15 border border-primary/30 flex items-center justify-center shrink-0">
+            <Target className="h-6 w-6 text-primary" />
+          </div>
+          <div>
+            <span className="inline-block text-[10px] uppercase tracking-widest text-accent font-bold mb-1">
+              Exemplo prático · custa 100 Tokens criar
+            </span>
+            <h2 className="font-display text-2xl sm:text-3xl font-black leading-tight">
+              Como funciona um <span className="text-gradient-brand">Desafio Aberto</span>
+            </h2>
+            <p className="text-muted-foreground text-sm mt-1">
+              Qualquer usuário cadastra. Exemplo: um jogo da Copa do Mundo — Brasil x Haiti.
+            </p>
+          </div>
+        </div>
+        <RewardTable
+          rows={[
+            { action: "Quem ganha o jogo? (Brasil x Haiti)", reward: "100 Tokens" },
+            { action: "Quem faz o primeiro gol? (Brasil x Haiti)", reward: "100 Tokens" },
+            { action: "Neymar vai jogar? (Sim / Não)", reward: "50 Tokens" },
+            { action: "Qual jogador faz o primeiro gol? (Neymar / Endrick / Vini Jr. / jogador do Haiti)", reward: "500 Tokens" },
+          ]}
+        />
+        <div className="mt-4 rounded-xl border border-accent/40 bg-accent/10 p-4 flex items-start gap-3">
+          <Gift className="h-5 w-5 text-accent shrink-0 mt-0.5" />
+          <p className="text-sm">
+            <strong className="text-foreground">Prêmio extra:</strong> quem acertar todos os palpites ganha uma{" "}
+            <strong className="text-foreground">camiseta do Brasil</strong>.
+          </p>
+        </div>
+        <p className="text-xs text-muted-foreground mt-4 italic">
+          No Desafio dos Palpites, os Tokens são simples de entender, divertidos de acumular e desejados — o segredo é
+          fazer com que as pessoas voltem todos os dias para ganhar mais.
+        </p>
+      </section>
 
       {/* 4 passos */}
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
