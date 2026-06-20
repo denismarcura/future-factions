@@ -1218,10 +1218,31 @@ function InvitePromoSection({
           <ImageIcon className="h-4 w-4 text-primary" />
           <div className="text-sm font-bold">Artes prontas para divulgação</div>
         </div>
+
         <p className="text-xs text-muted-foreground">
-          Removemos o criador de imagens com IA daqui e cadastramos suas peças prontas para download
-          e postagem.
+          Selecione uma arte para postar em seu Instagram.
         </p>
+
+        <div className="rounded-lg border border-border/60 bg-background p-3 space-y-2">
+          <label className="text-xs font-semibold flex items-center gap-1.5">
+            <Copy className="h-3.5 w-3.5 text-primary" />
+            Link para incluir na sua postagem
+          </label>
+          <div className="flex gap-2">
+            <input
+              readOnly
+              value={link}
+              className="flex-1 h-9 px-3 rounded-md border border-border/60 bg-card text-xs"
+            />
+            <button
+              onClick={() => copy(link, "Link copiado")}
+              className="h-9 px-3 rounded-md bg-gradient-brand text-primary-foreground text-xs font-bold inline-flex items-center gap-1.5"
+            >
+              <Copy className="h-3.5 w-3.5" /> Copiar
+            </button>
+          </div>
+        </div>
+
         <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4">
           {galleryItems.map((item) => (
             <article
@@ -1247,7 +1268,39 @@ function InvitePromoSection({
             </article>
           ))}
         </div>
+
+        <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 space-y-2">
+          <label className="text-xs font-semibold flex items-center gap-1.5">
+            <Instagram className="h-3.5 w-3.5 text-primary" />
+            Após postar, coloque aqui seu Instagram para ganhar 5.000 tokens
+          </label>
+          <div className="flex gap-2">
+            <input
+              value={igHandle}
+              onChange={(e) => setIgHandle(e.target.value)}
+              placeholder="@seuinstagram"
+              className="flex-1 h-9 px-3 rounded-md border border-border/60 bg-background text-xs"
+            />
+            <button
+              onClick={() => {
+                if (!igHandle.trim()) {
+                  toast.error("Informe seu @ do Instagram");
+                  return;
+                }
+                toast.success("Postagem registrada! +5.000 tokens em análise.");
+                setIgHandle("");
+              }}
+              className="h-9 px-3 rounded-md bg-gradient-brand text-primary-foreground text-xs font-bold inline-flex items-center gap-1.5"
+            >
+              <Send className="h-3.5 w-3.5" /> Enviar
+            </button>
+          </div>
+          <p className="text-[11px] text-muted-foreground">
+            * Você pode fazer postagens a cada 60 dias.
+          </p>
+        </div>
       </div>
+
     </section>
   );
 }
