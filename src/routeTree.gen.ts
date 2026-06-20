@@ -29,6 +29,7 @@ import { Route as AdminRegrasIaRouteImport } from './routes/admin.regras-ia'
 import { Route as AdminMissoesRouteImport } from './routes/admin.missoes'
 import { Route as AdminEmailMarketingRouteImport } from './routes/admin.email-marketing'
 import { Route as AdminDesafiosRouteImport } from './routes/admin.desafios'
+import { Route as AdminCategoriasRouteImport } from './routes/admin.categorias'
 import { Route as AdminCadastrosRouteImport } from './routes/admin.cadastros'
 import { Route as AdminApisRouteImport } from './routes/admin.apis'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
@@ -132,6 +133,11 @@ const AdminDesafiosRoute = AdminDesafiosRouteImport.update({
   path: '/desafios',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminCategoriasRoute = AdminCategoriasRouteImport.update({
+  id: '/categorias',
+  path: '/categorias',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminCadastrosRoute = AdminCadastrosRouteImport.update({
   id: '/cadastros',
   path: '/cadastros',
@@ -165,6 +171,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/admin/apis': typeof AdminApisRoute
   '/admin/cadastros': typeof AdminCadastrosRoute
+  '/admin/categorias': typeof AdminCategoriasRoute
   '/admin/desafios': typeof AdminDesafiosRoute
   '/admin/email-marketing': typeof AdminEmailMarketingRoute
   '/admin/missoes': typeof AdminMissoesRoute
@@ -188,6 +195,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/admin/apis': typeof AdminApisRoute
   '/admin/cadastros': typeof AdminCadastrosRoute
+  '/admin/categorias': typeof AdminCategoriasRoute
   '/admin/desafios': typeof AdminDesafiosRoute
   '/admin/email-marketing': typeof AdminEmailMarketingRoute
   '/admin/missoes': typeof AdminMissoesRoute
@@ -214,6 +222,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/admin/apis': typeof AdminApisRoute
   '/admin/cadastros': typeof AdminCadastrosRoute
+  '/admin/categorias': typeof AdminCategoriasRoute
   '/admin/desafios': typeof AdminDesafiosRoute
   '/admin/email-marketing': typeof AdminEmailMarketingRoute
   '/admin/missoes': typeof AdminMissoesRoute
@@ -240,6 +249,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/admin/apis'
     | '/admin/cadastros'
+    | '/admin/categorias'
     | '/admin/desafios'
     | '/admin/email-marketing'
     | '/admin/missoes'
@@ -263,6 +273,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/admin/apis'
     | '/admin/cadastros'
+    | '/admin/categorias'
     | '/admin/desafios'
     | '/admin/email-marketing'
     | '/admin/missoes'
@@ -288,6 +299,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/admin/apis'
     | '/admin/cadastros'
+    | '/admin/categorias'
     | '/admin/desafios'
     | '/admin/email-marketing'
     | '/admin/missoes'
@@ -456,6 +468,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminDesafiosRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/categorias': {
+      id: '/admin/categorias'
+      path: '/categorias'
+      fullPath: '/admin/categorias'
+      preLoaderRoute: typeof AdminCategoriasRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/cadastros': {
       id: '/admin/cadastros'
       path: '/cadastros'
@@ -494,6 +513,7 @@ const AuthenticatedRouteRouteWithChildren =
 interface AdminRouteChildren {
   AdminApisRoute: typeof AdminApisRoute
   AdminCadastrosRoute: typeof AdminCadastrosRoute
+  AdminCategoriasRoute: typeof AdminCategoriasRoute
   AdminDesafiosRoute: typeof AdminDesafiosRoute
   AdminEmailMarketingRoute: typeof AdminEmailMarketingRoute
   AdminMissoesRoute: typeof AdminMissoesRoute
@@ -504,6 +524,7 @@ interface AdminRouteChildren {
 const AdminRouteChildren: AdminRouteChildren = {
   AdminApisRoute: AdminApisRoute,
   AdminCadastrosRoute: AdminCadastrosRoute,
+  AdminCategoriasRoute: AdminCategoriasRoute,
   AdminDesafiosRoute: AdminDesafiosRoute,
   AdminEmailMarketingRoute: AdminEmailMarketingRoute,
   AdminMissoesRoute: AdminMissoesRoute,

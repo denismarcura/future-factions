@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import {
   Plus, Trash2, Sparkles, Upload, Wand2, Calendar as CalIcon,
@@ -11,6 +11,7 @@ import { CATEGORIES } from "@/lib/mock-data";
 import { generateInviteText } from "@/lib/invite.functions";
 import { saveUserChallenge } from "@/lib/user-challenges";
 import { improveTitle } from "@/lib/title-ai.functions";
+import { listCategories, listSubcategories, type ChallengeCategory, type ChallengeSubcategory } from "@/lib/challenge-categories";
 
 export const Route = createFileRoute("/criar")({
   head: () => ({
@@ -38,6 +39,39 @@ function Criar() {
   const [isOpen, setIsOpen] = useState(true);
   const [name, setName] = useState("");
   const [category, setCategory] = useState<string>(CATEGORIES[0]);
+  const [subcategory, setSubcategory] = useState<string>("");
+  const [dbCategories, setDbCategories] = useState<ChallengeCategory[]>([]);
+  const [dbSubcategories, setDbSubcategories] = useState<ChallengeSubcategory[]>([]);
+  const [loadingCats, setLoadingCats] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    Promise.all([listCategories(), listSubcategories()])
+      .then(([c, s]) => {
+        if (cancelled) return;
+        setDbCategories(c);
+        setDbSubcategories(s);
+        if (c.length && !c.some(x => x.name === category)) setCategory(c[0].name);
+      })
+      .catch(() => {})
+      .finally(() => { if (!cancelled) setLoadingCats(false); });
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const currentCategoryId = useMemo(
+    () => dbCategories.find(c => c.name === category)?.id ?? null,
+    [dbCategories, category],
+  );
+  const availableSubs = useMemo(
+    () => dbSubcategories.filter(s => s.category_id === currentCategoryId),
+    [dbSubcategories, currentCategoryId],
+  );
+
+  useEffect(() => {
+    if (!availableSubs.some(s => s.name === subcategory)) setSubcategory("");
+  }, [availableSubs, subcategory]);
+
   const [endsAt, setEndsAt] = useState("");
   const [prizeName, setPrizeName] = useState("");
   const [socialLink, setSocialLink] = useState("");
@@ -249,8 +283,10 @@ function Criar() {
             </Field>
             <div className="grid sm:grid-cols-2 gap-4">
               <Field label="Categoria">
-                <select value={category} onChange={(e) => setCategory(e.target.value)} className="input">
-                  {CATEGORIES.map((c) => <option key={c}>{c}</option>)}
+                <select value={category} onChange={(e) => setCategory(e.target.value)} className="input" disabled={loadingCats}>
+                  {dbCategories.length > 0
+                    ? dbCategories.map((c) => <option key={c.id} value={c.name}>{c.name}</option>)
+                    : CATEGORIES.map((c) => <option key={c}>{c}</option>)}
                 </select>
               </Field>
               <Field label="Fim do desafio">
@@ -260,6 +296,21 @@ function Criar() {
                 </div>
               </Field>
             </div>
+            {availableSubs.length > 0 && (
+              <Field
+                label="Sub-categoria"
+                action={
+                  <Link to="/admin/categorias" className="text-xs font-bold text-primary hover:text-primary/80">
+                    + Cadastrar
+                  </Link>
+                }
+              >
+                <select value={subcategory} onChange={(e) => setSubcategory(e.target.value)} className="input">
+                  <option value="">Selecione uma sub-categoria…</option>
+                  {availableSubs.map((s) => <option key={s.id} value={s.name}>{s.name}</option>)}
+                </select>
+              </Field>
+            )}
             <Field label="Visibilidade">
               <div className="flex gap-2">
                 <button
