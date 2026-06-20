@@ -20,6 +20,7 @@ import {
 } from "@/lib/friends";
 import { getUserChallenges, saveUserChallenge } from "@/lib/user-challenges";
 import { generateChallenges, type GeneratedChallenge } from "@/lib/generate-challenges.functions";
+import { generateInvitePromoText } from "@/lib/invite-ai.functions";
 import type { Prediction } from "@/lib/mock-data";
 import logoAsset from "@/assets/logo-desafio.png.asset.json";
 
@@ -151,7 +152,7 @@ function Dashboard() {
         />
 
         {/* INVITE PROMO (email + whatsapp + instagram creative) */}
-        <InvitePromoSection inviterName={name} />
+        <InvitePromoSection inviterName={name} myChallenges={myChallenges} />
 
         {/* SHOP PREVIEW */}
         <ShopPreviewSection tokens={tokens} />
@@ -795,7 +796,13 @@ const PRIZES = [
   { emoji: "👕", label: "Camiseta da Copa" },
 ];
 
-function InvitePromoSection({ inviterName }: { inviterName: string }) {
+function InvitePromoSection({
+  inviterName,
+  myChallenges,
+}: {
+  inviterName: string;
+  myChallenges: Prediction[];
+}) {
   const link = `${SITE_URL}/auth`;
   const defaultWhats = `Oi! 👋 Vem jogar no *Desafio dos Palpites* comigo!\n\n${inviterName} te convidou. Dê seus palpites sobre a Copa, futebol, política, entretenimento e muito mais — e concorra a prêmios incríveis:\n\n📱 iPhone\n📺 TV LED\n🎮 PS5\n💻 Notebook\n👕 Camiseta da Copa\n\n🎁 Você ganha 1.000 tokens só por se cadastrar.\n✅ 100% grátis — sem nenhum custo!\n\nEntra aqui: ${link}`;
   const defaultEmail = `Olá!\n\n${inviterName} te convidou para participar do Desafio dos Palpites — uma plataforma onde você dá seus palpites sobre Copa do Mundo, futebol, política, ciência e muito mais, acumula tokens e concorre a prêmios reais como:\n\n• iPhone\n• TV LED\n• PlayStation 5\n• Notebook\n• Camiseta oficial da Copa\n\nAo se cadastrar pelo link abaixo você já ganha 1.000 tokens de boas-vindas. É 100% grátis, sem nenhum custo.\n\nAcesse: ${link}\n\nNos vemos lá! 🏆`;
@@ -806,6 +813,56 @@ function InvitePromoSection({ inviterName }: { inviterName: string }) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [creativeUrl, setCreativeUrl] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
+  const [aiBusy, setAiBusy] = useState<"whatsapp" | "email" | null>(null);
+
+  const generateAi = useServerFn(generateInvitePromoText);
+
+  // Build the lists the AI uses: my challenges + the 3 expiring soonest
+  const meta = useMemo(() => {
+    const fmt = (iso?: string) => {
+      if (!iso) return undefined;
+      const d = new Date(iso);
+      if (Number.isNaN(d.getTime())) return undefined;
+      return d.toLocaleDateString("pt-BR");
+    };
+    const mine = myChallenges.slice(0, 5).map((c) => ({
+      title: c.title,
+      category: typeof c.category === "string" ? c.category : undefined,
+      closesAt: fmt(c.closesAt),
+    }));
+    const expiring = [...myChallenges]
+      .filter((c) => c.closesAt && new Date(c.closesAt).getTime() > Date.now())
+      .sort((a, b) => new Date(a.closesAt).getTime() - new Date(b.closesAt).getTime())
+      .slice(0, 3)
+      .map((c) => ({
+        title: c.title,
+        category: typeof c.category === "string" ? c.category : undefined,
+        closesAt: fmt(c.closesAt),
+      }));
+    return { mine, expiring };
+  }, [myChallenges]);
+
+  async function gerarTextoIA(channel: "whatsapp" | "email") {
+    setAiBusy(channel);
+    try {
+      const { text } = await generateAi({
+        data: {
+          inviterName,
+          channel,
+          link,
+          myChallenges: meta.mine,
+          expiringChallenges: meta.expiring,
+        },
+      });
+      if (channel === "whatsapp") setWhatsText(text);
+      else setEmailText(text);
+      toast.success("Texto gerado com IA");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Erro ao gerar texto");
+    } finally {
+      setAiBusy(null);
+    }
+  }
 
   function copy(text: string, label: string) {
     navigator.clipboard.writeText(text).then(
@@ -815,7 +872,8 @@ function InvitePromoSection({ inviterName }: { inviterName: string }) {
   }
 
   function openWhats() {
-    const url = `https://wa.me/?text=${encodeURIComponent(whatsText)}`;
+    // api.whatsapp.com/send opens the contact picker reliably on web.
+    const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(whatsText)}`;
     window.open(url, "_blank", "noopener,noreferrer");
   }
 
