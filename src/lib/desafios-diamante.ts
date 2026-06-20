@@ -1,5 +1,19 @@
 import { USERS } from "@/lib/mock-users";
 import type { Prediction, PredictionOption, SubPrediction } from "@/lib/mock-data";
+import imgCampeao from "@/assets/dd-campeao.jpg";
+import imgFinal from "@/assets/dd-final.jpg";
+import imgGols from "@/assets/dd-gols.jpg";
+import imgBrasil from "@/assets/dd-brasil.jpg";
+import imgTriplo from "@/assets/dd-triplo.jpg";
+import imgOitavas from "@/assets/dd-oitavas.jpg";
+import imgQuartas from "@/assets/dd-quartas.jpg";
+import imgSemi from "@/assets/dd-semi.jpg";
+import imgTerceiro from "@/assets/dd-terceiro.jpg";
+
+const IMG: Record<string, string> = {
+  dd1: imgCampeao, dd2: imgFinal, dd3: imgGols, dd4: imgBrasil, dd5: imgTriplo,
+  dd6: imgOitavas, dd7: imgQuartas, dd8: imgSemi, dd9: imgTerceiro,
+};
 
 const REQUIREMENTS = [
   "🎯 Ter feito todas as missões",
@@ -193,4 +207,4 @@ const DIAMANTES: Prediction[] = [
   },
 ];
 
-export const DESAFIOS_DIAMANTE = DIAMANTES;
+export const DESAFIOS_DIAMANTE = DIAMANTES.map((d) => ({ ...d, imageUrl: IMG[d.id] }));
