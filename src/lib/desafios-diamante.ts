@@ -207,4 +207,4 @@ const DIAMANTES: Prediction[] = [
   },
 ];
 
-export const DESAFIOS_DIAMANTE = DIAMANTES;
+export const DESAFIOS_DIAMANTE = DIAMANTES.map((d) => ({ ...d, imageUrl: IMG[d.id] }));
