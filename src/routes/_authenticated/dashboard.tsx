@@ -21,6 +21,7 @@ import {
 import { getUserChallenges, saveUserChallenge } from "@/lib/user-challenges";
 import { generateChallenges, type GeneratedChallenge } from "@/lib/generate-challenges.functions";
 import type { Prediction } from "@/lib/mock-data";
+import logoAsset from "@/assets/logo-desafio.png.asset.json";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   component: Dashboard,
