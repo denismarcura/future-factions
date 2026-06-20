@@ -51,6 +51,7 @@ function PredictionPage() {
   const [bonusMission, setBonusMission] = useState<Mission | null>(null);
   const [bonusDone, setBonusDone] = useState(false);
   const [bonusBusy, setBonusBusy] = useState(false);
+  const [confirmed, setConfirmed] = useState(false);
 
   useEffect(() => {
     (async () => {
