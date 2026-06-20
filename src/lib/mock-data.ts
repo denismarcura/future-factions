@@ -102,6 +102,7 @@ export type Prediction = {
   subPredictions?: SubPrediction[];
   entryFee?: number;
   prizeTiers?: PrizeTier[];
+  imageUrl?: string;
 };
 
 const COPA_LOUCA = [
