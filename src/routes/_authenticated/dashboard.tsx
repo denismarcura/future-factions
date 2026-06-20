@@ -34,6 +34,7 @@ type Profile = {
   provider: string | null;
   status: string;
   created_at: string;
+  welcome_bonus?: number | null;
 };
 
 function Dashboard() {
