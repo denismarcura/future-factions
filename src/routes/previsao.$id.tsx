@@ -56,6 +56,10 @@ function PredictionPage() {
   const [confirmed, setConfirmed] = useState(false);
 
   useEffect(() => {
+    if (hasParticipated(p.id)) setConfirmed(true);
+  }, [p.id]);
+
+  useEffect(() => {
     (async () => {
       try {
         const igMissions = await listMissions({ platform: "instagram", activeOnly: true });
