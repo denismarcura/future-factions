@@ -1,12 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import {
   Plus, Trash2, Sparkles, Upload, Wand2, Calendar as CalIcon,
   Gift, Coins, Instagram, Facebook, Youtube, Music2, Globe, Lock,
-  CheckCircle2, Share2, Copy, AlertCircle, UserPlus, Mail, Users,
+  CheckCircle2, Share2, Copy, AlertCircle, UserPlus, Mail, Users, Loader2,
 } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { CATEGORIES } from "@/lib/mock-data";
+import { generateInviteText } from "@/lib/invite.functions";
 
 export const Route = createFileRoute("/criar")({
   head: () => ({
@@ -53,6 +55,42 @@ function Criar() {
   const removeFriend = (id: string) => setFriends(friends.filter(f => f.id !== id));
   const updateFriend = (id: string, patch: Partial<{ name: string; email: string }>) =>
     setFriends(friends.map(f => f.id === id ? { ...f, ...patch } : f));
+
+  const [inviteText, setInviteText] = useState("");
+  const [inviterName, setInviterName] = useState("");
+  const [genLoading, setGenLoading] = useState(false);
+  const [genError, setGenError] = useState<string | null>(null);
+  const generateInvite = useServerFn(generateInviteText);
+
+  const handleGenerateInvite = async () => {
+    setGenError(null);
+    if (!inviterName.trim()) {
+      setGenError("Informe seu nome (quem está convidando) antes de gerar o texto.");
+      return;
+    }
+    if (!name.trim()) {
+      setGenError("Dê um nome ao desafio antes de gerar o texto do convite.");
+      return;
+    }
+    setGenLoading(true);
+    try {
+      const palpites = subs
+        .map(s => {
+          const opts = s.options.filter(o => o.trim());
+          if (!s.question.trim() || opts.length < 2) return "";
+          return `${s.question.trim()} (${opts.join(" / ")})`;
+        })
+        .filter(Boolean);
+      const { text } = await generateInvite({
+        data: { inviterName: inviterName.trim(), challengeName: name.trim(), palpites },
+      });
+      setInviteText(text);
+    } catch (err) {
+      setGenError(err instanceof Error ? err.message : "Não foi possível gerar o texto agora.");
+    } finally {
+      setGenLoading(false);
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -405,6 +443,54 @@ function Criar() {
               >
                 <UserPlus className="h-4 w-4" /> + convide mais amigos
               </button>
+            </div>
+
+            <div className="mt-5 pt-5 border-t border-border/40 space-y-3">
+              <Field label="Seu nome (quem está convidando)">
+                <input
+                  value={inviterName}
+                  onChange={(e) => setInviterName(e.target.value)}
+                  placeholder="Ex.: João Silva"
+                  className="input"
+                />
+              </Field>
+
+              <div className="flex items-center justify-between gap-2">
+                <label className="text-xs uppercase tracking-wider font-bold text-muted-foreground">
+                  Texto do e-mail de convite
+                </label>
+                <button
+                  type="button"
+                  onClick={handleGenerateInvite}
+                  disabled={genLoading}
+                  className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg bg-gradient-to-r from-primary to-gold text-background text-xs font-bold hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed transition"
+                >
+                  {genLoading ? (
+                    <><Loader2 className="h-3.5 w-3.5 animate-spin" /> Gerando…</>
+                  ) : (
+                    <><Wand2 className="h-3.5 w-3.5" /> Gerar com IA</>
+                  )}
+                </button>
+              </div>
+
+              <textarea
+                value={inviteText}
+                onChange={(e) => setInviteText(e.target.value)}
+                rows={8}
+                placeholder="Escreva aqui o texto do e-mail de convite, ou clique em &quot;Gerar com IA&quot; para criar automaticamente um convite com o nome do desafio e os palpites."
+                className="input min-h-[180px] resize-y leading-relaxed"
+              />
+
+              {genError && (
+                <div className="flex items-start gap-2 rounded-lg border border-destructive/40 bg-destructive/10 p-2.5 text-xs text-destructive">
+                  <AlertCircle className="h-3.5 w-3.5 mt-0.5 shrink-0" />
+                  <span>{genError}</span>
+                </div>
+              )}
+
+              <p className="text-xs text-muted-foreground">
+                A IA usa seu nome, o nome do desafio e os palpites cadastrados para escrever um convite pronto para enviar.
+              </p>
             </div>
           </Section>
         </div>
