@@ -1035,6 +1035,7 @@ function InvitePromoSection({
   const [emailText, setEmailText] = useState(defaultEmail);
   const [emailSubject, setEmailSubject] = useState("Vem jogar comigo no Desafio dos Palpites 🏆");
   const [aiBusy, setAiBusy] = useState<"whatsapp" | "email" | null>(null);
+  const [igHandle, setIgHandle] = useState("");
 
   const generateAi = useServerFn(generateInvitePromoText);
 
