@@ -629,7 +629,7 @@ function FriendsSection({
       <SectionTitle
         icon={Users}
         title="Meus amigos"
-        hint={`${registered.length} cadastrados · ${pending.length} pendentes`}
+        hint={`Cada amigo que se cadastrar você ganha 100 tokens · ${registered.length} cadastrados · ${pending.length} pendentes`}
         right={
           <a
             href={whatsappLink(undefined, inviteMessage)}
