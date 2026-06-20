@@ -84,6 +84,7 @@ function TokenPill() {
 
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const { user } = useAuth();
 
   return (
     <div className="min-h-screen bg-background bg-radial-brand">
