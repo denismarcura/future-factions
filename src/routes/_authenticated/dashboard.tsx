@@ -806,16 +806,10 @@ function Empty({ children }: { children: React.ReactNode }) {
   );
 }
 
-/* ---------- Invite Promo (email + whatsapp + instagram creative) ---------- */
+/* ---------- Invite Promo (email + whatsapp + artes prontas) ---------- */
 
 const SITE_URL = "https://future-factions.lovable.app";
-const PRIZES = [
-  { emoji: "📱", label: "iPhone" },
-  { emoji: "📺", label: "TV LED" },
-  { emoji: "🎮", label: "PS5" },
-  { emoji: "💻", label: "Notebook" },
-  { emoji: "👕", label: "Camiseta da Copa" },
-];
+
 
 function InvitePromoSection({
   inviterName,
