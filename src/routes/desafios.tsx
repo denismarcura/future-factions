@@ -49,6 +49,7 @@ function DesafiosPage() {
       list = [...userChallenges, ...PREDICTIONS];
     }
     if (cat !== "Todas") list = list.filter((p) => p.category === cat);
+    list.sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt));
     return list;
   }, [tab, cat, userChallenges, publicMock, privateMock]);
 
