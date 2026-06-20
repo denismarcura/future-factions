@@ -395,6 +395,16 @@ function Criar() {
                   </button>
                   <button
                     type="button"
+                    onClick={() => {
+                      setAiOpen(false);
+                      document.getElementById("manual-section")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                    }}
+                    className="h-11 px-4 rounded-lg border border-primary/40 bg-primary/10 text-primary text-sm font-bold inline-flex items-center gap-1.5"
+                  >
+                    <PencilLine className="h-4 w-4" /> Criar manualmente
+                  </button>
+                  <button
+                    type="button"
                     onClick={() => setAiOpen(false)}
                     className="h-11 px-4 rounded-lg border border-border text-sm font-semibold"
                   >
