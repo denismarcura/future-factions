@@ -352,7 +352,10 @@ function PredictionPage() {
                   <Row label="Seu saldo" value={`${formatTokens(CURRENT_USER.tokens)} TKN`} />
                 </div>
 
-                <button className="mt-5 w-full h-12 rounded-xl bg-gradient-brand text-primary-foreground font-display font-black tracking-wide shadow-glow hover:scale-[1.01] transition">
+                <button
+                  onClick={() => toast.success(`✅ Aposta de ${amount} TKN em "${sel.label}" confirmada!`)}
+                  className="mt-5 w-full h-12 rounded-xl bg-gradient-brand text-primary-foreground font-display font-black tracking-wide shadow-glow hover:scale-[1.01] transition"
+                >
                   APOSTAR {amount} TOKENS
                 </button>
 
