@@ -783,3 +783,306 @@ function Empty({ children }: { children: React.ReactNode }) {
     </div>
   );
 }
+
+/* ---------- Invite Promo (email + whatsapp + instagram creative) ---------- */
+
+const SITE_URL = "https://future-factions.lovable.app";
+const PRIZES = [
+  { emoji: "📱", label: "iPhone" },
+  { emoji: "📺", label: "TV LED" },
+  { emoji: "🎮", label: "PS5" },
+  { emoji: "💻", label: "Notebook" },
+  { emoji: "👕", label: "Camiseta da Copa" },
+];
+
+function InvitePromoSection({ inviterName }: { inviterName: string }) {
+  const link = `${SITE_URL}/auth`;
+  const defaultWhats = `Oi! 👋 Vem jogar no *Desafio dos Palpites* comigo!\n\n${inviterName} te convidou. Dê seus palpites sobre a Copa, futebol, política, entretenimento e muito mais — e concorra a prêmios incríveis:\n\n📱 iPhone\n📺 TV LED\n🎮 PS5\n💻 Notebook\n👕 Camiseta da Copa\n\n🎁 Você ganha 1.000 tokens só por se cadastrar.\n✅ 100% grátis — sem nenhum custo!\n\nEntra aqui: ${link}`;
+  const defaultEmail = `Olá!\n\n${inviterName} te convidou para participar do Desafio dos Palpites — uma plataforma onde você dá seus palpites sobre Copa do Mundo, futebol, política, ciência e muito mais, acumula tokens e concorre a prêmios reais como:\n\n• iPhone\n• TV LED\n• PlayStation 5\n• Notebook\n• Camiseta oficial da Copa\n\nAo se cadastrar pelo link abaixo você já ganha 1.000 tokens de boas-vindas. É 100% grátis, sem nenhum custo.\n\nAcesse: ${link}\n\nNos vemos lá! 🏆`;
+
+  const [whatsText, setWhatsText] = useState(defaultWhats);
+  const [emailText, setEmailText] = useState(defaultEmail);
+  const [emailSubject, setEmailSubject] = useState("Vem jogar comigo no Desafio dos Palpites 🏆");
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const [creativeUrl, setCreativeUrl] = useState<string | null>(null);
+  const [creating, setCreating] = useState(false);
+
+  function copy(text: string, label: string) {
+    navigator.clipboard.writeText(text).then(
+      () => toast.success(`${label} copiado!`),
+      () => toast.error("Não foi possível copiar."),
+    );
+  }
+
+  function openWhats() {
+    const url = `https://wa.me/?text=${encodeURIComponent(whatsText)}`;
+    window.open(url, "_blank", "noopener,noreferrer");
+  }
+
+  function openEmail() {
+    const url = `mailto:?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailText)}`;
+    window.location.href = url;
+  }
+
+  async function gerarCriativo() {
+    setCreating(true);
+    try {
+      const url = await renderInviteCreative(canvasRef.current, {
+        inviter: inviterName,
+        logoUrl: logoAsset.url,
+        link,
+      });
+      setCreativeUrl(url);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Erro ao gerar imagem");
+    } finally {
+      setCreating(false);
+    }
+  }
+
+  return (
+    <section className="glass-card rounded-2xl p-5 border border-border/60 space-y-5">
+      <SectionTitle
+        icon={Sparkles}
+        title="Divulgue e convide"
+        hint="Textos prontos pra WhatsApp e e-mail + imagem pronta pra postar no Instagram."
+      />
+
+      <div className="grid lg:grid-cols-2 gap-4">
+        {/* WhatsApp */}
+        <div className="rounded-xl bg-card border border-border/60 p-4 space-y-2">
+          <div className="flex items-center gap-2">
+            <MessageCircle className="h-4 w-4 text-[#25D366]" />
+            <div className="text-sm font-bold">Texto para WhatsApp</div>
+          </div>
+          <textarea
+            value={whatsText}
+            onChange={(e) => setWhatsText(e.target.value)}
+            rows={10}
+            className="w-full px-3 py-2 rounded-lg bg-background border border-border/60 text-xs leading-relaxed"
+          />
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => copy(whatsText, "Texto do WhatsApp")}
+              className="h-9 px-3 rounded-full bg-background border border-border/60 text-xs font-bold inline-flex items-center gap-1.5"
+            >
+              <Copy className="h-3.5 w-3.5" /> Copiar texto
+            </button>
+            <button
+              onClick={openWhats}
+              className="h-9 px-3 rounded-full bg-[#25D366] text-white text-xs font-bold inline-flex items-center gap-1.5"
+            >
+              <MessageCircle className="h-3.5 w-3.5" /> Enviar no WhatsApp
+            </button>
+          </div>
+        </div>
+
+        {/* Email */}
+        <div className="rounded-xl bg-card border border-border/60 p-4 space-y-2">
+          <div className="flex items-center gap-2">
+            <Mail className="h-4 w-4 text-primary" />
+            <div className="text-sm font-bold">Texto para e-mail</div>
+          </div>
+          <input
+            value={emailSubject}
+            onChange={(e) => setEmailSubject(e.target.value)}
+            placeholder="Assunto"
+            className="w-full h-9 px-3 rounded-lg bg-background border border-border/60 text-xs font-semibold"
+          />
+          <textarea
+            value={emailText}
+            onChange={(e) => setEmailText(e.target.value)}
+            rows={8}
+            className="w-full px-3 py-2 rounded-lg bg-background border border-border/60 text-xs leading-relaxed"
+          />
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => copy(`${emailSubject}\n\n${emailText}`, "Texto do e-mail")}
+              className="h-9 px-3 rounded-full bg-background border border-border/60 text-xs font-bold inline-flex items-center gap-1.5"
+            >
+              <Copy className="h-3.5 w-3.5" /> Copiar texto
+            </button>
+            <button
+              onClick={openEmail}
+              className="h-9 px-3 rounded-full bg-gradient-brand text-primary-foreground text-xs font-bold inline-flex items-center gap-1.5"
+            >
+              <Send className="h-3.5 w-3.5" /> Abrir e-mail
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Instagram creative */}
+      <div className="rounded-xl bg-card border border-border/60 p-4">
+        <div className="flex items-center gap-2 mb-3">
+          <ImageIcon className="h-4 w-4 text-primary" />
+          <div className="text-sm font-bold">Imagem para Instagram</div>
+        </div>
+        <div className="grid sm:grid-cols-[1fr_auto] gap-4 items-start">
+          <div className="aspect-square w-full max-w-[360px] rounded-xl border border-border/60 bg-background overflow-hidden grid place-items-center">
+            {creativeUrl ? (
+              <img src={creativeUrl} alt="Criativo" className="w-full h-full object-cover" />
+            ) : (
+              <div className="p-6 text-center text-xs text-muted-foreground">
+                Clique em "Gerar imagem" para criar uma arte 1080×1080 com o logo, os prêmios e a chamada para participar.
+              </div>
+            )}
+          </div>
+          <canvas ref={canvasRef} width={1080} height={1080} className="hidden" />
+          <div className="flex flex-col gap-2 min-w-[180px]">
+            <button
+              onClick={gerarCriativo}
+              disabled={creating}
+              className="h-10 px-4 rounded-full bg-gradient-brand text-primary-foreground text-sm font-bold inline-flex items-center justify-center gap-2 shadow-glow disabled:opacity-60"
+            >
+              {creating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+              {creating ? "Gerando…" : "Gerar imagem"}
+            </button>
+            {creativeUrl && (
+              <a
+                href={creativeUrl}
+                download="desafio-dos-palpites.png"
+                className="h-10 px-4 rounded-full bg-background border border-border/60 text-sm font-bold inline-flex items-center justify-center gap-2"
+              >
+                <Download className="h-4 w-4" /> Baixar
+              </a>
+            )}
+            <div className="text-[11px] text-muted-foreground leading-relaxed">
+              Salve a imagem e poste no seu Instagram (Feed ou Stories). Use o texto do WhatsApp/e-mail acima como legenda.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function loadImg(src: string): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => resolve(img);
+    img.onerror = () => reject(new Error("Falha ao carregar imagem"));
+    img.src = src;
+  });
+}
+
+async function renderInviteCreative(
+  canvas: HTMLCanvasElement | null,
+  data: { inviter: string; logoUrl: string; link: string },
+): Promise<string> {
+  if (!canvas) throw new Error("Canvas indisponível");
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("Contexto 2D indisponível");
+  const W = canvas.width, H = canvas.height;
+
+  // Background
+  const grad = ctx.createLinearGradient(0, 0, W, H);
+  grad.addColorStop(0, "#031309");
+  grad.addColorStop(0.5, "#0f3d22");
+  grad.addColorStop(1, "#031309");
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, W, H);
+
+  // Glow
+  const glow = ctx.createRadialGradient(W / 2, H * 0.35, 30, W / 2, H * 0.35, 700);
+  glow.addColorStop(0, "rgba(34,197,94,0.35)");
+  glow.addColorStop(1, "rgba(0,0,0,0)");
+  ctx.fillStyle = glow;
+  ctx.fillRect(0, 0, W, H);
+
+  // Border
+  ctx.strokeStyle = "rgba(34,197,94,0.6)";
+  ctx.lineWidth = 6;
+  ctx.strokeRect(24, 24, W - 48, H - 48);
+
+  // Logo (centered top)
+  try {
+    const logo = await loadImg(data.logoUrl);
+    const logoH = 180;
+    const logoW = (logo.width / logo.height) * logoH;
+    ctx.drawImage(logo, (W - logoW) / 2, 70, logoW, logoH);
+  } catch {
+    ctx.fillStyle = "#22c55e";
+    ctx.font = "900 64px system-ui, sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText("DESAFIO DOS PALPITES", W / 2, 160);
+    ctx.textAlign = "start";
+  }
+
+  // Headline
+  ctx.fillStyle = "#ffffff";
+  ctx.font = "900 88px system-ui, sans-serif";
+  ctx.textAlign = "center";
+  ctx.fillText("DÊ SEU PALPITE", W / 2, 320);
+  ctx.fillStyle = "#facc15";
+  ctx.font = "900 88px system-ui, sans-serif";
+  ctx.fillText("GANHE PRÊMIOS", W / 2, 410);
+
+  // Prizes grid
+  ctx.textAlign = "center";
+  const prizes = PRIZES;
+  const cols = prizes.length;
+  const cellW = (W - 140) / cols;
+  const cellY = 490;
+  const cellH = 260;
+  for (let i = 0; i < prizes.length; i++) {
+    const cx = 70 + i * cellW + cellW / 2;
+    // box
+    ctx.fillStyle = "rgba(34,197,94,0.12)";
+    ctx.strokeStyle = "rgba(34,197,94,0.55)";
+    ctx.lineWidth = 2;
+    const bx = 70 + i * cellW + 10;
+    const bw = cellW - 20;
+    ctx.beginPath();
+    const r = 18;
+    ctx.moveTo(bx + r, cellY);
+    ctx.arcTo(bx + bw, cellY, bx + bw, cellY + cellH, r);
+    ctx.arcTo(bx + bw, cellY + cellH, bx, cellY + cellH, r);
+    ctx.arcTo(bx, cellY + cellH, bx, cellY, r);
+    ctx.arcTo(bx, cellY, bx + bw, cellY, r);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+    // emoji
+    ctx.font = "120px system-ui, 'Apple Color Emoji', 'Segoe UI Emoji'";
+    ctx.fillText(prizes[i].emoji, cx, cellY + 140);
+    // label
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "700 22px system-ui, sans-serif";
+    ctx.fillText(prizes[i].label, cx, cellY + 220);
+  }
+
+  // CTA box
+  const boxY = H - 280;
+  ctx.fillStyle = "rgba(250,204,21,0.18)";
+  ctx.strokeStyle = "#facc15";
+  ctx.lineWidth = 4;
+  const bx = 70, bw = W - 140, bh = 100, br = 24;
+  ctx.beginPath();
+  ctx.moveTo(bx + br, boxY);
+  ctx.arcTo(bx + bw, boxY, bx + bw, boxY + bh, br);
+  ctx.arcTo(bx + bw, boxY + bh, bx, boxY + bh, br);
+  ctx.arcTo(bx, boxY + bh, bx, boxY, br);
+  ctx.arcTo(bx, boxY, bx + bw, boxY, br);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+  ctx.fillStyle = "#facc15";
+  ctx.font = "900 56px system-ui, sans-serif";
+  ctx.textBaseline = "middle";
+  ctx.fillText("PARTICIPE — É DE GRAÇA!", W / 2, boxY + bh / 2);
+  ctx.textBaseline = "top";
+
+  // Footer
+  ctx.fillStyle = "#ffffff";
+  ctx.font = "700 32px system-ui, sans-serif";
+  const inviter = (data.inviter || "Um amigo").trim();
+  ctx.fillText(`${inviter} te convidou`, W / 2, H - 150);
+  ctx.fillStyle = "rgba(255,255,255,0.85)";
+  ctx.font = "600 26px system-ui, sans-serif";
+  ctx.fillText(data.link, W / 2, H - 100);
+  ctx.textAlign = "start";
+
+  return canvas.toDataURL("image/png");
+}
