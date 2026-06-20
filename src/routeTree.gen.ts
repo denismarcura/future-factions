@@ -25,7 +25,9 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as PrevisaoIdRouteImport } from './routes/previsao.$id'
+import { Route as AdminRegrasIaRouteImport } from './routes/admin.regras-ia'
 import { Route as AdminEmailMarketingRouteImport } from './routes/admin.email-marketing'
+import { Route as AdminDesafiosRouteImport } from './routes/admin.desafios'
 import { Route as AdminCadastrosRouteImport } from './routes/admin.cadastros'
 import { Route as AdminApisRouteImport } from './routes/admin.apis'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
@@ -109,9 +111,19 @@ const PrevisaoIdRoute = PrevisaoIdRouteImport.update({
   path: '/previsao/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRegrasIaRoute = AdminRegrasIaRouteImport.update({
+  id: '/regras-ia',
+  path: '/regras-ia',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminEmailMarketingRoute = AdminEmailMarketingRouteImport.update({
   id: '/email-marketing',
   path: '/email-marketing',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminDesafiosRoute = AdminDesafiosRouteImport.update({
+  id: '/desafios',
+  path: '/desafios',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminCadastrosRoute = AdminCadastrosRouteImport.update({
@@ -147,7 +159,9 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/admin/apis': typeof AdminApisRoute
   '/admin/cadastros': typeof AdminCadastrosRoute
+  '/admin/desafios': typeof AdminDesafiosRoute
   '/admin/email-marketing': typeof AdminEmailMarketingRoute
+  '/admin/regras-ia': typeof AdminRegrasIaRoute
   '/previsao/$id': typeof PrevisaoIdRoute
   '/admin/': typeof AdminIndexRoute
 }
@@ -167,7 +181,9 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/admin/apis': typeof AdminApisRoute
   '/admin/cadastros': typeof AdminCadastrosRoute
+  '/admin/desafios': typeof AdminDesafiosRoute
   '/admin/email-marketing': typeof AdminEmailMarketingRoute
+  '/admin/regras-ia': typeof AdminRegrasIaRoute
   '/previsao/$id': typeof PrevisaoIdRoute
   '/admin': typeof AdminIndexRoute
 }
@@ -190,7 +206,9 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/admin/apis': typeof AdminApisRoute
   '/admin/cadastros': typeof AdminCadastrosRoute
+  '/admin/desafios': typeof AdminDesafiosRoute
   '/admin/email-marketing': typeof AdminEmailMarketingRoute
+  '/admin/regras-ia': typeof AdminRegrasIaRoute
   '/previsao/$id': typeof PrevisaoIdRoute
   '/admin/': typeof AdminIndexRoute
 }
@@ -213,7 +231,9 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/admin/apis'
     | '/admin/cadastros'
+    | '/admin/desafios'
     | '/admin/email-marketing'
+    | '/admin/regras-ia'
     | '/previsao/$id'
     | '/admin/'
   fileRoutesByTo: FileRoutesByTo
@@ -233,7 +253,9 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/admin/apis'
     | '/admin/cadastros'
+    | '/admin/desafios'
     | '/admin/email-marketing'
+    | '/admin/regras-ia'
     | '/previsao/$id'
     | '/admin'
   id:
@@ -255,7 +277,9 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/admin/apis'
     | '/admin/cadastros'
+    | '/admin/desafios'
     | '/admin/email-marketing'
+    | '/admin/regras-ia'
     | '/previsao/$id'
     | '/admin/'
   fileRoutesById: FileRoutesById
@@ -392,11 +416,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PrevisaoIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/regras-ia': {
+      id: '/admin/regras-ia'
+      path: '/regras-ia'
+      fullPath: '/admin/regras-ia'
+      preLoaderRoute: typeof AdminRegrasIaRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/email-marketing': {
       id: '/admin/email-marketing'
       path: '/email-marketing'
       fullPath: '/admin/email-marketing'
       preLoaderRoute: typeof AdminEmailMarketingRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/desafios': {
+      id: '/admin/desafios'
+      path: '/desafios'
+      fullPath: '/admin/desafios'
+      preLoaderRoute: typeof AdminDesafiosRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/cadastros': {
@@ -437,14 +475,18 @@ const AuthenticatedRouteRouteWithChildren =
 interface AdminRouteChildren {
   AdminApisRoute: typeof AdminApisRoute
   AdminCadastrosRoute: typeof AdminCadastrosRoute
+  AdminDesafiosRoute: typeof AdminDesafiosRoute
   AdminEmailMarketingRoute: typeof AdminEmailMarketingRoute
+  AdminRegrasIaRoute: typeof AdminRegrasIaRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
   AdminApisRoute: AdminApisRoute,
   AdminCadastrosRoute: AdminCadastrosRoute,
+  AdminDesafiosRoute: AdminDesafiosRoute,
   AdminEmailMarketingRoute: AdminEmailMarketingRoute,
+  AdminRegrasIaRoute: AdminRegrasIaRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
 

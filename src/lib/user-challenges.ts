@@ -69,3 +69,23 @@ export function saveUserChallenge(input: CreateChallengeInput): Prediction {
   write(list);
   return prediction;
 }
+
+export function addManyUserChallenges(items: Prediction[]) {
+  const list = read();
+  write([...items, ...list]);
+}
+
+export function updateUserChallenge(id: string, patch: Partial<Prediction>) {
+  const list = read();
+  const idx = list.findIndex((c) => c.id === id);
+  if (idx === -1) return null;
+  list[idx] = { ...list[idx], ...patch };
+  write(list);
+  return list[idx];
+}
+
+export function deleteUserChallenge(id: string) {
+  const list = read().filter((c) => c.id !== id);
+  write(list);
+}
+
