@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { AppShell } from "@/components/layout/AppShell";
 import { signOut } from "@/hooks/use-auth";
 import {
-  LogOut, Trophy, Target, Coins, Plus, ListChecks, ShoppingBag,
+  LogOut, Target, Coins, Plus, ListChecks, ShoppingBag,
   Pencil, Save, X, Users, Send, MessageCircle, Sparkles, Loader2,
   CheckCircle2, Circle, UserPlus, Trash2, ExternalLink, Gift,
 } from "lucide-react";
