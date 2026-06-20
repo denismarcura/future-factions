@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Target, Gift, Share2, Copy, Check, Instagram, Youtube, Star, Loader2, ExternalLink } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Target, Gift, Share2, Copy, Check, Instagram, Youtube, Star, Loader2, Facebook, Music2, Play, AlertTriangle } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { AppShell } from "@/components/layout/AppShell";
 import { CURRENT_USER, formatTokens } from "@/lib/mock-data";
@@ -25,14 +25,24 @@ export const Route = createFileRoute("/missoes")({
   component: Missoes,
 });
 
+const PLATFORMS: Platform[] = ["instagram", "facebook", "youtube", "tiktok", "google"];
+
+function PlatformIcon({ p, className }: { p: Platform; className?: string }) {
+  if (p === "instagram") return <Instagram className={className} />;
+  if (p === "facebook") return <Facebook className={className} />;
+  if (p === "youtube") return <Youtube className={className} />;
+  if (p === "tiktok") return <Music2 className={className} />;
+  return <Star className={className} />;
+}
+
 function Missoes() {
   const { user } = useAuth();
   const [copied, setCopied] = useState(false);
   const [missions, setMissions] = useState<Mission[]>([]);
   const [claimed, setClaimed] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
-  const [busy, setBusy] = useState<string | null>(null);
-  const [showMore, setShowMore] = useState<Platform | null>(null);
+  const [running, setRunning] = useState<string | null>(null);
+  const [confirmed, setConfirmed] = useState(false);
 
   const referralLink = `vaidar.app/r/${CURRENT_USER.username.toLowerCase()}`;
 
@@ -54,33 +64,37 @@ function Missoes() {
     })();
   }, [user]);
 
-  async function handleClaim(m: Mission) {
+  async function handleDo(m: Mission) {
     if (!user) {
       toast.error("Faça login para concluir missões.");
       return;
     }
-    if (claimed.has(m.id)) return;
-    setBusy(m.id);
+    if (claimed.has(m.id) || running) return;
+    setRunning(m.id);
+    // open the target in a new tab so user actually performs the action
     window.open(m.link, "_blank", "noopener,noreferrer");
+    await new Promise((r) => setTimeout(r, 5000));
     try {
-      await claimMission(m.id, "missoes", m.tokens);
+      const totalAward = m.tokens + (m.bonus_tokens || 0);
+      await claimMission(m.id, "missoes", totalAward);
       setClaimed((prev) => new Set(prev).add(m.id));
-      toast.success(`+${m.tokens} Tokens!`);
-
-      // Check completion per platform → prompt "more missions?"
-      const platformMissions = missions.filter((x) => x.platform === m.platform);
-      const newClaimed = new Set(claimed).add(m.id);
-      const done = platformMissions.every((x) => newClaimed.has(x.id));
-      if (done && platformMissions.length > 0) setShowMore(m.platform);
+      toast.success(
+        m.bonus_tokens > 0
+          ? `Tarefa concluída! +${m.tokens} Tokens + bônus de ${m.bonus_tokens} enviados para sua conta.`
+          : `Tarefa concluída! ${m.tokens} Tokens enviados para sua conta.`
+      );
     } catch (e: any) {
       toast.error(e.message ?? "Erro ao registrar");
     } finally {
-      setBusy(null);
+      setRunning(null);
     }
   }
 
-  const grouped: Record<Platform, Mission[]> = { instagram: [], youtube: [], google: [] };
-  missions.forEach((m) => grouped[m.platform].push(m));
+  const grouped = useMemo(() => {
+    const base: Record<Platform, Mission[]> = { instagram: [], facebook: [], youtube: [], tiktok: [], google: [] };
+    missions.forEach((m) => base[m.platform].push(m));
+    return base;
+  }, [missions]);
 
   return (
     <AppShell>
@@ -131,39 +145,40 @@ function Missoes() {
           Nenhuma missão disponível agora. Volte em breve!
         </div>
       ) : (
-        (Object.keys(PLATFORM_LABEL) as Platform[]).map((p) =>
+        PLATFORMS.map((p) =>
           grouped[p].length === 0 ? null : (
             <section key={p} className="mb-6">
               <h2 className="font-display font-black text-lg mb-3 flex items-center gap-2">
-                {p === "instagram" && <Instagram className="h-5 w-5 text-pink-400" />}
-                {p === "youtube" && <Youtube className="h-5 w-5 text-red-400" />}
-                {p === "google" && <Star className="h-5 w-5 text-blue-400" />}
+                <PlatformIcon p={p} className="h-5 w-5 text-primary" />
                 {PLATFORM_LABEL[p]}
               </h2>
               <div className="grid sm:grid-cols-2 gap-3">
                 {grouped[p].map((m) => {
                   const done = claimed.has(m.id);
+                  const isRunning = running === m.id;
                   return (
                     <div key={m.id} className="rounded-xl bg-card border border-border/60 p-4 flex items-center gap-4 hover:border-primary/40 transition">
                       <div className="h-10 w-10 rounded-lg bg-primary/15 border border-primary/30 grid place-items-center text-primary font-bold uppercase text-xs">
                         {ACTION_LABEL[m.action_type].slice(0, 2)}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="font-semibold truncate">{m.title}</div>
-                        <div className="text-xs text-muted-foreground">{m.sponsor_name} · {ACTION_LABEL[m.action_type]}</div>
-                        <div className="text-xs text-gold font-bold mt-0.5">+{m.tokens} Tokens</div>
+                        <div className="font-semibold truncate">{m.sponsor_name}</div>
+                        <div className="text-xs text-muted-foreground truncate">{ACTION_LABEL[m.action_type]}</div>
+                        <div className="text-xs text-gold font-bold mt-0.5">
+                          +{m.tokens} Tokens{m.bonus_tokens > 0 && ` · +${m.bonus_tokens} bônus`}
+                        </div>
                       </div>
                       <button
-                        onClick={() => handleClaim(m)}
-                        disabled={done || busy === m.id}
+                        onClick={() => handleDo(m)}
+                        disabled={done || isRunning || !!running}
                         className={`h-9 px-4 rounded-full font-bold text-xs inline-flex items-center gap-1 transition ${
                           done
                             ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30"
-                            : "bg-gradient-brand text-primary-foreground shadow-glow hover:scale-[1.03]"
+                            : "bg-gradient-brand text-primary-foreground shadow-glow hover:scale-[1.03] disabled:opacity-60 disabled:hover:scale-100"
                         }`}
                       >
-                        {busy === m.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : done ? <Check className="h-3.5 w-3.5" /> : <ExternalLink className="h-3.5 w-3.5" />}
-                        {done ? "Feito" : "Fazer"}
+                        {isRunning ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : done ? <Check className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
+                        {isRunning ? "Verificando…" : done ? "Concluída" : "Fazer tarefa"}
                       </button>
                     </div>
                   );
@@ -178,21 +193,24 @@ function Missoes() {
         Saldo atual: <span className="text-gold font-display font-black text-base">{formatTokens(CURRENT_USER.tokens)} Tokens</span>
       </section>
 
-      {showMore && (
-        <div className="fixed inset-0 z-50 grid place-items-center bg-background/80 backdrop-blur-sm p-4" onClick={() => setShowMore(null)}>
-          <div className="max-w-sm w-full rounded-2xl bg-card border border-primary/40 p-6 text-center shadow-glow" onClick={(e) => e.stopPropagation()}>
-            <div className="text-4xl mb-2">🎉</div>
-            <h3 className="font-display font-black text-xl">Você completou todas do {PLATFORM_LABEL[showMore]}!</h3>
-            <p className="text-sm text-muted-foreground mt-2">Quer fazer mais missões patrocinadas e ganhar ainda mais Tokens?</p>
-            <div className="mt-5 flex gap-2">
-              <button onClick={() => setShowMore(null)} className="flex-1 h-11 rounded-xl border border-border/60 font-semibold">Agora não</button>
-              <button onClick={() => { setShowMore(null); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="flex-1 h-11 rounded-xl bg-gradient-brand text-primary-foreground font-bold shadow-glow">
-                Sim, mais!
-              </button>
-            </div>
+      <section className="mt-6 rounded-2xl border border-amber-500/40 bg-amber-500/5 p-5">
+        <div className="flex items-start gap-3">
+          <AlertTriangle className="h-5 w-5 text-amber-400 shrink-0 mt-0.5" />
+          <div className="flex-1">
+            <label className="flex items-start gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={confirmed}
+                onChange={(e) => setConfirmed(e.target.checked)}
+                className="h-5 w-5 mt-0.5 accent-amber-400"
+              />
+              <span className="text-sm text-foreground">
+                <strong>Confirmo que realizei todas as tarefas selecionadas.</strong> Em caso de premiação, as tarefas serão verificadas. Caso constatado que não foram realizadas, o usuário será <strong>desclassificado</strong>.
+              </span>
+            </label>
           </div>
         </div>
-      )}
+      </section>
     </AppShell>
   );
 }
