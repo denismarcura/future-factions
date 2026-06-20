@@ -1,10 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import {
   Plus, Trash2, Sparkles, Upload, Wand2, Calendar as CalIcon,
   Gift, Coins, Instagram, Facebook, Youtube, Music2, Globe, Lock,
   CheckCircle2, Share2, Copy, AlertCircle, UserPlus, Mail, Users, Loader2,
+  PencilLine, MessageCircle, Download, ImageIcon,
 } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { CATEGORIES } from "@/lib/mock-data";
@@ -12,7 +13,8 @@ import { generateInviteText } from "@/lib/invite.functions";
 import { saveUserChallenge } from "@/lib/user-challenges";
 import { improveTitle } from "@/lib/title-ai.functions";
 import { listCategories, listSubcategories, type ChallengeCategory, type ChallengeSubcategory } from "@/lib/challenge-categories";
-import { generateChallenge } from "@/lib/challenge-ai.functions";
+import { generateChallenge, improveDescription, generateWhatsAppInvite } from "@/lib/challenge-ai.functions";
+import logoAsset from "@/assets/logo-desafio.png.asset.json";
 
 export const Route = createFileRoute("/criar")({
   head: () => ({
