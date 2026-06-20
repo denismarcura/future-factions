@@ -8,6 +8,8 @@ export type Banner = {
   imageUrl: string;
   ctaLabel?: string;
   ctaLink?: string;
+  challengeId?: string;
+  challengeTitle?: string;
   active: boolean;
   sortOrder: number;
   createdAt: string;
