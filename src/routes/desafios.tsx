@@ -5,7 +5,7 @@ import { PredictionCard } from "@/components/PredictionCard";
 import { CATEGORIES, PREDICTIONS, type Prediction } from "@/lib/mock-data";
 import { COMPANY_CHALLENGES } from "@/lib/mock-extra";
 import { getUserChallenges } from "@/lib/user-challenges";
-import { ListChecks, Building2, Users, Lock, Globe2 } from "lucide-react";
+import { ListChecks, Building2, Users, Lock, Globe2, Sparkles } from "lucide-react";
 
 export const Route = createFileRoute("/desafios")({
   head: () => ({
@@ -33,13 +33,32 @@ function DesafiosPage() {
     };
   }, []);
 
+  // Deterministic split of mock predictions into "públicos" vs "privados" so
+  // each tab shows a distinct list.
+  const publicMock = useMemo(() => PREDICTIONS.filter((_, i) => i % 3 !== 0), []);
+  const privateMock = useMemo(() => PREDICTIONS.filter((_, i) => i % 3 === 0), []);
+
   const items = useMemo(() => {
     if (tab === "empresas") return [];
-    let list = [...userChallenges, ...PREDICTIONS];
+    let list: Prediction[];
+    if (tab === "publicos") {
+      list = [...userChallenges, ...publicMock];
+    } else if (tab === "privados") {
+      list = [...userChallenges, ...privateMock];
+    } else {
+      list = [...userChallenges, ...PREDICTIONS];
+    }
     if (cat !== "Todas") list = list.filter((p) => p.category === cat);
-    if (tab === "privados") list = list.slice(0, 6); // mock
     return list;
-  }, [tab, cat, userChallenges]);
+  }, [tab, cat, userChallenges, publicMock, privateMock]);
+
+  // Últimos cadastrados = user-created first, then most recently created mocks.
+  const latest = useMemo(() => {
+    const sortedMocks = [...PREDICTIONS].sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    );
+    return [...userChallenges, ...sortedMocks].slice(0, 6);
+  }, [userChallenges]);
 
   return (
     <AppShell>
@@ -76,6 +95,23 @@ function DesafiosPage() {
 
       {tab !== "empresas" && (
         <>
+          {/* Últimos desafios cadastrados */}
+          <section className="mb-8">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="font-display text-lg font-bold flex items-center gap-2">
+                <Sparkles className="h-5 w-5 text-gold" /> Últimos desafios cadastrados
+              </h2>
+              <span className="text-xs text-muted-foreground">
+                {latest.length} mais recentes
+              </span>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {latest.map((p) => (
+                <PredictionCard key={`latest-${p.id}`} prediction={p} />
+              ))}
+            </div>
+          </section>
+
           <div className="mb-6 flex items-center gap-2 overflow-x-auto -mx-4 px-4 pb-2">
             {["Todas", ...CATEGORIES].map((c) => (
               <button
@@ -92,11 +128,17 @@ function DesafiosPage() {
             ))}
           </div>
 
-          <section className="grid gap-4 sm:grid-cols-2">
-            {items.map((p) => (
-              <PredictionCard key={p.id} prediction={p} />
-            ))}
-          </section>
+          {items.length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-border/60 bg-card/40 p-10 text-center text-muted-foreground">
+              Nenhum desafio encontrado nesta combinação de filtros.
+            </div>
+          ) : (
+            <section className="grid gap-4 sm:grid-cols-2">
+              {items.map((p) => (
+                <PredictionCard key={p.id} prediction={p} />
+              ))}
+            </section>
+          )}
         </>
       )}
 
