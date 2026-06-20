@@ -1173,3 +1173,85 @@ async function renderInviteCreative(
 
   return canvas.toDataURL("image/png");
 }
+
+/* ---------- My Participations ---------- */
+
+function MyParticipationsSection({ items }: { items: MyParticipation[] }) {
+  return (
+    <section className="glass-card rounded-2xl p-5 border border-border/60">
+      <SectionTitle
+        icon={Target}
+        title="Meus palpites e resultados"
+        hint="Acompanhe os desafios em que você participou e veja os resultados quando saírem."
+        right={
+          <Link to="/desafios" className="text-xs font-bold text-primary hover:underline inline-flex items-center gap-1">
+            Mais desafios <ExternalLink className="h-3 w-3" />
+          </Link>
+        }
+      />
+      {items.length === 0 ? (
+        <Empty>
+          Você ainda não fez nenhum palpite.{" "}
+          <Link to="/desafios" className="text-primary underline">Participar agora</Link>.
+        </Empty>
+      ) : (
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          {items.map((p) => {
+            const closedAt = new Date(p.closesAt).getTime();
+            const now = Date.now();
+            const ended = closedAt <= now;
+            const answersCount = Object.keys(p.answers).length;
+            return (
+              <Link
+                key={p.id}
+                to="/previsao/$id"
+                params={{ id: p.id }}
+                className="p-4 rounded-xl bg-card border border-border/60 hover:border-primary/60 transition flex flex-col"
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                    {p.category}
+                  </span>
+                  <span
+                    className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                      ended
+                        ? "bg-gold/15 text-gold border border-gold/30"
+                        : "bg-primary/15 text-primary border border-primary/30"
+                    }`}
+                  >
+                    {ended ? "Resultado em breve" : "Aguardando jogo"}
+                  </span>
+                </div>
+                <div className="font-display font-bold mt-2 line-clamp-2">{p.title}</div>
+                <div className="mt-3 text-[11px] text-muted-foreground space-y-0.5">
+                  {p.optionLabel ? (
+                    <div>
+                      Sua escolha: <span className="text-foreground font-semibold">{p.optionLabel}</span>
+                    </div>
+                  ) : (
+                    <div>{answersCount} palpites enviados</div>
+                  )}
+                  {p.entryFee > 0 && (
+                    <div>
+                      Entrada: <span className="text-gold font-bold">{p.entryFee} TKN</span>
+                    </div>
+                  )}
+                  <div>
+                    Participou em{" "}
+                    {new Date(p.participatedAt).toLocaleString("pt-BR", {
+                      day: "2-digit",
+                      month: "2-digit",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      timeZone: "America/Sao_Paulo",
+                    })}
+                  </div>
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+      )}
+    </section>
+  );
+}
