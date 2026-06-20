@@ -379,6 +379,8 @@ function Criar() {
         textarea.input { height: auto; padding: 10px 12px; }
         .input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px color-mix(in oklab, var(--primary) 25%, transparent); }
       `}</style>
+      </>
+      )}
     </AppShell>
   );
 }
