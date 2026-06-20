@@ -271,7 +271,7 @@ function Criar() {
             description={`Automaticamente daremos ${AUTO_PRIZE.toLocaleString("pt-BR")} tokens para quem fizer a maior pontuação. Você pode adicionar um prêmio físico extra (opcional).`}
           >
             <Field label="Nome do prêmio extra (opcional)">
-              <input placeholder="Ex.: 1 Camiseta do Brasil" className="input" />
+              <input value={prizeName} onChange={(e) => setPrizeName(e.target.value)} placeholder="Ex.: 1 Camiseta do Brasil" className="input" />
             </Field>
 
             <div className="grid sm:grid-cols-2 gap-4">
