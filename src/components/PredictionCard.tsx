@@ -99,7 +99,18 @@ export function PredictionCard({ prediction: p }: { prediction: Prediction }) {
           })}
         </div>
 
-        <div className="mt-4 flex items-center gap-4 text-xs text-muted-foreground">
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            navigate({ to: "/previsao/$id", params: { id: p.id } });
+          }}
+          className="mt-4 w-full h-10 rounded-xl bg-gradient-brand text-primary-foreground font-display font-black text-sm tracking-wide shadow-glow hover:scale-[1.01] transition inline-flex items-center justify-center gap-2"
+        >
+          <Plus className="h-4 w-4" /> PARTICIPAR
+        </button>
+
+        <div className="mt-3 flex items-center gap-4 text-xs text-muted-foreground">
           <span className="inline-flex items-center gap-1">
             <Users className="h-3.5 w-3.5" /> {p.bettors} apostadores
           </span>
