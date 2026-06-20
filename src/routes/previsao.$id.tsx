@@ -134,7 +134,7 @@ function PredictionPage() {
                 </div>
               </div>
               <div className="mt-3 text-center text-sm text-muted-foreground">
-                Início: <span className="text-foreground font-semibold">{new Date(p.match.kickoff).toLocaleString("pt-BR", { dateStyle: "full", timeStyle: "short" })}</span>
+                Início: <span className="text-foreground font-semibold">{new Date(p.match.kickoff).toLocaleString("pt-BR", { dateStyle: "full", timeStyle: "short", timeZone: "America/Sao_Paulo" })}</span>
               </div>
               <div className="mt-1 text-center text-xs text-destructive font-semibold">
                 Apostas encerram 10 minutos antes do jogo
