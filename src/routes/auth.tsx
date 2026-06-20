@@ -1,9 +1,13 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { useAuth } from "@/hooks/use-auth";
-import { Loader2, Mail, Lock, User as UserIcon, Phone, AlertCircle } from "lucide-react";
+import { prepareSignup } from "@/lib/signup.functions";
+import {
+  Loader2, Mail, Lock, User as UserIcon, Phone, AlertCircle, Instagram, ShieldCheck,
+} from "lucide-react";
 import { toast } from "sonner";
 import logoAsset from "@/assets/logo-desafio.png.asset.json";
 
@@ -14,13 +18,18 @@ export const Route = createFileRoute("/auth")({
 function AuthPage() {
   const navigate = useNavigate();
   const { user, loading } = useAuth();
+  const prepare = useServerFn(prepareSignup);
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
+  const [instagram, setInstagram] = useState("");
+  const [acceptTerms, setAcceptTerms] = useState(false);
+  const [marketing, setMarketing] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [info, setInfo] = useState<string | null>(null);
 
   useEffect(() => {
     if (!loading && user) navigate({ to: "/dashboard" });
@@ -45,26 +54,51 @@ function AuthPage() {
   async function handleEmail(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+    setInfo(null);
     setBusy(true);
     try {
       if (mode === "signup") {
-        if (!name.trim()) throw new Error("Informe seu nome");
+        if (!name.trim()) throw new Error("Informe seu nome completo");
+        if (!whatsapp.trim()) throw new Error("Informe seu WhatsApp");
+        if (!instagram.trim()) throw new Error("Informe seu Instagram");
         if (password.length < 6) throw new Error("Senha deve ter pelo menos 6 caracteres");
+        if (!acceptTerms) throw new Error("Você precisa aceitar as regras para continuar");
+
+        // 1. Server-side IP check + city lookup + attempt record
+        const { ip, city } = await prepare({ data: { email } });
+        const acceptedAt = new Date().toISOString();
+
+        // 2. Create the auth user (Supabase sends the confirmation email)
         const { error } = await supabase.auth.signUp({
           email,
           password,
           options: {
             emailRedirectTo: window.location.origin + "/dashboard",
-            data: { full_name: name, whatsapp },
+            data: {
+              full_name: name,
+              whatsapp,
+              instagram,
+              signup_ip: ip,
+              signup_city: city,
+              terms_accepted_at: acceptedAt,
+              marketing_opt_in: marketing,
+            },
           },
         });
         if (error) throw error;
-        toast.success("Conta criada! Bem-vindo.");
-      } else {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
-        toast.success("Bem-vindo de volta!");
+
+        setInfo(
+          "Cadastro recebido! Enviamos um e-mail de confirmação para " +
+            email +
+            ". Confirme para ativar sua conta.",
+        );
+        toast.success("Confirme seu e-mail para ativar a conta");
+        return;
       }
+
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+      toast.success("Bem-vindo de volta!");
       navigate({ to: "/dashboard" });
     } catch (e) {
       setError(e instanceof Error ? e.message : "Erro");
@@ -89,7 +123,7 @@ function AuthPage() {
             {(["login", "signup"] as const).map((m) => (
               <button
                 key={m}
-                onClick={() => { setMode(m); setError(null); }}
+                onClick={() => { setMode(m); setError(null); setInfo(null); }}
                 className={`flex-1 py-2 rounded-full text-sm font-semibold transition ${
                   mode === m ? "bg-gradient-brand text-primary-foreground shadow-glow" : "text-muted-foreground"
                 }`}
@@ -122,17 +156,66 @@ function AuthPage() {
           <form onSubmit={handleEmail} className="space-y-3">
             {mode === "signup" && (
               <>
-                <Field icon={UserIcon} placeholder="Seu nome" value={name} onChange={setName} />
-                <Field icon={Phone} placeholder="WhatsApp" value={whatsapp} onChange={setWhatsapp} />
+                <Field icon={UserIcon} placeholder="Nome completo" value={name} onChange={setName} required />
+                <Field icon={Phone} placeholder="WhatsApp (com DDD)" value={whatsapp} onChange={setWhatsapp} required />
+                <Field icon={Instagram} placeholder="Instagram (@usuario)" value={instagram} onChange={setInstagram} required />
               </>
             )}
             <Field icon={Mail} type="email" placeholder="E-mail" value={email} onChange={setEmail} required />
             <Field icon={Lock} type="password" placeholder="Senha" value={password} onChange={setPassword} required />
 
+            {mode === "signup" && (
+              <div className="rounded-xl bg-card/60 border border-border/60 p-4 space-y-3">
+                <div className="flex items-center gap-2 text-xs font-semibold text-foreground/80">
+                  <ShieldCheck className="h-4 w-4 text-primary" />
+                  REGRAS DE PARTICIPAÇÃO
+                </div>
+                <div className="text-xs text-muted-foreground max-h-32 overflow-y-auto leading-relaxed space-y-1.5 pr-1">
+                  <p>1. Cada CPF/pessoa pode ter apenas uma conta. Até 5 cadastros são permitidos por IP.</p>
+                  <p>2. Os palpites devem ser enviados até 1 hora antes do início do jogo.</p>
+                  <p>3. Prêmios em tokens são creditados após confirmação oficial dos resultados.</p>
+                  <p>4. Contas com dados falsos ou múltiplas contas serão suspensas e os tokens cancelados.</p>
+                  <p>5. Ao aceitar, você autoriza o registro de data, hora, cidade e endereço IP deste cadastro como prova de aceite.</p>
+                  <p>6. Você pode revogar consentimentos a qualquer momento no seu painel.</p>
+                </div>
+
+                <label className="flex items-start gap-2 text-xs cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={acceptTerms}
+                    onChange={(e) => setAcceptTerms(e.target.checked)}
+                    className="mt-0.5 h-4 w-4 accent-primary"
+                    required
+                  />
+                  <span className="text-foreground/90">
+                    Li e aceito as regras, os Termos de Uso e a Política de Privacidade.
+                  </span>
+                </label>
+
+                <label className="flex items-start gap-2 text-xs cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={marketing}
+                    onChange={(e) => setMarketing(e.target.checked)}
+                    className="mt-0.5 h-4 w-4 accent-primary"
+                  />
+                  <span className="text-muted-foreground">
+                    Desejo receber informações sobre resultados, promoções, entre outros.
+                  </span>
+                </label>
+              </div>
+            )}
+
             {error && (
               <div className="flex items-start gap-2 p-3 rounded-lg bg-destructive/10 border border-destructive/30 text-sm text-destructive">
                 <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
                 <span>{error}</span>
+              </div>
+            )}
+            {info && (
+              <div className="flex items-start gap-2 p-3 rounded-lg bg-primary/10 border border-primary/30 text-sm text-primary">
+                <Mail className="h-4 w-4 mt-0.5 shrink-0" />
+                <span>{info}</span>
               </div>
             )}
 
@@ -145,10 +228,6 @@ function AuthPage() {
               {mode === "login" ? "Entrar" : "Criar conta grátis"}
             </button>
           </form>
-
-          <p className="text-xs text-muted-foreground text-center mt-6">
-            Ao continuar você concorda com nossos Termos e Política de Privacidade.
-          </p>
         </div>
       </div>
     </div>
