@@ -226,7 +226,7 @@ function Criar() {
                     if (!name.trim()) return;
                     setImprovingTitle(true);
                     try {
-                      const result = await useServerFn(improveTitle)({ data: { title: name.trim(), category } });
+                      const result = await improveTitleFn({ data: { title: name.trim(), category } });
                       setName(result.title);
                     } catch (err) {
                       alert(err instanceof Error ? err.message : "Não foi possível melhorar o título agora.");
