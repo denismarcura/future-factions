@@ -2,7 +2,7 @@ import { createFileRoute, Link, Outlet, useRouterState, useNavigate } from "@tan
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
 import { AppShell } from "@/components/layout/AppShell";
-import { Users, KeyRound, Mail, LayoutDashboard, Shield, ListChecks, Sparkles, Target, Loader2, Lock, FolderTree } from "lucide-react";
+import { Users, KeyRound, Mail, LayoutDashboard, Shield, ListChecks, Sparkles, Target, Loader2, Lock, FolderTree, Image as ImageIcon } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { checkIsAdmin, claimAdminIfNone } from "@/lib/admin.functions";
 import { toast } from "sonner";
@@ -22,6 +22,7 @@ const ADMIN_NAV = [
   { to: "/admin/cadastros", label: "Cadastros", icon: Users },
   { to: "/admin/desafios", label: "Desafios", icon: ListChecks },
   { to: "/admin/categorias", label: "Categorias Desafios", icon: FolderTree },
+  { to: "/admin/banners", label: "Banners", icon: ImageIcon },
   { to: "/admin/regras-ia", label: "Regras IA", icon: Sparkles },
   { to: "/admin/missoes", label: "Missões", icon: Target },
   { to: "/admin/apis", label: "APIs", icon: KeyRound },
