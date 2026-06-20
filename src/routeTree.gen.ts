@@ -19,13 +19,16 @@ import { Route as EmpresasRouteImport } from './routes/empresas'
 import { Route as DesafiosRouteImport } from './routes/desafios'
 import { Route as CriarRouteImport } from './routes/criar'
 import { Route as ComoFuncionaRouteImport } from './routes/como-funciona'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminRouteImport } from './routes/admin'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as PrevisaoIdRouteImport } from './routes/previsao.$id'
 import { Route as AdminEmailMarketingRouteImport } from './routes/admin.email-marketing'
 import { Route as AdminCadastrosRouteImport } from './routes/admin.cadastros'
 import { Route as AdminApisRouteImport } from './routes/admin.apis'
+import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 
 const Top100Route = Top100RouteImport.update({
   id: '/top100',
@@ -77,9 +80,18 @@ const ComoFuncionaRoute = ComoFuncionaRouteImport.update({
   path: '/como-funciona',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -112,10 +124,16 @@ const AdminApisRoute = AdminApisRouteImport.update({
   path: '/apis',
   getParentRoute: () => AdminRoute,
 } as any)
+const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
+  '/auth': typeof AuthRoute
   '/como-funciona': typeof ComoFuncionaRoute
   '/criar': typeof CriarRoute
   '/desafios': typeof DesafiosRoute
@@ -126,6 +144,7 @@ export interface FileRoutesByFullPath {
   '/ranking': typeof RankingRoute
   '/shop': typeof ShopRoute
   '/top100': typeof Top100Route
+  '/dashboard': typeof AuthenticatedDashboardRoute
   '/admin/apis': typeof AdminApisRoute
   '/admin/cadastros': typeof AdminCadastrosRoute
   '/admin/email-marketing': typeof AdminEmailMarketingRoute
@@ -134,6 +153,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/como-funciona': typeof ComoFuncionaRoute
   '/criar': typeof CriarRoute
   '/desafios': typeof DesafiosRoute
@@ -144,6 +164,7 @@ export interface FileRoutesByTo {
   '/ranking': typeof RankingRoute
   '/shop': typeof ShopRoute
   '/top100': typeof Top100Route
+  '/dashboard': typeof AuthenticatedDashboardRoute
   '/admin/apis': typeof AdminApisRoute
   '/admin/cadastros': typeof AdminCadastrosRoute
   '/admin/email-marketing': typeof AdminEmailMarketingRoute
@@ -153,7 +174,9 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/admin': typeof AdminRouteWithChildren
+  '/auth': typeof AuthRoute
   '/como-funciona': typeof ComoFuncionaRoute
   '/criar': typeof CriarRoute
   '/desafios': typeof DesafiosRoute
@@ -164,6 +187,7 @@ export interface FileRoutesById {
   '/ranking': typeof RankingRoute
   '/shop': typeof ShopRoute
   '/top100': typeof Top100Route
+  '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/admin/apis': typeof AdminApisRoute
   '/admin/cadastros': typeof AdminCadastrosRoute
   '/admin/email-marketing': typeof AdminEmailMarketingRoute
@@ -175,6 +199,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/admin'
+    | '/auth'
     | '/como-funciona'
     | '/criar'
     | '/desafios'
@@ -185,6 +210,7 @@ export interface FileRouteTypes {
     | '/ranking'
     | '/shop'
     | '/top100'
+    | '/dashboard'
     | '/admin/apis'
     | '/admin/cadastros'
     | '/admin/email-marketing'
@@ -193,6 +219,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/auth'
     | '/como-funciona'
     | '/criar'
     | '/desafios'
@@ -203,6 +230,7 @@ export interface FileRouteTypes {
     | '/ranking'
     | '/shop'
     | '/top100'
+    | '/dashboard'
     | '/admin/apis'
     | '/admin/cadastros'
     | '/admin/email-marketing'
@@ -211,7 +239,9 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/_authenticated'
     | '/admin'
+    | '/auth'
     | '/como-funciona'
     | '/criar'
     | '/desafios'
@@ -222,6 +252,7 @@ export interface FileRouteTypes {
     | '/ranking'
     | '/shop'
     | '/top100'
+    | '/_authenticated/dashboard'
     | '/admin/apis'
     | '/admin/cadastros'
     | '/admin/email-marketing'
@@ -231,7 +262,9 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AdminRoute: typeof AdminRouteWithChildren
+  AuthRoute: typeof AuthRoute
   ComoFuncionaRoute: typeof ComoFuncionaRoute
   CriarRoute: typeof CriarRoute
   DesafiosRoute: typeof DesafiosRoute
@@ -317,11 +350,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ComoFuncionaRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin': {
       id: '/admin'
       path: '/admin'
       fullPath: '/admin'
       preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -366,8 +413,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminApisRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/_authenticated/dashboard': {
+      id: '/_authenticated/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AuthenticatedDashboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
+
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
 interface AdminRouteChildren {
   AdminApisRoute: typeof AdminApisRoute
@@ -387,7 +452,9 @@ const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AdminRoute: AdminRouteWithChildren,
+  AuthRoute: AuthRoute,
   ComoFuncionaRoute: ComoFuncionaRoute,
   CriarRoute: CriarRoute,
   DesafiosRoute: DesafiosRoute,

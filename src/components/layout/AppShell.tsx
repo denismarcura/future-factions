@@ -16,9 +16,12 @@ import {
   Flame,
   ListChecks,
   Shield,
+  LogIn,
+  LogOut,
 } from "lucide-react";
 import type { ReactNode } from "react";
 import { CURRENT_USER, formatTokens } from "@/lib/mock-data";
+import { useAuth, signOut } from "@/hooks/use-auth";
 import logoAsset from "@/assets/logo-desafio.png.asset.json";
 
 const NAV = [
@@ -81,6 +84,7 @@ function TokenPill() {
 
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const { user } = useAuth();
 
   return (
     <div className="min-h-screen bg-background bg-radial-brand">
@@ -112,6 +116,30 @@ export function AppShell({ children }: { children: ReactNode }) {
               <Plus className="h-4 w-4" />
               Criar desafio
             </Link>
+            {user ? (
+              <>
+                <Link
+                  to="/dashboard"
+                  className="hidden sm:inline-flex items-center gap-2 h-10 px-3 rounded-full bg-card border border-border/60 hover:border-primary/60 text-sm font-semibold transition"
+                >
+                  <UserIcon className="h-4 w-4" /> Dashboard
+                </Link>
+                <button
+                  onClick={() => signOut()}
+                  className="h-9 w-9 grid place-items-center rounded-full bg-card border border-border/60 hover:border-destructive/60 hover:text-destructive transition"
+                  aria-label="Sair"
+                >
+                  <LogOut className="h-4 w-4" />
+                </button>
+              </>
+            ) : (
+              <Link
+                to="/auth"
+                className="inline-flex items-center gap-2 h-10 px-4 rounded-full bg-card border border-border/60 hover:border-primary/60 text-sm font-semibold transition"
+              >
+                <LogIn className="h-4 w-4" /> Entrar
+              </Link>
+            )}
           </div>
         </div>
       </header>
