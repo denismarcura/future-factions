@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { generateText } from "ai";
 import { z } from "zod";
 
@@ -26,6 +27,7 @@ export type GeneratedChallengeResult = {
 };
 
 export const generateChallenge = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => Input.parse(input))
   .handler(async ({ data }): Promise<GeneratedChallengeResult> => {
     const key = process.env.LOVABLE_API_KEY;
@@ -91,6 +93,7 @@ Retorne APENAS um JSON válido (sem markdown, sem comentários) no formato exato
 
 // Improve a free-form description (e.g. private challenge invite description)
 export const improveDescription = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) =>
     z.object({
       text: z.string().trim().min(1).max(2000),
@@ -112,6 +115,7 @@ export const improveDescription = createServerFn({ method: "POST" })
 
 // WhatsApp invite text generator
 export const generateWhatsAppInvite = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) =>
     z.object({
       inviterName: z.string().trim().max(100).optional(),
