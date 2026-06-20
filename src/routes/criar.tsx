@@ -444,6 +444,54 @@ function Criar() {
                 <UserPlus className="h-4 w-4" /> + convide mais amigos
               </button>
             </div>
+
+            <div className="mt-5 pt-5 border-t border-border/40 space-y-3">
+              <Field label="Seu nome (quem está convidando)">
+                <input
+                  value={inviterName}
+                  onChange={(e) => setInviterName(e.target.value)}
+                  placeholder="Ex.: João Silva"
+                  className="input"
+                />
+              </Field>
+
+              <div className="flex items-center justify-between gap-2">
+                <label className="text-xs uppercase tracking-wider font-bold text-muted-foreground">
+                  Texto do e-mail de convite
+                </label>
+                <button
+                  type="button"
+                  onClick={handleGenerateInvite}
+                  disabled={genLoading}
+                  className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg bg-gradient-to-r from-primary to-gold text-background text-xs font-bold hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed transition"
+                >
+                  {genLoading ? (
+                    <><Loader2 className="h-3.5 w-3.5 animate-spin" /> Gerando…</>
+                  ) : (
+                    <><Wand2 className="h-3.5 w-3.5" /> Gerar com IA</>
+                  )}
+                </button>
+              </div>
+
+              <textarea
+                value={inviteText}
+                onChange={(e) => setInviteText(e.target.value)}
+                rows={8}
+                placeholder="Escreva aqui o texto do e-mail de convite, ou clique em &quot;Gerar com IA&quot; para criar automaticamente um convite com o nome do desafio e os palpites."
+                className="input min-h-[180px] resize-y leading-relaxed"
+              />
+
+              {genError && (
+                <div className="flex items-start gap-2 rounded-lg border border-destructive/40 bg-destructive/10 p-2.5 text-xs text-destructive">
+                  <AlertCircle className="h-3.5 w-3.5 mt-0.5 shrink-0" />
+                  <span>{genError}</span>
+                </div>
+              )}
+
+              <p className="text-xs text-muted-foreground">
+                A IA usa seu nome, o nome do desafio e os palpites cadastrados para escrever um convite pronto para enviar.
+              </p>
+            </div>
           </Section>
         </div>
 
