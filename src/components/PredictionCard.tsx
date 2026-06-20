@@ -25,9 +25,20 @@ export function PredictionCard({ prediction: p }: { prediction: Prediction }) {
           </span>
         </div>
 
-        <h3 className="mt-3 font-display text-lg font-bold leading-snug group-hover:text-gradient-brand transition">
-          {p.title}
+        <h3 className="mt-3 font-display text-lg font-bold leading-snug group-hover:text-gradient-brand transition flex items-start gap-2">
+          <span className="mt-2 h-2.5 w-2.5 rounded-full bg-primary shadow-[0_0_10px_var(--primary)] flex-none" title="Desafio aberto" />
+          <span>Desafio "{p.title}"</span>
         </h3>
+
+        {/* Prize image preview (deterministic by id) */}
+        <div className="mt-3 rounded-xl overflow-hidden border border-border/60 bg-background/40 aspect-[16/9]">
+          <img
+            src={`https://picsum.photos/seed/${encodeURIComponent(p.id)}/800/450`}
+            alt="Prêmio do desafio"
+            className="w-full h-full object-cover"
+            loading="lazy"
+          />
+        </div>
         <p className="mt-1 text-sm text-muted-foreground line-clamp-2">{p.description}</p>
 
         <div className="mt-4 space-y-2">
