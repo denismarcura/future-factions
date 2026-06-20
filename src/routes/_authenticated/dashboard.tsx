@@ -34,6 +34,7 @@ type Profile = {
   provider: string | null;
   status: string;
   created_at: string;
+  welcome_bonus?: number | null;
 };
 
 function Dashboard() {
@@ -69,7 +70,10 @@ function Dashboard() {
   }, []);
 
   const claimedIds = useMemo(() => new Set(claims.map((c) => c.mission_id)), [claims]);
-  const tokens = useMemo(() => claims.reduce((s, c) => s + (c.tokens_awarded ?? 0), 0), [claims]);
+  const tokens = useMemo(
+    () => (profile?.welcome_bonus ?? 0) + claims.reduce((s, c) => s + (c.tokens_awarded ?? 0), 0),
+    [claims, profile?.welcome_bonus],
+  );
   const missionsDone = claims.length;
   const missionsTodo = missions.filter((m) => !claimedIds.has(m.id)).length;
 
