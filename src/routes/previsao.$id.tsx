@@ -312,9 +312,18 @@ function PredictionPage() {
                       return;
                     }
                     setConfirmed(true);
+                    saveParticipation({
+                      id: p.id,
+                      title: p.title,
+                      category: p.category,
+                      entryFee: p.entryFee ?? 0,
+                      answers: subAnswers,
+                      closesAt: p.closesAt,
+                      participatedAt: new Date().toISOString(),
+                    });
                     toast.success(`🎯 Participação confirmada! ${p.entryFee} TKN debitados.`);
                     setTimeout(() => {
-                      navigate({ to: "/" });
+                      navigate({ to: "/dashboard" });
                     }, 1200);
                   }}
                   disabled={isClosed || confirmed || Object.keys(subAnswers).length < p.subPredictions.length}
