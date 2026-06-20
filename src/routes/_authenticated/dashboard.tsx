@@ -411,6 +411,8 @@ function RecommendationsSection() {
   const [taste, setTaste] = useState<Category>("Futebol");
   const [loading, setLoading] = useState(false);
   const [items, setItems] = useState<GeneratedChallenge[]>([]);
+  const [editingIdx, setEditingIdx] = useState<number | null>(null);
+  const [publishedIdx, setPublishedIdx] = useState<Set<number>>(new Set());
   const generate = useServerFn(generateChallenges);
 
   async function run() {
@@ -418,11 +420,34 @@ function RecommendationsSection() {
     try {
       const r = await generate({ data: { category: taste, count: 5 } });
       setItems(r.challenges);
+      setPublishedIdx(new Set());
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Erro ao gerar");
     } finally {
       setLoading(false);
     }
+  }
+
+  function updateItem(idx: number, patch: Partial<GeneratedChallenge>) {
+    setItems((arr) => arr.map((it, i) => (i === idx ? { ...it, ...patch } : it)));
+  }
+
+  function publish(idx: number) {
+    const it = items[idx];
+    if (!it) return;
+    if (!it.title.trim()) return toast.error("Adicione um título.");
+    const opts = it.options.map((o) => o.trim()).filter(Boolean);
+    if (opts.length < 2) return toast.error("Adicione pelo menos 2 opções.");
+    saveUserChallenge({
+      id: `ai-${Date.now()}-${idx}`,
+      name: it.title.trim(),
+      category: taste,
+      endsAt: "",
+      isOpen: true,
+      subs: [{ id: "s0", question: it.description || it.title, options: opts }],
+    });
+    setPublishedIdx((s) => new Set(s).add(idx));
+    toast.success("Desafio publicado!");
   }
 
   return (
@@ -453,20 +478,107 @@ function RecommendationsSection() {
         <Empty>Escolha uma categoria e clique em "Gerar 5 ideias".</Empty>
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          {items.map((c, i) => (
-            <div key={i} className="p-4 rounded-xl bg-card border border-border/60">
-              <div className="font-display font-bold line-clamp-2">{c.title}</div>
-              <div className="text-xs text-muted-foreground mt-1 line-clamp-2">{c.description}</div>
-              <div className="flex flex-wrap gap-1 mt-2">
-                {c.options.map((o, j) => (
-                  <span key={j} className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-background border border-border/60">
-                    {o}
-                  </span>
-                ))}
+          {items.map((c, i) => {
+            const isEditing = editingIdx === i;
+            const isPublished = publishedIdx.has(i);
+            return (
+              <div key={i} className="p-4 rounded-xl bg-card border border-border/60 flex flex-col gap-2">
+                {isEditing ? (
+                  <>
+                    <input
+                      value={c.title}
+                      onChange={(e) => updateItem(i, { title: e.target.value })}
+                      className="w-full h-9 px-2 rounded-lg bg-background border border-border/60 text-sm font-bold"
+                      placeholder="Título"
+                    />
+                    <textarea
+                      value={c.description}
+                      onChange={(e) => updateItem(i, { description: e.target.value })}
+                      rows={2}
+                      className="w-full px-2 py-1 rounded-lg bg-background border border-border/60 text-xs"
+                      placeholder="Descrição"
+                    />
+                    <div className="flex flex-col gap-1">
+                      {c.options.map((o, j) => (
+                        <div key={j} className="flex gap-1">
+                          <input
+                            value={o}
+                            onChange={(e) => {
+                              const next = [...c.options];
+                              next[j] = e.target.value;
+                              updateItem(i, { options: next });
+                            }}
+                            className="flex-1 h-8 px-2 rounded-lg bg-background border border-border/60 text-xs"
+                            placeholder={`Opção ${j + 1}`}
+                          />
+                          <button
+                            onClick={() => updateItem(i, { options: c.options.filter((_, k) => k !== j) })}
+                            className="h-8 w-8 rounded-lg border border-border/60 inline-flex items-center justify-center text-muted-foreground hover:text-destructive"
+                            aria-label="Remover opção"
+                          >
+                            <X className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+                      ))}
+                      <button
+                        onClick={() => updateItem(i, { options: [...c.options, ""] })}
+                        className="h-8 rounded-lg border border-dashed border-border/60 text-xs text-muted-foreground hover:text-foreground"
+                      >
+                        + opção
+                      </button>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <label className="text-[11px] text-muted-foreground">Tokens mín.</label>
+                      <input
+                        type="number"
+                        min={0}
+                        value={c.minTokens}
+                        onChange={(e) => updateItem(i, { minTokens: Number(e.target.value) || 0 })}
+                        className="w-20 h-8 px-2 rounded-lg bg-background border border-border/60 text-xs"
+                      />
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="font-display font-bold line-clamp-2">{c.title}</div>
+                    <div className="text-xs text-muted-foreground line-clamp-2">{c.description}</div>
+                    <div className="flex flex-wrap gap-1">
+                      {c.options.map((o, j) => (
+                        <span key={j} className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-background border border-border/60">
+                          {o}
+                        </span>
+                      ))}
+                    </div>
+                    <div className="text-[11px] text-gold font-bold">{c.minTokens} tokens</div>
+                  </>
+                )}
+                <div className="flex items-center gap-2 mt-auto pt-2">
+                  {isEditing ? (
+                    <button
+                      onClick={() => setEditingIdx(null)}
+                      className="h-8 px-3 rounded-full bg-background border border-border/60 text-xs font-semibold inline-flex items-center gap-1"
+                    >
+                      <Save className="h-3.5 w-3.5" /> OK
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => setEditingIdx(i)}
+                      className="h-8 px-3 rounded-full bg-background border border-border/60 text-xs font-semibold inline-flex items-center gap-1"
+                    >
+                      <Pencil className="h-3.5 w-3.5" /> Editar
+                    </button>
+                  )}
+                  <button
+                    onClick={() => publish(i)}
+                    disabled={isPublished}
+                    className="h-8 px-3 rounded-full bg-gradient-brand text-primary-foreground text-xs font-bold inline-flex items-center gap-1 shadow-glow disabled:opacity-60"
+                  >
+                    {isPublished ? <><CheckCircle2 className="h-3.5 w-3.5" /> Publicado</> : <><Rocket className="h-3.5 w-3.5" /> Publicar</>}
+                  </button>
+                </div>
               </div>
-              <div className="text-[11px] text-gold mt-2 font-bold">{c.minTokens} tokens</div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </section>
