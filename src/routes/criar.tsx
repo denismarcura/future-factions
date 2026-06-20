@@ -741,6 +741,39 @@ function Criar() {
               >
                 <UserPlus className="h-4 w-4" /> + convide mais amigos
               </button>
+
+              <div className="pt-3 mt-2 border-t border-border/40">
+                <Field label="Ou cole vários e-mails de uma vez (separados por vírgula, espaço ou linha)">
+                  <textarea
+                    value={bulkEmails}
+                    onChange={(e) => setBulkEmails(e.target.value)}
+                    rows={3}
+                    placeholder="amigo1@email.com, amigo2@email.com&#10;amigo3@email.com"
+                    className="input min-h-[88px] resize-y"
+                  />
+                </Field>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const emails = Array.from(new Set(
+                      bulkEmails.split(/[\s,;]+/).map((e) => e.trim()).filter((e) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e))
+                    ));
+                    if (!emails.length) return;
+                    setFriends((prev) => {
+                      const existing = new Set(prev.map((p) => p.email.trim().toLowerCase()));
+                      const additions = emails
+                        .filter((e) => !existing.has(e.toLowerCase()))
+                        .map((email) => ({ id: uid(), name: "", email }));
+                      const cleaned = prev.filter((p) => p.email.trim() || p.name.trim());
+                      return [...(cleaned.length ? cleaned : []), ...additions, ...(cleaned.length ? [] : [])];
+                    });
+                    setBulkEmails("");
+                  }}
+                  className="mt-2 inline-flex items-center gap-1.5 h-9 px-3 rounded-lg bg-primary/15 text-primary border border-primary/30 text-xs font-bold"
+                >
+                  <Plus className="h-3.5 w-3.5" /> Adicionar e-mails à lista
+                </button>
+              </div>
             </div>
 
             <div className="mt-5 pt-5 border-t border-border/40 space-y-3">
