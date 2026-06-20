@@ -353,11 +353,6 @@ function Criar() {
             </Field>
           </Section>
 
-          {/* Convide Amigos */}
-          <Section
-            title="Convide amigos"
-            description="Cada amigo cadastrado = 100 tokens para você. Se ele criar um Desafio, vocês dois ganham +100 tokens cada. Convide quantos amigos quiser e aumente suas chances de ganhar prêmios."
-          >
 
           {/* Convide Amigos */}
           <Section
