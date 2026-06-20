@@ -10,6 +10,7 @@ import { AppShell } from "@/components/layout/AppShell";
 import { CATEGORIES } from "@/lib/mock-data";
 import { generateInviteText } from "@/lib/invite.functions";
 import { saveUserChallenge } from "@/lib/user-challenges";
+import { improveTitle } from "@/lib/title-ai.functions";
 
 export const Route = createFileRoute("/criar")({
   head: () => ({
