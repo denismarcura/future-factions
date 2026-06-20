@@ -16,9 +16,12 @@ import {
   Flame,
   ListChecks,
   Shield,
+  LogIn,
+  LogOut,
 } from "lucide-react";
 import type { ReactNode } from "react";
 import { CURRENT_USER, formatTokens } from "@/lib/mock-data";
+import { useAuth, signOut } from "@/hooks/use-auth";
 import logoAsset from "@/assets/logo-desafio.png.asset.json";
 
 const NAV = [
