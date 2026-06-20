@@ -216,7 +216,34 @@ function Criar() {
         <div className="space-y-5">
           {/* Básico */}
           <Section title="Informações do desafio">
-            <Field label="Nome do desafio">
+            <Field
+              label="Nome do desafio"
+              action={
+                <button
+                  type="button"
+                  onClick={async () => {
+                    if (!name.trim()) return;
+                    setImprovingTitle(true);
+                    try {
+                      const result = await useServerFn(improveTitle)({ data: { title: name.trim(), category } });
+                      setName(result.title);
+                    } catch (err) {
+                      alert(err instanceof Error ? err.message : "Não foi possível melhorar o título agora.");
+                    } finally {
+                      setImprovingTitle(false);
+                    }
+                  }}
+                  disabled={improvingTitle || !name.trim()}
+                  className="inline-flex items-center gap-1 text-xs font-bold text-primary hover:text-primary/80 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                >
+                  {improvingTitle ? (
+                    <><Loader2 className="h-3 w-3 animate-spin" /> Melhorando…</>
+                  ) : (
+                    <><Sparkles className="h-3 w-3" /> Melhorar o título</>
+                  )}
+                </button>
+              }
+            >
               <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Ex.: Brasil x Haiti — Quem leva?" className="input" />
             </Field>
             <div className="grid sm:grid-cols-2 gap-4">
@@ -570,10 +597,13 @@ function Section({ title, description, action, children }: { title: string; desc
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({ label, action, children }: { label: string; action?: React.ReactNode; children: React.ReactNode }) {
   return (
     <label className="block">
-      <div className="text-xs uppercase tracking-wider font-bold text-muted-foreground mb-1.5">{label}</div>
+      <div className="flex items-center justify-between gap-2 mb-1.5">
+        <div className="text-xs uppercase tracking-wider font-bold text-muted-foreground">{label}</div>
+        {action}
+      </div>
       {children}
     </label>
   );
