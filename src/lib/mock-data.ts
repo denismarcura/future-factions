@@ -16,6 +16,7 @@ export type Category =
 
 export const CATEGORIES: Category[] = [
   "Copa do Mundo 2026",
+  "Desafios Diamante",
   "Palpites Malucos da Copa",
   "Futebol",
   "Política",
