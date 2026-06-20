@@ -48,6 +48,7 @@ function Criar() {
   const [prizeImg, setPrizeImg] = useState<string | null>(null);
   const [aiPrompt, setAiPrompt] = useState("");
   const [generating, setGenerating] = useState(false);
+  const [improvingTitle, setImprovingTitle] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
   const [published, setPublished] = useState<null | { id: string; name: string }>(null);
   const [friends, setFriends] = useState<{ id: string; name: string; email: string }[]>([
