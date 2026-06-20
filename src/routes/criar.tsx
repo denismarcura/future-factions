@@ -64,6 +64,7 @@ function Criar() {
   const [genLoading, setGenLoading] = useState(false);
   const [genError, setGenError] = useState<string | null>(null);
   const generateInvite = useServerFn(generateInviteText);
+  const improveTitleFn = useServerFn(improveTitle);
 
   const handleGenerateInvite = async () => {
     setGenError(null);
