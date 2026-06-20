@@ -5,14 +5,17 @@ const MAX_PER_IP = 5;
 
 function extractIp(req: Request): string {
   const h = req.headers;
+  // Prefer trusted edge headers that clients cannot spoof.
+  const trusted = h.get("cf-connecting-ip") || h.get("true-client-ip");
+  if (trusted) return trusted.trim();
+  // Fall back to x-forwarded-for (take the LAST entry, set by our edge,
+  // not the first which is the client-controlled value).
   const fwd = h.get("x-forwarded-for");
-  if (fwd) return fwd.split(",")[0]!.trim();
-  return (
-    h.get("cf-connecting-ip") ||
-    h.get("x-real-ip") ||
-    h.get("x-client-ip") ||
-    "0.0.0.0"
-  );
+  if (fwd) {
+    const parts = fwd.split(",").map((s) => s.trim()).filter(Boolean);
+    if (parts.length) return parts[parts.length - 1]!;
+  }
+  return h.get("x-real-ip") || "0.0.0.0";
 }
 
 async function lookupCity(ip: string): Promise<string | null> {
