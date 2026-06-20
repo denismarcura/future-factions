@@ -3,6 +3,7 @@ import { Flame, MessageCircle, Heart, Share2, Users, Clock, Plus } from "lucide-
 import { type Prediction, formatTokens, timeLeft } from "@/lib/mock-data";
 
 export function PredictionCard({ prediction: p }: { prediction: Prediction }) {
+  const navigate = useNavigate();
   const totalPool = p.options.reduce((s, o) => s + o.pool, 0);
   return (
     <article className="group rounded-2xl bg-card border border-border/60 hover:border-primary/50 hover:shadow-glow transition overflow-hidden">
