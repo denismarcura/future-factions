@@ -43,10 +43,49 @@ export const Route = createFileRoute("/previsao/$id")({
 
 function PredictionPage() {
   const p = Route.useLoaderData() as Prediction;
+  const { user } = useAuth();
   const totalPool = p.options.reduce((s: number, o) => s + o.pool, 0);
   const [selected, setSelected] = useState(p.options[0].id);
   const [amount, setAmount] = useState(p.entryFee ?? p.minTokens);
   const [subAnswers, setSubAnswers] = useState<Record<string, string>>({});
+  const [bonusMission, setBonusMission] = useState<Mission | null>(null);
+  const [bonusDone, setBonusDone] = useState(false);
+  const [bonusBusy, setBonusBusy] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const igMissions = await listMissions({ platform: "instagram", activeOnly: true });
+        const pick = pickRandomFor(igMissions, p.id);
+        setBonusMission(pick);
+        if (pick && user) {
+          const claims = await listMyClaims(`challenge:${p.id}`);
+          if (claims.some((c) => c.mission_id === pick.id)) setBonusDone(true);
+        }
+      } catch {
+        // silently ignore mission load failures on this page
+      }
+    })();
+  }, [p.id, user]);
+
+  async function handleBonusClaim() {
+    if (!bonusMission) return;
+    if (!user) {
+      toast.error("Faça login para ganhar o palpite extra.");
+      return;
+    }
+    setBonusBusy(true);
+    window.open(bonusMission.link, "_blank", "noopener,noreferrer");
+    try {
+      await claimMission(bonusMission.id, `challenge:${p.id}`, bonusMission.tokens);
+      setBonusDone(true);
+      toast.success("🎯 +1 palpite extra liberado neste desafio!");
+    } catch (e: any) {
+      toast.error(e.message ?? "Erro");
+    } finally {
+      setBonusBusy(false);
+    }
+  }
 
   const sel = p.options.find((o) => o.id === selected)!;
   const newPool = totalPool + amount;
