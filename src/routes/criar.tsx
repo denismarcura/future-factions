@@ -56,6 +56,42 @@ function Criar() {
   const updateFriend = (id: string, patch: Partial<{ name: string; email: string }>) =>
     setFriends(friends.map(f => f.id === id ? { ...f, ...patch } : f));
 
+  const [inviteText, setInviteText] = useState("");
+  const [inviterName, setInviterName] = useState("");
+  const [genLoading, setGenLoading] = useState(false);
+  const [genError, setGenError] = useState<string | null>(null);
+  const generateInvite = useServerFn(generateInviteText);
+
+  const handleGenerateInvite = async () => {
+    setGenError(null);
+    if (!inviterName.trim()) {
+      setGenError("Informe seu nome (quem está convidando) antes de gerar o texto.");
+      return;
+    }
+    if (!name.trim()) {
+      setGenError("Dê um nome ao desafio antes de gerar o texto do convite.");
+      return;
+    }
+    setGenLoading(true);
+    try {
+      const palpites = subs
+        .map(s => {
+          const opts = s.options.filter(o => o.trim());
+          if (!s.question.trim() || opts.length < 2) return "";
+          return `${s.question.trim()} (${opts.join(" / ")})`;
+        })
+        .filter(Boolean);
+      const { text } = await generateInvite({
+        data: { inviterName: inviterName.trim(), challengeName: name.trim(), palpites },
+      });
+      setInviteText(text);
+    } catch (err) {
+      setGenError(err instanceof Error ? err.message : "Não foi possível gerar o texto agora.");
+    } finally {
+      setGenLoading(false);
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const errs: string[] = [];
