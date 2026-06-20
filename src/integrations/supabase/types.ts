@@ -165,6 +165,7 @@ export type Database = {
           status: string
           terms_accepted_at: string | null
           updated_at: string
+          welcome_bonus: number
           whatsapp: string | null
         }
         Insert: {
@@ -181,6 +182,7 @@ export type Database = {
           status?: string
           terms_accepted_at?: string | null
           updated_at?: string
+          welcome_bonus?: number
           whatsapp?: string | null
         }
         Update: {
@@ -197,6 +199,7 @@ export type Database = {
           status?: string
           terms_accepted_at?: string | null
           updated_at?: string
+          welcome_bonus?: number
           whatsapp?: string | null
         }
         Relationships: []
