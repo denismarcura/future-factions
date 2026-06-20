@@ -268,9 +268,11 @@ COPA_LOUCA.forEach((title, i) => {
 
 import { WORLD_CUP_CHALLENGES } from "@/lib/world-cup-matches";
 import { PALPITES_MALUCOS } from "@/lib/palpites-malucos";
+import { DESAFIOS_DIAMANTE } from "@/lib/desafios-diamante";
 
 predictions.unshift(...WORLD_CUP_CHALLENGES);
 predictions.unshift(...PALPITES_MALUCOS);
+predictions.unshift(...DESAFIOS_DIAMANTE);
 
 export const PREDICTIONS = predictions;
 
