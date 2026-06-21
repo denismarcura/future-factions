@@ -552,8 +552,13 @@ function AdminBanners() {
                   className="h-16 w-28 object-cover rounded-md border border-border flex-shrink-0"
                 />
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <span className="font-bold truncate">{b.title}</span>
+                    {b.isMain && (
+                      <span className="text-[10px] px-2 py-0.5 rounded-full font-bold uppercase bg-gold/20 text-gold border border-gold/40 inline-flex items-center gap-1">
+                        ★ Principal
+                      </span>
+                    )}
                     <span
                       className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase ${
                         b.active
@@ -563,6 +568,20 @@ function AdminBanners() {
                     >
                       {b.active ? "Ativo" : "Inativo"}
                     </span>
+                    {b.expiresAt && (
+                      <span
+                        className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase ${
+                          new Date(b.expiresAt).getTime() < Date.now()
+                            ? "bg-destructive/15 text-destructive"
+                            : "bg-muted text-muted-foreground"
+                        }`}
+                        title={new Date(b.expiresAt).toLocaleString("pt-BR")}
+                      >
+                        {new Date(b.expiresAt).getTime() < Date.now()
+                          ? "Expirado"
+                          : `Expira ${new Date(b.expiresAt).toLocaleString("pt-BR")}`}
+                      </span>
+                    )}
                     <span className="text-[10px] text-muted-foreground">
                       Ordem: {b.sortOrder}
                     </span>
