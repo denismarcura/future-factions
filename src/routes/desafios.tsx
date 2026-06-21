@@ -1,11 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { AppShell } from "@/components/layout/AppShell";
 import { PredictionCard } from "@/components/PredictionCard";
 import { CATEGORIES, PREDICTIONS, type Prediction } from "@/lib/mock-data";
 import { COMPANY_CHALLENGES } from "@/lib/mock-extra";
 import { getUserChallenges } from "@/lib/user-challenges";
-import { ListChecks, Building2, Users, Lock, Globe2, Sparkles } from "lucide-react";
+import { aiSearchChallenges } from "@/lib/search-ai.functions";
+import { ListChecks, Building2, Users, Lock, Globe2, Sparkles, Search, Loader2, X, Wand2 } from "lucide-react";
 
 export const Route = createFileRoute("/desafios")({
   head: () => ({
@@ -21,6 +23,12 @@ function DesafiosPage() {
   const [tab, setTab] = useState<"todos" | "publicos" | "empresas" | "privados">("todos");
   const [cat, setCat] = useState<string>("Todas");
   const [userChallenges, setUserChallenges] = useState<Prediction[]>([]);
+  const [query, setQuery] = useState("");
+  const [aiQuery, setAiQuery] = useState<string | null>(null);
+  const [aiIds, setAiIds] = useState<string[] | null>(null);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState<string | null>(null);
+  const runAiSearch = useServerFn(aiSearchChallenges);
 
   useEffect(() => {
     const sync = () => setUserChallenges(getUserChallenges());
@@ -56,9 +64,52 @@ function DesafiosPage() {
       list = list.filter((p) => !isClosed(p));
       if (cat !== "Todas") list = list.filter((p) => p.category === cat);
     }
-    list.sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt));
+    if (aiIds && aiIds.length) {
+      const order = new Map(aiIds.map((id, i) => [id, i]));
+      list = list
+        .filter((p) => order.has(p.id))
+        .sort((a, b) => (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0));
+    } else {
+      list.sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt));
+    }
     return list;
-  }, [tab, cat, userChallenges, publicMock, privateMock]);
+  }, [tab, cat, userChallenges, publicMock, privateMock, aiIds]);
+
+  const handleAiSearch = async (e: { preventDefault: () => void }) => {
+    e.preventDefault();
+    const q = query.trim();
+    if (!q) return;
+    setAiLoading(true);
+    setAiError(null);
+    try {
+      const pool: Prediction[] = tab === "publicos"
+        ? [...userChallenges, ...publicMock]
+        : tab === "privados"
+          ? [...userChallenges, ...privateMock]
+          : [...userChallenges, ...PREDICTIONS];
+      const payload = pool.slice(0, 250).map((p) => ({
+        id: p.id,
+        title: p.title,
+        category: p.category,
+      }));
+      const res = await runAiSearch({ data: { query: q, items: payload } });
+      setAiQuery(q);
+      setAiIds(res.ids);
+      if (res.ids.length === 0) setAiError("Nenhum desafio encontrado para esta busca.");
+    } catch (err) {
+      setAiError(err instanceof Error ? err.message : "Erro na busca");
+      setAiIds([]);
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
+  const clearAiSearch = () => {
+    setQuery("");
+    setAiQuery(null);
+    setAiIds(null);
+    setAiError(null);
+  };
 
   // Últimos cadastrados = user-created first, then most recently created mocks (exclui encerrados).
   const latest = useMemo(() => {
@@ -80,6 +131,59 @@ function DesafiosPage() {
           Explore desafios públicos, privados (entre amigos) e promoções de empresas.
         </p>
       </header>
+
+      {/* Busca inteligente com IA */}
+      <form onSubmit={handleAiSearch} className="mb-6">
+        <div className="relative rounded-2xl border border-primary/40 bg-card/60 backdrop-blur-sm shadow-glow/30 focus-within:border-primary transition">
+          <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none">
+            {aiLoading ? (
+              <Loader2 className="h-5 w-5 text-primary animate-spin" />
+            ) : (
+              <Wand2 className="h-5 w-5 text-primary" />
+            )}
+          </div>
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder='Busca inteligente com IA — ex.: "jogos da Copa do Mundo com prêmios altos"'
+            className="w-full h-14 pl-12 pr-40 bg-transparent rounded-2xl text-sm sm:text-base focus:outline-none placeholder:text-muted-foreground/70"
+            disabled={aiLoading}
+          />
+          <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+            {(aiQuery || query) && (
+              <button
+                type="button"
+                onClick={clearAiSearch}
+                className="h-9 w-9 grid place-items-center rounded-full text-muted-foreground hover:text-foreground hover:bg-muted/60"
+                aria-label="Limpar"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
+            <button
+              type="submit"
+              disabled={aiLoading || !query.trim()}
+              className="inline-flex items-center gap-2 h-10 px-4 rounded-full bg-gradient-brand text-primary-foreground font-bold text-sm shadow-glow hover:scale-[1.02] transition disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Search className="h-4 w-4" />
+              <span className="hidden sm:inline">Buscar</span>
+            </button>
+          </div>
+        </div>
+        {aiQuery && !aiLoading && (
+          <div className="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
+            <Sparkles className="h-3.5 w-3.5 text-gold" />
+            Resultados de IA para <span className="font-bold text-foreground">"{aiQuery}"</span>
+            {aiIds && <span>· {aiIds.length} encontrados</span>}
+            <button type="button" onClick={clearAiSearch} className="text-primary hover:underline ml-1">
+              limpar
+            </button>
+          </div>
+        )}
+        {aiError && (
+          <div className="mt-2 text-xs text-destructive">{aiError}</div>
+        )}
+      </form>
 
       <div className="flex flex-wrap gap-2 mb-6">
         {[
