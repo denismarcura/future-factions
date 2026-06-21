@@ -543,25 +543,124 @@ function MissionCountdown({ missionId }: { missionId: string }) {
   );
 }
 
-function MissionRow({ m }: { m: Mission }) {
+function getPlatformTheme(m: Mission) {
+  if (m.platform === "instagram") {
+    return {
+      icon: Instagram,
+      color: "#E1306C",
+      gradient: "var(--gradient-instagram)",
+      border: "#E1306C/40",
+      bg: "#E1306C/10",
+    };
+  }
+  if (m.platform === "youtube") {
+    return {
+      icon: YoutubeIcon,
+      color: "#FF0000",
+      gradient: "var(--gradient-youtube)",
+      border: "#FF0000/40",
+      bg: "#FF0000/10",
+    };
+  }
+  if (m.platform === "facebook") {
+    return {
+      icon: FacebookIcon,
+      color: "#1877F2",
+      gradient: "var(--gradient-facebook)",
+      border: "#1877F2/40",
+      bg: "#1877F2/10",
+    };
+  }
+  if (m.platform === "tiktok" && m.action_type === "follow") {
+    return {
+      icon: TikTokIcon,
+      color: "#ffffff",
+      gradient: "var(--gradient-tiktok)",
+      border: "#ffffff/30",
+      bg: "#ffffff/5",
+    };
+  }
+  return {
+    icon: Circle,
+    color: "var(--primary)",
+    gradient: "var(--gradient-brand)",
+    border: "var(--primary)/30",
+    bg: "var(--primary)/10",
+  };
+}
+
+function YoutubeIcon({ className }: { className?: string }) {
   return (
-    <div className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border/60">
-      <Circle className="h-5 w-5 text-muted-foreground shrink-0" />
-      <div className="flex-1 min-w-0">
-        <div className="text-sm font-semibold truncate">{m.title}</div>
-        <div className="text-[11px] text-muted-foreground truncate">
-          {PLATFORM_LABEL[m.platform]} · {ACTION_LABEL[m.action_type]} · +{m.tokens} tokens
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M23.498 6.186a2.996 2.996 0 0 0-2.122-2.124C19.514 3.5 12 3.5 12 3.5s-7.514 0-9.376.562A2.996 2.996 0 0 0 .502 6.186 31.264 31.264 0 0 0 0 12a31.264 31.264 0 0 0 .502 5.814 2.996 2.996 0 0 0 2.122 2.124c1.862.562 9.376.562 9.376.562s7.514 0 9.376-.562a2.996 2.996 0 0 0 2.122-2.124A31.264 31.264 0 0 0 24 12a31.264 31.264 0 0 0-.502-5.814zM9.546 15.556V8.444L15.818 12l-6.272 3.556z" />
+    </svg>
+  );
+}
+
+function FacebookIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M24 12.073C24 5.405 18.627 0 12 0S0 5.405 0 12.073C0 18.1 4.388 23.095 10.125 24v-8.437H7.078v-3.49h3.047V9.412c0-3.017 1.791-4.682 4.534-4.682 1.312 0 2.686.235 2.686.235v2.953h-1.513c-1.491 0-1.956.926-1.956 1.875v2.25h3.328l-.532 3.49h-2.796V24C19.612 23.095 24 18.1 24 12.073z" />
+    </svg>
+  );
+}
+
+function TikTokIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.88-2.89 2.89 2.89 0 0 1 2.88-2.89c.27 0 .53.04.78.11V9.4a6.37 6.37 0 0 0-.78-.05A6.34 6.34 0 0 0 3.06 15.7a6.34 6.34 0 0 0 6.33 6.34 6.34 6.34 0 0 0 6.33-6.34V8.56a8.25 8.25 0 0 0 4.87 1.58V6.69z" />
+    </svg>
+  );
+}
+
+function MissionRow({ m }: { m: Mission }) {
+  const theme = getPlatformTheme(m);
+  const Icon = theme.icon;
+
+  return (
+    <div
+      className="flex flex-col gap-3 p-4 rounded-2xl border"
+      style={{
+        background: `color-mix(in srgb, ${theme.color} 8%, #0f0f0f)`,
+        borderColor: `color-mix(in srgb, ${theme.color} 35%, transparent)`,
+      }}
+    >
+      <div className="flex items-start gap-3">
+        <div
+          className="h-10 w-10 rounded-xl grid place-items-center shrink-0"
+          style={{
+            background: `color-mix(in srgb, ${theme.color} 18%, transparent)`,
+            color: theme.color,
+          }}
+        >
+          <Icon className="h-5 w-5" />
         </div>
-        <div className="mt-1">
-          <MissionCountdown missionId={m.id} />
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-bold" style={{ color: theme.color }}>
+              {PLATFORM_LABEL[m.platform]}
+            </span>
+            <span className="text-[10px] text-muted-foreground">· {ACTION_LABEL[m.action_type]}</span>
+          </div>
+          <div className="text-sm font-semibold truncate mt-0.5">{m.title}</div>
+          <div className="text-[11px] text-muted-foreground mt-0.5">
+            Ganhe <span className="font-bold text-gold">+{m.tokens} tokens</span>
+          </div>
         </div>
       </div>
+
       <Link
         to="/missoes"
-        className="text-[11px] font-bold px-3 h-8 rounded-full bg-gradient-brand text-primary-foreground inline-flex items-center"
+        className="w-full text-sm font-bold h-10 rounded-full text-white inline-flex items-center justify-center gap-2 transition hover:opacity-90"
+        style={{ background: theme.gradient }}
       >
-        Fazer
+        <ExternalLink className="h-4 w-4" />
+        Fazer missão
       </Link>
+
+      <div className="flex items-center justify-between">
+        <MissionCountdown missionId={m.id} />
+      </div>
     </div>
   );
 }
