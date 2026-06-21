@@ -46,6 +46,7 @@ import {
 import {
   listFriends,
   addFriend,
+  addManyFromText,
   removeFriend,
   markInviteSent,
   toggleRegistered,
