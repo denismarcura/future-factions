@@ -16,6 +16,7 @@ import { saveUserChallenge } from "@/lib/user-challenges";
 import { improveTitle } from "@/lib/title-ai.functions";
 import { listCategories, listSubcategories, type ChallengeCategory, type ChallengeSubcategory } from "@/lib/challenge-categories";
 import { generateChallenge, improveDescription, generateWhatsAppInvite } from "@/lib/challenge-ai.functions";
+import { generatePrizeImage } from "@/lib/prize-image.functions";
 import logoAsset from "@/assets/logo-desafio.png.asset.json";
 import { WORLD_CUP_MATCHES } from "@/lib/world-cup-matches";
 
@@ -113,7 +114,7 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
     ];
   });
   const [prizeImg, setPrizeImg] = useState<string | null>(null);
-  const [ownTokensPrize, setOwnTokensPrize] = useState<number>(0);
+  
   const [shopPrizeId, setShopPrizeId] = useState<string | null>(null);
   const [shopPickerOpen, setShopPickerOpen] = useState(false);
   const [aiPrompt, setAiPrompt] = useState("");
@@ -148,6 +149,7 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
   const generateChallengeFn = useServerFn(generateChallenge);
   const improveDescriptionFn = useServerFn(improveDescription);
   const generateWhatsFn = useServerFn(generateWhatsAppInvite);
+  const generatePrizeImageFn = useServerFn(generatePrizeImage);
 
   // AI Challenge Generator state
   const [aiOpen, setAiOpen] = useState(false);
@@ -367,12 +369,30 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
     img.src = url;
   };
 
-  const fakeGenerate = () => {
+  const generatePrize = async () => {
+    if (!name.trim() && !aiPrompt.trim()) {
+      alert("Dê um nome ao desafio ou descreva o prêmio antes de gerar a imagem.");
+      return;
+    }
     setGenerating(true);
-    setTimeout(() => {
-      setPrizeImg(`https://picsum.photos/seed/${encodeURIComponent(aiPrompt || "premio")}/500/500`);
+    try {
+      const drawDate = endsAt
+        ? new Date(endsAt).toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" })
+        : "";
+      const { dataUrl } = await generatePrizeImageFn({
+        data: {
+          title: name.trim() || "Desafio dos Palpites",
+          prize: prizeName.trim(),
+          drawDate,
+          extraPrompt: aiPrompt.trim(),
+        },
+      });
+      setPrizeImg(dataUrl);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Não foi possível gerar a imagem.");
+    } finally {
       setGenerating(false);
-    }, 900);
+    }
   };
 
   const totalQuestions = subs.length;
@@ -789,40 +809,6 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
             title="Prêmio"
             description={`Automaticamente daremos ${AUTO_PRIZE.toLocaleString("pt-BR")} tokens para quem fizer a maior pontuação. Você pode somar seus próprios tokens, escolher um prêmio da nossa loja ou cadastrar um prêmio físico próprio.`}
           >
-            {/* Tokens próprios como prêmio */}
-            <div className="rounded-xl border border-gold/30 bg-gold/5 p-4 mb-3">
-              <div className="flex items-start gap-3">
-                <Coins className="h-5 w-5 text-gold mt-0.5 shrink-0" />
-                <div className="flex-1">
-                  <div className="font-bold text-sm">Adicionar tokens do seu saldo como prêmio extra</div>
-                  <div className="text-xs text-muted-foreground mb-2">
-                    Seu saldo: <span className="text-gold font-bold">{formatTokens(CURRENT_USER.tokens)} tokens</span>. O valor será reservado e entregue ao vencedor.
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="number"
-                      min={0}
-                      step={100}
-                      max={CURRENT_USER.tokens}
-                      value={ownTokensPrize}
-                      onChange={(e) => setOwnTokensPrize(Math.max(0, Math.min(CURRENT_USER.tokens, Number(e.target.value) || 0)))}
-                      placeholder="0"
-                      className="input max-w-[180px]"
-                    />
-                    <span className="text-xs text-muted-foreground">tokens</span>
-                    {ownTokensPrize > 0 && (
-                      <button
-                        type="button"
-                        onClick={() => setOwnTokensPrize(0)}
-                        className="text-xs text-muted-foreground hover:text-destructive ml-2"
-                      >
-                        Limpar
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
 
             {/* Comprar prêmio na loja */}
             <div className="rounded-xl border border-primary/30 bg-primary/5 p-4 mb-4">
@@ -908,7 +894,7 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
                 </Field>
                 <button
                   type="button"
-                  onClick={fakeGenerate}
+                  onClick={generatePrize}
                   disabled={generating}
                   className="w-full h-11 rounded-lg bg-gradient-brand text-primary-foreground font-display font-bold inline-flex items-center justify-center gap-2 shadow-glow disabled:opacity-60"
                 >
