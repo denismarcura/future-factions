@@ -359,12 +359,8 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
   const totalQuestions = subs.length;
   const maxReward = totalQuestions * REWARD_PER_HIT;
 
-  const Wrapper: React.ComponentType<{ children: React.ReactNode }> = bare
-    ? ({ children }) => <div>{children}</div>
-    : ({ children }) => <AppShell>{children}</AppShell>;
-
-  return (
-    <Wrapper>
+  const content = (
+    <>
       <header className="mb-6 flex items-start justify-between gap-4 flex-wrap">
         <div>
           <h1 className="font-display text-3xl font-black flex items-center gap-3">
@@ -1302,10 +1298,12 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
           </div>
         </div>
       )}
-    </Wrapper>
-
-
+    </>
   );
+
+  return bare ? <div>{content}</div> : <AppShell>{content}</AppShell>;
+
+
 }
 
 function Section({ title, description, action, children }: { title: string; description?: string; action?: React.ReactNode; children: React.ReactNode }) {
