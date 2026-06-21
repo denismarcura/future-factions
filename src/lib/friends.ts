@@ -64,6 +64,46 @@ export function markInviteSent(id: string) {
   write(list);
 }
 
+/** Parses a free-text list (lines, commas, semicolons or tabs) into entries.
+ *  Each entry may be a name, an email, a phone number, or "Name <email>" / "Name - phone". */
+export function parseFriendsText(text: string): Array<{ name: string; email?: string; whatsapp?: string }> {
+  const tokens = text
+    .split(/[\n,;\t]+/)
+    .map((s) => s.trim())
+    .filter(Boolean);
+  const emailRe = /[^\s<>"]+@[^\s<>"]+\.[^\s<>"]+/;
+  const phoneRe = /\+?\d[\d\s().-]{7,}\d/;
+  const out: Array<{ name: string; email?: string; whatsapp?: string }> = [];
+  for (const raw of tokens) {
+    const email = raw.match(emailRe)?.[0];
+    const phone = raw.replace(email ?? "", "").match(phoneRe)?.[0];
+    let name = raw
+      .replace(email ?? "", "")
+      .replace(phone ?? "", "")
+      .replace(/[<>()\-–—|]/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+    if (!name) name = email ?? phone ?? raw;
+    out.push({
+      name,
+      email: email || undefined,
+      whatsapp: phone ? phone.replace(/\D/g, "") : undefined,
+    });
+  }
+  return out;
+}
+
+export function addManyFromText(text: string): number {
+  const entries = parseFriendsText(text);
+  let added = 0;
+  for (const e of entries) {
+    if (!e.name && !e.email && !e.whatsapp) continue;
+    addFriend(e);
+    added++;
+  }
+  return added;
+}
+
 export function toggleRegistered(id: string) {
   const list = read();
   const i = list.findIndex((f) => f.id === id);

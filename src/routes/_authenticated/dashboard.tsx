@@ -31,6 +31,10 @@ import {
   Mail,
   Image as ImageIcon,
   Instagram,
+  QrCode,
+  History,
+  Clock,
+  ClipboardPaste,
 } from "lucide-react";
 import { toast } from "sonner";
 import { CATEGORIES, formatTokens, type Category } from "@/lib/mock-data";
@@ -46,6 +50,7 @@ import {
 import {
   listFriends,
   addFriend,
+  addManyFromText,
   removeFriend,
   markInviteSent,
   toggleRegistered,
@@ -203,6 +208,14 @@ function Dashboard() {
         {/* PROFILE EDITOR */}
         <ProfileEditor profile={profile} onSaved={setProfile} />
 
+        {/* TOKENS EXTRACT */}
+        <TokensExtractSection
+          welcomeBonus={profile?.welcome_bonus ?? 0}
+          claims={claims}
+          missions={missions}
+          balance={tokens}
+        />
+
         {/* MY PARTICIPATIONS */}
         <MyParticipationsSection items={participations} />
 
@@ -224,11 +237,16 @@ function Dashboard() {
         <FriendsSection
           friends={friends}
           inviterName={name}
+          userId={profile?.id ?? ""}
           onChange={() => setFriends(listFriends())}
         />
 
         {/* INVITE PROMO (email + whatsapp + artes prontas) */}
-        <InvitePromoSection inviterName={name} myChallenges={myChallenges} />
+        <InvitePromoSection
+          inviterName={name}
+          userId={profile?.id ?? ""}
+          myChallenges={myChallenges}
+        />
 
         {/* SHOP PREVIEW */}
         <ShopPreviewSection tokens={tokens} />
@@ -445,15 +463,15 @@ function MissionsSection({
   done: number;
   todo: number;
 }) {
-  const todoList = missions.filter((m) => !claimedIds.has(m.id)).slice(0, 6);
-  const doneList = missions.filter((m) => claimedIds.has(m.id)).slice(0, 6);
+  // Completed missions are removed from this area entirely.
+  const todoList = missions.filter((m) => !claimedIds.has(m.id)).slice(0, 8);
 
   return (
     <section className="glass-card rounded-2xl p-5 border border-border/60">
       <SectionTitle
         icon={Target}
         title="Missões"
-        hint={`Ganhe mais tokens participando de missões · ${done} feitas · ${todo} para fazer`}
+        hint={`Ganhe mais tokens · ${done} feitas · ${todo} para fazer · prazo de 24h cada`}
         right={
           <Link
             to="/missoes"
@@ -463,59 +481,163 @@ function MissionsSection({
           </Link>
         }
       />
-      <div className="grid md:grid-cols-2 gap-4">
-        <div>
-          <h3 className="text-xs uppercase tracking-wider text-muted-foreground mb-2">
-            Para fazer
-          </h3>
-          <div className="space-y-2">
-            {todoList.length === 0 ? (
-              <Empty>Nenhuma missão disponível agora.</Empty>
-            ) : (
-              todoList.map((m) => <MissionRow key={m.id} m={m} done={false} />)
-            )}
-          </div>
-        </div>
-        <div>
-          <h3 className="text-xs uppercase tracking-wider text-muted-foreground mb-2">
-            Concluídas
-          </h3>
-          <div className="space-y-2">
-            {doneList.length === 0 ? (
-              <Empty>Você ainda não concluiu missões.</Empty>
-            ) : (
-              doneList.map((m) => <MissionRow key={m.id} m={m} done />)
-            )}
-          </div>
-        </div>
+      <div className="grid sm:grid-cols-2 gap-2">
+        {todoList.length === 0 ? (
+          <Empty>Nenhuma missão pendente. Boa! 🎉</Empty>
+        ) : (
+          todoList.map((m) => <MissionRow key={m.id} m={m} />)
+        )}
       </div>
     </section>
   );
 }
 
-function MissionRow({ m, done }: { m: Mission; done: boolean }) {
+function useMissionDeadline(missionId: string) {
+  // 24h window from when this user first sees the mission (stored locally).
+  const [now, setNow] = useState(() => Date.now());
+  const deadline = useMemo(() => {
+    if (typeof window === "undefined") return Date.now() + 24 * 3600 * 1000;
+    const k = `ddp:mission-seen:${missionId}`;
+    let seen = Number(window.localStorage.getItem(k) || 0);
+    if (!seen) {
+      seen = Date.now();
+      window.localStorage.setItem(k, String(seen));
+    }
+    return seen + 24 * 3600 * 1000;
+  }, [missionId]);
+  useEffect(() => {
+    const t = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, []);
+  const ms = Math.max(0, deadline - now);
+  const h = Math.floor(ms / 3600000);
+  const m = Math.floor((ms % 3600000) / 60000);
+  const s = Math.floor((ms % 60000) / 1000);
+  const expired = ms <= 0;
+  const label = expired ? "Expirou" : `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+  return { label, expired };
+}
+
+function MissionCountdown({ missionId }: { missionId: string }) {
+  const { label, expired } = useMissionDeadline(missionId);
+  return (
+    <span
+      className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full tabular-nums ${
+        expired
+          ? "bg-red-500/20 text-red-400 border border-red-500/40"
+          : "bg-red-500/15 text-red-400 border border-red-500/30"
+      }`}
+      title="Tempo restante para concluir a missão"
+    >
+      <Clock className="h-3 w-3" />
+      {expired ? "Expirou" : `Faltam ${label}`}
+    </span>
+  );
+}
+
+function MissionRow({ m }: { m: Mission }) {
   return (
     <div className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border/60">
-      {done ? (
-        <CheckCircle2 className="h-5 w-5 text-primary shrink-0" />
-      ) : (
-        <Circle className="h-5 w-5 text-muted-foreground shrink-0" />
-      )}
+      <Circle className="h-5 w-5 text-muted-foreground shrink-0" />
       <div className="flex-1 min-w-0">
         <div className="text-sm font-semibold truncate">{m.title}</div>
-        <div className="text-[11px] text-muted-foreground">
+        <div className="text-[11px] text-muted-foreground truncate">
           {PLATFORM_LABEL[m.platform]} · {ACTION_LABEL[m.action_type]} · +{m.tokens} tokens
         </div>
+        <div className="mt-1">
+          <MissionCountdown missionId={m.id} />
+        </div>
       </div>
-      {!done && (
-        <Link
-          to="/missoes"
-          className="text-[11px] font-bold px-3 h-8 rounded-full bg-gradient-brand text-primary-foreground inline-flex items-center"
-        >
-          Fazer
-        </Link>
-      )}
+      <Link
+        to="/missoes"
+        className="text-[11px] font-bold px-3 h-8 rounded-full bg-gradient-brand text-primary-foreground inline-flex items-center"
+      >
+        Fazer
+      </Link>
     </div>
+  );
+}
+
+/* ---------- Tokens extract ---------- */
+
+function TokensExtractSection({
+  welcomeBonus,
+  claims,
+  missions,
+  balance,
+}: {
+  welcomeBonus: number;
+  claims: MissionClaim[];
+  missions: Mission[];
+  balance: number;
+}) {
+  const missionMap = useMemo(() => new Map(missions.map((m) => [m.id, m])), [missions]);
+  const entries = useMemo(() => {
+    const items: Array<{ id: string; date: string; label: string; amount: number }> = [];
+    if (welcomeBonus > 0) {
+      items.push({ id: "welcome", date: "", label: "Bônus de boas-vindas", amount: welcomeBonus });
+    }
+    for (const c of claims) {
+      const m = missionMap.get(c.mission_id);
+      items.push({
+        id: c.id,
+        date: c.created_at,
+        label: m ? `Missão: ${m.title}` : "Missão concluída",
+        amount: c.tokens_awarded ?? 0,
+      });
+    }
+    return items.sort((a, b) => (b.date || "").localeCompare(a.date || ""));
+  }, [welcomeBonus, claims, missionMap]);
+
+  return (
+    <section className="glass-card rounded-2xl p-5 border border-border/60">
+      <SectionTitle
+        icon={History}
+        title="Extrato de tokens"
+        hint={`Saldo atual: ${formatTokens(balance)} tokens`}
+        right={
+          <span className="inline-flex items-center gap-1 text-gold font-display font-black">
+            <Coins className="h-4 w-4" /> {formatTokens(balance)}
+          </span>
+        }
+      />
+      {entries.length === 0 ? (
+        <Empty>Nenhuma movimentação ainda.</Empty>
+      ) : (
+        <div className="rounded-xl border border-border/60 overflow-hidden">
+          <table className="w-full text-sm">
+            <thead className="bg-card text-muted-foreground text-[11px] uppercase tracking-wider">
+              <tr>
+                <th className="text-left px-3 py-2">Data</th>
+                <th className="text-left px-3 py-2">Descrição</th>
+                <th className="text-right px-3 py-2">Tokens</th>
+              </tr>
+            </thead>
+            <tbody>
+              {entries.map((e) => (
+                <tr key={e.id} className="border-t border-border/60">
+                  <td className="px-3 py-2 text-xs text-muted-foreground whitespace-nowrap">
+                    {e.date
+                      ? new Date(e.date).toLocaleString("pt-BR", {
+                          day: "2-digit",
+                          month: "2-digit",
+                          year: "2-digit",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })
+                      : "—"}
+                  </td>
+                  <td className="px-3 py-2">{e.label}</td>
+                  <td className="px-3 py-2 text-right font-bold text-emerald-400 tabular-nums">
+                    +{formatTokens(e.amount)}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </section>
   );
 }
 
@@ -777,20 +899,36 @@ function RecommendationsSection() {
 function FriendsSection({
   friends,
   inviterName,
+  userId,
   onChange,
 }: {
   friends: Friend[];
   inviterName: string;
+  userId: string;
   onChange: () => void;
 }) {
   const [name, setName] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
   const [email, setEmail] = useState("");
+  const [bulkText, setBulkText] = useState("");
 
   const registered = friends.filter((f) => f.registered);
   const pending = friends.filter((f) => !f.registered);
 
-  const inviteMessage = `Oi! Vem jogar comigo no Desafio dos Palpites. ${inviterName} te convidou — você ganha 1.000 tokens de boas-vindas. ${typeof window !== "undefined" ? window.location.origin : ""}/auth`;
+  const refCode = (userId || "").slice(0, 8) || "amigo";
+  const referralLink = `${SITE_URL}/auth?ref=${refCode}`;
+  const inviteMessage = `Oi! Vem jogar comigo no Desafio dos Palpites. ${inviterName} te convidou — você ganha 1.000 tokens de boas-vindas. ${referralLink}`;
+
+  function handleBulk() {
+    const n = addManyFromText(bulkText);
+    if (n === 0) {
+      toast.error("Nenhum amigo identificado no texto.");
+      return;
+    }
+    setBulkText("");
+    onChange();
+    toast.success(`${n} amigo(s) adicionado(s) à lista`);
+  }
 
   function handleAdd(e: React.FormEvent) {
     e.preventDefault();
@@ -859,6 +997,33 @@ function FriendsSection({
           <UserPlus className="h-4 w-4" /> Adicionar
         </button>
       </form>
+
+      <div className="rounded-xl border border-dashed border-primary/40 bg-primary/5 p-4 mb-4 space-y-2">
+        <div className="flex items-center gap-2 text-sm font-bold">
+          <ClipboardPaste className="h-4 w-4 text-primary" /> Cole sua lista de amigos
+        </div>
+        <p className="text-[11px] text-muted-foreground">
+          Cole nomes, e-mails ou telefones separados por vírgula, ponto-e-vírgula ou em linhas
+          diferentes. Ex.: <code className="px-1 rounded bg-card">Ana, ana@email.com, 11988887777</code>
+        </p>
+        <textarea
+          value={bulkText}
+          onChange={(e) => setBulkText(e.target.value)}
+          rows={4}
+          placeholder={"Ana Silva, ana@email.com\nJoão, 11988887777\npedro@email.com"}
+          className="w-full px-3 py-2 rounded-lg bg-background border border-border/60 text-xs leading-relaxed"
+        />
+        <div className="flex justify-end">
+          <button
+            type="button"
+            onClick={handleBulk}
+            className="h-9 px-4 rounded-full bg-gradient-brand text-primary-foreground text-xs font-bold inline-flex items-center gap-2"
+          >
+            <UserPlus className="h-4 w-4" /> Adicionar todos
+          </button>
+        </div>
+      </div>
+
 
       <div className="grid md:grid-cols-2 gap-4">
         <div>
@@ -1022,14 +1187,18 @@ const SITE_URL = "https://future-factions.lovable.app";
 
 function InvitePromoSection({
   inviterName,
+  userId,
   myChallenges,
 }: {
   inviterName: string;
+  userId: string;
   myChallenges: Prediction[];
 }) {
-  const link = `${SITE_URL}/auth`;
-  const defaultWhats = `Oi! 👋 Vem jogar no *Desafio dos Palpites* comigo!\n\n${inviterName} te convidou. Dê seus palpites sobre a Copa, futebol, política, entretenimento e muito mais — e concorra a prêmios incríveis:\n\n📱 iPhone\n📺 TV LED\n🎮 PS5\n💻 Notebook\n👕 Camiseta da Copa\n\n🎁 Você ganha 1.000 tokens só por se cadastrar.\n✅ 100% grátis — sem nenhum custo!\n\nEntra aqui: ${link}`;
-  const defaultEmail = `Olá!\n\n${inviterName} te convidou para participar do Desafio dos Palpites — uma plataforma onde você dá seus palpites sobre Copa do Mundo, futebol, política, ciência e muito mais, acumula tokens e concorre a prêmios reais como:\n\n• iPhone\n• TV LED\n• PlayStation 5\n• Notebook\n• Camiseta oficial da Copa\n\nAo se cadastrar pelo link abaixo você já ganha 1.000 tokens de boas-vindas. É 100% grátis, sem nenhum custo.\n\nAcesse: ${link}\n\nNos vemos lá! 🏆`;
+  const refCode = (userId || "").slice(0, 8) || "amigo";
+  const link = `${SITE_URL}/auth?ref=${refCode}`;
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=320x320&margin=10&data=${encodeURIComponent(link)}`;
+  const defaultWhats = `🎯 Já imaginou dar seus palpites e ainda ganhar prêmios?\n\nConheça o Desafio dos Palpites!\n\n✅ Totalmente gratuito\n✅ Ganhe tokens participando dos desafios\n✅ Troque seus tokens por produtos, brindes e vale-compras\n✅ Crie seus próprios desafios para amigos, familiares ou empresas\n✅ Convide amigos e ganhe ainda mais créditos\n\nTem desafios de futebol, Copa do Mundo, Brasileirão, UFC, reality shows e muito mais!\n\nCadastre-se agora e comece a acumular tokens:\n\n👉 ${link}\n\nNos vemos no ranking! 🏆🚀`;
+  const defaultEmail = `Olá!\n\nQuero te convidar para conhecer o Desafio dos Palpites, uma plataforma gratuita onde você participa de desafios, acumula tokens e troca por prêmios incríveis.\n\nNa plataforma você pode:\n\n🏆 Participar de desafios esportivos e promocionais\n🎁 Ganhar tokens gratuitamente\n🎯 Trocar tokens por produtos, serviços e vale-compras\n👥 Criar seus próprios desafios para amigos, familiares ou clientes\n🚀 Participar de rankings e competir com outros usuários\n\nO melhor de tudo: a participação é totalmente gratuita.\n\nFaça seu cadastro através do link abaixo:\n\n👉 ${link}\n\nVenha se divertir, dar seus palpites e concorrer a prêmios!\n\nEquipe Desafio dos Palpites\nwww.desafiodospalpites.com.br`;
 
   const [whatsText, setWhatsText] = useState(defaultWhats);
   const [emailText, setEmailText] = useState(defaultEmail);
@@ -1243,6 +1412,40 @@ function InvitePromoSection({
             </button>
           </div>
         </div>
+
+        <div className="rounded-lg border border-border/60 bg-background p-3 flex flex-col sm:flex-row items-center gap-4">
+          <img
+            src={qrUrl}
+            alt="QR Code do seu link de convite"
+            className="h-40 w-40 rounded-md bg-white p-2"
+            loading="lazy"
+          />
+          <div className="flex-1 space-y-2 text-center sm:text-left">
+            <div className="flex items-center justify-center sm:justify-start gap-1.5 text-sm font-bold">
+              <QrCode className="h-4 w-4 text-primary" /> Seu QR Code de convite
+            </div>
+            <p className="text-[11px] text-muted-foreground">
+              Cada amigo que se cadastrar pelo seu link/QR Code conta como sua indicação.
+              Use no Instagram, e-mail, panfletos ou WhatsApp.
+            </p>
+            <div className="flex flex-wrap gap-2 justify-center sm:justify-start">
+              <a
+                href={qrUrl}
+                download={`qrcode-convite-${refCode}.png`}
+                className="h-9 px-3 rounded-full bg-gradient-brand text-primary-foreground text-xs font-bold inline-flex items-center gap-1.5"
+              >
+                <Download className="h-3.5 w-3.5" /> Baixar QR Code
+              </a>
+              <button
+                onClick={() => copy(qrUrl, "URL do QR Code")}
+                className="h-9 px-3 rounded-full bg-background border border-border/60 text-xs font-bold inline-flex items-center gap-1.5"
+              >
+                <Copy className="h-3.5 w-3.5" /> Copiar URL do QR
+              </button>
+            </div>
+          </div>
+        </div>
+
 
         <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4">
           {galleryItems.map((item) => (
