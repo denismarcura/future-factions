@@ -55,10 +55,22 @@ function PredictionPage() {
   const [bonusDone, setBonusDone] = useState(false);
   const [bonusBusy, setBonusBusy] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
+  const [balance, setBalance] = useState<number | null>(null);
 
   useEffect(() => {
     if (hasParticipated(p.id)) setConfirmed(true);
   }, [p.id]);
+
+  useEffect(() => {
+    if (!user) {
+      setBalance(null);
+      return;
+    }
+    getTokenBalance().then(setBalance).catch(() => setBalance(null));
+    const refresh = () => getTokenBalance().then(setBalance).catch(() => {});
+    window.addEventListener("ddp:participations-updated", refresh);
+    return () => window.removeEventListener("ddp:participations-updated", refresh);
+  }, [user]);
 
   useEffect(() => {
     (async () => {
