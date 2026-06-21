@@ -75,6 +75,7 @@ function PredictionPage() {
   const [missionStatus, setMissionStatus] = useState<"idle" | "verifying" | "done">("idle");
   const [extraPalpites, setExtraPalpites] = useState<{ platform: SeqPlatform; sponsor: string; answers: Record<string, string> }[]>([]);
   const [confirmed, setConfirmed] = useState(false);
+  const [pendingExtra, setPendingExtra] = useState<{ platform: SeqPlatform; sponsor: string } | null>(null);
   const [balance, setBalance] = useState<number | null>(null);
 
   useEffect(() => {
