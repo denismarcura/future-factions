@@ -998,6 +998,33 @@ function FriendsSection({
         </button>
       </form>
 
+      <div className="rounded-xl border border-dashed border-primary/40 bg-primary/5 p-4 mb-4 space-y-2">
+        <div className="flex items-center gap-2 text-sm font-bold">
+          <ClipboardPaste className="h-4 w-4 text-primary" /> Cole sua lista de amigos
+        </div>
+        <p className="text-[11px] text-muted-foreground">
+          Cole nomes, e-mails ou telefones separados por vírgula, ponto-e-vírgula ou em linhas
+          diferentes. Ex.: <code className="px-1 rounded bg-card">Ana, ana@email.com, 11988887777</code>
+        </p>
+        <textarea
+          value={bulkText}
+          onChange={(e) => setBulkText(e.target.value)}
+          rows={4}
+          placeholder={"Ana Silva, ana@email.com\nJoão, 11988887777\npedro@email.com"}
+          className="w-full px-3 py-2 rounded-lg bg-background border border-border/60 text-xs leading-relaxed"
+        />
+        <div className="flex justify-end">
+          <button
+            type="button"
+            onClick={handleBulk}
+            className="h-9 px-4 rounded-full bg-gradient-brand text-primary-foreground text-xs font-bold inline-flex items-center gap-2"
+          >
+            <UserPlus className="h-4 w-4" /> Adicionar todos
+          </button>
+        </div>
+      </div>
+
+
       <div className="grid md:grid-cols-2 gap-4">
         <div>
           <h3 className="text-xs uppercase tracking-wider text-muted-foreground mb-2">
