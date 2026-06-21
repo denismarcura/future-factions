@@ -29,6 +29,7 @@ function DesafiosPage() {
   const [aiIds, setAiIds] = useState<string[] | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState<string | null>(null);
+  const [expiringLimit, setExpiringLimit] = useState(6);
   const runAiSearch = useServerFn(aiSearchChallenges);
 
   useEffect(() => {
@@ -229,10 +230,20 @@ function DesafiosPage() {
               </span>
             </div>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {expiringSoon.map((p) => (
+              {expiringSoon.slice(0, expiringLimit).map((p) => (
                 <PredictionCard key={`expiring-${p.id}`} prediction={p} />
               ))}
             </div>
+            {expiringSoon.length > 6 && (
+              <div className="mt-4 text-center">
+                <button
+                  onClick={() => setExpiringLimit((prev) => (prev === 6 ? expiringSoon.length : 6))}
+                  className="inline-flex items-center gap-2 h-10 px-5 rounded-full bg-gradient-brand text-primary-foreground font-bold text-sm shadow-glow hover:scale-[1.02] transition"
+                >
+                  {expiringLimit === 6 ? "Ver mais Desafios que estão encerrando em Breve" : "Ver menos"}
+                </button>
+              </div>
+            )}
           </section>
 
           {/* Últimos desafios cadastrados */}
