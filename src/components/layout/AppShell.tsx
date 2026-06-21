@@ -16,6 +16,7 @@ import {
   Flame,
   ListChecks,
   Shield,
+  Brain,
   LogIn,
   LogOut,
 } from "lucide-react";
@@ -31,6 +32,7 @@ const NAV = [
   { to: "/como-funciona", label: "Como Funciona", icon: BookOpen },
   { to: "/desafios", label: "Desafios", icon: ListChecks },
   { to: "/criar", label: "Criar Desafio", icon: Plus },
+  { to: "/palpite-ia", label: "Palpite da IA", icon: Brain },
   { to: "/ranking", label: "Ranking", icon: Trophy },
   { to: "/top100", label: "Top 100", icon: Crown },
   { to: "/shop", label: "Prêmios", icon: ShoppingBag },

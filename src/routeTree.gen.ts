@@ -14,6 +14,7 @@ import { Route as ShopRouteImport } from './routes/shop'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as RankingRouteImport } from './routes/ranking'
 import { Route as PerfilRouteImport } from './routes/perfil'
+import { Route as PalpiteIaRouteImport } from './routes/palpite-ia'
 import { Route as MissoesRouteImport } from './routes/missoes'
 import { Route as FaqRouteImport } from './routes/faq'
 import { Route as EmpresasRouteImport } from './routes/empresas'
@@ -61,6 +62,11 @@ const RankingRoute = RankingRouteImport.update({
 const PerfilRoute = PerfilRouteImport.update({
   id: '/perfil',
   path: '/perfil',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PalpiteIaRoute = PalpiteIaRouteImport.update({
+  id: '/palpite-ia',
+  path: '/palpite-ia',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MissoesRoute = MissoesRouteImport.update({
@@ -189,6 +195,7 @@ export interface FileRoutesByFullPath {
   '/empresas': typeof EmpresasRoute
   '/faq': typeof FaqRoute
   '/missoes': typeof MissoesRoute
+  '/palpite-ia': typeof PalpiteIaRoute
   '/perfil': typeof PerfilRoute
   '/ranking': typeof RankingRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -217,6 +224,7 @@ export interface FileRoutesByTo {
   '/empresas': typeof EmpresasRoute
   '/faq': typeof FaqRoute
   '/missoes': typeof MissoesRoute
+  '/palpite-ia': typeof PalpiteIaRoute
   '/perfil': typeof PerfilRoute
   '/ranking': typeof RankingRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -248,6 +256,7 @@ export interface FileRoutesById {
   '/empresas': typeof EmpresasRoute
   '/faq': typeof FaqRoute
   '/missoes': typeof MissoesRoute
+  '/palpite-ia': typeof PalpiteIaRoute
   '/perfil': typeof PerfilRoute
   '/ranking': typeof RankingRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -279,6 +288,7 @@ export interface FileRouteTypes {
     | '/empresas'
     | '/faq'
     | '/missoes'
+    | '/palpite-ia'
     | '/perfil'
     | '/ranking'
     | '/reset-password'
@@ -307,6 +317,7 @@ export interface FileRouteTypes {
     | '/empresas'
     | '/faq'
     | '/missoes'
+    | '/palpite-ia'
     | '/perfil'
     | '/ranking'
     | '/reset-password'
@@ -337,6 +348,7 @@ export interface FileRouteTypes {
     | '/empresas'
     | '/faq'
     | '/missoes'
+    | '/palpite-ia'
     | '/perfil'
     | '/ranking'
     | '/reset-password'
@@ -368,6 +380,7 @@ export interface RootRouteChildren {
   EmpresasRoute: typeof EmpresasRoute
   FaqRoute: typeof FaqRoute
   MissoesRoute: typeof MissoesRoute
+  PalpiteIaRoute: typeof PalpiteIaRoute
   PerfilRoute: typeof PerfilRoute
   RankingRoute: typeof RankingRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
@@ -411,6 +424,13 @@ declare module '@tanstack/react-router' {
       path: '/perfil'
       fullPath: '/perfil'
       preLoaderRoute: typeof PerfilRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/palpite-ia': {
+      id: '/palpite-ia'
+      path: '/palpite-ia'
+      fullPath: '/palpite-ia'
+      preLoaderRoute: typeof PalpiteIaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/missoes': {
@@ -628,6 +648,7 @@ const rootRouteChildren: RootRouteChildren = {
   EmpresasRoute: EmpresasRoute,
   FaqRoute: FaqRoute,
   MissoesRoute: MissoesRoute,
+  PalpiteIaRoute: PalpiteIaRoute,
   PerfilRoute: PerfilRoute,
   RankingRoute: RankingRoute,
   ResetPasswordRoute: ResetPasswordRoute,
