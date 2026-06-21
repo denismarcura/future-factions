@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Flame, Sparkles, TrendingUp, Clock, ShoppingBag, Trophy, Coins, Gift, Users } from "lucide-react";
+import { Flame, Sparkles, TrendingUp, Clock, ShoppingBag, Trophy, Coins, Gift, Users, Zap } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { PredictionCard } from "@/components/PredictionCard";
 import { CATEGORIES, PREDICTIONS } from "@/lib/mock-data";
@@ -27,6 +27,14 @@ type Sort = "trending" | "new" | "popular" | "closing";
 function Feed() {
   const [cat, setCat] = useState<string>("Todas");
   const [sort, setSort] = useState<Sort>("new");
+
+  const closingSoon = useMemo(() => {
+    const now = Date.now();
+    return [...PREDICTIONS]
+      .filter((p) => new Date(p.closesAt).getTime() > now)
+      .sort((a, b) => +new Date(a.closesAt) - +new Date(b.closesAt))
+      .slice(0, 4);
+  }, []);
 
   const items = useMemo(() => {
     let list = [...PREDICTIONS];
@@ -120,6 +128,26 @@ function Feed() {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Encerrando em breve */}
+      <section className="mb-8">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="font-display text-xl font-black flex items-center gap-2">
+            <Zap className="h-5 w-5 text-destructive" /> Encerrando em breve
+          </h2>
+          <Link
+            to="/desafios"
+            className="text-xs font-bold text-primary hover:underline"
+          >
+            Ver todos →
+          </Link>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {closingSoon.map((p) => (
+            <PredictionCard key={`closing-${p.id}`} prediction={p} />
+          ))}
         </div>
       </section>
 
