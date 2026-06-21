@@ -7,7 +7,8 @@ import { CATEGORIES, PREDICTIONS, type Prediction } from "@/lib/mock-data";
 import { COMPANY_CHALLENGES } from "@/lib/mock-extra";
 import { getUserChallenges } from "@/lib/user-challenges";
 import { aiSearchChallenges } from "@/lib/search-ai.functions";
-import { ListChecks, Building2, Users, Lock, Globe2, Sparkles, Search, Loader2, X, Wand2 } from "lucide-react";
+import { ListChecks, Building2, Users, Lock, Globe2, Sparkles, Search, Loader2, X, Wand2, Timer } from "lucide-react";
+import { timeLeft } from "@/lib/mock-data";
 
 export const Route = createFileRoute("/desafios")({
   head: () => ({
