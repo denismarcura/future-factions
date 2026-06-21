@@ -226,7 +226,20 @@ predictions.unshift(...DESAFIOS_DIAMANTE);
 export const PREDICTIONS = predictions;
 
 export function getPrediction(id: string) {
-  return PREDICTIONS.find((p) => p.id === id);
+  const found = PREDICTIONS.find((p) => p.id === id);
+  if (found) return found;
+  if (typeof window !== "undefined") {
+    try {
+      const raw = window.localStorage.getItem("ddp:user-challenges");
+      if (raw) {
+        const arr = JSON.parse(raw) as Prediction[];
+        return Array.isArray(arr) ? arr.find((p) => p.id === id) : undefined;
+      }
+    } catch {
+      // ignore
+    }
+  }
+  return undefined;
 }
 
 export const MISSIONS: { id: string; title: string; reward: number; icon: string }[] = [
