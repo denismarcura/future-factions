@@ -850,8 +850,8 @@ function Criar() {
 
             <div className="text-xs uppercase tracking-wider font-bold text-muted-foreground mb-2">Ou cadastre seu próprio prêmio físico</div>
 
-            <Field label="Nome do prêmio extra (opcional)">
-              <input value={prizeName} onChange={(e) => setPrizeName(e.target.value)} placeholder="Ex.: 1 Camiseta do Brasil" className="input" />
+            <Field label="Prêmio do desafio (opcional)">
+              <input value={prizeName} onChange={(e) => setPrizeName(e.target.value)} placeholder="Ex.: 1 Camiseta do Brasil, Caixa de Cerveja…" className="input" />
             </Field>
 
             <div className="grid sm:grid-cols-2 gap-4">
