@@ -132,6 +132,26 @@ function Feed() {
         </div>
       </section>
 
+      {/* Encerrando em breve */}
+      <section className="mb-8">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="font-display text-xl font-black flex items-center gap-2">
+            <Zap className="h-5 w-5 text-destructive" /> Encerrando em breve
+          </h2>
+          <Link
+            to="/desafios"
+            className="text-xs font-bold text-primary hover:underline"
+          >
+            Ver todos →
+          </Link>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {closingSoon.map((p) => (
+            <PredictionCard key={`closing-${p.id}`} prediction={p} />
+          ))}
+        </div>
+      </section>
+
       {/* Destaque: Desafios para Empresas */}
       <section className="mb-6">
         <Link
