@@ -175,10 +175,6 @@ function PredictionPage() {
       </Link>
 
       {(() => {
-        const closingSoon = PREDICTIONS
-          .filter((x) => x.id !== p.id && new Date(x.closesAt).getTime() > Date.now())
-          .sort((a, b) => new Date(a.closesAt).getTime() - new Date(b.closesAt).getTime())
-          .slice(0, 5);
 
         const handleParticipate = () => {
           if (p.subPredictions) {
@@ -369,38 +365,6 @@ function PredictionPage() {
           </div>
         </article>
 
-        {/* Slider de desafios com tempo se esgotando */}
-        {closingSoon.length > 0 && (
-          <section className="rounded-2xl bg-card border border-border/60 p-5">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <Clock className="h-4 w-4 text-destructive" />
-                <h2 className="font-display font-black text-base uppercase tracking-wide">Tempo se esgotando</h2>
-              </div>
-              <span className="text-[10px] uppercase text-muted-foreground font-bold">Top 5</span>
-            </div>
-            <div className="flex gap-3 overflow-x-auto snap-x snap-mandatory -mx-1 px-1 pb-2 scrollbar-thin">
-              {closingSoon.map((r) => (
-                <Link
-                  key={r.id}
-                  to="/previsao/$id"
-                  params={{ id: r.id }}
-                  className="snap-start shrink-0 w-[260px] rounded-xl bg-background/60 border border-border/60 p-4 hover:border-destructive/60 hover:shadow-glow transition"
-                >
-                  <div className="flex items-center justify-between text-[10px] font-bold uppercase">
-                    <span className="text-primary">{r.category}</span>
-                    <span className="inline-flex items-center gap-1 text-destructive"><Clock className="h-3 w-3" /> {timeLeft(r.closesAt)}</span>
-                  </div>
-                  <div className="font-display font-bold text-sm mt-2 line-clamp-3 min-h-[3.6em]">{r.title}</div>
-                  <div className="mt-3 flex items-center justify-between text-[11px] text-muted-foreground">
-                    <span className="inline-flex items-center gap-1"><Users className="h-3 w-3" /> {r.bettors}</span>
-                    <span className="text-gold font-bold">{r.entryFee ?? r.minTokens} TKN</span>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </section>
-        )}
 
         {/* Banner de missões sequenciais — abaixo do slider */}
         {p.subPredictions && (() => {
