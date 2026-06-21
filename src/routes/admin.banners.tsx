@@ -44,6 +44,9 @@ type Form = {
   challengeId: string;
   challengeTitle: string;
   active: boolean;
+  isMain: boolean;
+  hasExpiry: boolean;
+  expiresAt: string; // datetime-local value
   sortOrder: number;
 };
 
@@ -56,8 +59,20 @@ const EMPTY: Form = {
   challengeId: "",
   challengeTitle: "",
   active: true,
+  isMain: false,
+  hasExpiry: false,
+  expiresAt: "",
   sortOrder: 1,
 };
+
+// Convert ISO -> input[type=datetime-local] value (local TZ, no seconds)
+function isoToLocalInput(iso?: string): string {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
 
 function AdminBanners() {
   const [items, setItems] = useState<Banner[]>([]);
@@ -110,6 +125,9 @@ function AdminBanners() {
       challengeId: b.challengeId ?? "",
       challengeTitle: b.challengeTitle ?? "",
       active: b.active,
+      isMain: !!b.isMain,
+      hasExpiry: !!b.expiresAt,
+      expiresAt: isoToLocalInput(b.expiresAt),
       sortOrder: b.sortOrder,
     });
     setChallengeQuery("");
@@ -164,6 +182,19 @@ function AdminBanners() {
       toast.error("Título e imagem são obrigatórios");
       return;
     }
+    let expiresAtIso: string | undefined;
+    if (form.hasExpiry) {
+      if (!form.expiresAt) {
+        toast.error("Informe a data e horário de expiração");
+        return;
+      }
+      const d = new Date(form.expiresAt);
+      if (Number.isNaN(d.getTime())) {
+        toast.error("Data de expiração inválida");
+        return;
+      }
+      expiresAtIso = d.toISOString();
+    }
     const payload = {
       title: form.title.trim(),
       subtitle: form.subtitle.trim() || undefined,
@@ -173,6 +204,8 @@ function AdminBanners() {
       challengeId: form.challengeId || undefined,
       challengeTitle: form.challengeTitle || undefined,
       active: form.active,
+      isMain: form.isMain,
+      expiresAt: expiresAtIso,
       sortOrder: Number(form.sortOrder) || 1,
     };
     if (editingId) {
@@ -344,7 +377,7 @@ function AdminBanners() {
             </div>
             <div className="md:col-span-2">
               <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Imagem * (URL ou upload)
+                Imagem * (URL ou upload) · Recomendado: 988px largura × 560px altura
               </label>
               <div className="mt-1 flex gap-2">
                 <input
@@ -418,6 +451,62 @@ function AdminBanners() {
                 <span className="text-sm font-semibold">Ativo</span>
               </label>
             </div>
+
+            {/* Banner principal */}
+            <div className="md:col-span-2 rounded-lg border border-gold/40 bg-gold/5 p-3">
+              <label className="inline-flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={form.isMain}
+                  onChange={(e) => setForm({ ...form, isMain: e.target.checked })}
+                  className="h-4 w-4 accent-primary"
+                />
+                <span className="text-sm font-bold text-gold">Definir como banner principal</span>
+              </label>
+              <p className="text-[11px] text-muted-foreground mt-1">
+                O banner principal é exibido em destaque no topo. Apenas um banner pode ser principal por vez.
+              </p>
+            </div>
+
+            {/* Expiração */}
+            <div className="md:col-span-2 rounded-lg border border-border p-3 space-y-2">
+              <div className="flex items-center gap-4 flex-wrap">
+                <span className="text-sm font-semibold">O banner expira?</span>
+                <label className="inline-flex items-center gap-1.5 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="hasExpiry"
+                    checked={form.hasExpiry}
+                    onChange={() => setForm({ ...form, hasExpiry: true })}
+                    className="h-4 w-4 accent-primary"
+                  />
+                  <span className="text-sm">Sim</span>
+                </label>
+                <label className="inline-flex items-center gap-1.5 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="hasExpiry"
+                    checked={!form.hasExpiry}
+                    onChange={() => setForm({ ...form, hasExpiry: false, expiresAt: "" })}
+                    className="h-4 w-4 accent-primary"
+                  />
+                  <span className="text-sm">Não</span>
+                </label>
+              </div>
+              {form.hasExpiry && (
+                <div>
+                  <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    Data e horário de expiração
+                  </label>
+                  <input
+                    type="datetime-local"
+                    value={form.expiresAt}
+                    onChange={(e) => setForm({ ...form, expiresAt: e.target.value })}
+                    className="input mt-1 w-full md:w-72"
+                  />
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="flex gap-2 justify-end">
@@ -463,8 +552,13 @@ function AdminBanners() {
                   className="h-16 w-28 object-cover rounded-md border border-border flex-shrink-0"
                 />
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <span className="font-bold truncate">{b.title}</span>
+                    {b.isMain && (
+                      <span className="text-[10px] px-2 py-0.5 rounded-full font-bold uppercase bg-gold/20 text-gold border border-gold/40 inline-flex items-center gap-1">
+                        ★ Principal
+                      </span>
+                    )}
                     <span
                       className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase ${
                         b.active
@@ -474,6 +568,20 @@ function AdminBanners() {
                     >
                       {b.active ? "Ativo" : "Inativo"}
                     </span>
+                    {b.expiresAt && (
+                      <span
+                        className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase ${
+                          new Date(b.expiresAt).getTime() < Date.now()
+                            ? "bg-destructive/15 text-destructive"
+                            : "bg-muted text-muted-foreground"
+                        }`}
+                        title={new Date(b.expiresAt).toLocaleString("pt-BR")}
+                      >
+                        {new Date(b.expiresAt).getTime() < Date.now()
+                          ? "Expirado"
+                          : `Expira ${new Date(b.expiresAt).toLocaleString("pt-BR")}`}
+                      </span>
+                    )}
                     <span className="text-[10px] text-muted-foreground">
                       Ordem: {b.sortOrder}
                     </span>
