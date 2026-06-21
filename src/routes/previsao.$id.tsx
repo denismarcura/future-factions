@@ -75,6 +75,7 @@ function PredictionPage() {
   const [missionStatus, setMissionStatus] = useState<"idle" | "verifying" | "done">("idle");
   const [extraPalpites, setExtraPalpites] = useState<{ platform: SeqPlatform; sponsor: string; answers: Record<string, string> }[]>([]);
   const [confirmed, setConfirmed] = useState(false);
+  const [pendingExtra, setPendingExtra] = useState<{ platform: SeqPlatform; sponsor: string } | null>(null);
   const [balance, setBalance] = useState<number | null>(null);
 
   useEffect(() => {
@@ -144,11 +145,11 @@ function PredictionPage() {
       } catch {
         // ignore (likely already claimed)
       }
-      // Save current answers as a completed extra round, then reset for the next round
-      setExtraPalpites((prev) => [...prev, { platform: mission.platform as SeqPlatform, sponsor: mission.sponsor_name, answers: subAnswers }]);
+      // Unlock a new extra round: user must now fill the predictions again and confirm
       setSubAnswers({});
+      setPendingExtra({ platform: mission.platform as SeqPlatform, sponsor: mission.sponsor_name });
       setMissionStatus("done");
-      toast.success("✅ Missão feita! Palpites zerados — preencha mais um round!");
+      toast.success("✅ Missão feita! Preencha o novo palpite e clique em CONFIRMAR PALPITE EXTRA.");
       setTimeout(() => {
         setMissionStep((s) => s + 1);
         setMissionStatus("idle");
@@ -183,6 +184,15 @@ function PredictionPage() {
               toast.error(`Preencha todos os ${p.subPredictions.length} palpites.`);
               return;
             }
+            // Confirming an EXTRA round (no fee) after a completed mission
+            if (confirmed && pendingExtra) {
+              setExtraPalpites((prev) => [...prev, { platform: pendingExtra.platform, sponsor: pendingExtra.sponsor, answers: subAnswers }]);
+              setPendingExtra(null);
+              setSubAnswers({});
+              toast.success(`🎁 Palpite extra Nº ${extraPalpites.length + 1} confirmado!`);
+              return;
+            }
+            if (confirmed) return;
             const fee = p.entryFee ?? 0;
             if (!user) { toast.error("Faça login para participar."); return; }
             if (balance !== null && balance < fee) {
@@ -332,23 +342,35 @@ function PredictionPage() {
             </div>
           )}
 
-          {/* PARTICIPAR — botão verde único */}
+          {/* PARTICIPAR — botão verde único (também serve para CONFIRMAR PALPITE EXTRA) */}
           <button
             onClick={handleParticipate}
             disabled={
               isClosed ||
-              (p.subPredictions ? confirmed || Object.keys(subAnswers).length < p.subPredictions.length : false) ||
-              (balance !== null && balance < (p.entryFee ?? amount))
+              (p.subPredictions
+                ? (Object.keys(subAnswers).length < p.subPredictions.length) || (confirmed && !pendingExtra)
+                : false) ||
+              (!confirmed && balance !== null && balance < (p.entryFee ?? amount))
             }
             className="mt-6 w-full h-14 rounded-xl font-display font-black tracking-wide text-lg transition disabled:opacity-60 disabled:cursor-not-allowed text-white"
             style={{
-              background: confirmed
+              background: pendingExtra
+                ? "linear-gradient(135deg, #f59e0b, #d97706)"
+                : confirmed
                 ? "linear-gradient(135deg, #059669, #047857)"
                 : "linear-gradient(135deg, #22c55e, #16a34a)",
-              boxShadow: "0 0 28px rgba(34,197,94,0.45), 0 10px 24px -8px rgba(34,197,94,0.6)",
+              boxShadow: pendingExtra
+                ? "0 0 28px rgba(245,158,11,0.5), 0 10px 24px -8px rgba(245,158,11,0.6)"
+                : "0 0 28px rgba(34,197,94,0.45), 0 10px 24px -8px rgba(34,197,94,0.6)",
             }}
           >
-            {isClosed ? "APOSTAS ENCERRADAS" : confirmed ? "✓ PARTICIPAÇÃO CONFIRMADA" : "PARTICIPAR"}
+            {isClosed
+              ? "APOSTAS ENCERRADAS"
+              : pendingExtra
+              ? `🎁 CONFIRMAR PALPITE EXTRA Nº ${extraPalpites.length + 1}`
+              : confirmed
+              ? "✓ PARTICIPAÇÃO CONFIRMADA"
+              : "PARTICIPAR"}
           </button>
           {user && balance !== null && (
             <p className="mt-2 text-[11px] text-center text-muted-foreground">
