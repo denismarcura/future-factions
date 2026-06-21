@@ -1,6 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { Flame, Sparkles, TrendingUp, Clock, ShoppingBag, Trophy, Coins, Gift, Users, Zap } from "lucide-react";
+import { Flame, Sparkles, TrendingUp, Clock, ShoppingBag, Trophy, Coins, Gift, Users, Zap, Diamond, Building2 } from "lucide-react";
+import imgCampeao from "@/assets/dd-campeao.jpg";
+import imgMalucos from "@/assets/pm-soccer.jpg";
+import imgAlien from "@/assets/cat-alienigenas.jpg";
 import { AppShell } from "@/components/layout/AppShell";
 import { PredictionCard } from "@/components/PredictionCard";
 import { CATEGORIES, PREDICTIONS } from "@/lib/mock-data";
