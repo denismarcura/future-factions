@@ -33,7 +33,7 @@ function Feed() {
     return [...PREDICTIONS]
       .filter((p) => new Date(p.closesAt).getTime() > now)
       .sort((a, b) => +new Date(a.closesAt) - +new Date(b.closesAt))
-      .slice(0, 4);
+      .slice(0, 2);
   }, []);
 
   const items = useMemo(() => {
@@ -144,7 +144,7 @@ function Feed() {
             Ver todos →
           </Link>
         </div>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 sm:grid-cols-2">
           {closingSoon.map((p) => (
             <PredictionCard key={`closing-${p.id}`} prediction={p} />
           ))}
