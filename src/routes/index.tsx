@@ -4,6 +4,8 @@ import { Flame, Sparkles, TrendingUp, Clock, ShoppingBag, Trophy, Coins, Gift, U
 import imgCampeao from "@/assets/dd-campeao.jpg";
 import imgMalucos from "@/assets/pm-soccer.jpg";
 import imgAlien from "@/assets/cat-alienigenas.jpg";
+import bannerNaoGaste from "@/assets/banner-nao-gaste.png.asset.json";
+import bannerPalpitou from "@/assets/banner-palpitou.png.asset.json";
 import { AppShell } from "@/components/layout/AppShell";
 import { PredictionCard } from "@/components/PredictionCard";
 import { CATEGORIES, PREDICTIONS } from "@/lib/mock-data";
@@ -138,6 +140,27 @@ function Feed() {
             ))}
           </div>
         </div>
+      </section>
+
+      {/* Banners promocionais */}
+      <section className="mb-8 grid gap-4 sm:grid-cols-2">
+        {[
+          { src: bannerNaoGaste.url, alt: "Não gaste R$ 1 real em palpites" },
+          { src: bannerPalpitou.url, alt: "Palpitou, concorreu, ganhou!" },
+        ].map((b) => (
+          <Link
+            key={b.alt}
+            to="/desafios"
+            className="group block overflow-hidden rounded-2xl border border-border/60 hover:border-primary/60 hover:shadow-glow transition"
+          >
+            <img
+              src={b.src}
+              alt={b.alt}
+              className="w-full h-auto object-cover group-hover:scale-[1.02] transition duration-500"
+              loading="lazy"
+            />
+          </Link>
+        ))}
       </section>
 
       {/* Banners cadastrados no admin */}
