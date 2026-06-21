@@ -1209,7 +1209,7 @@ function Criar() {
             <div className="text-xs uppercase tracking-wider font-bold text-gold mb-2">Dicas</div>
             <ul className="text-sm text-muted-foreground list-disc pl-4 space-y-1.5">
               <li>Use até 10 sub-categorias bem objetivas.</li>
-              <li>Adicione missões para gerar mais palpites.</li>
+              
               <li>Prêmio físico aumenta engajamento.</li>
               <li>Encerre antes do evento acontecer.</li>
             </ul>
