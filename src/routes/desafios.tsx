@@ -38,6 +38,8 @@ function DesafiosPage() {
   const publicMock = useMemo(() => PREDICTIONS.filter((_, i) => i % 3 !== 0), []);
   const privateMock = useMemo(() => PREDICTIONS.filter((_, i) => i % 3 === 0), []);
 
+  const isClosed = (p: Prediction) => new Date(p.closesAt).getTime() < Date.now();
+
   const items = useMemo(() => {
     if (tab === "empresas") return [];
     let list: Prediction[];
@@ -48,17 +50,24 @@ function DesafiosPage() {
     } else {
       list = [...userChallenges, ...PREDICTIONS];
     }
-    if (cat !== "Todas") list = list.filter((p) => p.category === cat);
+    if (cat === "Encerrados") {
+      list = list.filter(isClosed);
+    } else {
+      list = list.filter((p) => !isClosed(p));
+      if (cat !== "Todas") list = list.filter((p) => p.category === cat);
+    }
     list.sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt));
     return list;
   }, [tab, cat, userChallenges, publicMock, privateMock]);
 
-  // Últimos cadastrados = user-created first, then most recently created mocks.
+  // Últimos cadastrados = user-created first, then most recently created mocks (exclui encerrados).
   const latest = useMemo(() => {
-    const sortedMocks = [...PREDICTIONS].sort(
+    const openMocks = PREDICTIONS.filter((p) => !isClosed(p));
+    const sortedMocks = [...openMocks].sort(
       (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
     );
-    return [...userChallenges, ...sortedMocks].slice(0, 6);
+    const openUser = userChallenges.filter((p) => !isClosed(p));
+    return [...openUser, ...sortedMocks].slice(0, 6);
   }, [userChallenges]);
 
   return (
@@ -114,13 +123,15 @@ function DesafiosPage() {
           </section>
 
           <div className="mb-6 flex items-center gap-2 overflow-x-auto -mx-4 px-4 pb-2">
-            {["Todas", ...CATEGORIES].map((c) => (
+            {["Todas", ...CATEGORIES, "Encerrados"].map((c) => (
               <button
                 key={c}
                 onClick={() => setCat(c)}
                 className={`shrink-0 h-8 px-3 rounded-full text-xs font-medium border transition ${
                   cat === c
-                    ? "border-gold text-gold bg-gold/10"
+                    ? c === "Encerrados"
+                      ? "border-destructive text-destructive bg-destructive/10"
+                      : "border-gold text-gold bg-gold/10"
                     : "border-border/60 text-muted-foreground hover:text-foreground"
                 }`}
               >

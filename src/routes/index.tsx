@@ -30,7 +30,14 @@ function Feed() {
 
   const items = useMemo(() => {
     let list = [...PREDICTIONS];
-    if (cat !== "Todas") list = list.filter((p) => p.category === cat);
+    const isClosed = (p: typeof PREDICTIONS[number]) =>
+      new Date(p.closesAt).getTime() < Date.now();
+    if (cat === "Encerrados") {
+      list = list.filter(isClosed);
+    } else {
+      list = list.filter((p) => !isClosed(p));
+      if (cat !== "Todas") list = list.filter((p) => p.category === cat);
+    }
     switch (sort) {
       case "new":
         list.sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt));
@@ -180,13 +187,15 @@ function Feed() {
       </section>
 
       <section className="mb-6 flex items-center gap-2 overflow-x-auto -mx-4 px-4 pb-2">
-        {["Todas", ...CATEGORIES].map((c) => (
+        {["Todas", ...CATEGORIES, "Encerrados"].map((c) => (
           <button
             key={c}
             onClick={() => setCat(c)}
             className={`shrink-0 h-8 px-3 rounded-full text-xs font-medium border transition ${
               cat === c
-                ? "border-gold text-gold bg-gold/10"
+                ? c === "Encerrados"
+                  ? "border-destructive text-destructive bg-destructive/10"
+                  : "border-gold text-gold bg-gold/10"
                 : "border-border/60 text-muted-foreground hover:text-foreground"
             }`}
           >
