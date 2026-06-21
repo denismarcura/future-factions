@@ -173,7 +173,48 @@ function PredictionPage() {
         <ArrowLeft className="h-4 w-4" /> Voltar
       </Link>
 
-      <div className="grid lg:grid-cols-[1fr_360px] gap-6">
+      {(() => {
+        const closingSoon = PREDICTIONS
+          .filter((x) => x.id !== p.id && new Date(x.closesAt).getTime() > Date.now())
+          .sort((a, b) => new Date(a.closesAt).getTime() - new Date(b.closesAt).getTime())
+          .slice(0, 5);
+
+        const handleParticipate = () => {
+          if (p.subPredictions) {
+            const filled = Object.keys(subAnswers).length;
+            if (filled < p.subPredictions.length) {
+              toast.error(`Preencha todos os ${p.subPredictions.length} palpites.`);
+              return;
+            }
+            const fee = p.entryFee ?? 0;
+            if (!user) { toast.error("Faça login para participar."); return; }
+            if (balance !== null && balance < fee) {
+              toast.error(`Saldo insuficiente. Você tem ${formatTokens(balance)} TKN e precisa de ${fee}.`);
+              return;
+            }
+            setConfirmed(true);
+            saveParticipation({
+              id: p.id, title: p.title, category: p.category, entryFee: fee,
+              answers: subAnswers, closesAt: p.closesAt,
+              participatedAt: new Date().toISOString(),
+            });
+            toast.success(`🎯 Participação confirmada! ${fee} TKN debitados. Missões bônus liberadas!`);
+          } else {
+            if (!user) { toast.error("Faça login para apostar."); return; }
+            if (balance !== null && balance < amount) {
+              toast.error(`Saldo insuficiente. Você tem ${formatTokens(balance)} TKN.`); return;
+            }
+            saveParticipation({
+              id: p.id, title: p.title, category: p.category, entryFee: amount,
+              answers: {}, optionLabel: sel.label, closesAt: p.closesAt,
+              participatedAt: new Date().toISOString(),
+            });
+            toast.success(`✅ Aposta de ${amount} TKN em "${sel.label}" confirmada!`);
+          }
+        };
+
+        return (
+      <div className="space-y-6">
         <article className="rounded-2xl bg-card border border-border/60 p-6">
           <div className="flex flex-wrap items-center gap-2 text-xs">
             <span className="px-2 py-0.5 rounded-full bg-primary/15 text-primary font-semibold border border-primary/30">{p.category}</span>
@@ -228,172 +269,42 @@ function PredictionPage() {
 
           {p.subPredictions ? (
             <div className="mt-6 space-y-5">
-              <h2 className="font-display font-bold text-lg">Seus 5 palpites</h2>
-              {p.subPredictions.map((s, i) => (
-                <div key={s.id} className="rounded-xl border border-border/60 bg-background/40 p-4">
-                  <div className="text-sm font-bold mb-3">
-                    <span className="text-primary mr-1">{i + 1}.</span> {s.question}
-                  </div>
-                  <div className="grid gap-2 sm:grid-cols-3">
-                    {s.options.map((opt) => {
-                      const active = subAnswers[s.id] === opt;
-                      return (
-                        <button
-                          key={opt}
-                          onClick={() => setSubAnswers((prev) => ({ ...prev, [s.id]: opt }))}
-                          disabled={isClosed}
-                          className={`h-11 px-3 rounded-lg border text-sm font-semibold transition ${
-                            active
-                              ? "border-primary bg-primary/10 text-primary shadow-glow"
-                              : "border-border/60 hover:border-primary/40"
-                          } ${isClosed ? "opacity-50 cursor-not-allowed" : ""}`}
-                        >
-                          {opt}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              ))}
-
-              {/* Trilha sequencial de missões — só desbloqueia após Participar */}
-              {(() => {
-                const baseCount = p.subPredictions!.length;
-                const allDone = missionStep >= PLATFORM_ORDER.length;
-                const currentPlatform = !allDone ? PLATFORM_ORDER[missionStep] : null;
-                const currentMission = currentPlatform ? missionsByPlat[currentPlatform] : null;
-
+              <div className="flex items-baseline justify-between">
+                <h2 className="font-display font-bold text-lg">Seus palpites</h2>
+                <span className="text-xs text-muted-foreground">
+                  Round {extraPalpites.length + 1}
+                  {extraPalpites.length > 0 && <span className="text-gold ml-1">· +{extraPalpites.length} extras</span>}
+                </span>
+              </div>
+              {p.subPredictions.map((s, i) => {
+                const palpiteNum = extraPalpites.length * p.subPredictions!.length + i + 1;
                 return (
-                  <div className="space-y-3">
-                    {/* Conquistados */}
-                    {extraPalpites.length > 0 && (
-                      <div className="rounded-xl border border-gold/40 bg-gold/5 p-4">
-                        <div className="font-display font-bold text-sm mb-2 text-gold">🎁 Palpites extras conquistados</div>
-                        <ul className="space-y-1.5 text-xs">
-                          {extraPalpites.map((e, i) => {
-                            const T = PLATFORM_THEME[e.platform];
-                            return (
-                              <li key={i} className="flex items-center gap-2">
-                                <T.Icon className="h-3.5 w-3.5" />
-                                <span className="font-bold text-foreground">Palpite extra Nº {baseCount + i + 1}</span>
-                                <span className="text-muted-foreground">— missão {T.label} ({e.sponsor})</span>
-                                <Check className="h-3.5 w-3.5 text-emerald-400 ml-auto" />
-                              </li>
-                            );
-                          })}
-                        </ul>
-                      </div>
-                    )}
-
-                    {/* Bloqueado */}
-                    {!confirmed && (
-                      <div className="rounded-xl border-2 border-dashed border-border/60 bg-background/40 p-4 text-center">
-                        <Lock className="h-5 w-5 mx-auto text-muted-foreground mb-2" />
-                        <div className="text-sm font-bold text-muted-foreground">Missões bônus bloqueadas</div>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          Confirme sua participação para desbloquear missões e ganhar até <strong className="text-gold">+4 palpites extras</strong>.
-                        </p>
-                      </div>
-                    )}
-
-                    {/* Missão atual */}
-                    {confirmed && !allDone && currentMission && (() => {
-                      const T = PLATFORM_THEME[currentPlatform!];
-                      const verifying = missionStatus === "verifying";
-                      const done = missionStatus === "done";
-                      return (
-                        <div
-                          className="rounded-xl border-2 p-4"
-                          style={{
-                            borderColor: `color-mix(in srgb, ${T.color} 45%, transparent)`,
-                            background: `color-mix(in srgb, ${T.color} 10%, transparent)`,
-                          }}
-                        >
-                          <div className="flex items-center gap-2 text-sm font-display font-black mb-1">
-                            <T.Icon className="h-4 w-4" style={{ color: T.color }} />
-                            <span style={{ color: T.color }}>Palpite extra grátis — {T.label}</span>
-                          </div>
-                          <p className="text-xs text-muted-foreground mb-3">
-                            <strong>{ACTION_LABEL[currentMission.action_type]}</strong> {currentMission.sponsor_name} no {T.label} e ganhe <strong className="text-gold">+1 palpite</strong> neste desafio.
-                          </p>
+                  <div key={s.id} className="rounded-xl border border-border/60 bg-background/40 p-4">
+                    <div className="text-sm font-bold mb-3">
+                      <span className="text-primary mr-1">Palpite Nº {palpiteNum}.</span> {s.question}
+                    </div>
+                    <div className="grid gap-2 sm:grid-cols-3">
+                      {s.options.map((opt) => {
+                        const active = subAnswers[s.id] === opt;
+                        return (
                           <button
-                            onClick={handleMissionClick}
-                            disabled={verifying || done}
-                            className="w-full h-11 rounded-lg font-bold text-sm inline-flex items-center justify-center gap-2 transition text-white shadow-glow hover:scale-[1.02] disabled:opacity-80 disabled:cursor-not-allowed"
-                            style={{ background: done ? "linear-gradient(135deg, #10b981, #059669)" : T.gradient }}
+                            key={opt}
+                            onClick={() => setSubAnswers((prev) => ({ ...prev, [s.id]: opt }))}
+                            disabled={isClosed}
+                            className={`h-11 px-3 rounded-lg border text-sm font-semibold transition ${
+                              active
+                                ? "border-primary bg-primary/10 text-primary shadow-glow"
+                                : "border-border/60 hover:border-primary/40"
+                            } ${isClosed ? "opacity-50 cursor-not-allowed" : ""}`}
                           >
-                            {verifying ? (
-                              <>
-                                <Loader2 className="h-4 w-4 animate-spin" /> Validando missão…
-                              </>
-                            ) : done ? (
-                              <>
-                                <Check className="h-4 w-4" /> Missão feita — +1 palpite liberado!
-                              </>
-                            ) : (
-                              <>
-                                <ExternalLink className="h-4 w-4" /> {currentMission.title}
-                              </>
-                            )}
+                            {opt}
                           </button>
-                          <div className="mt-2 text-[11px] text-center text-muted-foreground">
-                            Etapa {missionStep + 1} de {PLATFORM_ORDER.length} · próxima:{" "}
-                            {PLATFORM_ORDER[missionStep + 1]
-                              ? PLATFORM_THEME[PLATFORM_ORDER[missionStep + 1]].label
-                              : "—"}
-                          </div>
-                        </div>
-                      );
-                    })()}
-
-                    {/* Sem missão cadastrada para a etapa */}
-                    {confirmed && !allDone && !currentMission && (
-                      <div className="rounded-xl border border-border/60 bg-background/40 p-3 text-xs text-center text-muted-foreground">
-                        Nenhuma missão {PLATFORM_THEME[currentPlatform!].label} ativa no momento.
-                        <button
-                          onClick={() => setMissionStep((s) => s + 1)}
-                          className="ml-2 underline text-primary"
-                        >
-                          pular etapa
-                        </button>
-                      </div>
-                    )}
-
-                    {/* Todas concluídas */}
-                    {confirmed && allDone && (
-                      <div className="rounded-xl border-2 border-emerald-500/40 bg-emerald-500/10 p-4 text-center">
-                        <div className="text-sm font-display font-black text-emerald-400">
-                          🏆 Todas as missões concluídas!
-                        </div>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          Você ganhou <strong className="text-gold">+{extraPalpites.length} palpites extras</strong> neste desafio.
-                        </p>
-                      </div>
-                    )}
+                        );
+                      })}
+                    </div>
                   </div>
                 );
-              })()}
-
-              <div className="rounded-xl border border-primary/30 bg-primary/5 p-4">
-                <div className="font-display font-bold text-sm mb-2 text-primary">⚡ Ganhe mais chances</div>
-                <p className="text-xs text-muted-foreground mb-3">
-                  Complete missões e convide amigos para ganhar tokens extras e palpites bônus neste desafio.
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  <Link
-                    to="/missoes"
-                    className="inline-flex items-center gap-1.5 h-9 px-3 rounded-full bg-gradient-brand text-primary-foreground text-xs font-bold shadow-glow hover:scale-[1.02] transition"
-                  >
-                    🎯 Fazer missões
-                  </Link>
-                  <Link
-                    to="/criar"
-                    className="inline-flex items-center gap-1.5 h-9 px-3 rounded-full border border-gold/60 text-gold text-xs font-bold hover:bg-gold/10"
-                  >
-                    👥 Convidar amigos
-                  </Link>
-                </div>
-              </div>
+              })}
             </div>
           ) : (
             <div className="mt-6 space-y-3">
@@ -424,204 +335,198 @@ function PredictionPage() {
             </div>
           )}
 
+          {/* PARTICIPAR — botão verde único */}
+          <button
+            onClick={handleParticipate}
+            disabled={
+              isClosed ||
+              (p.subPredictions ? confirmed || Object.keys(subAnswers).length < p.subPredictions.length : false) ||
+              (balance !== null && balance < (p.entryFee ?? amount))
+            }
+            className="mt-6 w-full h-14 rounded-xl font-display font-black tracking-wide text-lg transition disabled:opacity-60 disabled:cursor-not-allowed text-white"
+            style={{
+              background: confirmed
+                ? "linear-gradient(135deg, #059669, #047857)"
+                : "linear-gradient(135deg, #22c55e, #16a34a)",
+              boxShadow: "0 0 28px rgba(34,197,94,0.45), 0 10px 24px -8px rgba(34,197,94,0.6)",
+            }}
+          >
+            {isClosed ? "APOSTAS ENCERRADAS" : confirmed ? "✓ PARTICIPAÇÃO CONFIRMADA" : "PARTICIPAR"}
+          </button>
+          {user && balance !== null && (
+            <p className="mt-2 text-[11px] text-center text-muted-foreground">
+              Seu saldo: <span className="text-gold font-bold">{formatTokens(balance)} TKN</span> · Entrada:{" "}
+              <span className="text-gold font-bold">{p.entryFee ?? amount} TKN</span>
+            </p>
+          )}
+
           <div className="mt-6 flex items-center gap-5 text-sm text-muted-foreground border-t border-border/60 pt-4">
             <button className="inline-flex items-center gap-1.5 hover:text-destructive"><Heart className="h-4 w-4" />{p.likes}</button>
             <button className="inline-flex items-center gap-1.5 hover:text-primary"><MessageCircle className="h-4 w-4" />{p.comments}</button>
             <button className="inline-flex items-center gap-1.5 hover:text-gold"><Share2 className="h-4 w-4" />{p.shares}</button>
-            <span className="ml-auto text-xs">Entrada: <span className="text-gold font-semibold">{p.entryFee ?? p.minTokens} tokens</span></span>
+            <span className="ml-auto text-xs inline-flex items-center gap-1.5"><TrendingUp className="h-3.5 w-3.5 text-primary" /> Volume: <span className="text-gold font-semibold">{formatTokens(totalPool)} TKN</span></span>
           </div>
         </article>
 
-        {/* Bet widget */}
-        <aside>
-          <div className="sticky top-24 rounded-2xl bg-card border border-border/60 p-5 shadow-glow">
-            <div className="flex items-center gap-2 text-xs uppercase tracking-wider text-gold font-bold">
-              <Coins className="h-4 w-4" /> {p.subPredictions ? "Participar do desafio" : "Fazer aposta"}
+        {/* Slider de desafios com tempo se esgotando */}
+        {closingSoon.length > 0 && (
+          <section className="rounded-2xl bg-card border border-border/60 p-5">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <Clock className="h-4 w-4 text-destructive" />
+                <h2 className="font-display font-black text-base uppercase tracking-wide">Tempo se esgotando</h2>
+              </div>
+              <span className="text-[10px] uppercase text-muted-foreground font-bold">Top 5</span>
             </div>
-
-            {p.subPredictions ? (
-              <>
-                {/* BOTÃO VERDE PRIMEIRO */}
-                <button
-                  onClick={() => {
-                    const filled = Object.keys(subAnswers).length;
-                    if (filled < p.subPredictions!.length) {
-                      toast.error(`Preencha todos os ${p.subPredictions!.length} palpites.`);
-                      return;
-                    }
-                    const fee = p.entryFee ?? 0;
-                    if (!user) {
-                      toast.error("Faça login para participar.");
-                      return;
-                    }
-                    if (balance !== null && balance < fee) {
-                      toast.error(`Saldo insuficiente. Você tem ${formatTokens(balance)} TKN e precisa de ${fee}.`);
-                      return;
-                    }
-                    setConfirmed(true);
-                    saveParticipation({
-                      id: p.id,
-                      title: p.title,
-                      category: p.category,
-                      entryFee: fee,
-                      answers: subAnswers,
-                      closesAt: p.closesAt,
-                      participatedAt: new Date().toISOString(),
-                    });
-                    toast.success(`🎯 Participação confirmada! ${fee} TKN debitados. Missões bônus liberadas!`);
-                  }}
-                  disabled={isClosed || confirmed || Object.keys(subAnswers).length < p.subPredictions.length || (balance !== null && balance < (p.entryFee ?? 0))}
-                  className="mt-3 w-full h-14 rounded-xl font-display font-black tracking-wide text-base transition disabled:opacity-60 disabled:cursor-not-allowed text-white"
-                  style={{
-                    background: confirmed
-                      ? "linear-gradient(135deg, #059669, #047857)"
-                      : "linear-gradient(135deg, #22c55e, #16a34a)",
-                    boxShadow: "0 0 28px rgba(34,197,94,0.45), 0 10px 24px -8px rgba(34,197,94,0.6)",
-                  }}
+            <div className="flex gap-3 overflow-x-auto snap-x snap-mandatory -mx-1 px-1 pb-2 scrollbar-thin">
+              {closingSoon.map((r) => (
+                <Link
+                  key={r.id}
+                  to="/previsao/$id"
+                  params={{ id: r.id }}
+                  className="snap-start shrink-0 w-[260px] rounded-xl bg-background/60 border border-border/60 p-4 hover:border-destructive/60 hover:shadow-glow transition"
                 >
-                  {isClosed
-                    ? "APOSTAS ENCERRADAS"
-                    : confirmed
-                      ? "✓ PARTICIPAÇÃO CONFIRMADA"
-                      : balance !== null && balance < (p.entryFee ?? 0)
-                        ? "SALDO INSUFICIENTE"
-                        : `PARTICIPAR POR ${p.entryFee} TOKENS`}
-                </button>
-                {user && balance !== null && (
-                  <p className="mt-2 text-[11px] text-center text-muted-foreground">
-                    Seu saldo: <span className="text-gold font-bold">{formatTokens(balance)} TKN</span>
-                  </p>
-                )}
-
-                <div className="my-4 h-px bg-border/60" />
-
-                {/* INFO ABAIXO */}
-                <div className="text-sm text-muted-foreground">Custo de entrada</div>
-                <div className="mt-1 font-display text-3xl font-black text-gold">
-                  {p.entryFee} <span className="text-sm text-muted-foreground font-normal">TKN</span>
-                </div>
-                <div className="mt-4 space-y-2 text-sm">
-                  <Row label="Palpites preenchidos" value={`${Object.keys(subAnswers).length} / ${p.subPredictions.length}`} />
-                  <Row label="Seu saldo" value={`${formatTokens(balance ?? CURRENT_USER.tokens)} TKN`} />
-                </div>
-                {p.prizeTiers && (
-                  <div className="mt-4 rounded-xl bg-background/40 border border-border/60 p-3 text-xs">
-                    <div className="font-bold text-foreground mb-1">Premiação</div>
-                    {p.prizeTiers.map((t) => (
-                      <div key={t.hits} className="flex justify-between text-muted-foreground">
-                        <span>{t.hits} acertos</span>
-                        <span className="text-gold font-bold">{t.tokens.toLocaleString("pt-BR")} TKN</span>
-                      </div>
-                    ))}
+                  <div className="flex items-center justify-between text-[10px] font-bold uppercase">
+                    <span className="text-primary">{r.category}</span>
+                    <span className="inline-flex items-center gap-1 text-destructive"><Clock className="h-3 w-3" /> {timeLeft(r.closesAt)}</span>
                   </div>
-                )}
-                <p className="mt-3 text-[11px] text-center text-muted-foreground">
-                  Apostas encerram 10 minutos antes do jogo. Tokens virtuais, sem dinheiro real.
-                </p>
-              </>
+                  <div className="font-display font-bold text-sm mt-2 line-clamp-3 min-h-[3.6em]">{r.title}</div>
+                  <div className="mt-3 flex items-center justify-between text-[11px] text-muted-foreground">
+                    <span className="inline-flex items-center gap-1"><Users className="h-3 w-3" /> {r.bettors}</span>
+                    <span className="text-gold font-bold">{r.entryFee ?? r.minTokens} TKN</span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
 
-            ) : (
-              <>
-                <div className="mt-3 text-sm text-muted-foreground">Sua escolha</div>
-                <div className="mt-1 font-display text-xl font-black">{sel.label}</div>
+        {/* Banner de missões sequenciais — abaixo do slider */}
+        {p.subPredictions && (() => {
+          const allDone = missionStep >= missionQueue.length;
+          const currentMission = missionQueue[missionStep] ?? null;
+          const currentPlatform = (currentMission?.platform as SeqPlatform) ?? null;
 
-                <label className="mt-5 block text-xs uppercase tracking-wider text-muted-foreground font-bold">
-                  Quantidade de Tokens
-                </label>
-                <div className="mt-2 flex items-center gap-2">
-                  <input
-                    type="number"
-                    value={amount}
-                    min={p.minTokens}
-                    max={balance ?? CURRENT_USER.tokens}
-                    onChange={(e) => setAmount(Math.max(p.minTokens, Number(e.target.value) || 0))}
-                    className="flex-1 h-11 px-3 rounded-lg bg-background border border-border/60 font-display font-bold tabular-nums focus:outline-none focus:ring-2 focus:ring-primary/60"
-                  />
-                  <span className="text-gold font-bold">TKN</span>
+          return (
+            <section className="rounded-2xl bg-card border border-border/60 p-5 space-y-3">
+              <div className="flex items-center gap-2">
+                <Coins className="h-4 w-4 text-gold" />
+                <h2 className="font-display font-black text-base uppercase tracking-wide">Palpites extras por missões</h2>
+              </div>
+
+              {extraPalpites.length > 0 && (
+                <div className="rounded-xl border border-gold/40 bg-gold/5 p-4">
+                  <div className="font-display font-bold text-sm mb-2 text-gold">🎁 Rounds extras conquistados</div>
+                  <ul className="space-y-1.5 text-xs">
+                    {extraPalpites.map((e, i) => {
+                      const T = PLATFORM_THEME[e.platform];
+                      return (
+                        <li key={i} className="flex items-center gap-2">
+                          <T.Icon className="h-3.5 w-3.5" />
+                          <span className="font-bold text-foreground">Round extra Nº {i + 1}</span>
+                          <span className="text-muted-foreground">— missão {T.label} ({e.sponsor})</span>
+                          <Check className="h-3.5 w-3.5 text-emerald-400 ml-auto" />
+                        </li>
+                      );
+                    })}
+                  </ul>
                 </div>
-                <div className="mt-2 flex gap-1.5">
-                  {[10, 50, 100, 500].map((n) => (
+              )}
+
+              {!confirmed && (
+                <div className="rounded-xl border-2 border-dashed border-border/60 bg-background/40 p-4 text-center">
+                  <Lock className="h-5 w-5 mx-auto text-muted-foreground mb-2" />
+                  <div className="text-sm font-bold text-muted-foreground">Missões bônus bloqueadas</div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Confirme sua participação para desbloquear missões e ganhar <strong className="text-gold">palpites extras</strong>.
+                  </p>
+                </div>
+              )}
+
+              {confirmed && !allDone && currentMission && currentPlatform && (() => {
+                const T = PLATFORM_THEME[currentPlatform];
+                const verifying = missionStatus === "verifying";
+                const done = missionStatus === "done";
+                return (
+                  <div
+                    className="rounded-xl border-2 p-4"
+                    style={{
+                      borderColor: `color-mix(in srgb, ${T.color} 45%, transparent)`,
+                      background: `color-mix(in srgb, ${T.color} 10%, transparent)`,
+                    }}
+                  >
+                    <div className="flex items-center gap-2 text-sm font-display font-black mb-1">
+                      <T.Icon className="h-4 w-4" style={{ color: T.color }} />
+                      <span style={{ color: T.color }}>Palpite extra grátis — {T.label}</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground mb-3">
+                      <strong>{ACTION_LABEL[currentMission.action_type]}</strong> {currentMission.sponsor_name} no {T.label} e ganhe <strong className="text-gold">+1 round</strong> de palpites (seus palpites serão zerados para preencher de novo).
+                    </p>
                     <button
-                      key={n}
-                      onClick={() => setAmount(n)}
-                      className="flex-1 h-8 rounded-md text-xs font-semibold border border-border/60 hover:border-primary/60 hover:text-primary"
+                      onClick={handleMissionClick}
+                      disabled={verifying || done}
+                      className="w-full h-11 rounded-lg font-bold text-sm inline-flex items-center justify-center gap-2 transition text-white shadow-glow hover:scale-[1.02] disabled:opacity-80 disabled:cursor-not-allowed"
+                      style={{ background: done ? "linear-gradient(135deg, #10b981, #059669)" : T.gradient }}
                     >
-                      {n}
+                      {verifying ? (
+                        <><Loader2 className="h-4 w-4 animate-spin" /> Validando missão…</>
+                      ) : done ? (
+                        <><Check className="h-4 w-4" /> Missão feita — palpites zerados!</>
+                      ) : (
+                        <><ExternalLink className="h-4 w-4" /> {currentMission.title}</>
+                      )}
                     </button>
-                  ))}
-                </div>
+                    <div className="mt-2 text-[11px] text-center text-muted-foreground">
+                      Missão {missionStep + 1} de {missionQueue.length}
+                      {missionQueue[missionStep + 1] && (
+                        <> · próxima: {PLATFORM_THEME[missionQueue[missionStep + 1].platform as SeqPlatform].label}</>
+                      )}
+                    </div>
+                  </div>
+                );
+              })()}
 
-                <div className="mt-5 space-y-2 text-sm">
-                  <Row label="Odds estimada" value={odds.toFixed(2) + "x"} />
-                  <Row label="Possível retorno" value={`${formatTokens(possibleReturn)} TKN`} highlight />
-                  <Row label="Seu saldo" value={`${formatTokens(balance ?? CURRENT_USER.tokens)} TKN`} />
+              {confirmed && allDone && (
+                <div className="rounded-xl border-2 border-emerald-500/40 bg-emerald-500/10 p-4 text-center">
+                  <div className="text-sm font-display font-black text-emerald-400">🏆 Todas as missões concluídas!</div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Você ganhou <strong className="text-gold">+{extraPalpites.length} rounds extras</strong> neste desafio.
+                  </p>
                 </div>
+              )}
 
-                <button
-                  onClick={() => {
-                    if (!user) {
-                      toast.error("Faça login para apostar.");
-                      return;
-                    }
-                    if (balance !== null && balance < amount) {
-                      toast.error(`Saldo insuficiente. Você tem ${formatTokens(balance)} TKN.`);
-                      return;
-                    }
-                    saveParticipation({
-                      id: p.id,
-                      title: p.title,
-                      category: p.category,
-                      entryFee: amount,
-                      answers: {},
-                      optionLabel: sel.label,
-                      closesAt: p.closesAt,
-                      participatedAt: new Date().toISOString(),
-                    });
-                    toast.success(`✅ Aposta de ${amount} TKN em "${sel.label}" confirmada!`);
-                  }}
-                  disabled={balance !== null && balance < amount}
-                  className="mt-5 w-full h-12 rounded-xl bg-gradient-brand text-primary-foreground font-display font-black tracking-wide shadow-glow hover:scale-[1.01] transition disabled:opacity-50 disabled:cursor-not-allowed"
+              {confirmed && missionQueue.length === 0 && (
+                <div className="rounded-xl border border-border/60 bg-background/40 p-3 text-xs text-center text-muted-foreground">
+                  Nenhuma missão de seguir disponível no momento.
+                </div>
+              )}
+            </section>
+          );
+        })()}
+
+        {related.length > 0 && (
+          <section className="mt-4">
+            <h2 className="font-display text-xl font-bold mb-4">Mais em {p.category}</h2>
+            <div className="grid sm:grid-cols-2 gap-4">
+              {related.map((r) => (
+                <Link
+                  key={r.id}
+                  to="/previsao/$id"
+                  params={{ id: r.id }}
+                  className="rounded-xl bg-card border border-border/60 p-4 hover:border-primary/50 transition"
                 >
-                  {balance !== null && balance < amount ? "SALDO INSUFICIENTE" : `APOSTAR ${amount} TOKENS`}
-                </button>
-
-                <p className="mt-3 text-[11px] text-center text-muted-foreground">
-                  Fase de testes. Tokens virtuais, sem dinheiro real.
-                </p>
-              </>
-            )}
-          </div>
-
-          <div className="mt-4 rounded-2xl glass-card p-4">
-            <div className="flex items-center gap-2 text-xs uppercase tracking-wider font-bold text-primary">
-              <TrendingUp className="h-4 w-4" /> Volume total
+                  <div className="text-xs text-primary font-semibold">{r.category}</div>
+                  <div className="font-display font-bold mt-1 line-clamp-2">{r.title}</div>
+                  <div className="mt-2 text-xs text-muted-foreground">{r.bettors} apostadores · {timeLeft(r.closesAt)}</div>
+                </Link>
+              ))}
             </div>
-            <div className="mt-1 font-display text-2xl font-black text-gold">
-              {formatTokens(totalPool)} <span className="text-xs text-muted-foreground font-normal uppercase">tokens</span>
-            </div>
-          </div>
-        </aside>
+          </section>
+        )}
       </div>
+        );
+      })()}
 
-      {related.length > 0 && (
-        <section className="mt-10">
-          <h2 className="font-display text-xl font-bold mb-4">Mais em {p.category}</h2>
-          <div className="grid sm:grid-cols-2 gap-4">
-            {related.map((r) => (
-              <Link
-                key={r.id}
-                to="/previsao/$id"
-                params={{ id: r.id }}
-                className="rounded-xl bg-card border border-border/60 p-4 hover:border-primary/50 transition"
-              >
-                <div className="text-xs text-primary font-semibold">{r.category}</div>
-                <div className="font-display font-bold mt-1 line-clamp-2">{r.title}</div>
-                <div className="mt-2 text-xs text-muted-foreground">{r.bettors} apostadores · {timeLeft(r.closesAt)}</div>
-              </Link>
-            ))}
-          </div>
-        </section>
-      )}
     </AppShell>
   );
 }
