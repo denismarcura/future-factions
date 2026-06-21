@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Flame, Sparkles, TrendingUp, Clock, ShoppingBag, Trophy, Coins, Gift } from "lucide-react";
+import { Flame, Sparkles, TrendingUp, Clock, ShoppingBag, Trophy, Coins, Gift, Users } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { PredictionCard } from "@/components/PredictionCard";
 import { CATEGORIES, PREDICTIONS } from "@/lib/mock-data";
@@ -56,57 +56,62 @@ function Feed() {
 
   return (
     <AppShell>
-      {/* Hero banner */}
-      <section className="relative overflow-hidden rounded-3xl border border-primary/30 glass-card p-6 sm:p-10 mb-8">
+      {/* Hero banner — focada em conversão */}
+      <section className="relative overflow-hidden rounded-3xl border border-primary/30 glass-card p-6 sm:p-10 mb-8 text-center">
         <div className="absolute -top-24 -right-20 h-80 w-80 rounded-full bg-primary/30 blur-3xl" />
         <div className="absolute -bottom-24 -left-10 h-72 w-72 rounded-full bg-gold/20 blur-3xl" />
-        <div className="relative grid lg:grid-cols-[1fr_auto] gap-8 items-center">
-          <div>
-            <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/15 text-primary text-xs font-bold border border-primary/30">
-              <Flame className="h-3 w-3" /> 100% GRATUITO · SÓ TOKENS VIRTUAIS
-            </span>
-            <h1 className="mt-4 font-display text-4xl sm:text-6xl font-black leading-[0.95]">
-              <span className="text-gradient-brand">NÃO GASTE</span><br />
-              <span className="text-gradient-silver">R$ 1 REAL</span> EM PALPITES!
-            </h1>
-            <p className="mt-4 text-base sm:text-lg text-muted-foreground max-w-xl">
-              Participe gratuitamente de desafios, acumule Tokens e troque por
-              <span className="text-gold font-semibold"> prêmios incríveis</span>.
-              Futebol, UFC, NBA, criptos, reality, política e palpites entre amigos.
-            </p>
-            <div className="mt-6 flex flex-wrap gap-3">
-              <Link
-                to="/desafios"
-                className="inline-flex items-center gap-2 h-12 px-6 rounded-full bg-gradient-brand text-primary-foreground font-black uppercase tracking-wide shadow-glow hover:scale-[1.03] transition"
-              >
-                Quero participar
-              </Link>
-              <Link
-                to="/shop"
-                className="inline-flex items-center gap-2 h-12 px-6 rounded-full border border-gold/60 text-gold font-bold hover:bg-gold/10 transition"
-              >
-                <ShoppingBag className="h-4 w-4" /> Shop de prêmios
-              </Link>
-            </div>
-            <div className="mt-8 grid grid-cols-3 gap-3 max-w-md">
-              {[
-                { k: "+1.000", v: "Tokens grátis", icon: Coins },
-                { k: "150+", v: "Desafios ativos", icon: TrendingUp },
-                { k: "50+", v: "Prêmios reais", icon: Gift },
-              ].map((s) => (
-                <div key={s.v} className="rounded-xl bg-background/40 border border-border/60 px-3 py-2.5">
-                  <div className="font-display text-lg font-black text-gradient-brand">{s.k}</div>
-                  <div className="text-[11px] uppercase tracking-wider text-muted-foreground">{s.v}</div>
-                </div>
-              ))}
-            </div>
+
+        <div className="relative max-w-3xl mx-auto">
+          <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/15 text-primary text-xs font-bold border border-primary/30">
+            <Flame className="h-3 w-3" /> 100% GRATUITO · GANHE PRÊMIOS REAIS
+          </span>
+
+          <h1 className="mt-5 font-display text-4xl sm:text-6xl lg:text-7xl font-black leading-[0.95]">
+            <span className="text-gradient-brand">Ganhe Tokens</span><br />
+            <span className="text-gradient-gold">e Troque por Prêmios Reais</span>
+          </h1>
+
+          <p className="mt-4 text-base sm:text-lg text-muted-foreground max-w-xl mx-auto">
+            Participe gratuitamente de desafios, acumule Tokens e troque por prêmios incríveis.
+          </p>
+
+          {/* Benefícios */}
+          <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-2xl mx-auto">
+            {[
+              { icon: TrendingUp, text: "Mais de 100 desafios ativos" },
+              { icon: Sparkles, text: "Totalmente gratuito" },
+              { icon: Trophy, text: "Ranking nacional" },
+              { icon: Users, text: "Convide amigos e ganhe mais tokens" },
+            ].map((item) => (
+              <div key={item.text} className="flex items-center gap-2 text-left rounded-xl bg-background/40 border border-border/60 px-3 py-2.5">
+                <item.icon className="h-4 w-4 text-primary shrink-0" />
+                <span className="text-xs font-bold text-foreground">{item.text}</span>
+              </div>
+            ))}
           </div>
-          <div className="hidden lg:flex items-center justify-center">
-            <img
-              src={logoAsset.url}
-              alt="Desafio dos Palpites"
-              className="h-72 w-72 object-contain drop-shadow-[0_0_40px_rgba(0,230,118,0.45)]"
-            />
+
+          {/* Botão gigante */}
+          <div className="mt-8">
+            <Link
+              to="/desafios"
+              className="inline-flex items-center justify-center gap-2 h-14 sm:h-16 px-8 sm:px-10 rounded-full bg-gradient-brand text-primary-foreground text-lg sm:text-xl font-black uppercase tracking-wide shadow-glow hover:scale-[1.03] transition"
+            >
+              COMEÇAR AGORA
+            </Link>
+          </div>
+
+          {/* Stats */}
+          <div className="mt-8 grid grid-cols-3 gap-3 max-w-md mx-auto">
+            {[
+              { k: "+1.000", v: "Tokens grátis", icon: Coins },
+              { k: "150+", v: "Desafios ativos", icon: TrendingUp },
+              { k: "50+", v: "Prêmios reais", icon: Gift },
+            ].map((s) => (
+              <div key={s.v} className="rounded-xl bg-background/40 border border-border/60 px-3 py-2.5">
+                <div className="font-display text-lg font-black text-gradient-brand">{s.k}</div>
+                <div className="text-[11px] uppercase tracking-wider text-muted-foreground">{s.v}</div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
