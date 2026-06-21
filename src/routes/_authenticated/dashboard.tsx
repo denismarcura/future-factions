@@ -658,18 +658,22 @@ function MissionRow({ m, done = false }: { m: Mission; done?: boolean }) {
       </div>
 
       {done ? (
-        <button
-          disabled
-          className="w-full text-sm font-bold h-10 rounded-full inline-flex items-center justify-center gap-2 cursor-not-allowed"
+        <a
+          href={m.link}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="w-full text-sm font-bold h-10 rounded-full inline-flex items-center justify-center gap-2 transition hover:opacity-90"
           style={{
             background: "color-mix(in srgb, #10b981 18%, transparent)",
             color: "#10b981",
             border: "1px solid color-mix(in srgb, #10b981 45%, transparent)",
           }}
+          title="Abrir link da missão para verificação"
         >
           <Check className="h-4 w-4" />
-          Concluída
-        </button>
+          Concluída · Ver verificação
+          <ExternalLink className="h-3.5 w-3.5" />
+        </a>
       ) : (
         <Link
           to="/missoes"
