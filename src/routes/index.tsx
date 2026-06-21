@@ -1,9 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Flame, Sparkles, TrendingUp, Clock, ShoppingBag, Trophy, Coins, Gift, Users } from "lucide-react";
+import { Flame, Sparkles, TrendingUp, Clock, ShoppingBag, Trophy, Coins, Gift, Users, Zap } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { PredictionCard } from "@/components/PredictionCard";
 import { CATEGORIES, PREDICTIONS } from "@/lib/mock-data";
+import { getUrgencyHours } from "@/components/ClosingTimerBadge";
 import logoAsset from "@/assets/logo-desafio.png.asset.json";
 
 export const Route = createFileRoute("/")({
