@@ -251,7 +251,7 @@ function Criar() {
   };
 
   const addSub = () => {
-    if (subs.length >= 5) return;
+    if (subs.length >= MAX_SUBS) return;
     setSubs([...subs, { id: uid(), question: "", options: ["Sim", "Não"] }]);
   };
   const removeSub = (id: string) => setSubs(subs.filter(s => s.id !== id));
