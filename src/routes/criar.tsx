@@ -924,23 +924,20 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
 
           {/* Missões */}
           <Section
-            title={forCompany ? "Missões do desafio • Obrigatório" : "Missões do desafio"}
-            description={
-              forCompany
-                ? "Para desafios de empresas as missões de redes sociais são obrigatórias. Quem cumprir as 3 ações ganha +1 chance de palpite e 50 tokens."
-                : "Padrão em todos os desafios (não obrigatório). Usuários que cumprem as 3 ações de uma rede social ganham +1 chance de palpite e 50 tokens."
-            }
+            title="Cadastre as missões obrigatórias"
+            description="Informe o endereço completo de cada rede social do desafio. Os usuários precisarão Seguir, Curtir e Comentar para ganhar +1 chance de palpite e 50 tokens."
           >
-            <div className="grid sm:grid-cols-2 gap-3">
-              <MissionBlock icon={<Instagram className="h-4 w-4" />} name="Instagram" />
-              <MissionBlock icon={<Facebook className="h-4 w-4" />} name="Facebook" />
-              <MissionBlock icon={<Youtube className="h-4 w-4" />} name="YouTube" />
-              <MissionBlock icon={<Music2 className="h-4 w-4" />} name="TikTok" />
-            </div>
-            <Field label="Link das redes sociais do desafio">
-              <input value={socialLink} onChange={(e) => setSocialLink(e.target.value)} placeholder="https://instagram.com/seu-perfil" className="input" />
-            </Field>
+            <MissionWizard
+              step={missionStep}
+              setStep={setMissionStep}
+              links={missionLinks}
+              setLinks={setMissionLinks}
+              onComplete={(links) => {
+                setSocialLink(links.instagram || links.facebook || links.youtube || links.tiktok);
+              }}
+            />
           </Section>
+
 
 
           {/* Convide Amigos */}
