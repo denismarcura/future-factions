@@ -44,6 +44,9 @@ type Form = {
   challengeId: string;
   challengeTitle: string;
   active: boolean;
+  isMain: boolean;
+  hasExpiry: boolean;
+  expiresAt: string; // datetime-local value
   sortOrder: number;
 };
 
@@ -56,8 +59,20 @@ const EMPTY: Form = {
   challengeId: "",
   challengeTitle: "",
   active: true,
+  isMain: false,
+  hasExpiry: false,
+  expiresAt: "",
   sortOrder: 1,
 };
+
+// Convert ISO -> input[type=datetime-local] value (local TZ, no seconds)
+function isoToLocalInput(iso?: string): string {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
 
 function AdminBanners() {
   const [items, setItems] = useState<Banner[]>([]);
@@ -110,6 +125,9 @@ function AdminBanners() {
       challengeId: b.challengeId ?? "",
       challengeTitle: b.challengeTitle ?? "",
       active: b.active,
+      isMain: !!b.isMain,
+      hasExpiry: !!b.expiresAt,
+      expiresAt: isoToLocalInput(b.expiresAt),
       sortOrder: b.sortOrder,
     });
     setChallengeQuery("");
@@ -164,6 +182,19 @@ function AdminBanners() {
       toast.error("Título e imagem são obrigatórios");
       return;
     }
+    let expiresAtIso: string | undefined;
+    if (form.hasExpiry) {
+      if (!form.expiresAt) {
+        toast.error("Informe a data e horário de expiração");
+        return;
+      }
+      const d = new Date(form.expiresAt);
+      if (Number.isNaN(d.getTime())) {
+        toast.error("Data de expiração inválida");
+        return;
+      }
+      expiresAtIso = d.toISOString();
+    }
     const payload = {
       title: form.title.trim(),
       subtitle: form.subtitle.trim() || undefined,
@@ -173,6 +204,8 @@ function AdminBanners() {
       challengeId: form.challengeId || undefined,
       challengeTitle: form.challengeTitle || undefined,
       active: form.active,
+      isMain: form.isMain,
+      expiresAt: expiresAtIso,
       sortOrder: Number(form.sortOrder) || 1,
     };
     if (editingId) {
