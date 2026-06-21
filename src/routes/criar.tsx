@@ -336,14 +336,33 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
 
   const handleUpload = (file: File) => {
     const url = URL.createObjectURL(file);
-    // Validate 500x500
     const img = new Image();
     img.onload = () => {
-      if (img.width !== 500 || img.height !== 500) {
-        alert(`A imagem deve ter 500x500 pixels. Recebido: ${img.width}x${img.height}.`);
+      if (img.width === 500 && img.height === 500) {
+        setPrizeImg(url);
         return;
       }
-      setPrizeImg(url);
+      // Auto-resize to 500x500 (center-crop to square, then scale)
+      const size = 500;
+      const canvas = document.createElement("canvas");
+      canvas.width = size;
+      canvas.height = size;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) {
+        setPrizeImg(url);
+        return;
+      }
+      const side = Math.min(img.width, img.height);
+      const sx = (img.width - side) / 2;
+      const sy = (img.height - side) / 2;
+      ctx.drawImage(img, sx, sy, side, side, 0, 0, size, size);
+      const resized = canvas.toDataURL("image/png");
+      setPrizeImg(resized);
+      URL.revokeObjectURL(url);
+    };
+    img.onerror = () => {
+      alert("Não foi possível ler a imagem.");
+      URL.revokeObjectURL(url);
     };
     img.src = url;
   };
