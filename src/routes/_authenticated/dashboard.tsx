@@ -35,6 +35,7 @@ import {
   History,
   Clock,
   ClipboardPaste,
+  Check,
 } from "lucide-react";
 import { toast } from "sonner";
 import { CATEGORIES, formatTokens, type Category } from "@/lib/mock-data";
@@ -471,8 +472,10 @@ function MissionsSection({
   done: number;
   todo: number;
 }) {
-  // Completed missions are removed from this area entirely.
-  const todoList = missions.filter((m) => !claimedIds.has(m.id)).slice(0, 8);
+  // Show pending missions first, then completed ones (marked "Concluída").
+  const pending = missions.filter((m) => !claimedIds.has(m.id));
+  const completed = missions.filter((m) => claimedIds.has(m.id));
+  const list = [...pending, ...completed].slice(0, 8);
 
   return (
     <section className="glass-card rounded-2xl p-5 border border-border/60">
@@ -490,10 +493,10 @@ function MissionsSection({
         }
       />
       <div className="grid sm:grid-cols-2 gap-2">
-        {todoList.length === 0 ? (
+        {list.length === 0 ? (
           <Empty>Nenhuma missão pendente. Boa! 🎉</Empty>
         ) : (
-          todoList.map((m) => <MissionRow key={m.id} m={m} />)
+          list.map((m) => <MissionRow key={m.id} m={m} done={claimedIds.has(m.id)} />)
         )}
       </div>
     </section>
@@ -613,7 +616,7 @@ function TikTokIcon({ className }: { className?: string }) {
   );
 }
 
-function MissionRow({ m }: { m: Mission }) {
+function MissionRow({ m, done = false }: { m: Mission; done?: boolean }) {
   const theme = getPlatformTheme(m);
   const Icon = theme.icon;
 
@@ -621,8 +624,13 @@ function MissionRow({ m }: { m: Mission }) {
     <div
       className="flex flex-col gap-3 p-4 rounded-2xl border"
       style={{
-        background: `color-mix(in srgb, ${theme.color} 8%, #0f0f0f)`,
-        borderColor: `color-mix(in srgb, ${theme.color} 35%, transparent)`,
+        background: done
+          ? "color-mix(in srgb, #10b981 6%, #0f0f0f)"
+          : `color-mix(in srgb, ${theme.color} 8%, #0f0f0f)`,
+        borderColor: done
+          ? "color-mix(in srgb, #10b981 40%, transparent)"
+          : `color-mix(in srgb, ${theme.color} 35%, transparent)`,
+        opacity: done ? 0.85 : 1,
       }}
     >
       <div className="flex items-start gap-3">
@@ -649,18 +657,35 @@ function MissionRow({ m }: { m: Mission }) {
         </div>
       </div>
 
-      <Link
-        to="/missoes"
-        className="w-full text-sm font-bold h-10 rounded-full text-white inline-flex items-center justify-center gap-2 transition hover:opacity-90"
-        style={{ background: theme.gradient }}
-      >
-        <ExternalLink className="h-4 w-4" />
-        Fazer missão
-      </Link>
+      {done ? (
+        <button
+          disabled
+          className="w-full text-sm font-bold h-10 rounded-full inline-flex items-center justify-center gap-2 cursor-not-allowed"
+          style={{
+            background: "color-mix(in srgb, #10b981 18%, transparent)",
+            color: "#10b981",
+            border: "1px solid color-mix(in srgb, #10b981 45%, transparent)",
+          }}
+        >
+          <Check className="h-4 w-4" />
+          Concluída
+        </button>
+      ) : (
+        <Link
+          to="/missoes"
+          className="w-full text-sm font-bold h-10 rounded-full text-white inline-flex items-center justify-center gap-2 transition hover:opacity-90"
+          style={{ background: theme.gradient }}
+        >
+          <ExternalLink className="h-4 w-4" />
+          Fazer missão
+        </Link>
+      )}
 
-      <div className="flex items-center justify-between">
-        <MissionCountdown missionId={m.id} />
-      </div>
+      {!done && (
+        <div className="flex items-center justify-between">
+          <MissionCountdown missionId={m.id} />
+        </div>
+      )}
     </div>
   );
 }
