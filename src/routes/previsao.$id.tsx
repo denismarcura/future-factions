@@ -1,7 +1,7 @@
-import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import {
-  Clock, Users, Flame, Heart, MessageCircle, Share2, Coins, TrendingUp, ArrowLeft, Instagram, Check, ExternalLink, Loader2,
+  Clock, Users, Flame, Heart, MessageCircle, Share2, Coins, TrendingUp, ArrowLeft, Instagram, Youtube, Facebook, Check, ExternalLink, Loader2, Lock,
 } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell } from "@/components/layout/AppShell";
@@ -10,6 +10,24 @@ import { listMissions, listMyClaims, claimMission, pickRandomFor, type Mission, 
 import { useAuth } from "@/hooks/use-auth";
 import { hasParticipated, saveParticipation } from "@/lib/my-participations";
 import { getTokenBalance } from "@/lib/balance";
+
+const PLATFORM_ORDER = ["instagram", "youtube", "facebook", "tiktok"] as const;
+type SeqPlatform = typeof PLATFORM_ORDER[number];
+
+const PLATFORM_THEME: Record<SeqPlatform, { label: string; gradient: string; color: string; Icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }> }> = {
+  instagram: { label: "Instagram", gradient: "linear-gradient(135deg, #E1306C, #833AB4)", color: "#E1306C", Icon: Instagram },
+  youtube:   { label: "YouTube",   gradient: "linear-gradient(135deg, #FF0000, #CC0000)", color: "#FF0000", Icon: Youtube },
+  facebook:  { label: "Facebook",  gradient: "linear-gradient(135deg, #1877F2, #0D5AA5)", color: "#1877F2", Icon: Facebook },
+  tiktok:    { label: "TikTok",    gradient: "linear-gradient(135deg, #010101, #333333)", color: "#ffffff", Icon: TikTokIcon },
+};
+
+function TikTokIcon({ className, style }: { className?: string; style?: React.CSSProperties }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} style={style} fill="currentColor" aria-hidden="true">
+      <path d="M19.6 6.3a5.3 5.3 0 0 1-3.2-1.1V15a5.7 5.7 0 1 1-5.7-5.7c.3 0 .6 0 .9.1v2.9a2.8 2.8 0 1 0 2 2.7V2h2.7a5.3 5.3 0 0 0 3.3 4.3z" />
+    </svg>
+  );
+}
 
 export const Route = createFileRoute("/previsao/$id")({
   loader: ({ params }): Prediction => {
@@ -44,16 +62,17 @@ export const Route = createFileRoute("/previsao/$id")({
 });
 
 function PredictionPage() {
-  const navigate = useNavigate();
+  // navigate removed: user stays on the page to complete bonus missions
   const p = Route.useLoaderData() as Prediction;
   const { user } = useAuth();
   const totalPool = p.options.reduce((s: number, o) => s + o.pool, 0);
   const [selected, setSelected] = useState(p.options[0].id);
   const [amount, setAmount] = useState(p.entryFee ?? p.minTokens);
   const [subAnswers, setSubAnswers] = useState<Record<string, string>>({});
-  const [bonusMission, setBonusMission] = useState<Mission | null>(null);
-  const [bonusDone, setBonusDone] = useState(false);
-  const [bonusBusy, setBonusBusy] = useState(false);
+  const [missionsByPlat, setMissionsByPlat] = useState<Partial<Record<SeqPlatform, Mission | null>>>({});
+  const [missionStep, setMissionStep] = useState(0);
+  const [missionStatus, setMissionStatus] = useState<"idle" | "verifying" | "done">("idle");
+  const [extraPalpites, setExtraPalpites] = useState<{ platform: SeqPlatform; sponsor: string }[]>([]);
   const [confirmed, setConfirmed] = useState(false);
   const [balance, setBalance] = useState<number | null>(null);
 
@@ -75,12 +94,31 @@ function PredictionPage() {
   useEffect(() => {
     (async () => {
       try {
-        const igMissions = await listMissions({ platform: "instagram", activeOnly: true });
-        const pick = pickRandomFor(igMissions, p.id);
-        setBonusMission(pick);
-        if (pick && user) {
+        const results = await Promise.all(
+          PLATFORM_ORDER.map((pl) =>
+            listMissions({ platform: pl, activeOnly: true })
+              .then((arr) => [pl, pickRandomFor(arr, p.id)] as const)
+              .catch(() => [pl, null] as const),
+          ),
+        );
+        const map: Partial<Record<SeqPlatform, Mission | null>> = {};
+        results.forEach(([pl, m]) => (map[pl] = m));
+        setMissionsByPlat(map);
+
+        if (user) {
           const claims = await listMyClaims(`challenge:${p.id}`);
-          if (claims.some((c) => c.mission_id === pick.id)) setBonusDone(true);
+          const done: { platform: SeqPlatform; sponsor: string }[] = [];
+          let step = 0;
+          for (const pl of PLATFORM_ORDER) {
+            const m = map[pl];
+            if (!m) { step++; continue; }
+            if (claims.some((c) => c.mission_id === m.id)) {
+              done.push({ platform: pl, sponsor: m.sponsor_name });
+              step++;
+            } else break;
+          }
+          setExtraPalpites(done);
+          setMissionStep(step);
         }
       } catch {
         // silently ignore mission load failures on this page
@@ -88,23 +126,34 @@ function PredictionPage() {
     })();
   }, [p.id, user]);
 
-  async function handleBonusClaim() {
-    if (!bonusMission) return;
-    if (!user) {
-      toast.error("Faça login para ganhar o palpite extra.");
+  async function handleMissionClick() {
+    if (!confirmed) {
+      toast.error("Confirme sua participação primeiro.");
       return;
     }
-    setBonusBusy(true);
-    window.open(bonusMission.link, "_blank", "noopener,noreferrer");
-    try {
-      await claimMission(bonusMission.id, `challenge:${p.id}`, bonusMission.tokens);
-      setBonusDone(true);
-      toast.success("🎯 +1 palpite extra liberado neste desafio!");
-    } catch (e: any) {
-      toast.error(e.message ?? "Erro");
-    } finally {
-      setBonusBusy(false);
+    if (!user) {
+      toast.error("Faça login para ganhar palpites extras.");
+      return;
     }
+    const current = PLATFORM_ORDER[missionStep];
+    const mission = current ? missionsByPlat[current] : null;
+    if (!mission) return;
+    window.open(mission.link, "_blank", "noopener,noreferrer");
+    setMissionStatus("verifying");
+    setTimeout(async () => {
+      try {
+        await claimMission(mission.id, `challenge:${p.id}`, mission.tokens);
+      } catch {
+        // ignore (likely already claimed)
+      }
+      setExtraPalpites((prev) => [...prev, { platform: current, sponsor: mission.sponsor_name }]);
+      setMissionStatus("done");
+      toast.success("✅ Missão feita! +1 palpite extra liberado.");
+      setTimeout(() => {
+        setMissionStep((s) => s + 1);
+        setMissionStatus("idle");
+      }, 1500);
+    }, 5000);
   }
 
   const sel = p.options.find((o) => o.id === selected)!;
@@ -207,29 +256,123 @@ function PredictionPage() {
                 </div>
               ))}
 
-              {bonusMission && (
-                <div className="rounded-xl border-2 border-pink-500/40 bg-gradient-to-br from-pink-500/10 to-purple-500/10 p-4">
-                  <div className="flex items-center gap-2 text-sm font-display font-black mb-1">
-                    <Instagram className="h-4 w-4 text-pink-400" />
-                    <span className="text-pink-300">Palpite extra grátis</span>
+              {/* Trilha sequencial de missões — só desbloqueia após Participar */}
+              {(() => {
+                const baseCount = p.subPredictions!.length;
+                const allDone = missionStep >= PLATFORM_ORDER.length;
+                const currentPlatform = !allDone ? PLATFORM_ORDER[missionStep] : null;
+                const currentMission = currentPlatform ? missionsByPlat[currentPlatform] : null;
+
+                return (
+                  <div className="space-y-3">
+                    {/* Conquistados */}
+                    {extraPalpites.length > 0 && (
+                      <div className="rounded-xl border border-gold/40 bg-gold/5 p-4">
+                        <div className="font-display font-bold text-sm mb-2 text-gold">🎁 Palpites extras conquistados</div>
+                        <ul className="space-y-1.5 text-xs">
+                          {extraPalpites.map((e, i) => {
+                            const T = PLATFORM_THEME[e.platform];
+                            return (
+                              <li key={i} className="flex items-center gap-2">
+                                <T.Icon className="h-3.5 w-3.5" />
+                                <span className="font-bold text-foreground">Palpite extra Nº {baseCount + i + 1}</span>
+                                <span className="text-muted-foreground">— missão {T.label} ({e.sponsor})</span>
+                                <Check className="h-3.5 w-3.5 text-emerald-400 ml-auto" />
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      </div>
+                    )}
+
+                    {/* Bloqueado */}
+                    {!confirmed && (
+                      <div className="rounded-xl border-2 border-dashed border-border/60 bg-background/40 p-4 text-center">
+                        <Lock className="h-5 w-5 mx-auto text-muted-foreground mb-2" />
+                        <div className="text-sm font-bold text-muted-foreground">Missões bônus bloqueadas</div>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Confirme sua participação para desbloquear missões e ganhar até <strong className="text-gold">+4 palpites extras</strong>.
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Missão atual */}
+                    {confirmed && !allDone && currentMission && (() => {
+                      const T = PLATFORM_THEME[currentPlatform!];
+                      const verifying = missionStatus === "verifying";
+                      const done = missionStatus === "done";
+                      return (
+                        <div
+                          className="rounded-xl border-2 p-4"
+                          style={{
+                            borderColor: `color-mix(in srgb, ${T.color} 45%, transparent)`,
+                            background: `color-mix(in srgb, ${T.color} 10%, transparent)`,
+                          }}
+                        >
+                          <div className="flex items-center gap-2 text-sm font-display font-black mb-1">
+                            <T.Icon className="h-4 w-4" style={{ color: T.color }} />
+                            <span style={{ color: T.color }}>Palpite extra grátis — {T.label}</span>
+                          </div>
+                          <p className="text-xs text-muted-foreground mb-3">
+                            <strong>{ACTION_LABEL[currentMission.action_type]}</strong> {currentMission.sponsor_name} no {T.label} e ganhe <strong className="text-gold">+1 palpite</strong> neste desafio.
+                          </p>
+                          <button
+                            onClick={handleMissionClick}
+                            disabled={verifying || done}
+                            className="w-full h-11 rounded-lg font-bold text-sm inline-flex items-center justify-center gap-2 transition text-white shadow-glow hover:scale-[1.02] disabled:opacity-80 disabled:cursor-not-allowed"
+                            style={{ background: done ? "linear-gradient(135deg, #10b981, #059669)" : T.gradient }}
+                          >
+                            {verifying ? (
+                              <>
+                                <Loader2 className="h-4 w-4 animate-spin" /> Validando missão…
+                              </>
+                            ) : done ? (
+                              <>
+                                <Check className="h-4 w-4" /> Missão feita — +1 palpite liberado!
+                              </>
+                            ) : (
+                              <>
+                                <ExternalLink className="h-4 w-4" /> {currentMission.title}
+                              </>
+                            )}
+                          </button>
+                          <div className="mt-2 text-[11px] text-center text-muted-foreground">
+                            Etapa {missionStep + 1} de {PLATFORM_ORDER.length} · próxima:{" "}
+                            {PLATFORM_ORDER[missionStep + 1]
+                              ? PLATFORM_THEME[PLATFORM_ORDER[missionStep + 1]].label
+                              : "—"}
+                          </div>
+                        </div>
+                      );
+                    })()}
+
+                    {/* Sem missão cadastrada para a etapa */}
+                    {confirmed && !allDone && !currentMission && (
+                      <div className="rounded-xl border border-border/60 bg-background/40 p-3 text-xs text-center text-muted-foreground">
+                        Nenhuma missão {PLATFORM_THEME[currentPlatform!].label} ativa no momento.
+                        <button
+                          onClick={() => setMissionStep((s) => s + 1)}
+                          className="ml-2 underline text-primary"
+                        >
+                          pular etapa
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Todas concluídas */}
+                    {confirmed && allDone && (
+                      <div className="rounded-xl border-2 border-emerald-500/40 bg-emerald-500/10 p-4 text-center">
+                        <div className="text-sm font-display font-black text-emerald-400">
+                          🏆 Todas as missões concluídas!
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Você ganhou <strong className="text-gold">+{extraPalpites.length} palpites extras</strong> neste desafio.
+                        </p>
+                      </div>
+                    )}
                   </div>
-                  <p className="text-xs text-muted-foreground mb-3">
-                    <strong>{ACTION_LABEL[bonusMission.action_type]}</strong> {bonusMission.sponsor_name} no Instagram e ganhe <strong className="text-gold">+1 palpite</strong> neste desafio.
-                  </p>
-                  <button
-                    onClick={handleBonusClaim}
-                    disabled={bonusDone || bonusBusy}
-                    className={`w-full h-10 rounded-lg font-bold text-sm inline-flex items-center justify-center gap-2 transition ${
-                      bonusDone
-                        ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30"
-                        : "bg-gradient-to-r from-pink-500 to-purple-500 text-white shadow-glow hover:scale-[1.02]"
-                    }`}
-                  >
-                    {bonusBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : bonusDone ? <Check className="h-4 w-4" /> : <ExternalLink className="h-4 w-4" />}
-                    {bonusDone ? "Palpite extra liberado!" : bonusMission.title}
-                  </button>
-                </div>
-              )}
+                );
+              })()}
 
               <div className="rounded-xl border border-primary/30 bg-primary/5 p-4">
                 <div className="font-display font-bold text-sm mb-2 text-primary">⚡ Ganhe mais chances</div>
@@ -298,25 +441,7 @@ function PredictionPage() {
 
             {p.subPredictions ? (
               <>
-                <div className="mt-3 text-sm text-muted-foreground">Custo de entrada</div>
-                <div className="mt-1 font-display text-3xl font-black text-gold">
-                  {p.entryFee} <span className="text-sm text-muted-foreground font-normal">TKN</span>
-                </div>
-                <div className="mt-4 space-y-2 text-sm">
-                  <Row label="Palpites preenchidos" value={`${Object.keys(subAnswers).length} / ${p.subPredictions.length}`} />
-                  <Row label="Seu saldo" value={`${formatTokens(balance ?? CURRENT_USER.tokens)} TKN`} />
-                </div>
-                {p.prizeTiers && (
-                  <div className="mt-4 rounded-xl bg-background/40 border border-border/60 p-3 text-xs">
-                    <div className="font-bold text-foreground mb-1">Premiação</div>
-                    {p.prizeTiers.map((t) => (
-                      <div key={t.hits} className="flex justify-between text-muted-foreground">
-                        <span>{t.hits} acertos</span>
-                        <span className="text-gold font-bold">{t.tokens.toLocaleString("pt-BR")} TKN</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                {/* BOTÃO VERDE PRIMEIRO */}
                 <button
                   onClick={() => {
                     const filled = Object.keys(subAnswers).length;
@@ -343,13 +468,16 @@ function PredictionPage() {
                       closesAt: p.closesAt,
                       participatedAt: new Date().toISOString(),
                     });
-                    toast.success(`🎯 Participação confirmada! ${fee} TKN debitados.`);
-                    setTimeout(() => {
-                      navigate({ to: "/dashboard" });
-                    }, 1200);
+                    toast.success(`🎯 Participação confirmada! ${fee} TKN debitados. Missões bônus liberadas!`);
                   }}
                   disabled={isClosed || confirmed || Object.keys(subAnswers).length < p.subPredictions.length || (balance !== null && balance < (p.entryFee ?? 0))}
-                  className="mt-5 w-full h-12 rounded-xl bg-gradient-brand text-primary-foreground font-display font-black tracking-wide shadow-glow hover:scale-[1.01] transition disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="mt-3 w-full h-14 rounded-xl font-display font-black tracking-wide text-base transition disabled:opacity-60 disabled:cursor-not-allowed text-white"
+                  style={{
+                    background: confirmed
+                      ? "linear-gradient(135deg, #059669, #047857)"
+                      : "linear-gradient(135deg, #22c55e, #16a34a)",
+                    boxShadow: "0 0 28px rgba(34,197,94,0.45), 0 10px 24px -8px rgba(34,197,94,0.6)",
+                  }}
                 >
                   {isClosed
                     ? "APOSTAS ENCERRADAS"
@@ -364,10 +492,34 @@ function PredictionPage() {
                     Seu saldo: <span className="text-gold font-bold">{formatTokens(balance)} TKN</span>
                   </p>
                 )}
+
+                <div className="my-4 h-px bg-border/60" />
+
+                {/* INFO ABAIXO */}
+                <div className="text-sm text-muted-foreground">Custo de entrada</div>
+                <div className="mt-1 font-display text-3xl font-black text-gold">
+                  {p.entryFee} <span className="text-sm text-muted-foreground font-normal">TKN</span>
+                </div>
+                <div className="mt-4 space-y-2 text-sm">
+                  <Row label="Palpites preenchidos" value={`${Object.keys(subAnswers).length} / ${p.subPredictions.length}`} />
+                  <Row label="Seu saldo" value={`${formatTokens(balance ?? CURRENT_USER.tokens)} TKN`} />
+                </div>
+                {p.prizeTiers && (
+                  <div className="mt-4 rounded-xl bg-background/40 border border-border/60 p-3 text-xs">
+                    <div className="font-bold text-foreground mb-1">Premiação</div>
+                    {p.prizeTiers.map((t) => (
+                      <div key={t.hits} className="flex justify-between text-muted-foreground">
+                        <span>{t.hits} acertos</span>
+                        <span className="text-gold font-bold">{t.tokens.toLocaleString("pt-BR")} TKN</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
                 <p className="mt-3 text-[11px] text-center text-muted-foreground">
                   Apostas encerram 10 minutos antes do jogo. Tokens virtuais, sem dinheiro real.
                 </p>
               </>
+
             ) : (
               <>
                 <div className="mt-3 text-sm text-muted-foreground">Sua escolha</div>
