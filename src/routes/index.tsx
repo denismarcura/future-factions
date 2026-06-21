@@ -179,6 +179,30 @@ function Feed() {
         </section>
       )}
 
+      {/* Desafios mais recentes */}
+      <section className="mb-8">
+        <div className="flex items-end justify-between mb-4">
+          <div>
+            <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-wider text-primary font-bold">
+              <Sparkles className="h-3.5 w-3.5" /> Novidades
+            </div>
+            <h2 className="font-display text-2xl sm:text-3xl font-black">Desafios mais recentes</h2>
+          </div>
+          <Link to="/desafios" className="text-xs font-bold text-primary hover:underline shrink-0">
+            Ver todos →
+          </Link>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {[...PREDICTIONS]
+            .filter((p) => new Date(p.closesAt).getTime() > Date.now())
+            .sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt))
+            .slice(0, 6)
+            .map((p) => (
+              <PredictionCard key={p.id} prediction={p} />
+            ))}
+        </div>
+      </section>
+
 
       {/* Destaque: Desafios para Empresas */}
       <section className="mb-6">
