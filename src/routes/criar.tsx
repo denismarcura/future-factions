@@ -85,7 +85,11 @@ function Criar() {
     { id: uid(), question: "Neymar vai jogar?", options: ["Sim", "Não"] },
   ]);
   const [prizeImg, setPrizeImg] = useState<string | null>(null);
+  const [ownTokensPrize, setOwnTokensPrize] = useState<number>(0);
+  const [shopPrizeId, setShopPrizeId] = useState<string | null>(null);
+  const [shopPickerOpen, setShopPickerOpen] = useState(false);
   const [aiPrompt, setAiPrompt] = useState("");
+
   const [generating, setGenerating] = useState(false);
   const [improvingTitle, setImprovingTitle] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
