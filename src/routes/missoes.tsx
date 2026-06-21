@@ -115,6 +115,14 @@ function Missoes() {
           <Target className="h-7 w-7 text-primary" /> Missões
         </h1>
         <p className="text-muted-foreground mt-1">Ganhe Tokens fazendo coisas que você já faz.</p>
+        <div className="mt-3 inline-flex items-center gap-2 rounded-xl border border-gold/40 bg-gold/10 px-3 py-2 text-sm">
+          <Gift className="h-4 w-4 text-gold" />
+          <span>
+            A cada missão cumprida você ganha{" "}
+            <span className="font-bold text-gold">+{COMPLETION_BONUS_CHANCES} chance</span> de fazer um novo palpite e{" "}
+            <span className="font-bold text-gold">+{COMPLETION_BONUS_TOKENS} tokens</span> extras.
+          </span>
+        </div>
       </header>
 
       <section className="rounded-2xl glass-card p-6 mb-6">
