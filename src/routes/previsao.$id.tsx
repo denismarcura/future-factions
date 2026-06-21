@@ -381,7 +381,7 @@ function PredictionPage() {
                     type="number"
                     value={amount}
                     min={p.minTokens}
-                    max={CURRENT_USER.tokens}
+                    max={balance ?? CURRENT_USER.tokens}
                     onChange={(e) => setAmount(Math.max(p.minTokens, Number(e.target.value) || 0))}
                     className="flex-1 h-11 px-3 rounded-lg bg-background border border-border/60 font-display font-bold tabular-nums focus:outline-none focus:ring-2 focus:ring-primary/60"
                   />
