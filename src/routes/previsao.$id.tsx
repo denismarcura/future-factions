@@ -127,10 +127,6 @@ function PredictionPage() {
   }, [p.id, user]);
 
   async function handleMissionClick() {
-    if (!confirmed) {
-      toast.error("Confirme sua participação primeiro.");
-      return;
-    }
     if (!user) {
       toast.error("Faça login para ganhar palpites extras.");
       return;
@@ -145,11 +141,16 @@ function PredictionPage() {
       } catch {
         // ignore (likely already claimed)
       }
-      // Unlock a new extra round: user must now fill the predictions again and confirm
       setSubAnswers({});
-      setPendingExtra({ platform: mission.platform as SeqPlatform, sponsor: mission.sponsor_name });
+      if (confirmed) {
+        setPendingExtra({ platform: mission.platform as SeqPlatform, sponsor: mission.sponsor_name });
+        toast.success("✅ Missão feita! Preencha o novo palpite e clique em CONFIRMAR PALPITE EXTRA.");
+      } else {
+        // Mission done before confirming participation: just credit tokens
+        setExtraPalpites((prev) => [...prev, { platform: mission.platform as SeqPlatform, sponsor: mission.sponsor_name, answers: {} }]);
+        toast.success(`✅ Missão feita! +${mission.tokens} TKN no seu saldo. Você pode continuar ou já participar do desafio.`);
+      }
       setMissionStatus("done");
-      toast.success("✅ Missão feita! Preencha o novo palpite e clique em CONFIRMAR PALPITE EXTRA.");
       setTimeout(() => {
         setMissionStep((s) => s + 1);
         setMissionStatus("idle");
