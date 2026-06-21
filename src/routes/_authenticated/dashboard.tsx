@@ -572,11 +572,13 @@ function TokensExtractSection({
   welcomeBonus,
   claims,
   missions,
+  participations,
   balance,
 }: {
   welcomeBonus: number;
   claims: MissionClaim[];
   missions: Mission[];
+  participations: MyParticipation[];
   balance: number;
 }) {
   const missionMap = useMemo(() => new Map(missions.map((m) => [m.id, m])), [missions]);
@@ -594,8 +596,17 @@ function TokensExtractSection({
         amount: c.tokens_awarded ?? 0,
       });
     }
+    for (const p of participations) {
+      if (!p.entryFee) continue;
+      items.push({
+        id: `part-${p.id}-${p.participatedAt}`,
+        date: p.participatedAt,
+        label: `Participação: ${p.title}`,
+        amount: -p.entryFee,
+      });
+    }
     return items.sort((a, b) => (b.date || "").localeCompare(a.date || ""));
-  }, [welcomeBonus, claims, missionMap]);
+  }, [welcomeBonus, claims, missionMap, participations]);
 
   return (
     <section className="glass-card rounded-2xl p-5 border border-border/60">
