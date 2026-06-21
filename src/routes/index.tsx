@@ -29,6 +29,14 @@ function Feed() {
   const [cat, setCat] = useState<string>("Todas");
   const [sort, setSort] = useState<Sort>("new");
 
+  const closingSoon = useMemo(() => {
+    const now = Date.now();
+    return [...PREDICTIONS]
+      .filter((p) => new Date(p.closesAt).getTime() > now)
+      .sort((a, b) => +new Date(a.closesAt) - +new Date(b.closesAt))
+      .slice(0, 4);
+  }, []);
+
   const items = useMemo(() => {
     let list = [...PREDICTIONS];
     const isClosed = (p: typeof PREDICTIONS[number]) =>
