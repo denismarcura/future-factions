@@ -14,9 +14,9 @@ const Input = z.object({
         options: z.array(z.string().trim().min(1).max(60)).min(2).max(3).optional(),
       }),
     )
-    .max(5)
+    .max(10)
     .optional(),
-  count: z.number().int().min(1).max(5).default(5),
+  count: z.number().int().min(1).max(10).default(5),
   prizeName: z.string().trim().max(120).optional(),
   endsAt: z.string().trim().optional(),
 });
