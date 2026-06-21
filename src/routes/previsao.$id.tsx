@@ -473,16 +473,20 @@ function PredictionPage() {
                 );
               })()}
 
-              {confirmed && allDone && (
+              {allDone && missionQueue.length > 0 && (
                 <div className="rounded-xl border-2 border-emerald-500/40 bg-emerald-500/10 p-4 text-center">
                   <div className="text-sm font-display font-black text-emerald-400">🏆 Todas as missões concluídas!</div>
                   <p className="text-xs text-muted-foreground mt-1">
-                    Você ganhou <strong className="text-gold">+{extraPalpites.length} rounds extras</strong> neste desafio.
+                    {confirmed ? (
+                      <>Você ganhou <strong className="text-gold">+{extraPalpites.length} rounds extras</strong> neste desafio.</>
+                    ) : (
+                      <>Agora é só confirmar sua participação no desafio.</>
+                    )}
                   </p>
                 </div>
               )}
 
-              {confirmed && missionQueue.length === 0 && (
+              {missionQueue.length === 0 && (
                 <div className="rounded-xl border border-border/60 bg-background/40 p-3 text-xs text-center text-muted-foreground">
                   Nenhuma missão de seguir disponível no momento.
                 </div>
