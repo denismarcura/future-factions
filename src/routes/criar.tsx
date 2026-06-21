@@ -1108,7 +1108,57 @@ function Criar() {
       `}</style>
       </>
       )}
+
+      {/* Picker de prêmio da loja */}
+      {shopPickerOpen && (
+        <div
+          className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm grid place-items-center p-4"
+          onClick={() => setShopPickerOpen(false)}
+        >
+          <div
+            className="relative w-full max-w-3xl max-h-[85vh] rounded-2xl border border-border bg-card shadow-2xl flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between p-4 border-b border-border">
+              <div className="flex items-center gap-2">
+                <ShoppingBag className="h-5 w-5 text-primary" />
+                <h3 className="font-display font-black text-lg">Escolher prêmio da loja</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShopPickerOpen(false)}
+                className="h-9 w-9 rounded-lg grid place-items-center hover:bg-muted"
+                aria-label="Fechar"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="overflow-y-auto p-4 grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {PRODUCTS.map((p) => {
+                const selected = shopPrizeId === p.id;
+                return (
+                  <button
+                    key={p.id}
+                    type="button"
+                    onClick={() => { setShopPrizeId(p.id); setShopPickerOpen(false); }}
+                    className={`text-left rounded-xl border bg-background/60 overflow-hidden hover:border-primary transition ${selected ? "border-primary ring-2 ring-primary/40" : "border-border/60"}`}
+                  >
+                    {p.image && <img src={p.image} alt={p.name} className="w-full aspect-square object-cover" />}
+                    <div className="p-2">
+                      <div className="text-xs font-bold line-clamp-2 leading-tight">{p.name}</div>
+                      <div className="mt-1 text-xs text-gold font-bold inline-flex items-center gap-1">
+                        <Coins className="h-3 w-3" /> {formatTokens(p.cost)}
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
     </AppShell>
+
   );
 }
 
