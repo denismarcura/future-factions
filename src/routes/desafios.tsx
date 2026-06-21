@@ -7,7 +7,8 @@ import { CATEGORIES, PREDICTIONS, type Prediction } from "@/lib/mock-data";
 import { COMPANY_CHALLENGES } from "@/lib/mock-extra";
 import { getUserChallenges } from "@/lib/user-challenges";
 import { aiSearchChallenges } from "@/lib/search-ai.functions";
-import { ListChecks, Building2, Users, Lock, Globe2, Sparkles, Search, Loader2, X, Wand2 } from "lucide-react";
+import { ListChecks, Building2, Users, Lock, Globe2, Sparkles, Search, Loader2, X, Wand2, Timer } from "lucide-react";
+import { timeLeft } from "@/lib/mock-data";
 
 export const Route = createFileRoute("/desafios")({
   head: () => ({
@@ -121,6 +122,14 @@ function DesafiosPage() {
     return [...openUser, ...sortedMocks].slice(0, 6);
   }, [userChallenges]);
 
+  // Desafios com tempo se esgotando — abertos, mais próximos do encerramento
+  const expiringSoon = useMemo(() => {
+    const pool = [...userChallenges, ...PREDICTIONS].filter((p) => !isClosed(p));
+    return pool
+      .sort((a, b) => new Date(a.closesAt).getTime() - new Date(b.closesAt).getTime())
+      .slice(0, 6);
+  }, [userChallenges]);
+
   return (
     <AppShell>
       <header className="mb-6">
@@ -209,6 +218,23 @@ function DesafiosPage() {
 
       {tab !== "empresas" && (
         <>
+          {/* Encerrando em breve */}
+          <section className="mb-8">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="font-display text-lg font-bold flex items-center gap-2">
+                <Timer className="h-5 w-5 text-destructive" /> Encerrando em breve
+              </h2>
+              <span className="text-xs text-muted-foreground">
+                {expiringSoon.length} desafios
+              </span>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {expiringSoon.map((p) => (
+                <PredictionCard key={`expiring-${p.id}`} prediction={p} />
+              ))}
+            </div>
+          </section>
+
           {/* Últimos desafios cadastrados */}
           <section className="mb-8">
             <div className="flex items-center justify-between mb-3">
