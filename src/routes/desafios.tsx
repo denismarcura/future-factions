@@ -218,6 +218,23 @@ function DesafiosPage() {
 
       {tab !== "empresas" && (
         <>
+          {/* Encerrando em breve */}
+          <section className="mb-8">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="font-display text-lg font-bold flex items-center gap-2">
+                <Timer className="h-5 w-5 text-destructive" /> Encerrando em breve
+              </h2>
+              <span className="text-xs text-muted-foreground">
+                {expiringSoon.length} desafios
+              </span>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {expiringSoon.map((p) => (
+                <PredictionCard key={`expiring-${p.id}`} prediction={p} />
+              ))}
+            </div>
+          </section>
+
           {/* Últimos desafios cadastrados */}
           <section className="mb-8">
             <div className="flex items-center justify-between mb-3">
