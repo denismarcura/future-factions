@@ -9,6 +9,7 @@ import { CURRENT_USER, formatTokens, getPrediction, PREDICTIONS, type Prediction
 import { listMissions, listMyClaims, claimMission, pickRandomFor, type Mission, ACTION_LABEL } from "@/lib/missions";
 import { useAuth } from "@/hooks/use-auth";
 import { hasParticipated, saveParticipation } from "@/lib/my-participations";
+import { getTokenBalance } from "@/lib/balance";
 
 export const Route = createFileRoute("/previsao/$id")({
   loader: ({ params }): Prediction => {
@@ -54,10 +55,22 @@ function PredictionPage() {
   const [bonusDone, setBonusDone] = useState(false);
   const [bonusBusy, setBonusBusy] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
+  const [balance, setBalance] = useState<number | null>(null);
 
   useEffect(() => {
     if (hasParticipated(p.id)) setConfirmed(true);
   }, [p.id]);
+
+  useEffect(() => {
+    if (!user) {
+      setBalance(null);
+      return;
+    }
+    getTokenBalance().then(setBalance).catch(() => setBalance(null));
+    const refresh = () => getTokenBalance().then(setBalance).catch(() => {});
+    window.addEventListener("ddp:participations-updated", refresh);
+    return () => window.removeEventListener("ddp:participations-updated", refresh);
+  }, [user]);
 
   useEffect(() => {
     (async () => {
@@ -291,7 +304,7 @@ function PredictionPage() {
                 </div>
                 <div className="mt-4 space-y-2 text-sm">
                   <Row label="Palpites preenchidos" value={`${Object.keys(subAnswers).length} / ${p.subPredictions.length}`} />
-                  <Row label="Seu saldo" value={`${formatTokens(CURRENT_USER.tokens)} TKN`} />
+                  <Row label="Seu saldo" value={`${formatTokens(balance ?? CURRENT_USER.tokens)} TKN`} />
                 </div>
                 {p.prizeTiers && (
                   <div className="mt-4 rounded-xl bg-background/40 border border-border/60 p-3 text-xs">
@@ -311,26 +324,46 @@ function PredictionPage() {
                       toast.error(`Preencha todos os ${p.subPredictions!.length} palpites.`);
                       return;
                     }
+                    const fee = p.entryFee ?? 0;
+                    if (!user) {
+                      toast.error("Faça login para participar.");
+                      return;
+                    }
+                    if (balance !== null && balance < fee) {
+                      toast.error(`Saldo insuficiente. Você tem ${formatTokens(balance)} TKN e precisa de ${fee}.`);
+                      return;
+                    }
                     setConfirmed(true);
                     saveParticipation({
                       id: p.id,
                       title: p.title,
                       category: p.category,
-                      entryFee: p.entryFee ?? 0,
+                      entryFee: fee,
                       answers: subAnswers,
                       closesAt: p.closesAt,
                       participatedAt: new Date().toISOString(),
                     });
-                    toast.success(`🎯 Participação confirmada! ${p.entryFee} TKN debitados.`);
+                    toast.success(`🎯 Participação confirmada! ${fee} TKN debitados.`);
                     setTimeout(() => {
                       navigate({ to: "/dashboard" });
                     }, 1200);
                   }}
-                  disabled={isClosed || confirmed || Object.keys(subAnswers).length < p.subPredictions.length}
+                  disabled={isClosed || confirmed || Object.keys(subAnswers).length < p.subPredictions.length || (balance !== null && balance < (p.entryFee ?? 0))}
                   className="mt-5 w-full h-12 rounded-xl bg-gradient-brand text-primary-foreground font-display font-black tracking-wide shadow-glow hover:scale-[1.01] transition disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {isClosed ? "APOSTAS ENCERRADAS" : confirmed ? "✓ PARTICIPAÇÃO CONFIRMADA" : `PARTICIPAR POR ${p.entryFee} TOKENS`}
+                  {isClosed
+                    ? "APOSTAS ENCERRADAS"
+                    : confirmed
+                      ? "✓ PARTICIPAÇÃO CONFIRMADA"
+                      : balance !== null && balance < (p.entryFee ?? 0)
+                        ? "SALDO INSUFICIENTE"
+                        : `PARTICIPAR POR ${p.entryFee} TOKENS`}
                 </button>
+                {user && balance !== null && (
+                  <p className="mt-2 text-[11px] text-center text-muted-foreground">
+                    Seu saldo: <span className="text-gold font-bold">{formatTokens(balance)} TKN</span>
+                  </p>
+                )}
                 <p className="mt-3 text-[11px] text-center text-muted-foreground">
                   Apostas encerram 10 minutos antes do jogo. Tokens virtuais, sem dinheiro real.
                 </p>
@@ -348,7 +381,7 @@ function PredictionPage() {
                     type="number"
                     value={amount}
                     min={p.minTokens}
-                    max={CURRENT_USER.tokens}
+                    max={balance ?? CURRENT_USER.tokens}
                     onChange={(e) => setAmount(Math.max(p.minTokens, Number(e.target.value) || 0))}
                     className="flex-1 h-11 px-3 rounded-lg bg-background border border-border/60 font-display font-bold tabular-nums focus:outline-none focus:ring-2 focus:ring-primary/60"
                   />
@@ -369,11 +402,19 @@ function PredictionPage() {
                 <div className="mt-5 space-y-2 text-sm">
                   <Row label="Odds estimada" value={odds.toFixed(2) + "x"} />
                   <Row label="Possível retorno" value={`${formatTokens(possibleReturn)} TKN`} highlight />
-                  <Row label="Seu saldo" value={`${formatTokens(CURRENT_USER.tokens)} TKN`} />
+                  <Row label="Seu saldo" value={`${formatTokens(balance ?? CURRENT_USER.tokens)} TKN`} />
                 </div>
 
                 <button
                   onClick={() => {
+                    if (!user) {
+                      toast.error("Faça login para apostar.");
+                      return;
+                    }
+                    if (balance !== null && balance < amount) {
+                      toast.error(`Saldo insuficiente. Você tem ${formatTokens(balance)} TKN.`);
+                      return;
+                    }
                     saveParticipation({
                       id: p.id,
                       title: p.title,
@@ -386,9 +427,10 @@ function PredictionPage() {
                     });
                     toast.success(`✅ Aposta de ${amount} TKN em "${sel.label}" confirmada!`);
                   }}
-                  className="mt-5 w-full h-12 rounded-xl bg-gradient-brand text-primary-foreground font-display font-black tracking-wide shadow-glow hover:scale-[1.01] transition"
+                  disabled={balance !== null && balance < amount}
+                  className="mt-5 w-full h-12 rounded-xl bg-gradient-brand text-primary-foreground font-display font-black tracking-wide shadow-glow hover:scale-[1.01] transition disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  APOSTAR {amount} TOKENS
+                  {balance !== null && balance < amount ? "SALDO INSUFICIENTE" : `APOSTAR ${amount} TOKENS`}
                 </button>
 
                 <p className="mt-3 text-[11px] text-center text-muted-foreground">

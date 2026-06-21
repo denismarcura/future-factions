@@ -129,9 +129,16 @@ function Dashboard() {
   }, []);
 
   const claimedIds = useMemo(() => new Set(claims.map((c) => c.mission_id)), [claims]);
+  const spentTokens = useMemo(
+    () => participations.reduce((s, p) => s + (p.entryFee ?? 0), 0),
+    [participations],
+  );
   const tokens = useMemo(
-    () => (profile?.welcome_bonus ?? 0) + claims.reduce((s, c) => s + (c.tokens_awarded ?? 0), 0),
-    [claims, profile?.welcome_bonus],
+    () =>
+      (profile?.welcome_bonus ?? 0) +
+      claims.reduce((s, c) => s + (c.tokens_awarded ?? 0), 0) -
+      spentTokens,
+    [claims, profile?.welcome_bonus, spentTokens],
   );
   const missionsDone = claims.length;
   const missionsTodo = missions.filter((m) => !claimedIds.has(m.id)).length;
@@ -213,6 +220,7 @@ function Dashboard() {
           welcomeBonus={profile?.welcome_bonus ?? 0}
           claims={claims}
           missions={missions}
+          participations={participations}
           balance={tokens}
         />
 
@@ -564,11 +572,13 @@ function TokensExtractSection({
   welcomeBonus,
   claims,
   missions,
+  participations,
   balance,
 }: {
   welcomeBonus: number;
   claims: MissionClaim[];
   missions: Mission[];
+  participations: MyParticipation[];
   balance: number;
 }) {
   const missionMap = useMemo(() => new Map(missions.map((m) => [m.id, m])), [missions]);
@@ -586,8 +596,17 @@ function TokensExtractSection({
         amount: c.tokens_awarded ?? 0,
       });
     }
+    for (const p of participations) {
+      if (!p.entryFee) continue;
+      items.push({
+        id: `part-${p.id}-${p.participatedAt}`,
+        date: p.participatedAt,
+        label: `Participação: ${p.title}`,
+        amount: -p.entryFee,
+      });
+    }
     return items.sort((a, b) => (b.date || "").localeCompare(a.date || ""));
-  }, [welcomeBonus, claims, missionMap]);
+  }, [welcomeBonus, claims, missionMap, participations]);
 
   return (
     <section className="glass-card rounded-2xl p-5 border border-border/60">
@@ -628,8 +647,13 @@ function TokensExtractSection({
                       : "—"}
                   </td>
                   <td className="px-3 py-2">{e.label}</td>
-                  <td className="px-3 py-2 text-right font-bold text-emerald-400 tabular-nums">
-                    +{formatTokens(e.amount)}
+                  <td
+                    className={`px-3 py-2 text-right font-bold tabular-nums ${
+                      e.amount < 0 ? "text-destructive" : "text-emerald-400"
+                    }`}
+                  >
+                    {e.amount < 0 ? "−" : "+"}
+                    {formatTokens(Math.abs(e.amount))}
                   </td>
                 </tr>
               ))}
