@@ -26,6 +26,8 @@ export const Route = createFileRoute("/missoes")({
 });
 
 const PLATFORMS: Platform[] = ["instagram", "facebook", "youtube", "tiktok", "google"];
+const COMPLETION_BONUS_TOKENS = 50; // bônus extra por cada missão cumprida
+const COMPLETION_BONUS_CHANCES = 1; // +1 chance de palpite por missão cumprida
 
 function PlatformIcon({ p, className }: { p: Platform; className?: string }) {
   if (p === "instagram") return <Instagram className={className} />;
@@ -87,13 +89,11 @@ function Missoes() {
     }
     await new Promise((r) => setTimeout(r, 5000));
     try {
-      const totalAward = m.tokens + (m.bonus_tokens || 0);
+      const totalAward = m.tokens + (m.bonus_tokens || 0) + COMPLETION_BONUS_TOKENS;
       await claimMission(m.id, "missoes", totalAward);
       setClaimed((prev) => new Set(prev).add(m.id));
       toast.success(
-        m.bonus_tokens > 0
-          ? `Tarefa concluída! +${m.tokens} Tokens + bônus de ${m.bonus_tokens} enviados para sua conta.`
-          : `Tarefa concluída! ${m.tokens} Tokens enviados para sua conta.`
+        `Tarefa concluída! +${m.tokens + (m.bonus_tokens || 0)} Tokens da missão · +${COMPLETION_BONUS_TOKENS} bônus · +${COMPLETION_BONUS_CHANCES} chance de palpite.`
       );
     } catch (e: any) {
       toast.error(e.message ?? "Erro ao registrar");
@@ -115,6 +115,14 @@ function Missoes() {
           <Target className="h-7 w-7 text-primary" /> Missões
         </h1>
         <p className="text-muted-foreground mt-1">Ganhe Tokens fazendo coisas que você já faz.</p>
+        <div className="mt-3 inline-flex items-center gap-2 rounded-xl border border-gold/40 bg-gold/10 px-3 py-2 text-sm">
+          <Gift className="h-4 w-4 text-gold" />
+          <span>
+            A cada missão cumprida você ganha{" "}
+            <span className="font-bold text-gold">+{COMPLETION_BONUS_CHANCES} chance</span> de fazer um novo palpite e{" "}
+            <span className="font-bold text-gold">+{COMPLETION_BONUS_TOKENS} tokens</span> extras.
+          </span>
+        </div>
       </header>
 
       <section className="rounded-2xl glass-card p-6 mb-6">
@@ -177,7 +185,7 @@ function Missoes() {
                         <div className="font-semibold truncate">{m.sponsor_name}</div>
                         <div className="text-xs text-muted-foreground truncate">{ACTION_LABEL[m.action_type]}</div>
                         <div className="text-xs text-gold font-bold mt-0.5">
-                          +{m.tokens} Tokens{m.bonus_tokens > 0 && ` · +${m.bonus_tokens} bônus`}
+                          +{m.tokens} Tokens{m.bonus_tokens > 0 && ` · +${m.bonus_tokens} bônus`} · +{COMPLETION_BONUS_TOKENS} extra · +{COMPLETION_BONUS_CHANCES} chance
                         </div>
                       </div>
                       <button
