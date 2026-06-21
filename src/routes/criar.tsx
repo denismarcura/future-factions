@@ -912,8 +912,12 @@ function Criar({ forCompany = false }: { forCompany?: boolean } = {}) {
 
           {/* Missões */}
           <Section
-            title="Missões do desafio"
-            description="Usuários que cumprem as 3 ações de uma rede social ganham +1 chance de palpite."
+            title={forCompany ? "Missões do desafio • Obrigatório" : "Missões do desafio"}
+            description={
+              forCompany
+                ? "Para desafios de empresas as missões de redes sociais são obrigatórias. Quem cumprir as 3 ações ganha +1 chance de palpite e 50 tokens."
+                : "Padrão em todos os desafios (não obrigatório). Usuários que cumprem as 3 ações de uma rede social ganham +1 chance de palpite e 50 tokens."
+            }
           >
             <div className="grid sm:grid-cols-2 gap-3">
               <MissionBlock icon={<Instagram className="h-4 w-4" />} name="Instagram" />
