@@ -146,6 +146,61 @@ function Criar() {
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState<string | null>(null);
 
+  // Inline AI generator (inside Sub-categorias section)
+  const [inlineAiCount, setInlineAiCount] = useState(3);
+  const [inlineAiLoading, setInlineAiLoading] = useState(false);
+  const [inlineAiError, setInlineAiError] = useState<string | null>(null);
+
+  const hasBrazilMatch = useMemo(
+    () => subs.some(s => /\bbrasil\b/i.test(s.question)) || /\bbrasil\b/i.test(name),
+    [subs, name],
+  );
+
+  const handleInlineGenerate = async () => {
+    setInlineAiError(null);
+    const remaining = MAX_SUBS - subs.length;
+    if (remaining <= 0) {
+      setInlineAiError(`Você já tem o máximo de ${MAX_SUBS} palpites.`);
+      return;
+    }
+    const want = Math.min(inlineAiCount, remaining);
+    setInlineAiLoading(true);
+    try {
+      const result = await generateChallengeFn({
+        data: {
+          theme: (name.trim() || subcategory || category || "Desafio de palpites"),
+          category,
+          subcategory: subcategory || undefined,
+          userSubs: subs
+            .map(s => ({ question: s.question.trim(), options: s.options.map(o => o.trim()).filter(Boolean) }))
+            .filter(s => s.question.length > 0),
+          count: subs.filter(s => s.question.trim()).length + want,
+          prizeName: prizeName.trim() || undefined,
+          endsAt: endsAt || undefined,
+        },
+      });
+      const existingQs = new Set(subs.map(s => s.question.trim().toLowerCase()).filter(Boolean));
+      const fresh = result.subs
+        .filter(s => !existingQs.has(s.question.trim().toLowerCase()))
+        .slice(0, want)
+        .map(s => ({ id: uid(), question: s.question, options: s.options.slice(0, MAX_OPTIONS) }));
+      // Replace empty placeholder subs first, then append
+      setSubs(prev => {
+        const out = [...prev];
+        for (const ns of fresh) {
+          const emptyIdx = out.findIndex(s => !s.question.trim());
+          if (emptyIdx >= 0) out[emptyIdx] = ns;
+          else if (out.length < MAX_SUBS) out.push(ns);
+        }
+        return out;
+      });
+    } catch (err) {
+      setInlineAiError(err instanceof Error ? err.message : "Não foi possível gerar agora.");
+    } finally {
+      setInlineAiLoading(false);
+    }
+  };
+
   const handleGenerateChallenge = async () => {
     setAiError(null);
     if (!aiTheme.trim()) {
