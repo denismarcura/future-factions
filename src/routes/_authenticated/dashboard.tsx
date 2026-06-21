@@ -471,8 +471,10 @@ function MissionsSection({
   done: number;
   todo: number;
 }) {
-  // Completed missions are removed from this area entirely.
-  const todoList = missions.filter((m) => !claimedIds.has(m.id)).slice(0, 8);
+  // Show pending missions first, then completed ones (marked "Concluída").
+  const pending = missions.filter((m) => !claimedIds.has(m.id));
+  const completed = missions.filter((m) => claimedIds.has(m.id));
+  const list = [...pending, ...completed].slice(0, 8);
 
   return (
     <section className="glass-card rounded-2xl p-5 border border-border/60">
@@ -490,10 +492,10 @@ function MissionsSection({
         }
       />
       <div className="grid sm:grid-cols-2 gap-2">
-        {todoList.length === 0 ? (
+        {list.length === 0 ? (
           <Empty>Nenhuma missão pendente. Boa! 🎉</Empty>
         ) : (
-          todoList.map((m) => <MissionRow key={m.id} m={m} />)
+          list.map((m) => <MissionRow key={m.id} m={m} done={claimedIds.has(m.id)} />)
         )}
       </div>
     </section>
