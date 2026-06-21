@@ -507,6 +507,7 @@ function AdminBanners() {
                 </div>
               )}
             </div>
+          </div>
 
           <div className="flex gap-2 justify-end">
             <button
