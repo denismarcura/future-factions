@@ -5,10 +5,12 @@ import {
   Plus, Trash2, Sparkles, Upload, Wand2, Calendar as CalIcon,
   Gift, Coins, Instagram, Facebook, Youtube, Music2, Globe, Lock,
   CheckCircle2, Share2, Copy, AlertCircle, UserPlus, Mail, Users, Loader2,
-  PencilLine, MessageCircle, Download, ImageIcon,
+  PencilLine, MessageCircle, Download, ImageIcon, ShoppingBag, X,
 } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
-import { CATEGORIES } from "@/lib/mock-data";
+import { CATEGORIES, CURRENT_USER, formatTokens } from "@/lib/mock-data";
+import { PRODUCTS } from "@/lib/mock-extra";
+
 import { generateInviteText } from "@/lib/invite.functions";
 import { saveUserChallenge } from "@/lib/user-challenges";
 import { improveTitle } from "@/lib/title-ai.functions";
