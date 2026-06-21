@@ -1207,7 +1207,7 @@ function Empty({ children }: { children: React.ReactNode }) {
 
 /* ---------- Invite Promo (email + whatsapp + artes prontas) ---------- */
 
-const SITE_URL = "https://future-factions.lovable.app";
+const SITE_URL = "https://desafiodospalpites.com.br";
 
 function InvitePromoSection({
   inviterName,
