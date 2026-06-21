@@ -256,29 +256,123 @@ function PredictionPage() {
                 </div>
               ))}
 
-              {bonusMission && (
-                <div className="rounded-xl border-2 border-pink-500/40 bg-gradient-to-br from-pink-500/10 to-purple-500/10 p-4">
-                  <div className="flex items-center gap-2 text-sm font-display font-black mb-1">
-                    <Instagram className="h-4 w-4 text-pink-400" />
-                    <span className="text-pink-300">Palpite extra grátis</span>
+              {/* Trilha sequencial de missões — só desbloqueia após Participar */}
+              {(() => {
+                const baseCount = p.subPredictions!.length;
+                const allDone = missionStep >= PLATFORM_ORDER.length;
+                const currentPlatform = !allDone ? PLATFORM_ORDER[missionStep] : null;
+                const currentMission = currentPlatform ? missionsByPlat[currentPlatform] : null;
+
+                return (
+                  <div className="space-y-3">
+                    {/* Conquistados */}
+                    {extraPalpites.length > 0 && (
+                      <div className="rounded-xl border border-gold/40 bg-gold/5 p-4">
+                        <div className="font-display font-bold text-sm mb-2 text-gold">🎁 Palpites extras conquistados</div>
+                        <ul className="space-y-1.5 text-xs">
+                          {extraPalpites.map((e, i) => {
+                            const T = PLATFORM_THEME[e.platform];
+                            return (
+                              <li key={i} className="flex items-center gap-2">
+                                <T.Icon className="h-3.5 w-3.5" />
+                                <span className="font-bold text-foreground">Palpite extra Nº {baseCount + i + 1}</span>
+                                <span className="text-muted-foreground">— missão {T.label} ({e.sponsor})</span>
+                                <Check className="h-3.5 w-3.5 text-emerald-400 ml-auto" />
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      </div>
+                    )}
+
+                    {/* Bloqueado */}
+                    {!confirmed && (
+                      <div className="rounded-xl border-2 border-dashed border-border/60 bg-background/40 p-4 text-center">
+                        <Lock className="h-5 w-5 mx-auto text-muted-foreground mb-2" />
+                        <div className="text-sm font-bold text-muted-foreground">Missões bônus bloqueadas</div>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Confirme sua participação para desbloquear missões e ganhar até <strong className="text-gold">+4 palpites extras</strong>.
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Missão atual */}
+                    {confirmed && !allDone && currentMission && (() => {
+                      const T = PLATFORM_THEME[currentPlatform!];
+                      const verifying = missionStatus === "verifying";
+                      const done = missionStatus === "done";
+                      return (
+                        <div
+                          className="rounded-xl border-2 p-4"
+                          style={{
+                            borderColor: `color-mix(in srgb, ${T.color} 45%, transparent)`,
+                            background: `color-mix(in srgb, ${T.color} 10%, transparent)`,
+                          }}
+                        >
+                          <div className="flex items-center gap-2 text-sm font-display font-black mb-1">
+                            <T.Icon className="h-4 w-4" style={{ color: T.color }} />
+                            <span style={{ color: T.color }}>Palpite extra grátis — {T.label}</span>
+                          </div>
+                          <p className="text-xs text-muted-foreground mb-3">
+                            <strong>{ACTION_LABEL[currentMission.action_type]}</strong> {currentMission.sponsor_name} no {T.label} e ganhe <strong className="text-gold">+1 palpite</strong> neste desafio.
+                          </p>
+                          <button
+                            onClick={handleMissionClick}
+                            disabled={verifying || done}
+                            className="w-full h-11 rounded-lg font-bold text-sm inline-flex items-center justify-center gap-2 transition text-white shadow-glow hover:scale-[1.02] disabled:opacity-80 disabled:cursor-not-allowed"
+                            style={{ background: done ? "linear-gradient(135deg, #10b981, #059669)" : T.gradient }}
+                          >
+                            {verifying ? (
+                              <>
+                                <Loader2 className="h-4 w-4 animate-spin" /> Validando missão…
+                              </>
+                            ) : done ? (
+                              <>
+                                <Check className="h-4 w-4" /> Missão feita — +1 palpite liberado!
+                              </>
+                            ) : (
+                              <>
+                                <ExternalLink className="h-4 w-4" /> {currentMission.title}
+                              </>
+                            )}
+                          </button>
+                          <div className="mt-2 text-[11px] text-center text-muted-foreground">
+                            Etapa {missionStep + 1} de {PLATFORM_ORDER.length} · próxima:{" "}
+                            {PLATFORM_ORDER[missionStep + 1]
+                              ? PLATFORM_THEME[PLATFORM_ORDER[missionStep + 1]].label
+                              : "—"}
+                          </div>
+                        </div>
+                      );
+                    })()}
+
+                    {/* Sem missão cadastrada para a etapa */}
+                    {confirmed && !allDone && !currentMission && (
+                      <div className="rounded-xl border border-border/60 bg-background/40 p-3 text-xs text-center text-muted-foreground">
+                        Nenhuma missão {PLATFORM_THEME[currentPlatform!].label} ativa no momento.
+                        <button
+                          onClick={() => setMissionStep((s) => s + 1)}
+                          className="ml-2 underline text-primary"
+                        >
+                          pular etapa
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Todas concluídas */}
+                    {confirmed && allDone && (
+                      <div className="rounded-xl border-2 border-emerald-500/40 bg-emerald-500/10 p-4 text-center">
+                        <div className="text-sm font-display font-black text-emerald-400">
+                          🏆 Todas as missões concluídas!
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Você ganhou <strong className="text-gold">+{extraPalpites.length} palpites extras</strong> neste desafio.
+                        </p>
+                      </div>
+                    )}
                   </div>
-                  <p className="text-xs text-muted-foreground mb-3">
-                    <strong>{ACTION_LABEL[bonusMission.action_type]}</strong> {bonusMission.sponsor_name} no Instagram e ganhe <strong className="text-gold">+1 palpite</strong> neste desafio.
-                  </p>
-                  <button
-                    onClick={handleBonusClaim}
-                    disabled={bonusDone || bonusBusy}
-                    className={`w-full h-10 rounded-lg font-bold text-sm inline-flex items-center justify-center gap-2 transition ${
-                      bonusDone
-                        ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30"
-                        : "bg-gradient-to-r from-pink-500 to-purple-500 text-white shadow-glow hover:scale-[1.02]"
-                    }`}
-                  >
-                    {bonusBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : bonusDone ? <Check className="h-4 w-4" /> : <ExternalLink className="h-4 w-4" />}
-                    {bonusDone ? "Palpite extra liberado!" : bonusMission.title}
-                  </button>
-                </div>
-              )}
+                );
+              })()}
 
               <div className="rounded-xl border border-primary/30 bg-primary/5 p-4">
                 <div className="font-display font-bold text-sm mb-2 text-primary">⚡ Ganhe mais chances</div>
