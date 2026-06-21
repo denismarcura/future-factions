@@ -105,6 +105,13 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
   const [endsAt, setEndsAt] = useState(() => kickoffToLocalDateTime(getNextBrazilMatch().kickoff));
   const [prizeName, setPrizeName] = useState("");
   const [socialLink, setSocialLink] = useState("");
+  const [missionStep, setMissionStep] = useState(0);
+  const [missionLinks, setMissionLinks] = useState({
+    instagram: "",
+    facebook: "",
+    youtube: "",
+    tiktok: "",
+  });
   const [subs, setSubs] = useState<SubCat[]>(() => {
     const next = getNextBrazilMatch();
     const adv = next.home === "Brasil" ? next.away : next.home;
