@@ -64,7 +64,7 @@ const BRAZIL_BONUS = 10000;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
 
-function Criar() {
+function Criar({ forCompany = false }: { forCompany?: boolean } = {}) {
   const [isOpen, setIsOpen] = useState(true);
   const [name, setName] = useState("");
   const [category, setCategory] = useState<string>(CATEGORIES[0]);
