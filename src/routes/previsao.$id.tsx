@@ -304,7 +304,7 @@ function PredictionPage() {
                 </div>
                 <div className="mt-4 space-y-2 text-sm">
                   <Row label="Palpites preenchidos" value={`${Object.keys(subAnswers).length} / ${p.subPredictions.length}`} />
-                  <Row label="Seu saldo" value={`${formatTokens(CURRENT_USER.tokens)} TKN`} />
+                  <Row label="Seu saldo" value={`${formatTokens(balance ?? CURRENT_USER.tokens)} TKN`} />
                 </div>
                 {p.prizeTiers && (
                   <div className="mt-4 rounded-xl bg-background/40 border border-border/60 p-3 text-xs">
