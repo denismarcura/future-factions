@@ -1,7 +1,7 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import {
-  Clock, Users, Flame, Heart, MessageCircle, Share2, Coins, TrendingUp, ArrowLeft, Instagram, Youtube, Facebook, Check, ExternalLink, Loader2, Lock,
+  Clock, Users, Flame, Heart, MessageCircle, Share2, Coins, TrendingUp, ArrowLeft, Instagram, Youtube, Facebook, Check, ExternalLink, Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell } from "@/components/layout/AppShell";
@@ -127,10 +127,6 @@ function PredictionPage() {
   }, [p.id, user]);
 
   async function handleMissionClick() {
-    if (!confirmed) {
-      toast.error("Confirme sua participação primeiro.");
-      return;
-    }
     if (!user) {
       toast.error("Faça login para ganhar palpites extras.");
       return;
@@ -145,11 +141,16 @@ function PredictionPage() {
       } catch {
         // ignore (likely already claimed)
       }
-      // Unlock a new extra round: user must now fill the predictions again and confirm
       setSubAnswers({});
-      setPendingExtra({ platform: mission.platform as SeqPlatform, sponsor: mission.sponsor_name });
+      if (confirmed) {
+        setPendingExtra({ platform: mission.platform as SeqPlatform, sponsor: mission.sponsor_name });
+        toast.success("✅ Missão feita! Preencha o novo palpite e clique em CONFIRMAR PALPITE EXTRA.");
+      } else {
+        // Mission done before confirming participation: just credit tokens
+        setExtraPalpites((prev) => [...prev, { platform: mission.platform as SeqPlatform, sponsor: mission.sponsor_name, answers: {} }]);
+        toast.success(`✅ Missão feita! +${mission.tokens} TKN no seu saldo. Você pode continuar ou já participar do desafio.`);
+      }
       setMissionStatus("done");
-      toast.success("✅ Missão feita! Preencha o novo palpite e clique em CONFIRMAR PALPITE EXTRA.");
       setTimeout(() => {
         setMissionStep((s) => s + 1);
         setMissionStatus("idle");
@@ -420,17 +421,13 @@ function PredictionPage() {
                 </div>
               )}
 
-              {!confirmed && (
-                <div className="rounded-xl border-2 border-dashed border-border/60 bg-background/40 p-4 text-center">
-                  <Lock className="h-5 w-5 mx-auto text-muted-foreground mb-2" />
-                  <div className="text-sm font-bold text-muted-foreground">Missões bônus bloqueadas</div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Confirme sua participação para desbloquear missões e ganhar <strong className="text-gold">palpites extras</strong>.
-                  </p>
+              {!confirmed && missionQueue.length > 0 && (
+                <div className="rounded-xl border border-primary/30 bg-primary/5 p-3 text-xs text-center text-muted-foreground">
+                  💡 Faça as missões agora para ganhar <strong className="text-gold">tokens extras</strong> e depois usar nos palpites — ou confirme sua participação primeiro.
                 </div>
               )}
 
-              {confirmed && !allDone && currentMission && currentPlatform && (() => {
+              {!allDone && currentMission && currentPlatform && (() => {
                 const T = PLATFORM_THEME[currentPlatform];
                 const verifying = missionStatus === "verifying";
                 const done = missionStatus === "done";
@@ -444,10 +441,13 @@ function PredictionPage() {
                   >
                     <div className="flex items-center gap-2 text-sm font-display font-black mb-1">
                       <T.Icon className="h-4 w-4" style={{ color: T.color }} />
-                      <span style={{ color: T.color }}>Palpite extra grátis — {T.label}</span>
+                      <span style={{ color: T.color }}>
+                        {confirmed ? "Palpite extra grátis" : "Missão bônus"} — {T.label}
+                      </span>
                     </div>
                     <p className="text-xs text-muted-foreground mb-3">
-                      <strong>{ACTION_LABEL[currentMission.action_type]}</strong> {currentMission.sponsor_name} no {T.label} e ganhe <strong className="text-gold">+1 round</strong> de palpites (seus palpites serão zerados para preencher de novo).
+                      <strong>{ACTION_LABEL[currentMission.action_type]}</strong> {currentMission.sponsor_name} no {T.label} e ganhe <strong className="text-gold">+{currentMission.tokens} TKN</strong>
+                      {confirmed ? <> (libera +1 round de palpites extras).</> : <> no seu saldo.</>}
                     </p>
                     <button
                       onClick={handleMissionClick}
@@ -458,7 +458,7 @@ function PredictionPage() {
                       {verifying ? (
                         <><Loader2 className="h-4 w-4 animate-spin" /> Validando missão…</>
                       ) : done ? (
-                        <><Check className="h-4 w-4" /> Missão feita — palpites zerados!</>
+                        <><Check className="h-4 w-4" /> Missão concluída!</>
                       ) : (
                         <><ExternalLink className="h-4 w-4" /> {currentMission.title}</>
                       )}
@@ -473,16 +473,20 @@ function PredictionPage() {
                 );
               })()}
 
-              {confirmed && allDone && (
+              {allDone && missionQueue.length > 0 && (
                 <div className="rounded-xl border-2 border-emerald-500/40 bg-emerald-500/10 p-4 text-center">
                   <div className="text-sm font-display font-black text-emerald-400">🏆 Todas as missões concluídas!</div>
                   <p className="text-xs text-muted-foreground mt-1">
-                    Você ganhou <strong className="text-gold">+{extraPalpites.length} rounds extras</strong> neste desafio.
+                    {confirmed ? (
+                      <>Você ganhou <strong className="text-gold">+{extraPalpites.length} rounds extras</strong> neste desafio.</>
+                    ) : (
+                      <>Agora é só confirmar sua participação no desafio.</>
+                    )}
                   </p>
                 </div>
               )}
 
-              {confirmed && missionQueue.length === 0 && (
+              {missionQueue.length === 0 && (
                 <div className="rounded-xl border border-border/60 bg-background/40 p-3 text-xs text-center text-muted-foreground">
                   Nenhuma missão de seguir disponível no momento.
                 </div>
