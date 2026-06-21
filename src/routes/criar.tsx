@@ -1325,13 +1325,13 @@ function Section({ title, description, action, children }: { title: string; desc
 
 function Field({ label, action, children }: { label: string; action?: React.ReactNode; children: React.ReactNode }) {
   return (
-    <label className="block">
+    <div className="block">
       <div className="flex items-center justify-between gap-2 mb-1.5">
         <div className="text-xs uppercase tracking-wider font-bold text-muted-foreground">{label}</div>
         {action}
       </div>
       {children}
-    </label>
+    </div>
   );
 }
 
