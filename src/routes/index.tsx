@@ -1,6 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { Flame, Sparkles, TrendingUp, Clock, ShoppingBag, Trophy, Coins, Gift, Users, Zap } from "lucide-react";
+import { Flame, Sparkles, TrendingUp, Clock, ShoppingBag, Trophy, Coins, Gift, Users, Zap, Diamond, Building2 } from "lucide-react";
+import imgCampeao from "@/assets/dd-campeao.jpg";
+import imgMalucos from "@/assets/pm-soccer.jpg";
+import imgAlien from "@/assets/cat-alienigenas.jpg";
 import { AppShell } from "@/components/layout/AppShell";
 import { PredictionCard } from "@/components/PredictionCard";
 import { CATEGORIES, PREDICTIONS } from "@/lib/mock-data";
@@ -229,25 +232,77 @@ function Feed() {
         </Link>
       </section>
 
-      {/* Quick links */}
-      <section className="mb-8 grid sm:grid-cols-3 gap-3">
-        {[
-          { to: "/ranking", label: "Ranking semanal", desc: "Veja os palpiteiros do topo", icon: Trophy, accent: "text-gold" },
-          { to: "/top100", label: "Top 100", desc: "Os lendários da plataforma", icon: Trophy, accent: "text-gradient-silver" },
-          { to: "/empresas", label: "Para empresas", desc: "Crie desafios e capte leads", icon: ShoppingBag, accent: "text-primary" },
-        ].map((c) => (
-          <Link
-            key={c.to}
-            to={c.to}
-            className="group rounded-2xl border border-border/60 bg-card p-4 hover:border-primary/50 hover:shadow-glow transition flex items-center gap-3"
-          >
-            <c.icon className={`h-7 w-7 ${c.accent}`} />
-            <div>
-              <div className="font-display font-bold text-sm">{c.label}</div>
-              <div className="text-xs text-muted-foreground">{c.desc}</div>
-            </div>
-          </Link>
-        ))}
+      {/* Categorias em destaque */}
+      <section className="mb-8">
+        <div className="mb-4">
+          <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-wider text-primary font-bold">
+            <Sparkles className="h-3.5 w-3.5" /> Explore
+          </div>
+          <h2 className="font-display text-2xl sm:text-3xl font-black">Categorias em destaque</h2>
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          {[
+            {
+              to: "/desafios",
+              label: "Desafios Diamantes",
+              desc: "Prêmios exclusivos e alta recompensa",
+              image: imgCampeao,
+              icon: Diamond,
+              accent: "text-gold",
+            },
+            {
+              to: "/desafios",
+              label: "Palpites Malucos da Copa",
+              desc: "Apostas inusitadas para a Copa 2026",
+              image: imgMalucos,
+              icon: Trophy,
+              accent: "text-primary",
+            },
+            {
+              to: "/desafios",
+              label: "Alienígenas",
+              desc: "Mistérios e teorias extraterrestres",
+              image: imgAlien,
+              icon: Zap,
+              accent: "text-gold",
+            },
+            {
+              to: "/empresas",
+              label: "Empresas",
+              desc: "Desafios corporativos e promoções",
+              image: null,
+              icon: Building2,
+              accent: "text-primary",
+            },
+          ].map((c) => (
+            <Link
+              key={c.label}
+              to={c.to}
+              className="group relative block overflow-hidden rounded-2xl border border-border/60 hover:border-primary/50 hover:shadow-glow transition"
+            >
+              {c.image ? (
+                <div className="aspect-[16/10] w-full overflow-hidden">
+                  <img
+                    src={c.image}
+                    alt={c.label}
+                    className="h-full w-full object-cover group-hover:scale-105 transition duration-500"
+                    loading="lazy"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/50 to-transparent" />
+                </div>
+              ) : (
+                <div className="aspect-[16/10] w-full bg-gradient-to-br from-primary/15 to-gold/10" />
+              )}
+              <div className="absolute inset-x-0 bottom-0 p-3 sm:p-4">
+                <div className="flex items-center gap-2">
+                  <c.icon className={`h-4 w-4 ${c.accent} shrink-0`} />
+                  <div className="font-display font-bold text-sm sm:text-base truncate">{c.label}</div>
+                </div>
+                <div className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{c.desc}</div>
+              </div>
+            </Link>
+          ))}
+        </div>
       </section>
 
       {/* Filters */}
