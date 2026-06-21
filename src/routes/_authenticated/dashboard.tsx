@@ -463,15 +463,15 @@ function MissionsSection({
   done: number;
   todo: number;
 }) {
-  const todoList = missions.filter((m) => !claimedIds.has(m.id)).slice(0, 6);
-  const doneList = missions.filter((m) => claimedIds.has(m.id)).slice(0, 6);
+  // Completed missions are removed from this area entirely.
+  const todoList = missions.filter((m) => !claimedIds.has(m.id)).slice(0, 8);
 
   return (
     <section className="glass-card rounded-2xl p-5 border border-border/60">
       <SectionTitle
         icon={Target}
         title="Missões"
-        hint={`Ganhe mais tokens participando de missões · ${done} feitas · ${todo} para fazer`}
+        hint={`Ganhe mais tokens · ${done} feitas · ${todo} para fazer · prazo de 24h cada`}
         right={
           <Link
             to="/missoes"
@@ -481,59 +481,163 @@ function MissionsSection({
           </Link>
         }
       />
-      <div className="grid md:grid-cols-2 gap-4">
-        <div>
-          <h3 className="text-xs uppercase tracking-wider text-muted-foreground mb-2">
-            Para fazer
-          </h3>
-          <div className="space-y-2">
-            {todoList.length === 0 ? (
-              <Empty>Nenhuma missão disponível agora.</Empty>
-            ) : (
-              todoList.map((m) => <MissionRow key={m.id} m={m} done={false} />)
-            )}
-          </div>
-        </div>
-        <div>
-          <h3 className="text-xs uppercase tracking-wider text-muted-foreground mb-2">
-            Concluídas
-          </h3>
-          <div className="space-y-2">
-            {doneList.length === 0 ? (
-              <Empty>Você ainda não concluiu missões.</Empty>
-            ) : (
-              doneList.map((m) => <MissionRow key={m.id} m={m} done />)
-            )}
-          </div>
-        </div>
+      <div className="grid sm:grid-cols-2 gap-2">
+        {todoList.length === 0 ? (
+          <Empty>Nenhuma missão pendente. Boa! 🎉</Empty>
+        ) : (
+          todoList.map((m) => <MissionRow key={m.id} m={m} />)
+        )}
       </div>
     </section>
   );
 }
 
-function MissionRow({ m, done }: { m: Mission; done: boolean }) {
+function useMissionDeadline(missionId: string) {
+  // 24h window from when this user first sees the mission (stored locally).
+  const [now, setNow] = useState(() => Date.now());
+  const deadline = useMemo(() => {
+    if (typeof window === "undefined") return Date.now() + 24 * 3600 * 1000;
+    const k = `ddp:mission-seen:${missionId}`;
+    let seen = Number(window.localStorage.getItem(k) || 0);
+    if (!seen) {
+      seen = Date.now();
+      window.localStorage.setItem(k, String(seen));
+    }
+    return seen + 24 * 3600 * 1000;
+  }, [missionId]);
+  useEffect(() => {
+    const t = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, []);
+  const ms = Math.max(0, deadline - now);
+  const h = Math.floor(ms / 3600000);
+  const m = Math.floor((ms % 3600000) / 60000);
+  const s = Math.floor((ms % 60000) / 1000);
+  const expired = ms <= 0;
+  const label = expired ? "Expirou" : `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+  return { label, expired };
+}
+
+function MissionCountdown({ missionId }: { missionId: string }) {
+  const { label, expired } = useMissionDeadline(missionId);
+  return (
+    <span
+      className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full tabular-nums ${
+        expired
+          ? "bg-red-500/20 text-red-400 border border-red-500/40"
+          : "bg-red-500/15 text-red-400 border border-red-500/30"
+      }`}
+      title="Tempo restante para concluir a missão"
+    >
+      <Clock className="h-3 w-3" />
+      {expired ? "Expirou" : `Faltam ${label}`}
+    </span>
+  );
+}
+
+function MissionRow({ m }: { m: Mission }) {
   return (
     <div className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border/60">
-      {done ? (
-        <CheckCircle2 className="h-5 w-5 text-primary shrink-0" />
-      ) : (
-        <Circle className="h-5 w-5 text-muted-foreground shrink-0" />
-      )}
+      <Circle className="h-5 w-5 text-muted-foreground shrink-0" />
       <div className="flex-1 min-w-0">
         <div className="text-sm font-semibold truncate">{m.title}</div>
-        <div className="text-[11px] text-muted-foreground">
+        <div className="text-[11px] text-muted-foreground truncate">
           {PLATFORM_LABEL[m.platform]} · {ACTION_LABEL[m.action_type]} · +{m.tokens} tokens
         </div>
+        <div className="mt-1">
+          <MissionCountdown missionId={m.id} />
+        </div>
       </div>
-      {!done && (
-        <Link
-          to="/missoes"
-          className="text-[11px] font-bold px-3 h-8 rounded-full bg-gradient-brand text-primary-foreground inline-flex items-center"
-        >
-          Fazer
-        </Link>
-      )}
+      <Link
+        to="/missoes"
+        className="text-[11px] font-bold px-3 h-8 rounded-full bg-gradient-brand text-primary-foreground inline-flex items-center"
+      >
+        Fazer
+      </Link>
     </div>
+  );
+}
+
+/* ---------- Tokens extract ---------- */
+
+function TokensExtractSection({
+  welcomeBonus,
+  claims,
+  missions,
+  balance,
+}: {
+  welcomeBonus: number;
+  claims: MissionClaim[];
+  missions: Mission[];
+  balance: number;
+}) {
+  const missionMap = useMemo(() => new Map(missions.map((m) => [m.id, m])), [missions]);
+  const entries = useMemo(() => {
+    const items: Array<{ id: string; date: string; label: string; amount: number }> = [];
+    if (welcomeBonus > 0) {
+      items.push({ id: "welcome", date: "", label: "Bônus de boas-vindas", amount: welcomeBonus });
+    }
+    for (const c of claims) {
+      const m = missionMap.get(c.mission_id);
+      items.push({
+        id: c.id,
+        date: c.created_at,
+        label: m ? `Missão: ${m.title}` : "Missão concluída",
+        amount: c.tokens_awarded ?? 0,
+      });
+    }
+    return items.sort((a, b) => (b.date || "").localeCompare(a.date || ""));
+  }, [welcomeBonus, claims, missionMap]);
+
+  return (
+    <section className="glass-card rounded-2xl p-5 border border-border/60">
+      <SectionTitle
+        icon={History}
+        title="Extrato de tokens"
+        hint={`Saldo atual: ${formatTokens(balance)} tokens`}
+        right={
+          <span className="inline-flex items-center gap-1 text-gold font-display font-black">
+            <Coins className="h-4 w-4" /> {formatTokens(balance)}
+          </span>
+        }
+      />
+      {entries.length === 0 ? (
+        <Empty>Nenhuma movimentação ainda.</Empty>
+      ) : (
+        <div className="rounded-xl border border-border/60 overflow-hidden">
+          <table className="w-full text-sm">
+            <thead className="bg-card text-muted-foreground text-[11px] uppercase tracking-wider">
+              <tr>
+                <th className="text-left px-3 py-2">Data</th>
+                <th className="text-left px-3 py-2">Descrição</th>
+                <th className="text-right px-3 py-2">Tokens</th>
+              </tr>
+            </thead>
+            <tbody>
+              {entries.map((e) => (
+                <tr key={e.id} className="border-t border-border/60">
+                  <td className="px-3 py-2 text-xs text-muted-foreground whitespace-nowrap">
+                    {e.date
+                      ? new Date(e.date).toLocaleString("pt-BR", {
+                          day: "2-digit",
+                          month: "2-digit",
+                          year: "2-digit",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })
+                      : "—"}
+                  </td>
+                  <td className="px-3 py-2">{e.label}</td>
+                  <td className="px-3 py-2 text-right font-bold text-emerald-400 tabular-nums">
+                    +{formatTokens(e.amount)}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </section>
   );
 }
 
