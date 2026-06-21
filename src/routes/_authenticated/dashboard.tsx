@@ -647,8 +647,13 @@ function TokensExtractSection({
                       : "—"}
                   </td>
                   <td className="px-3 py-2">{e.label}</td>
-                  <td className="px-3 py-2 text-right font-bold text-emerald-400 tabular-nums">
-                    +{formatTokens(e.amount)}
+                  <td
+                    className={`px-3 py-2 text-right font-bold tabular-nums ${
+                      e.amount < 0 ? "text-destructive" : "text-emerald-400"
+                    }`}
+                  >
+                    {e.amount < 0 ? "−" : "+"}
+                    {formatTokens(Math.abs(e.amount))}
                   </td>
                 </tr>
               ))}
