@@ -11,6 +11,8 @@ export type Banner = {
   challengeId?: string;
   challengeTitle?: string;
   active: boolean;
+  isMain?: boolean;
+  expiresAt?: string; // ISO datetime; if past, banner is treated as expired
   sortOrder: number;
   createdAt: string;
 };
@@ -44,6 +46,7 @@ function seed(): Banner[] {
       ctaLabel: "Quero participar",
       ctaLink: "/desafios",
       active: true,
+      isMain: true,
       sortOrder: 1,
       createdAt: new Date().toISOString(),
     },
@@ -52,12 +55,29 @@ function seed(): Banner[] {
   return initial;
 }
 
+function isExpired(b: Banner): boolean {
+  if (!b.expiresAt) return false;
+  return new Date(b.expiresAt).getTime() < Date.now();
+}
+
 export function listBanners(): Banner[] {
-  return read().sort((a, b) => a.sortOrder - b.sortOrder);
+  return read().sort((a, b) => {
+    if (a.isMain && !b.isMain) return -1;
+    if (!a.isMain && b.isMain) return 1;
+    return a.sortOrder - b.sortOrder;
+  });
 }
 
 export function listActiveBanners(): Banner[] {
-  return listBanners().filter((b) => b.active);
+  return listBanners().filter((b) => b.active && !isExpired(b));
+}
+
+export function getMainBanner(): Banner | undefined {
+  return listActiveBanners().find((b) => b.isMain);
+}
+
+export function isBannerExpired(b: Banner): boolean {
+  return isExpired(b);
 }
 
 export function createBanner(input: Omit<Banner, "id" | "createdAt">): Banner {
@@ -67,13 +87,20 @@ export function createBanner(input: Omit<Banner, "id" | "createdAt">): Banner {
     createdAt: new Date().toISOString(),
   };
   const list = read();
+  if (banner.isMain) {
+    list.forEach((b) => (b.isMain = false));
+  }
   list.push(banner);
   write(list);
   return banner;
 }
 
 export function updateBanner(id: string, patch: Partial<Omit<Banner, "id" | "createdAt">>) {
-  const list = read().map((b) => (b.id === id ? { ...b, ...patch } : b));
+  let list = read();
+  if (patch.isMain) {
+    list = list.map((b) => ({ ...b, isMain: false }));
+  }
+  list = list.map((b) => (b.id === id ? { ...b, ...patch } : b));
   write(list);
 }
 
