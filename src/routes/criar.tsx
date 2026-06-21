@@ -1302,7 +1302,8 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
           </div>
         </div>
       )}
-    </AppShell>
+    </Wrapper>
+
 
   );
 }
