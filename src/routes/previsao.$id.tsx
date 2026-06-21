@@ -441,25 +441,7 @@ function PredictionPage() {
 
             {p.subPredictions ? (
               <>
-                <div className="mt-3 text-sm text-muted-foreground">Custo de entrada</div>
-                <div className="mt-1 font-display text-3xl font-black text-gold">
-                  {p.entryFee} <span className="text-sm text-muted-foreground font-normal">TKN</span>
-                </div>
-                <div className="mt-4 space-y-2 text-sm">
-                  <Row label="Palpites preenchidos" value={`${Object.keys(subAnswers).length} / ${p.subPredictions.length}`} />
-                  <Row label="Seu saldo" value={`${formatTokens(balance ?? CURRENT_USER.tokens)} TKN`} />
-                </div>
-                {p.prizeTiers && (
-                  <div className="mt-4 rounded-xl bg-background/40 border border-border/60 p-3 text-xs">
-                    <div className="font-bold text-foreground mb-1">Premiação</div>
-                    {p.prizeTiers.map((t) => (
-                      <div key={t.hits} className="flex justify-between text-muted-foreground">
-                        <span>{t.hits} acertos</span>
-                        <span className="text-gold font-bold">{t.tokens.toLocaleString("pt-BR")} TKN</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                {/* BOTÃO VERDE PRIMEIRO */}
                 <button
                   onClick={() => {
                     const filled = Object.keys(subAnswers).length;
@@ -486,13 +468,16 @@ function PredictionPage() {
                       closesAt: p.closesAt,
                       participatedAt: new Date().toISOString(),
                     });
-                    toast.success(`🎯 Participação confirmada! ${fee} TKN debitados.`);
-                    setTimeout(() => {
-                      navigate({ to: "/dashboard" });
-                    }, 1200);
+                    toast.success(`🎯 Participação confirmada! ${fee} TKN debitados. Missões bônus liberadas!`);
                   }}
                   disabled={isClosed || confirmed || Object.keys(subAnswers).length < p.subPredictions.length || (balance !== null && balance < (p.entryFee ?? 0))}
-                  className="mt-5 w-full h-12 rounded-xl bg-gradient-brand text-primary-foreground font-display font-black tracking-wide shadow-glow hover:scale-[1.01] transition disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="mt-3 w-full h-14 rounded-xl font-display font-black tracking-wide text-base transition disabled:opacity-60 disabled:cursor-not-allowed text-white"
+                  style={{
+                    background: confirmed
+                      ? "linear-gradient(135deg, #059669, #047857)"
+                      : "linear-gradient(135deg, #22c55e, #16a34a)",
+                    boxShadow: "0 0 28px rgba(34,197,94,0.45), 0 10px 24px -8px rgba(34,197,94,0.6)",
+                  }}
                 >
                   {isClosed
                     ? "APOSTAS ENCERRADAS"
@@ -507,10 +492,34 @@ function PredictionPage() {
                     Seu saldo: <span className="text-gold font-bold">{formatTokens(balance)} TKN</span>
                   </p>
                 )}
+
+                <div className="my-4 h-px bg-border/60" />
+
+                {/* INFO ABAIXO */}
+                <div className="text-sm text-muted-foreground">Custo de entrada</div>
+                <div className="mt-1 font-display text-3xl font-black text-gold">
+                  {p.entryFee} <span className="text-sm text-muted-foreground font-normal">TKN</span>
+                </div>
+                <div className="mt-4 space-y-2 text-sm">
+                  <Row label="Palpites preenchidos" value={`${Object.keys(subAnswers).length} / ${p.subPredictions.length}`} />
+                  <Row label="Seu saldo" value={`${formatTokens(balance ?? CURRENT_USER.tokens)} TKN`} />
+                </div>
+                {p.prizeTiers && (
+                  <div className="mt-4 rounded-xl bg-background/40 border border-border/60 p-3 text-xs">
+                    <div className="font-bold text-foreground mb-1">Premiação</div>
+                    {p.prizeTiers.map((t) => (
+                      <div key={t.hits} className="flex justify-between text-muted-foreground">
+                        <span>{t.hits} acertos</span>
+                        <span className="text-gold font-bold">{t.tokens.toLocaleString("pt-BR")} TKN</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
                 <p className="mt-3 text-[11px] text-center text-muted-foreground">
                   Apostas encerram 10 minutos antes do jogo. Tokens virtuais, sem dinheiro real.
                 </p>
               </>
+
             ) : (
               <>
                 <div className="mt-3 text-sm text-muted-foreground">Sua escolha</div>
