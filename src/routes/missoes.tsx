@@ -26,6 +26,8 @@ export const Route = createFileRoute("/missoes")({
 });
 
 const PLATFORMS: Platform[] = ["instagram", "facebook", "youtube", "tiktok", "google"];
+const COMPLETION_BONUS_TOKENS = 50; // bônus extra por cada missão cumprida
+const COMPLETION_BONUS_CHANCES = 1; // +1 chance de palpite por missão cumprida
 
 function PlatformIcon({ p, className }: { p: Platform; className?: string }) {
   if (p === "instagram") return <Instagram className={className} />;
