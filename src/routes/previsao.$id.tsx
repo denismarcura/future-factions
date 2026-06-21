@@ -69,9 +69,10 @@ function PredictionPage() {
   const [selected, setSelected] = useState(p.options[0].id);
   const [amount, setAmount] = useState(p.entryFee ?? p.minTokens);
   const [subAnswers, setSubAnswers] = useState<Record<string, string>>({});
-  const [bonusMission, setBonusMission] = useState<Mission | null>(null);
-  const [bonusDone, setBonusDone] = useState(false);
-  const [bonusBusy, setBonusBusy] = useState(false);
+  const [missionsByPlat, setMissionsByPlat] = useState<Partial<Record<SeqPlatform, Mission | null>>>({});
+  const [missionStep, setMissionStep] = useState(0);
+  const [missionStatus, setMissionStatus] = useState<"idle" | "verifying" | "done">("idle");
+  const [extraPalpites, setExtraPalpites] = useState<{ platform: SeqPlatform; sponsor: string }[]>([]);
   const [confirmed, setConfirmed] = useState(false);
   const [balance, setBalance] = useState<number | null>(null);
 
@@ -93,12 +94,31 @@ function PredictionPage() {
   useEffect(() => {
     (async () => {
       try {
-        const igMissions = await listMissions({ platform: "instagram", activeOnly: true });
-        const pick = pickRandomFor(igMissions, p.id);
-        setBonusMission(pick);
-        if (pick && user) {
+        const results = await Promise.all(
+          PLATFORM_ORDER.map((pl) =>
+            listMissions({ platform: pl, activeOnly: true })
+              .then((arr) => [pl, pickRandomFor(arr, p.id)] as const)
+              .catch(() => [pl, null] as const),
+          ),
+        );
+        const map: Partial<Record<SeqPlatform, Mission | null>> = {};
+        results.forEach(([pl, m]) => (map[pl] = m));
+        setMissionsByPlat(map);
+
+        if (user) {
           const claims = await listMyClaims(`challenge:${p.id}`);
-          if (claims.some((c) => c.mission_id === pick.id)) setBonusDone(true);
+          const done: { platform: SeqPlatform; sponsor: string }[] = [];
+          let step = 0;
+          for (const pl of PLATFORM_ORDER) {
+            const m = map[pl];
+            if (!m) { step++; continue; }
+            if (claims.some((c) => c.mission_id === m.id)) {
+              done.push({ platform: pl, sponsor: m.sponsor_name });
+              step++;
+            } else break;
+          }
+          setExtraPalpites(done);
+          setMissionStep(step);
         }
       } catch {
         // silently ignore mission load failures on this page
@@ -106,23 +126,34 @@ function PredictionPage() {
     })();
   }, [p.id, user]);
 
-  async function handleBonusClaim() {
-    if (!bonusMission) return;
-    if (!user) {
-      toast.error("Faça login para ganhar o palpite extra.");
+  async function handleMissionClick() {
+    if (!confirmed) {
+      toast.error("Confirme sua participação primeiro.");
       return;
     }
-    setBonusBusy(true);
-    window.open(bonusMission.link, "_blank", "noopener,noreferrer");
-    try {
-      await claimMission(bonusMission.id, `challenge:${p.id}`, bonusMission.tokens);
-      setBonusDone(true);
-      toast.success("🎯 +1 palpite extra liberado neste desafio!");
-    } catch (e: any) {
-      toast.error(e.message ?? "Erro");
-    } finally {
-      setBonusBusy(false);
+    if (!user) {
+      toast.error("Faça login para ganhar palpites extras.");
+      return;
     }
+    const current = PLATFORM_ORDER[missionStep];
+    const mission = current ? missionsByPlat[current] : null;
+    if (!mission) return;
+    window.open(mission.link, "_blank", "noopener,noreferrer");
+    setMissionStatus("verifying");
+    setTimeout(async () => {
+      try {
+        await claimMission(mission.id, `challenge:${p.id}`, mission.tokens);
+      } catch {
+        // ignore (likely already claimed)
+      }
+      setExtraPalpites((prev) => [...prev, { platform: current, sponsor: mission.sponsor_name }]);
+      setMissionStatus("done");
+      toast.success("✅ Missão feita! +1 palpite extra liberado.");
+      setTimeout(() => {
+        setMissionStep((s) => s + 1);
+        setMissionStatus("idle");
+      }, 1500);
+    }, 5000);
   }
 
   const sel = p.options.find((o) => o.id === selected)!;
