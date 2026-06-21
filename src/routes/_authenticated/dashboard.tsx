@@ -220,6 +220,7 @@ function Dashboard() {
           welcomeBonus={profile?.welcome_bonus ?? 0}
           claims={claims}
           missions={missions}
+          participations={participations}
           balance={tokens}
         />
 
