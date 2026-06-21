@@ -53,7 +53,9 @@ function Missoes() {
         const all = await listMissions({ activeOnly: true });
         setMissions(all);
         if (user) {
-          const claims = await listMyClaims("missoes");
+          // Consider claims from any context (dashboard, previsão, missões page)
+          // so a mission completed elsewhere shows as "Concluída" here too.
+          const claims = await listMyClaims();
           setClaimed(new Set(claims.map((c) => c.mission_id)));
         }
       } catch (e: any) {
