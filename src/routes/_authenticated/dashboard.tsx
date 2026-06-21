@@ -1413,6 +1413,40 @@ function InvitePromoSection({
           </div>
         </div>
 
+        <div className="rounded-lg border border-border/60 bg-background p-3 flex flex-col sm:flex-row items-center gap-4">
+          <img
+            src={qrUrl}
+            alt="QR Code do seu link de convite"
+            className="h-40 w-40 rounded-md bg-white p-2"
+            loading="lazy"
+          />
+          <div className="flex-1 space-y-2 text-center sm:text-left">
+            <div className="flex items-center justify-center sm:justify-start gap-1.5 text-sm font-bold">
+              <QrCode className="h-4 w-4 text-primary" /> Seu QR Code de convite
+            </div>
+            <p className="text-[11px] text-muted-foreground">
+              Cada amigo que se cadastrar pelo seu link/QR Code conta como sua indicação.
+              Use no Instagram, e-mail, panfletos ou WhatsApp.
+            </p>
+            <div className="flex flex-wrap gap-2 justify-center sm:justify-start">
+              <a
+                href={qrUrl}
+                download={`qrcode-convite-${refCode}.png`}
+                className="h-9 px-3 rounded-full bg-gradient-brand text-primary-foreground text-xs font-bold inline-flex items-center gap-1.5"
+              >
+                <Download className="h-3.5 w-3.5" /> Baixar QR Code
+              </a>
+              <button
+                onClick={() => copy(qrUrl, "URL do QR Code")}
+                className="h-9 px-3 rounded-full bg-background border border-border/60 text-xs font-bold inline-flex items-center gap-1.5"
+              >
+                <Copy className="h-3.5 w-3.5" /> Copiar URL do QR
+              </button>
+            </div>
+          </div>
+        </div>
+
+
         <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4">
           {galleryItems.map((item) => (
             <article
