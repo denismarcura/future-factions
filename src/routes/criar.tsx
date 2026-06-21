@@ -1377,6 +1377,115 @@ function MissionBlock({ icon, name }: { icon: React.ReactNode; name: string }) {
   );
 }
 
+type MissionLinks = { instagram: string; facebook: string; youtube: string; tiktok: string };
+
+const MISSION_STEPS: Array<{
+  key: keyof MissionLinks;
+  label: string;
+  question: string;
+  placeholder: string;
+  icon: React.ReactNode;
+}> = [
+  { key: "instagram", label: "Instagram", question: "Qual é o endereço do seu Instagram?", placeholder: "https://www.instagram.com/seu-perfil", icon: <Instagram className="h-4 w-4" /> },
+  { key: "facebook", label: "Facebook", question: "Qual é o endereço do seu Facebook?", placeholder: "https://www.facebook.com/sua-pagina", icon: <Facebook className="h-4 w-4" /> },
+  { key: "youtube", label: "YouTube", question: "Qual é o endereço do seu canal no YouTube?", placeholder: "https://www.youtube.com/@seu-canal", icon: <Youtube className="h-4 w-4" /> },
+  { key: "tiktok", label: "TikTok", question: "Qual é o endereço do seu TikTok?", placeholder: "https://www.tiktok.com/@seu-perfil", icon: <Music2 className="h-4 w-4" /> },
+];
+
+function MissionWizard({
+  step,
+  setStep,
+  links,
+  setLinks,
+  onComplete,
+}: {
+  step: number;
+  setStep: (n: number) => void;
+  links: MissionLinks;
+  setLinks: React.Dispatch<React.SetStateAction<MissionLinks>>;
+  onComplete: (links: MissionLinks) => void;
+}) {
+  const total = MISSION_STEPS.length;
+  const done = step >= total;
+  const current = !done ? MISSION_STEPS[step] : null;
+  const value = current ? links[current.key] : "";
+
+  const next = () => {
+    if (current) onComplete({ ...links });
+    if (step + 1 >= total) {
+      setStep(total);
+      onComplete({ ...links });
+    } else {
+      setStep(step + 1);
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center gap-1.5">
+        {MISSION_STEPS.map((s, i) => (
+          <div key={s.key} className={`h-1.5 flex-1 rounded-full ${i < step ? "bg-primary" : i === step ? "bg-primary/60" : "bg-border"}`} />
+        ))}
+      </div>
+
+      {current ? (
+        <div className="rounded-xl border border-border/60 bg-background/40 p-4 space-y-3">
+          <div className="flex items-center gap-2">
+            <span className="h-8 w-8 grid place-items-center rounded-md bg-primary/15 text-primary">{current.icon}</span>
+            <div>
+              <div className="text-xs text-muted-foreground">Passo {step + 1} de {total} • {current.label}</div>
+              <div className="font-semibold text-sm">{current.question}</div>
+            </div>
+          </div>
+          <input
+            value={value}
+            onChange={(e) => setLinks((prev) => ({ ...prev, [current.key]: e.target.value }))}
+            placeholder={current.placeholder}
+            className="input"
+            autoFocus
+          />
+          <p className="text-[11px] text-muted-foreground">Cole o endereço completo (com https://). Os usuários precisarão Seguir, Curtir e Comentar para concluir a missão.</p>
+          <div className="flex justify-between gap-2 pt-1">
+            <button
+              type="button"
+              onClick={() => setStep(Math.max(0, step - 1))}
+              disabled={step === 0}
+              className="h-10 px-4 rounded-lg border border-border text-sm font-semibold disabled:opacity-40"
+            >
+              Voltar
+            </button>
+            <div className="flex gap-2">
+              <button type="button" onClick={() => setStep(step + 1)} className="h-10 px-4 rounded-lg border border-border text-sm font-semibold">
+                Pular
+              </button>
+              <button type="button" onClick={next} className="h-10 px-4 rounded-lg bg-primary text-primary-foreground text-sm font-bold">
+                {step + 1 === total ? "Concluir" : "Próximo"}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="rounded-xl border border-primary/30 bg-primary/5 p-4 space-y-3">
+          <div className="font-semibold text-sm text-primary">Missões cadastradas ✓</div>
+          <ul className="space-y-1.5 text-xs">
+            {MISSION_STEPS.map((s) => (
+              <li key={s.key} className="flex items-center gap-2">
+                <span className="h-6 w-6 grid place-items-center rounded-md bg-primary/15 text-primary">{s.icon}</span>
+                <span className="font-semibold w-20">{s.label}:</span>
+                <span className="text-muted-foreground truncate">{links[s.key] || <em>não informado</em>}</span>
+              </li>
+            ))}
+          </ul>
+          <button type="button" onClick={() => setStep(0)} className="h-9 px-3 rounded-lg border border-border text-xs font-semibold">
+            Editar missões
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
 function PublishedSuccess({ name, id, onCreateAnother }: { name: string; id: string; onCreateAnother: () => void }) {
   const [copied, setCopied] = useState(false);
   const link = typeof window !== "undefined" ? `${window.location.origin}/previsao/${id}` : `/previsao/${id}`;
