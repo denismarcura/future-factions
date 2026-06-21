@@ -184,6 +184,15 @@ function PredictionPage() {
               toast.error(`Preencha todos os ${p.subPredictions.length} palpites.`);
               return;
             }
+            // Confirming an EXTRA round (no fee) after a completed mission
+            if (confirmed && pendingExtra) {
+              setExtraPalpites((prev) => [...prev, { platform: pendingExtra.platform, sponsor: pendingExtra.sponsor, answers: subAnswers }]);
+              setPendingExtra(null);
+              setSubAnswers({});
+              toast.success(`🎁 Palpite extra Nº ${extraPalpites.length + 1} confirmado!`);
+              return;
+            }
+            if (confirmed) return;
             const fee = p.entryFee ?? 0;
             if (!user) { toast.error("Faça login para participar."); return; }
             if (balance !== null && balance < fee) {
