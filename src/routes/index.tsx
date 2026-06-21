@@ -4,7 +4,6 @@ import { Flame, Sparkles, TrendingUp, Clock, ShoppingBag, Trophy, Coins, Gift, U
 import { AppShell } from "@/components/layout/AppShell";
 import { PredictionCard } from "@/components/PredictionCard";
 import { CATEGORIES, PREDICTIONS } from "@/lib/mock-data";
-import { getUrgencyHours } from "@/components/ClosingTimerBadge";
 import logoAsset from "@/assets/logo-desafio.png.asset.json";
 
 export const Route = createFileRoute("/")({
