@@ -29,6 +29,7 @@ function DesafiosPage() {
   const [aiIds, setAiIds] = useState<string[] | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState<string | null>(null);
+  const [expiringLimit, setExpiringLimit] = useState(6);
   const runAiSearch = useServerFn(aiSearchChallenges);
 
   useEffect(() => {
