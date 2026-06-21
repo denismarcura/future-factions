@@ -27,6 +27,14 @@ function getNextBrazilMatch() {
   return upcoming[0] ?? WORLD_CUP_MATCHES.find(m => m.home === "Brasil" || m.away === "Brasil")!;
 }
 
+function kickoffToLocalDateTime(kickoff: string): string {
+  // kickoff is ISO with -03:00 offset, e.g. 2026-06-24T16:00:00-03:00
+  // datetime-local expects YYYY-MM-DDTHH:mm
+  const d = new Date(kickoff);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
 export const Route = createFileRoute("/criar")({
   head: () => ({
     meta: [
