@@ -145,11 +145,11 @@ function PredictionPage() {
       } catch {
         // ignore (likely already claimed)
       }
-      // Save current answers as a completed extra round, then reset for the next round
-      setExtraPalpites((prev) => [...prev, { platform: mission.platform as SeqPlatform, sponsor: mission.sponsor_name, answers: subAnswers }]);
+      // Unlock a new extra round: user must now fill the predictions again and confirm
       setSubAnswers({});
+      setPendingExtra({ platform: mission.platform as SeqPlatform, sponsor: mission.sponsor_name });
       setMissionStatus("done");
-      toast.success("✅ Missão feita! Palpites zerados — preencha mais um round!");
+      toast.success("✅ Missão feita! Preencha o novo palpite e clique em CONFIRMAR PALPITE EXTRA.");
       setTimeout(() => {
         setMissionStep((s) => s + 1);
         setMissionStatus("idle");
