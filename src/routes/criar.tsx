@@ -42,8 +42,11 @@ export const Route = createFileRoute("/criar")({
       { name: "description", content: "Crie seu desafio, escolha sub-categorias de palpites e ofereça prêmios." },
     ],
   }),
-  component: Criar,
+  component: () => <Criar />,
 });
+
+export { Criar };
+
 
 type SubCat = {
   id: string;
@@ -61,7 +64,7 @@ const BRAZIL_BONUS = 10000;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
 
-function Criar() {
+function Criar({ forCompany = false }: { forCompany?: boolean } = {}) {
   const [isOpen, setIsOpen] = useState(true);
   const [name, setName] = useState("");
   const [category, setCategory] = useState<string>(CATEGORIES[0]);
@@ -292,6 +295,9 @@ function Criar() {
       if (!s.question.trim()) errs.push(`Pergunta vazia no palpite #${i + 1}.`);
       if (s.options.filter(o => o.trim()).length < 2) errs.push(`Palpite #${i + 1} precisa de pelo menos 2 opções preenchidas.`);
     });
+    if (forCompany && !socialLink.trim()) {
+      errs.push("Informe o link da rede social do desafio (obrigatório para empresas).");
+    }
     if (errs.length) {
       setErrors(errs);
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -358,10 +364,12 @@ function Criar() {
       <header className="mb-6 flex items-start justify-between gap-4 flex-wrap">
         <div>
           <h1 className="font-display text-3xl font-black flex items-center gap-3">
-            <Sparkles className="h-7 w-7 text-primary" /> Cadastro de Desafio
+            <Sparkles className="h-7 w-7 text-primary" /> {forCompany ? "Cadastro de Desafio • Empresa" : "Cadastro de Desafio"}
           </h1>
           <p className="text-muted-foreground mt-1">
-            Monte seu desafio, escolha até 10 sub-categorias e defina o prêmio.
+            {forCompany
+              ? "Monte o desafio da sua marca. As missões de redes sociais são obrigatórias."
+              : "Monte seu desafio, escolha até 10 sub-categorias e defina o prêmio."}
           </p>
         </div>
         <div className="flex items-center gap-2 rounded-xl glass-card px-4 py-2.5">
@@ -904,8 +912,12 @@ function Criar() {
 
           {/* Missões */}
           <Section
-            title="Missões do desafio"
-            description="Usuários que cumprem as 3 ações de uma rede social ganham +1 chance de palpite."
+            title={forCompany ? "Missões do desafio • Obrigatório" : "Missões do desafio"}
+            description={
+              forCompany
+                ? "Para desafios de empresas as missões de redes sociais são obrigatórias. Quem cumprir as 3 ações ganha +1 chance de palpite e 50 tokens."
+                : "Padrão em todos os desafios (não obrigatório). Usuários que cumprem as 3 ações de uma rede social ganham +1 chance de palpite e 50 tokens."
+            }
           >
             <div className="grid sm:grid-cols-2 gap-3">
               <MissionBlock icon={<Instagram className="h-4 w-4" />} name="Instagram" />
