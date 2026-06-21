@@ -208,6 +208,14 @@ function Dashboard() {
         {/* PROFILE EDITOR */}
         <ProfileEditor profile={profile} onSaved={setProfile} />
 
+        {/* TOKENS EXTRACT */}
+        <TokensExtractSection
+          welcomeBonus={profile?.welcome_bonus ?? 0}
+          claims={claims}
+          missions={missions}
+          balance={tokens}
+        />
+
         {/* MY PARTICIPATIONS */}
         <MyParticipationsSection items={participations} />
 
@@ -229,11 +237,16 @@ function Dashboard() {
         <FriendsSection
           friends={friends}
           inviterName={name}
+          userId={profile?.id ?? ""}
           onChange={() => setFriends(listFriends())}
         />
 
         {/* INVITE PROMO (email + whatsapp + artes prontas) */}
-        <InvitePromoSection inviterName={name} myChallenges={myChallenges} />
+        <InvitePromoSection
+          inviterName={name}
+          userId={profile?.id ?? ""}
+          myChallenges={myChallenges}
+        />
 
         {/* SHOP PREVIEW */}
         <ShopPreviewSection tokens={tokens} />
