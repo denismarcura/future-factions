@@ -809,40 +809,6 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
             title="Prêmio"
             description={`Automaticamente daremos ${AUTO_PRIZE.toLocaleString("pt-BR")} tokens para quem fizer a maior pontuação. Você pode somar seus próprios tokens, escolher um prêmio da nossa loja ou cadastrar um prêmio físico próprio.`}
           >
-            {/* Tokens próprios como prêmio */}
-            <div className="rounded-xl border border-gold/30 bg-gold/5 p-4 mb-3">
-              <div className="flex items-start gap-3">
-                <Coins className="h-5 w-5 text-gold mt-0.5 shrink-0" />
-                <div className="flex-1">
-                  <div className="font-bold text-sm">Adicionar tokens do seu saldo como prêmio extra</div>
-                  <div className="text-xs text-muted-foreground mb-2">
-                    Seu saldo: <span className="text-gold font-bold">{formatTokens(CURRENT_USER.tokens)} tokens</span>. O valor será reservado e entregue ao vencedor.
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="number"
-                      min={0}
-                      step={100}
-                      max={CURRENT_USER.tokens}
-                      value={ownTokensPrize}
-                      onChange={(e) => setOwnTokensPrize(Math.max(0, Math.min(CURRENT_USER.tokens, Number(e.target.value) || 0)))}
-                      placeholder="0"
-                      className="input max-w-[180px]"
-                    />
-                    <span className="text-xs text-muted-foreground">tokens</span>
-                    {ownTokensPrize > 0 && (
-                      <button
-                        type="button"
-                        onClick={() => setOwnTokensPrize(0)}
-                        className="text-xs text-muted-foreground hover:text-destructive ml-2"
-                      >
-                        Limpar
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
 
             {/* Comprar prêmio na loja */}
             <div className="rounded-xl border border-primary/30 bg-primary/5 p-4 mb-4">
