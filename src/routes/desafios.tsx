@@ -1,11 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { AppShell } from "@/components/layout/AppShell";
 import { PredictionCard } from "@/components/PredictionCard";
 import { CATEGORIES, PREDICTIONS, type Prediction } from "@/lib/mock-data";
 import { COMPANY_CHALLENGES } from "@/lib/mock-extra";
 import { getUserChallenges } from "@/lib/user-challenges";
-import { ListChecks, Building2, Users, Lock, Globe2, Sparkles } from "lucide-react";
+import { aiSearchChallenges } from "@/lib/search-ai.functions";
+import { ListChecks, Building2, Users, Lock, Globe2, Sparkles, Search, Loader2, X, Wand2 } from "lucide-react";
 
 export const Route = createFileRoute("/desafios")({
   head: () => ({
@@ -21,6 +23,12 @@ function DesafiosPage() {
   const [tab, setTab] = useState<"todos" | "publicos" | "empresas" | "privados">("todos");
   const [cat, setCat] = useState<string>("Todas");
   const [userChallenges, setUserChallenges] = useState<Prediction[]>([]);
+  const [query, setQuery] = useState("");
+  const [aiQuery, setAiQuery] = useState<string | null>(null);
+  const [aiIds, setAiIds] = useState<string[] | null>(null);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState<string | null>(null);
+  const runAiSearch = useServerFn(aiSearchChallenges);
 
   useEffect(() => {
     const sync = () => setUserChallenges(getUserChallenges());
@@ -56,9 +64,52 @@ function DesafiosPage() {
       list = list.filter((p) => !isClosed(p));
       if (cat !== "Todas") list = list.filter((p) => p.category === cat);
     }
-    list.sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt));
+    if (aiIds && aiIds.length) {
+      const order = new Map(aiIds.map((id, i) => [id, i]));
+      list = list
+        .filter((p) => order.has(p.id))
+        .sort((a, b) => (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0));
+    } else {
+      list.sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt));
+    }
     return list;
-  }, [tab, cat, userChallenges, publicMock, privateMock]);
+  }, [tab, cat, userChallenges, publicMock, privateMock, aiIds]);
+
+  const handleAiSearch = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const q = query.trim();
+    if (!q) return;
+    setAiLoading(true);
+    setAiError(null);
+    try {
+      const pool: Prediction[] = tab === "publicos"
+        ? [...userChallenges, ...publicMock]
+        : tab === "privados"
+          ? [...userChallenges, ...privateMock]
+          : [...userChallenges, ...PREDICTIONS];
+      const payload = pool.slice(0, 250).map((p) => ({
+        id: p.id,
+        title: p.title,
+        category: p.category,
+      }));
+      const res = await runAiSearch({ data: { query: q, items: payload } });
+      setAiQuery(q);
+      setAiIds(res.ids);
+      if (res.ids.length === 0) setAiError("Nenhum desafio encontrado para esta busca.");
+    } catch (err) {
+      setAiError(err instanceof Error ? err.message : "Erro na busca");
+      setAiIds([]);
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
+  const clearAiSearch = () => {
+    setQuery("");
+    setAiQuery(null);
+    setAiIds(null);
+    setAiError(null);
+  };
 
   // Últimos cadastrados = user-created first, then most recently created mocks (exclui encerrados).
   const latest = useMemo(() => {
