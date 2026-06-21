@@ -28,6 +28,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as PrevisaoIdRouteImport } from './routes/previsao.$id'
+import { Route as EmpresaCriarRouteImport } from './routes/empresa.criar'
 import { Route as AdminRegrasIaRouteImport } from './routes/admin.regras-ia'
 import { Route as AdminMissoesRouteImport } from './routes/admin.missoes'
 import { Route as AdminEmpresasRouteImport } from './routes/admin.empresas'
@@ -133,6 +134,11 @@ const PrevisaoIdRoute = PrevisaoIdRouteImport.update({
   path: '/previsao/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EmpresaCriarRoute = EmpresaCriarRouteImport.update({
+  id: '/empresa/criar',
+  path: '/empresa/criar',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminRegrasIaRoute = AdminRegrasIaRouteImport.update({
   id: '/regras-ia',
   path: '/regras-ia',
@@ -211,6 +217,7 @@ export interface FileRoutesByFullPath {
   '/admin/empresas': typeof AdminEmpresasRoute
   '/admin/missoes': typeof AdminMissoesRoute
   '/admin/regras-ia': typeof AdminRegrasIaRoute
+  '/empresa/criar': typeof EmpresaCriarRoute
   '/previsao/$id': typeof PrevisaoIdRoute
   '/admin/': typeof AdminIndexRoute
 }
@@ -240,6 +247,7 @@ export interface FileRoutesByTo {
   '/admin/empresas': typeof AdminEmpresasRoute
   '/admin/missoes': typeof AdminMissoesRoute
   '/admin/regras-ia': typeof AdminRegrasIaRoute
+  '/empresa/criar': typeof EmpresaCriarRoute
   '/previsao/$id': typeof PrevisaoIdRoute
   '/admin': typeof AdminIndexRoute
 }
@@ -272,6 +280,7 @@ export interface FileRoutesById {
   '/admin/empresas': typeof AdminEmpresasRoute
   '/admin/missoes': typeof AdminMissoesRoute
   '/admin/regras-ia': typeof AdminRegrasIaRoute
+  '/empresa/criar': typeof EmpresaCriarRoute
   '/previsao/$id': typeof PrevisaoIdRoute
   '/admin/': typeof AdminIndexRoute
 }
@@ -304,6 +313,7 @@ export interface FileRouteTypes {
     | '/admin/empresas'
     | '/admin/missoes'
     | '/admin/regras-ia'
+    | '/empresa/criar'
     | '/previsao/$id'
     | '/admin/'
   fileRoutesByTo: FileRoutesByTo
@@ -333,6 +343,7 @@ export interface FileRouteTypes {
     | '/admin/empresas'
     | '/admin/missoes'
     | '/admin/regras-ia'
+    | '/empresa/criar'
     | '/previsao/$id'
     | '/admin'
   id:
@@ -364,6 +375,7 @@ export interface FileRouteTypes {
     | '/admin/empresas'
     | '/admin/missoes'
     | '/admin/regras-ia'
+    | '/empresa/criar'
     | '/previsao/$id'
     | '/admin/'
   fileRoutesById: FileRoutesById
@@ -386,6 +398,7 @@ export interface RootRouteChildren {
   ResetPasswordRoute: typeof ResetPasswordRoute
   ShopRoute: typeof ShopRoute
   Top100Route: typeof Top100Route
+  EmpresaCriarRoute: typeof EmpresaCriarRoute
   PrevisaoIdRoute: typeof PrevisaoIdRoute
 }
 
@@ -524,6 +537,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PrevisaoIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/empresa/criar': {
+      id: '/empresa/criar'
+      path: '/empresa/criar'
+      fullPath: '/empresa/criar'
+      preLoaderRoute: typeof EmpresaCriarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/regras-ia': {
       id: '/admin/regras-ia'
       path: '/regras-ia'
@@ -654,6 +674,7 @@ const rootRouteChildren: RootRouteChildren = {
   ResetPasswordRoute: ResetPasswordRoute,
   ShopRoute: ShopRoute,
   Top100Route: Top100Route,
+  EmpresaCriarRoute: EmpresaCriarRoute,
   PrevisaoIdRoute: PrevisaoIdRoute,
 }
 export const routeTree = rootRouteImport
