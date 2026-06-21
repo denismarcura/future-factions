@@ -631,8 +631,96 @@ function Criar() {
           {/* Prêmio */}
           <Section
             title="Prêmio"
-            description={`Automaticamente daremos ${AUTO_PRIZE.toLocaleString("pt-BR")} tokens para quem fizer a maior pontuação. Você pode adicionar um prêmio físico extra (opcional).`}
+            description={`Automaticamente daremos ${AUTO_PRIZE.toLocaleString("pt-BR")} tokens para quem fizer a maior pontuação. Você pode somar seus próprios tokens, escolher um prêmio da nossa loja ou cadastrar um prêmio físico próprio.`}
           >
+            {/* Tokens próprios como prêmio */}
+            <div className="rounded-xl border border-gold/30 bg-gold/5 p-4 mb-3">
+              <div className="flex items-start gap-3">
+                <Coins className="h-5 w-5 text-gold mt-0.5 shrink-0" />
+                <div className="flex-1">
+                  <div className="font-bold text-sm">Adicionar tokens do seu saldo como prêmio extra</div>
+                  <div className="text-xs text-muted-foreground mb-2">
+                    Seu saldo: <span className="text-gold font-bold">{formatTokens(CURRENT_USER.tokens)} tokens</span>. O valor será reservado e entregue ao vencedor.
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="number"
+                      min={0}
+                      step={100}
+                      max={CURRENT_USER.tokens}
+                      value={ownTokensPrize}
+                      onChange={(e) => setOwnTokensPrize(Math.max(0, Math.min(CURRENT_USER.tokens, Number(e.target.value) || 0)))}
+                      placeholder="0"
+                      className="input max-w-[180px]"
+                    />
+                    <span className="text-xs text-muted-foreground">tokens</span>
+                    {ownTokensPrize > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => setOwnTokensPrize(0)}
+                        className="text-xs text-muted-foreground hover:text-destructive ml-2"
+                      >
+                        Limpar
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Comprar prêmio na loja */}
+            <div className="rounded-xl border border-primary/30 bg-primary/5 p-4 mb-4">
+              <div className="flex items-start gap-3">
+                <ShoppingBag className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <div className="font-bold text-sm">Comprar prêmio da nossa loja virtual</div>
+                  <div className="text-xs text-muted-foreground mb-2">
+                    Escolha um produto do nosso catálogo. Cuidamos do envio direto ao vencedor — você só precisa pagar o valor em tokens.
+                  </div>
+                  {shopPrizeId ? (() => {
+                    const p = PRODUCTS.find(x => x.id === shopPrizeId);
+                    if (!p) return null;
+                    return (
+                      <div className="flex items-center gap-3 rounded-lg border border-border/60 bg-background/60 p-2">
+                        {p.image && <img src={p.image} alt={p.name} className="h-14 w-14 rounded-md object-cover" />}
+                        <div className="min-w-0 flex-1">
+                          <div className="font-bold text-sm truncate">{p.name}</div>
+                          <div className="text-xs text-gold font-bold inline-flex items-center gap-1">
+                            <Coins className="h-3 w-3" /> {formatTokens(p.cost)} tokens
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setShopPickerOpen(true)}
+                          className="h-9 px-3 rounded-lg border border-border text-xs font-semibold hover:border-primary hover:text-primary"
+                        >
+                          Trocar
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setShopPrizeId(null)}
+                          className="h-9 w-9 rounded-lg border border-border grid place-items-center text-muted-foreground hover:text-destructive hover:border-destructive/60"
+                          aria-label="Remover prêmio da loja"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    );
+                  })() : (
+                    <button
+                      type="button"
+                      onClick={() => setShopPickerOpen(true)}
+                      className="inline-flex items-center gap-2 h-10 px-4 rounded-lg bg-primary/15 text-primary border border-primary/40 text-sm font-bold hover:bg-primary/25"
+                    >
+                      <ShoppingBag className="h-4 w-4" /> Escolher prêmio na loja
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="text-xs uppercase tracking-wider font-bold text-muted-foreground mb-2">Ou cadastre seu próprio prêmio físico</div>
+
             <Field label="Nome do prêmio extra (opcional)">
               <input value={prizeName} onChange={(e) => setPrizeName(e.target.value)} placeholder="Ex.: 1 Camiseta do Brasil" className="input" />
             </Field>
@@ -683,6 +771,7 @@ function Criar() {
               </div>
             </div>
           </Section>
+
 
           {/* Missões */}
           <Section
