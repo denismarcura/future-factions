@@ -91,10 +91,14 @@ function Criar() {
   const [endsAt, setEndsAt] = useState("");
   const [prizeName, setPrizeName] = useState("");
   const [socialLink, setSocialLink] = useState("");
-  const [subs, setSubs] = useState<SubCat[]>([
-    { id: uid(), question: "Quem ganha o jogo Brasil x Haiti?", options: ["Brasil", "Empate", "Haiti"] },
-    { id: uid(), question: "Neymar vai jogar?", options: ["Sim", "Não"] },
-  ]);
+  const [subs, setSubs] = useState<SubCat[]>(() => {
+    const next = getNextBrazilMatch();
+    const adv = next.home === "Brasil" ? next.away : next.home;
+    return [
+      { id: uid(), question: `Quem ganha o jogo Brasil x ${adv}?`, options: ["Brasil", "Empate", adv] },
+      { id: uid(), question: "Neymar vai jogar?", options: ["Sim", "Não"] },
+    ];
+  });
   const [prizeImg, setPrizeImg] = useState<string | null>(null);
   const [ownTokensPrize, setOwnTokensPrize] = useState<number>(0);
   const [shopPrizeId, setShopPrizeId] = useState<string | null>(null);
