@@ -615,7 +615,7 @@ function TikTokIcon({ className }: { className?: string }) {
   );
 }
 
-function MissionRow({ m }: { m: Mission }) {
+function MissionRow({ m, done = false }: { m: Mission; done?: boolean }) {
   const theme = getPlatformTheme(m);
   const Icon = theme.icon;
 
@@ -623,8 +623,13 @@ function MissionRow({ m }: { m: Mission }) {
     <div
       className="flex flex-col gap-3 p-4 rounded-2xl border"
       style={{
-        background: `color-mix(in srgb, ${theme.color} 8%, #0f0f0f)`,
-        borderColor: `color-mix(in srgb, ${theme.color} 35%, transparent)`,
+        background: done
+          ? "color-mix(in srgb, #10b981 6%, #0f0f0f)"
+          : `color-mix(in srgb, ${theme.color} 8%, #0f0f0f)`,
+        borderColor: done
+          ? "color-mix(in srgb, #10b981 40%, transparent)"
+          : `color-mix(in srgb, ${theme.color} 35%, transparent)`,
+        opacity: done ? 0.85 : 1,
       }}
     >
       <div className="flex items-start gap-3">
@@ -651,18 +656,35 @@ function MissionRow({ m }: { m: Mission }) {
         </div>
       </div>
 
-      <Link
-        to="/missoes"
-        className="w-full text-sm font-bold h-10 rounded-full text-white inline-flex items-center justify-center gap-2 transition hover:opacity-90"
-        style={{ background: theme.gradient }}
-      >
-        <ExternalLink className="h-4 w-4" />
-        Fazer missão
-      </Link>
+      {done ? (
+        <button
+          disabled
+          className="w-full text-sm font-bold h-10 rounded-full inline-flex items-center justify-center gap-2 cursor-not-allowed"
+          style={{
+            background: "color-mix(in srgb, #10b981 18%, transparent)",
+            color: "#10b981",
+            border: "1px solid color-mix(in srgb, #10b981 45%, transparent)",
+          }}
+        >
+          <Check className="h-4 w-4" />
+          Concluída
+        </button>
+      ) : (
+        <Link
+          to="/missoes"
+          className="w-full text-sm font-bold h-10 rounded-full text-white inline-flex items-center justify-center gap-2 transition hover:opacity-90"
+          style={{ background: theme.gradient }}
+        >
+          <ExternalLink className="h-4 w-4" />
+          Fazer missão
+        </Link>
+      )}
 
-      <div className="flex items-center justify-between">
-        <MissionCountdown missionId={m.id} />
-      </div>
+      {!done && (
+        <div className="flex items-center justify-between">
+          <MissionCountdown missionId={m.id} />
+        </div>
+      )}
     </div>
   );
 }
