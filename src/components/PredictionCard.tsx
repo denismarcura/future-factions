@@ -1,8 +1,8 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Flame, MessageCircle, Heart, Share2, Users, Clock, Plus } from "lucide-react";
+import { Flame, MessageCircle, Heart, Share2, Users, Plus } from "lucide-react";
 import { type Prediction, formatTokens } from "@/lib/mock-data";
 import { CATEGORY_IMAGES } from "@/lib/category-images";
-import { CountdownTimer } from "@/components/CountdownTimer";
+import { ClosingTimerBadge } from "@/components/ClosingTimerBadge";
 
 export function PredictionCard({ prediction: p }: { prediction: Prediction }) {
   const navigate = useNavigate();
