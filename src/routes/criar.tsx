@@ -17,6 +17,15 @@ import { improveTitle } from "@/lib/title-ai.functions";
 import { listCategories, listSubcategories, type ChallengeCategory, type ChallengeSubcategory } from "@/lib/challenge-categories";
 import { generateChallenge, improveDescription, generateWhatsAppInvite } from "@/lib/challenge-ai.functions";
 import logoAsset from "@/assets/logo-desafio.png.asset.json";
+import { WORLD_CUP_MATCHES } from "@/lib/world-cup-matches";
+
+function getNextBrazilMatch() {
+  const now = Date.now();
+  const upcoming = WORLD_CUP_MATCHES
+    .filter(m => (m.home === "Brasil" || m.away === "Brasil") && new Date(m.kickoff).getTime() > now)
+    .sort((a, b) => new Date(a.kickoff).getTime() - new Date(b.kickoff).getTime());
+  return upcoming[0] ?? WORLD_CUP_MATCHES.find(m => m.home === "Brasil" || m.away === "Brasil")!;
+}
 
 export const Route = createFileRoute("/criar")({
   head: () => ({
@@ -82,10 +91,14 @@ function Criar() {
   const [endsAt, setEndsAt] = useState("");
   const [prizeName, setPrizeName] = useState("");
   const [socialLink, setSocialLink] = useState("");
-  const [subs, setSubs] = useState<SubCat[]>([
-    { id: uid(), question: "Quem ganha o jogo Brasil x Haiti?", options: ["Brasil", "Empate", "Haiti"] },
-    { id: uid(), question: "Neymar vai jogar?", options: ["Sim", "Não"] },
-  ]);
+  const [subs, setSubs] = useState<SubCat[]>(() => {
+    const next = getNextBrazilMatch();
+    const adv = next.home === "Brasil" ? next.away : next.home;
+    return [
+      { id: uid(), question: `Quem ganha o jogo Brasil x ${adv}?`, options: ["Brasil", "Empate", adv] },
+      { id: uid(), question: "Neymar vai jogar?", options: ["Sim", "Não"] },
+    ];
+  });
   const [prizeImg, setPrizeImg] = useState<string | null>(null);
   const [ownTokensPrize, setOwnTokensPrize] = useState<number>(0);
   const [shopPrizeId, setShopPrizeId] = useState<string | null>(null);
@@ -458,7 +471,7 @@ function Criar() {
                 </button>
               }
             >
-              <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Ex.: Brasil x Haiti — Quem leva?" className="input" />
+              <input value={name} onChange={(e) => setName(e.target.value)} placeholder={`Ex.: Brasil x ${(() => { const n = getNextBrazilMatch(); return n.home === "Brasil" ? n.away : n.home; })()} — Quem leva?`} className="input" />
             </Field>
             <div className="grid sm:grid-cols-2 gap-4">
               <Field label="Categoria">
