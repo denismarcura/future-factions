@@ -928,7 +928,7 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
                 </Field>
                 <button
                   type="button"
-                  onClick={fakeGenerate}
+                  onClick={generatePrize}
                   disabled={generating}
                   className="w-full h-11 rounded-lg bg-gradient-brand text-primary-foreground font-display font-bold inline-flex items-center justify-center gap-2 shadow-glow disabled:opacity-60"
                 >
