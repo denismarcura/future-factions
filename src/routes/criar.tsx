@@ -42,8 +42,11 @@ export const Route = createFileRoute("/criar")({
       { name: "description", content: "Crie seu desafio, escolha sub-categorias de palpites e ofereça prêmios." },
     ],
   }),
-  component: Criar,
+  component: () => <Criar />,
 });
+
+export { Criar };
+
 
 type SubCat = {
   id: string;
