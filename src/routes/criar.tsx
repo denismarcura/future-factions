@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import {
   Plus, Trash2, Sparkles, Upload, Wand2, Calendar as CalIcon,
@@ -64,7 +64,7 @@ const BRAZIL_BONUS = 10000;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
 
-function Criar({ forCompany = false }: { forCompany?: boolean } = {}) {
+function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bare?: boolean } = {}) {
   const [isOpen, setIsOpen] = useState(true);
   const [name, setName] = useState("");
   const [category, setCategory] = useState<string>(CATEGORIES[0]);
@@ -359,8 +359,12 @@ function Criar({ forCompany = false }: { forCompany?: boolean } = {}) {
   const totalQuestions = subs.length;
   const maxReward = totalQuestions * REWARD_PER_HIT;
 
+  const Wrapper: React.ComponentType<{ children: React.ReactNode }> = bare
+    ? ({ children }) => <div>{children}</div>
+    : ({ children }) => <AppShell>{children}</AppShell>;
+
   return (
-    <AppShell>
+    <Wrapper>
       <header className="mb-6 flex items-start justify-between gap-4 flex-wrap">
         <div>
           <h1 className="font-display text-3xl font-black flex items-center gap-3">
@@ -1298,7 +1302,8 @@ function Criar({ forCompany = false }: { forCompany?: boolean } = {}) {
           </div>
         </div>
       )}
-    </AppShell>
+    </Wrapper>
+
 
   );
 }

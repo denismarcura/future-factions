@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { generateCorporateChallenge } from "@/lib/corporate-challenge-ai.functions";
+import { Criar } from "@/routes/criar";
 
 export const Route = createFileRoute("/admin/empresas")({
   component: AdminEmpresasPage,
@@ -117,7 +118,7 @@ function AdminEmpresasPage() {
 
       {tab === "dashboard" && <DashboardTab companies={companies} challenges={challenges} />}
       {tab === "empresas" && <EmpresasTab companies={companies} onChange={updateCompanies} />}
-      {tab === "novo" && <NovoDesafioTab companies={companies} onCreate={(c) => updateChallenges([c, ...challenges])} />}
+      {tab === "novo" && <Criar forCompany bare />}
       {tab === "ativos" && <ChallengesListTab list={ativos} companies={companies} onChange={updateChallenges} all={challenges} emptyText="Nenhum desafio ativo." />}
       {tab === "encerrados" && <ChallengesListTab list={encerrados} companies={companies} onChange={updateChallenges} all={challenges} emptyText="Nenhum desafio encerrado." />}
       {tab === "premiacoes" && <PremiacoesTab list={challenges} />}
