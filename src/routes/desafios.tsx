@@ -122,6 +122,14 @@ function DesafiosPage() {
     return [...openUser, ...sortedMocks].slice(0, 6);
   }, [userChallenges]);
 
+  // Desafios com tempo se esgotando — abertos, mais próximos do encerramento
+  const expiringSoon = useMemo(() => {
+    const pool = [...userChallenges, ...PREDICTIONS].filter((p) => !isClosed(p));
+    return pool
+      .sort((a, b) => new Date(a.closesAt).getTime() - new Date(b.closesAt).getTime())
+      .slice(0, 6);
+  }, [userChallenges]);
+
   return (
     <AppShell>
       <header className="mb-6">
