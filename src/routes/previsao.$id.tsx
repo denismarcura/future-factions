@@ -62,7 +62,7 @@ export const Route = createFileRoute("/previsao/$id")({
 });
 
 function PredictionPage() {
-  const navigate = useNavigate();
+  // navigate removed: user stays on the page to complete bonus missions
   const p = Route.useLoaderData() as Prediction;
   const { user } = useAuth();
   const totalPool = p.options.reduce((s: number, o) => s + o.pool, 0);
