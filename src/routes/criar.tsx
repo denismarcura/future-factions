@@ -369,12 +369,30 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
     img.src = url;
   };
 
-  const fakeGenerate = () => {
+  const generatePrize = async () => {
+    if (!name.trim() && !aiPrompt.trim()) {
+      alert("Dê um nome ao desafio ou descreva o prêmio antes de gerar a imagem.");
+      return;
+    }
     setGenerating(true);
-    setTimeout(() => {
-      setPrizeImg(`https://picsum.photos/seed/${encodeURIComponent(aiPrompt || "premio")}/500/500`);
+    try {
+      const drawDate = endsAt
+        ? new Date(endsAt).toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" })
+        : "";
+      const { dataUrl } = await generatePrizeImageFn({
+        data: {
+          title: name.trim() || "Desafio dos Palpites",
+          prize: prizeName.trim(),
+          drawDate,
+          extraPrompt: aiPrompt.trim(),
+        },
+      });
+      setPrizeImg(dataUrl);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Não foi possível gerar a imagem.");
+    } finally {
       setGenerating(false);
-    }, 900);
+    }
   };
 
   const totalQuestions = subs.length;
