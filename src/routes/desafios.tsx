@@ -132,6 +132,59 @@ function DesafiosPage() {
         </p>
       </header>
 
+      {/* Busca inteligente com IA */}
+      <form onSubmit={handleAiSearch} className="mb-6">
+        <div className="relative rounded-2xl border border-primary/40 bg-card/60 backdrop-blur-sm shadow-glow/30 focus-within:border-primary transition">
+          <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none">
+            {aiLoading ? (
+              <Loader2 className="h-5 w-5 text-primary animate-spin" />
+            ) : (
+              <Wand2 className="h-5 w-5 text-primary" />
+            )}
+          </div>
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder='Busca inteligente com IA — ex.: "jogos da Copa do Mundo com prêmios altos"'
+            className="w-full h-14 pl-12 pr-40 bg-transparent rounded-2xl text-sm sm:text-base focus:outline-none placeholder:text-muted-foreground/70"
+            disabled={aiLoading}
+          />
+          <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+            {(aiQuery || query) && (
+              <button
+                type="button"
+                onClick={clearAiSearch}
+                className="h-9 w-9 grid place-items-center rounded-full text-muted-foreground hover:text-foreground hover:bg-muted/60"
+                aria-label="Limpar"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
+            <button
+              type="submit"
+              disabled={aiLoading || !query.trim()}
+              className="inline-flex items-center gap-2 h-10 px-4 rounded-full bg-gradient-brand text-primary-foreground font-bold text-sm shadow-glow hover:scale-[1.02] transition disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Search className="h-4 w-4" />
+              <span className="hidden sm:inline">Buscar</span>
+            </button>
+          </div>
+        </div>
+        {aiQuery && !aiLoading && (
+          <div className="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
+            <Sparkles className="h-3.5 w-3.5 text-gold" />
+            Resultados de IA para <span className="font-bold text-foreground">"{aiQuery}"</span>
+            {aiIds && <span>· {aiIds.length} encontrados</span>}
+            <button type="button" onClick={clearAiSearch} className="text-primary hover:underline ml-1">
+              limpar
+            </button>
+          </div>
+        )}
+        {aiError && (
+          <div className="mt-2 text-xs text-destructive">{aiError}</div>
+        )}
+      </form>
+
       <div className="flex flex-wrap gap-2 mb-6">
         {[
           { k: "todos", label: "Todos", icon: ListChecks },
