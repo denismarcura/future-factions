@@ -28,6 +28,11 @@ type Sort = "trending" | "new" | "popular" | "closing";
 function Feed() {
   const [cat, setCat] = useState<string>("Todas");
   const [sort, setSort] = useState<Sort>("new");
+  const [banners, setBanners] = useState<Banner[]>([]);
+
+  useEffect(() => {
+    setBanners(listActiveBanners());
+  }, []);
 
   const closingSoon = useMemo(() => {
     const now = Date.now();
