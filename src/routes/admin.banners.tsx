@@ -377,7 +377,7 @@ function AdminBanners() {
             </div>
             <div className="md:col-span-2">
               <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Imagem * (URL ou upload)
+                Imagem * (URL ou upload) · Recomendado: 988px largura × 560px altura
               </label>
               <div className="mt-1 flex gap-2">
                 <input
@@ -451,7 +451,62 @@ function AdminBanners() {
                 <span className="text-sm font-semibold">Ativo</span>
               </label>
             </div>
-          </div>
+
+            {/* Banner principal */}
+            <div className="md:col-span-2 rounded-lg border border-gold/40 bg-gold/5 p-3">
+              <label className="inline-flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={form.isMain}
+                  onChange={(e) => setForm({ ...form, isMain: e.target.checked })}
+                  className="h-4 w-4 accent-primary"
+                />
+                <span className="text-sm font-bold text-gold">Definir como banner principal</span>
+              </label>
+              <p className="text-[11px] text-muted-foreground mt-1">
+                O banner principal é exibido em destaque no topo. Apenas um banner pode ser principal por vez.
+              </p>
+            </div>
+
+            {/* Expiração */}
+            <div className="md:col-span-2 rounded-lg border border-border p-3 space-y-2">
+              <div className="flex items-center gap-4 flex-wrap">
+                <span className="text-sm font-semibold">O banner expira?</span>
+                <label className="inline-flex items-center gap-1.5 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="hasExpiry"
+                    checked={form.hasExpiry}
+                    onChange={() => setForm({ ...form, hasExpiry: true })}
+                    className="h-4 w-4 accent-primary"
+                  />
+                  <span className="text-sm">Sim</span>
+                </label>
+                <label className="inline-flex items-center gap-1.5 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="hasExpiry"
+                    checked={!form.hasExpiry}
+                    onChange={() => setForm({ ...form, hasExpiry: false, expiresAt: "" })}
+                    className="h-4 w-4 accent-primary"
+                  />
+                  <span className="text-sm">Não</span>
+                </label>
+              </div>
+              {form.hasExpiry && (
+                <div>
+                  <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    Data e horário de expiração
+                  </label>
+                  <input
+                    type="datetime-local"
+                    value={form.expiresAt}
+                    onChange={(e) => setForm({ ...form, expiresAt: e.target.value })}
+                    className="input mt-1 w-full md:w-72"
+                  />
+                </div>
+              )}
+            </div>
 
           <div className="flex gap-2 justify-end">
             <button
