@@ -114,7 +114,7 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
     ];
   });
   const [prizeImg, setPrizeImg] = useState<string | null>(null);
-  const [ownTokensPrize, setOwnTokensPrize] = useState<number>(0);
+  
   const [shopPrizeId, setShopPrizeId] = useState<string | null>(null);
   const [shopPickerOpen, setShopPickerOpen] = useState(false);
   const [aiPrompt, setAiPrompt] = useState("");
