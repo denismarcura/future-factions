@@ -98,7 +98,7 @@ function Criar() {
     if (!availableSubs.some(s => s.name === subcategory)) setSubcategory("");
   }, [availableSubs, subcategory]);
 
-  const [endsAt, setEndsAt] = useState("");
+  const [endsAt, setEndsAt] = useState(() => kickoffToLocalDateTime(getNextBrazilMatch().kickoff));
   const [prizeName, setPrizeName] = useState("");
   const [socialLink, setSocialLink] = useState("");
   const [subs, setSubs] = useState<SubCat[]>(() => {
