@@ -9,6 +9,7 @@ import { CURRENT_USER, formatTokens, getPrediction, PREDICTIONS, type Prediction
 import { listMissions, listMyClaims, claimMission, pickRandomFor, type Mission, ACTION_LABEL } from "@/lib/missions";
 import { useAuth } from "@/hooks/use-auth";
 import { hasParticipated, saveParticipation } from "@/lib/my-participations";
+import { getTokenBalance } from "@/lib/balance";
 
 export const Route = createFileRoute("/previsao/$id")({
   loader: ({ params }): Prediction => {
