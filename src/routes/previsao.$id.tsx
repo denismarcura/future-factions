@@ -175,10 +175,6 @@ function PredictionPage() {
       </Link>
 
       {(() => {
-        const closingSoon = PREDICTIONS
-          .filter((x) => x.id !== p.id && new Date(x.closesAt).getTime() > Date.now())
-          .sort((a, b) => new Date(a.closesAt).getTime() - new Date(b.closesAt).getTime())
-          .slice(0, 5);
 
         const handleParticipate = () => {
           if (p.subPredictions) {
