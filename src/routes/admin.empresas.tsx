@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { generateCorporateChallenge } from "@/lib/corporate-challenge-ai.functions";
+import { Criar } from "@/routes/criar";
 
 export const Route = createFileRoute("/admin/empresas")({
   component: AdminEmpresasPage,
