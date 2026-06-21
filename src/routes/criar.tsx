@@ -353,7 +353,7 @@ function Criar() {
             <Sparkles className="h-7 w-7 text-primary" /> Cadastro de Desafio
           </h1>
           <p className="text-muted-foreground mt-1">
-            Monte seu desafio, escolha até 5 sub-categorias e defina o prêmio.
+            Monte seu desafio, escolha até 10 sub-categorias e defina o prêmio.
           </p>
         </div>
         <div className="flex items-center gap-2 rounded-xl glass-card px-4 py-2.5">
@@ -1191,7 +1191,7 @@ function Criar() {
           <div className="rounded-2xl glass-card p-5 space-y-3">
             <div className="text-xs uppercase tracking-wider font-bold text-gold">Resumo</div>
             <Row label="Custo de criação" value={`${COST} Tokens`} />
-            <Row label="Sub-categorias" value={`${totalQuestions}/5`} />
+            <Row label="Sub-categorias" value={`${totalQuestions}/${MAX_SUBS}`} />
             <Row label="Prêmio em tokens (auto)" value={`${AUTO_PRIZE.toLocaleString("pt-BR")} Tokens`} />
             <Row label="Recompensa total possível" value={`${maxReward} Tokens / usuário`} />
             <Row label="Visibilidade" value={isOpen ? "Aberto" : "Privado"} />
@@ -1200,7 +1200,7 @@ function Criar() {
           <div className="rounded-2xl glass-card p-5">
             <div className="text-xs uppercase tracking-wider font-bold text-gold mb-2">Dicas</div>
             <ul className="text-sm text-muted-foreground list-disc pl-4 space-y-1.5">
-              <li>Use até 5 sub-categorias bem objetivas.</li>
+              <li>Use até 10 sub-categorias bem objetivas.</li>
               <li>Adicione missões para gerar mais palpites.</li>
               <li>Prêmio físico aumenta engajamento.</li>
               <li>Encerre antes do evento acontecer.</li>
