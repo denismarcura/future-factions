@@ -24,6 +24,8 @@ import { CURRENT_USER, formatTokens } from "@/lib/mock-data";
 import { useAuth, signOut } from "@/hooks/use-auth";
 import logoAsset from "@/assets/logo-desafio.png.asset.json";
 
+const ADMIN_EMAILS = ["denismarcura@gmail.com", "antoinio.salvador@gmail.com"];
+
 const NAV = [
   { to: "/", label: "Home", icon: Home },
   { to: "/como-funciona", label: "Como Funciona", icon: BookOpen },
@@ -31,12 +33,12 @@ const NAV = [
   { to: "/criar", label: "Criar Desafio", icon: Plus },
   { to: "/ranking", label: "Ranking", icon: Trophy },
   { to: "/top100", label: "Top 100", icon: Crown },
-  { to: "/shop", label: "Shop de Prêmios", icon: ShoppingBag },
+  { to: "/shop", label: "Prêmios", icon: ShoppingBag },
   { to: "/empresas", label: "Empresas", icon: Building2 },
   { to: "/missoes", label: "Missões", icon: Target },
   { to: "/perfil", label: "Perfil", icon: UserIcon },
   { to: "/faq", label: "FAQ", icon: HelpCircle },
-  { to: "/admin", label: "Administrativo", icon: Shield },
+  { to: "/admin", label: "Administrativo", icon: Shield, adminOnly: true },
 ];
 
 const MOBILE_NAV = [
@@ -147,7 +149,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <div className="max-w-7xl mx-auto px-4 pb-24 md:pb-12 md:flex md:gap-8 pt-6">
         <aside className="hidden md:block w-60 shrink-0">
           <nav className="sticky top-24 space-y-1">
-            {NAV.map(({ to, label, icon: Icon }) => {
+            {NAV.filter((n) => !n.adminOnly || (user?.email && ADMIN_EMAILS.includes(user.email.toLowerCase()))).map(({ to, label, icon: Icon }) => {
               const active = to === "/" ? pathname === "/" : pathname.startsWith(to);
               return (
                 <Link
