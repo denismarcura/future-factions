@@ -618,20 +618,69 @@ function Criar() {
 
           {/* Sub-categorias */}
           <Section
-            title={`Sub-categorias de palpites (${subs.length}/5)`}
-            description={`Até 5 perguntas, cada uma com até ${MAX_OPTIONS} opções de resposta. Cada acerto vale ${REWARD_PER_HIT} tokens.`}
+            title={`Sub-categorias de palpites (${subs.length}/${MAX_SUBS})`}
+            description={`Até ${MAX_SUBS} perguntas, cada uma com até ${MAX_OPTIONS} opções de resposta. Cada acerto vale ${REWARD_PER_HIT} tokens.`}
 
             action={
               <button
                 type="button"
                 onClick={addSub}
-                disabled={subs.length >= 5}
+                disabled={subs.length >= MAX_SUBS}
                 className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg bg-primary/15 text-primary border border-primary/30 text-sm font-semibold hover:bg-primary/20 disabled:opacity-50"
               >
                 <Plus className="h-4 w-4" /> Nova sub-categoria
               </button>
             }
           >
+            {/* Gerar palpites com IA — inline */}
+            <div className="mb-4 rounded-xl border border-primary/30 bg-primary/5 p-3">
+              <div className="flex items-center gap-2 mb-2">
+                <Sparkles className="h-4 w-4 text-primary" />
+                <span className="text-sm font-bold">Gerar palpites com a IA</span>
+              </div>
+              <div className="flex flex-wrap items-end gap-2">
+                <label className="flex flex-col gap-1">
+                  <span className="text-[11px] text-muted-foreground">Quantos palpites</span>
+                  <select
+                    value={inlineAiCount}
+                    onChange={(e) => setInlineAiCount(Number(e.target.value))}
+                    className="input h-10 w-24"
+                  >
+                    {Array.from({ length: 10 }, (_, i) => i + 1).map(n => (
+                      <option key={n} value={n}>{n}</option>
+                    ))}
+                  </select>
+                </label>
+                <button
+                  type="button"
+                  onClick={handleInlineGenerate}
+                  disabled={inlineAiLoading || subs.length >= MAX_SUBS}
+                  className="inline-flex items-center gap-2 h-10 px-4 rounded-lg bg-primary text-primary-foreground text-sm font-bold hover:opacity-90 disabled:opacity-50"
+                >
+                  {inlineAiLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4" />}
+                  {inlineAiLoading ? "Gerando…" : "Gerar com IA"}
+                </button>
+                <span className="text-[11px] text-muted-foreground">
+                  Usa o tema, categoria e prêmio já preenchidos.
+                </span>
+              </div>
+              {inlineAiError && (
+                <div className="mt-2 text-xs text-destructive">{inlineAiError}</div>
+              )}
+            </div>
+
+            {hasBrazilMatch && (
+              <div className="mb-4 rounded-xl border border-gold/40 bg-gold/10 p-3 flex items-start gap-2.5">
+                <Coins className="h-5 w-5 text-gold mt-0.5 shrink-0" />
+                <div className="text-sm">
+                  <div className="font-bold text-gold">Bônus Seleção Brasileira</div>
+                  <div className="text-xs text-muted-foreground">
+                    Quem acertar <span className="font-bold text-foreground">TODOS</span> os palpites de um jogo do Brasil ganha <span className="font-bold text-gold">{BRAZIL_BONUS.toLocaleString("pt-BR")} tokens</span> extras.
+                  </div>
+                </div>
+              </div>
+            )}
+
             <div className="space-y-3">
               {subs.map((s, idx) => (
                 <div key={s.id} className="rounded-xl border border-border/60 bg-background/40 p-4">
@@ -690,13 +739,15 @@ function Criar() {
               <button
                 type="button"
                 onClick={addSub}
-                disabled={subs.length >= 5}
+                disabled={subs.length >= MAX_SUBS}
                 className="w-full inline-flex items-center justify-center gap-2 h-12 rounded-xl border-2 border-dashed border-primary/40 bg-primary/5 text-primary text-sm font-bold hover:bg-primary/10 hover:border-primary/60 disabled:opacity-40 disabled:cursor-not-allowed transition"
               >
-                <Plus className="h-4 w-4" /> + mais Palpites {subs.length >= 5 ? "(máx. 5)" : `(${subs.length}/5)`}
+                <Plus className="h-4 w-4" /> + mais Palpites {subs.length >= MAX_SUBS ? `(máx. ${MAX_SUBS})` : `(${subs.length}/${MAX_SUBS})`}
               </button>
             </div>
           </Section>
+
+
 
           {/* Prêmio */}
           <Section
