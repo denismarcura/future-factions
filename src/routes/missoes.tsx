@@ -89,13 +89,11 @@ function Missoes() {
     }
     await new Promise((r) => setTimeout(r, 5000));
     try {
-      const totalAward = m.tokens + (m.bonus_tokens || 0);
+      const totalAward = m.tokens + (m.bonus_tokens || 0) + COMPLETION_BONUS_TOKENS;
       await claimMission(m.id, "missoes", totalAward);
       setClaimed((prev) => new Set(prev).add(m.id));
       toast.success(
-        m.bonus_tokens > 0
-          ? `Tarefa concluída! +${m.tokens} Tokens + bônus de ${m.bonus_tokens} enviados para sua conta.`
-          : `Tarefa concluída! ${m.tokens} Tokens enviados para sua conta.`
+        `Tarefa concluída! +${m.tokens + (m.bonus_tokens || 0)} Tokens da missão · +${COMPLETION_BONUS_TOKENS} bônus · +${COMPLETION_BONUS_CHANCES} chance de palpite.`
       );
     } catch (e: any) {
       toast.error(e.message ?? "Erro ao registrar");
