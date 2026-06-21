@@ -324,26 +324,46 @@ function PredictionPage() {
                       toast.error(`Preencha todos os ${p.subPredictions!.length} palpites.`);
                       return;
                     }
+                    const fee = p.entryFee ?? 0;
+                    if (!user) {
+                      toast.error("Faça login para participar.");
+                      return;
+                    }
+                    if (balance !== null && balance < fee) {
+                      toast.error(`Saldo insuficiente. Você tem ${formatTokens(balance)} TKN e precisa de ${fee}.`);
+                      return;
+                    }
                     setConfirmed(true);
                     saveParticipation({
                       id: p.id,
                       title: p.title,
                       category: p.category,
-                      entryFee: p.entryFee ?? 0,
+                      entryFee: fee,
                       answers: subAnswers,
                       closesAt: p.closesAt,
                       participatedAt: new Date().toISOString(),
                     });
-                    toast.success(`🎯 Participação confirmada! ${p.entryFee} TKN debitados.`);
+                    toast.success(`🎯 Participação confirmada! ${fee} TKN debitados.`);
                     setTimeout(() => {
                       navigate({ to: "/dashboard" });
                     }, 1200);
                   }}
-                  disabled={isClosed || confirmed || Object.keys(subAnswers).length < p.subPredictions.length}
+                  disabled={isClosed || confirmed || Object.keys(subAnswers).length < p.subPredictions.length || (balance !== null && balance < (p.entryFee ?? 0))}
                   className="mt-5 w-full h-12 rounded-xl bg-gradient-brand text-primary-foreground font-display font-black tracking-wide shadow-glow hover:scale-[1.01] transition disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {isClosed ? "APOSTAS ENCERRADAS" : confirmed ? "✓ PARTICIPAÇÃO CONFIRMADA" : `PARTICIPAR POR ${p.entryFee} TOKENS`}
+                  {isClosed
+                    ? "APOSTAS ENCERRADAS"
+                    : confirmed
+                      ? "✓ PARTICIPAÇÃO CONFIRMADA"
+                      : balance !== null && balance < (p.entryFee ?? 0)
+                        ? "SALDO INSUFICIENTE"
+                        : `PARTICIPAR POR ${p.entryFee} TOKENS`}
                 </button>
+                {user && balance !== null && (
+                  <p className="mt-2 text-[11px] text-center text-muted-foreground">
+                    Seu saldo: <span className="text-gold font-bold">{formatTokens(balance)} TKN</span>
+                  </p>
+                )}
                 <p className="mt-3 text-[11px] text-center text-muted-foreground">
                   Apostas encerram 10 minutos antes do jogo. Tokens virtuais, sem dinheiro real.
                 </p>
