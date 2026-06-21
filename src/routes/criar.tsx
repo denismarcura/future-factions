@@ -471,7 +471,7 @@ function Criar() {
                 </button>
               }
             >
-              <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Ex.: Brasil x Haiti — Quem leva?" className="input" />
+              <input value={name} onChange={(e) => setName(e.target.value)} placeholder={`Ex.: Brasil x ${(() => { const n = getNextBrazilMatch(); return n.home === "Brasil" ? n.away : n.home; })()} — Quem leva?`} className="input" />
             </Field>
             <div className="grid sm:grid-cols-2 gap-4">
               <Field label="Categoria">
