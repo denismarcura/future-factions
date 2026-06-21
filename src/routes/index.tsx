@@ -137,8 +137,51 @@ function Feed() {
         </div>
       </section>
 
+      {/* Banners cadastrados no admin */}
+      {banners.length > 0 && (
+        <section className="mb-8 grid gap-4 sm:grid-cols-2">
+          {banners.map((b) => {
+            const href = b.challengeId ? `/previsao/${b.challengeId}` : (b.ctaLink || "/desafios");
+            return (
+              <Link
+                key={b.id}
+                to={href}
+                className="group relative block overflow-hidden rounded-2xl border border-border/60 glass-card hover:border-primary/60 hover:shadow-glow transition"
+              >
+                <div className="aspect-[16/9] w-full overflow-hidden bg-muted">
+                  <img
+                    src={b.imageUrl}
+                    alt={b.title}
+                    className="h-full w-full object-cover group-hover:scale-105 transition duration-500"
+                    loading="lazy"
+                  />
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/40 to-transparent" />
+                <div className="absolute inset-x-0 bottom-0 p-4 sm:p-5">
+                  {b.isMain && (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-gold/20 text-gold text-[10px] font-black uppercase border border-gold/40 mb-2">
+                      <Sparkles className="h-3 w-3" /> Destaque
+                    </span>
+                  )}
+                  <div className="font-display text-lg sm:text-xl font-black leading-tight">{b.title}</div>
+                  {b.subtitle && (
+                    <div className="text-sm text-muted-foreground mt-1 line-clamp-2">{b.subtitle}</div>
+                  )}
+                  {b.ctaLabel && (
+                    <span className="mt-3 inline-flex items-center justify-center h-9 px-4 rounded-full bg-gradient-brand text-primary-foreground text-xs font-black uppercase shadow-glow">
+                      {b.ctaLabel} →
+                    </span>
+                  )}
+                </div>
+              </Link>
+            );
+          })}
+        </section>
+      )}
+
       {/* Encerrando em breve */}
       <section className="mb-8">
+
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-display text-xl font-black flex items-center gap-2">
             <Zap className="h-5 w-5 text-destructive" /> Encerrando em breve
