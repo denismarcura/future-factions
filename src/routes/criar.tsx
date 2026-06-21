@@ -47,6 +47,8 @@ const COST = 100;
 const REWARD_PER_HIT = 50;
 const AUTO_PRIZE = 5000;
 const MAX_OPTIONS = 10;
+const MAX_SUBS = 10;
+const BRAZIL_BONUS = 10000;
 
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
