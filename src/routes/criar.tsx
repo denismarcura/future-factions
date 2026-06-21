@@ -295,6 +295,9 @@ function Criar({ forCompany = false }: { forCompany?: boolean } = {}) {
       if (!s.question.trim()) errs.push(`Pergunta vazia no palpite #${i + 1}.`);
       if (s.options.filter(o => o.trim()).length < 2) errs.push(`Palpite #${i + 1} precisa de pelo menos 2 opções preenchidas.`);
     });
+    if (forCompany && !socialLink.trim()) {
+      errs.push("Informe o link da rede social do desafio (obrigatório para empresas).");
+    }
     if (errs.length) {
       setErrors(errs);
       window.scrollTo({ top: 0, behavior: "smooth" });
