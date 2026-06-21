@@ -24,8 +24,8 @@ export function PredictionCard({ prediction: p }: { prediction: Prediction }) {
                 <Flame className="h-3 w-3" /> Em alta
               </span>
             )}
-            <span className="ml-auto inline-flex items-center gap-1 text-muted-foreground">
-              <Clock className="h-3 w-3" /> <CountdownTimer closesAt={p.closesAt} />
+            <span className="ml-auto">
+              <ClosingTimerBadge closesAt={p.closesAt} />
             </span>
           </div>
 
