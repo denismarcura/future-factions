@@ -923,7 +923,7 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
                     onChange={(e) => e.target.files?.[0] && handleUpload(e.target.files[0])}
                   />
                 </label>
-                <p className="text-xs text-muted-foreground">A imagem precisa ter exatamente 500x500 pixels.</p>
+                <p className="text-xs text-muted-foreground">Aceita qualquer tamanho — a imagem será redimensionada automaticamente para 500×500.</p>
               </div>
             </div>
           </Section>
