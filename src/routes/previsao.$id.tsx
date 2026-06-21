@@ -531,12 +531,3 @@ function PredictionPage() {
     </AppShell>
   );
 }
-
-function Row({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) {
-  return (
-    <div className="flex items-center justify-between">
-      <span className="text-muted-foreground">{label}</span>
-      <span className={highlight ? "font-display font-black text-gradient-brand" : "font-semibold"}>{value}</span>
-    </div>
-  );
-}
