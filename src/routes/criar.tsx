@@ -5,10 +5,12 @@ import {
   Plus, Trash2, Sparkles, Upload, Wand2, Calendar as CalIcon,
   Gift, Coins, Instagram, Facebook, Youtube, Music2, Globe, Lock,
   CheckCircle2, Share2, Copy, AlertCircle, UserPlus, Mail, Users, Loader2,
-  PencilLine, MessageCircle, Download, ImageIcon,
+  PencilLine, MessageCircle, Download, ImageIcon, ShoppingBag, X,
 } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
-import { CATEGORIES } from "@/lib/mock-data";
+import { CATEGORIES, CURRENT_USER, formatTokens } from "@/lib/mock-data";
+import { PRODUCTS } from "@/lib/mock-extra";
+
 import { generateInviteText } from "@/lib/invite.functions";
 import { saveUserChallenge } from "@/lib/user-challenges";
 import { improveTitle } from "@/lib/title-ai.functions";
@@ -29,12 +31,14 @@ export const Route = createFileRoute("/criar")({
 type SubCat = {
   id: string;
   question: string;
-  options: string[]; // up to 3
+  options: string[]; // up to MAX_OPTIONS
 };
 
 const COST = 100;
 const REWARD_PER_HIT = 50;
 const AUTO_PRIZE = 5000;
+const MAX_OPTIONS = 10;
+
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
 
@@ -83,7 +87,11 @@ function Criar() {
     { id: uid(), question: "Neymar vai jogar?", options: ["Sim", "Não"] },
   ]);
   const [prizeImg, setPrizeImg] = useState<string | null>(null);
+  const [ownTokensPrize, setOwnTokensPrize] = useState<number>(0);
+  const [shopPrizeId, setShopPrizeId] = useState<string | null>(null);
+  const [shopPickerOpen, setShopPickerOpen] = useState(false);
   const [aiPrompt, setAiPrompt] = useState("");
+
   const [generating, setGenerating] = useState(false);
   const [improvingTitle, setImprovingTitle] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
@@ -237,9 +245,10 @@ function Criar() {
   const setOption = (id: string, i: number, v: string) =>
     setSubs(subs.map(s => s.id === id ? { ...s, options: s.options.map((o, x) => x === i ? v : o) } : s));
   const addOption = (id: string) =>
-    setSubs(subs.map(s => s.id === id && s.options.length < 3 ? { ...s, options: [...s.options, ""] } : s));
+    setSubs(subs.map(s => s.id === id && s.options.length < MAX_OPTIONS ? { ...s, options: [...s.options, ""] } : s));
   const removeOption = (id: string, i: number) =>
     setSubs(subs.map(s => s.id === id && s.options.length > 2 ? { ...s, options: s.options.filter((_, x) => x !== i) } : s));
+
 
   const handleUpload = (file: File) => {
     const url = URL.createObjectURL(file);
@@ -540,7 +549,8 @@ function Criar() {
           {/* Sub-categorias */}
           <Section
             title={`Sub-categorias de palpites (${subs.length}/5)`}
-            description={`Até 5 perguntas, cada uma com até 3 opções. Cada acerto vale ${REWARD_PER_HIT} tokens.`}
+            description={`Até 5 perguntas, cada uma com até ${MAX_OPTIONS} opções de resposta. Cada acerto vale ${REWARD_PER_HIT} tokens.`}
+
             action={
               <button
                 type="button"
@@ -590,15 +600,16 @@ function Criar() {
                         </button>
                       </div>
                     ))}
-                    {s.options.length < 3 && (
+                    {s.options.length < MAX_OPTIONS && (
                       <button
                         type="button"
                         onClick={() => addOption(s.id)}
                         className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg border border-dashed border-border text-sm text-muted-foreground hover:text-primary hover:border-primary/60"
                       >
-                        <Plus className="h-4 w-4" /> Adicionar opção (até 3)
+                        <Plus className="h-4 w-4" /> Adicionar opção ({s.options.length}/{MAX_OPTIONS})
                       </button>
                     )}
+
                   </div>
                   <div className="mt-3 text-xs text-muted-foreground">
                     Quem acertar este palpite ganha <span className="text-primary font-bold">{REWARD_PER_HIT} tokens</span>.
@@ -620,8 +631,96 @@ function Criar() {
           {/* Prêmio */}
           <Section
             title="Prêmio"
-            description={`Automaticamente daremos ${AUTO_PRIZE.toLocaleString("pt-BR")} tokens para quem fizer a maior pontuação. Você pode adicionar um prêmio físico extra (opcional).`}
+            description={`Automaticamente daremos ${AUTO_PRIZE.toLocaleString("pt-BR")} tokens para quem fizer a maior pontuação. Você pode somar seus próprios tokens, escolher um prêmio da nossa loja ou cadastrar um prêmio físico próprio.`}
           >
+            {/* Tokens próprios como prêmio */}
+            <div className="rounded-xl border border-gold/30 bg-gold/5 p-4 mb-3">
+              <div className="flex items-start gap-3">
+                <Coins className="h-5 w-5 text-gold mt-0.5 shrink-0" />
+                <div className="flex-1">
+                  <div className="font-bold text-sm">Adicionar tokens do seu saldo como prêmio extra</div>
+                  <div className="text-xs text-muted-foreground mb-2">
+                    Seu saldo: <span className="text-gold font-bold">{formatTokens(CURRENT_USER.tokens)} tokens</span>. O valor será reservado e entregue ao vencedor.
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="number"
+                      min={0}
+                      step={100}
+                      max={CURRENT_USER.tokens}
+                      value={ownTokensPrize}
+                      onChange={(e) => setOwnTokensPrize(Math.max(0, Math.min(CURRENT_USER.tokens, Number(e.target.value) || 0)))}
+                      placeholder="0"
+                      className="input max-w-[180px]"
+                    />
+                    <span className="text-xs text-muted-foreground">tokens</span>
+                    {ownTokensPrize > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => setOwnTokensPrize(0)}
+                        className="text-xs text-muted-foreground hover:text-destructive ml-2"
+                      >
+                        Limpar
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Comprar prêmio na loja */}
+            <div className="rounded-xl border border-primary/30 bg-primary/5 p-4 mb-4">
+              <div className="flex items-start gap-3">
+                <ShoppingBag className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <div className="font-bold text-sm">Comprar prêmio da nossa loja virtual</div>
+                  <div className="text-xs text-muted-foreground mb-2">
+                    Escolha um produto do nosso catálogo. Cuidamos do envio direto ao vencedor — você só precisa pagar o valor em tokens.
+                  </div>
+                  {shopPrizeId ? (() => {
+                    const p = PRODUCTS.find(x => x.id === shopPrizeId);
+                    if (!p) return null;
+                    return (
+                      <div className="flex items-center gap-3 rounded-lg border border-border/60 bg-background/60 p-2">
+                        {p.image && <img src={p.image} alt={p.name} className="h-14 w-14 rounded-md object-cover" />}
+                        <div className="min-w-0 flex-1">
+                          <div className="font-bold text-sm truncate">{p.name}</div>
+                          <div className="text-xs text-gold font-bold inline-flex items-center gap-1">
+                            <Coins className="h-3 w-3" /> {formatTokens(p.cost)} tokens
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setShopPickerOpen(true)}
+                          className="h-9 px-3 rounded-lg border border-border text-xs font-semibold hover:border-primary hover:text-primary"
+                        >
+                          Trocar
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setShopPrizeId(null)}
+                          className="h-9 w-9 rounded-lg border border-border grid place-items-center text-muted-foreground hover:text-destructive hover:border-destructive/60"
+                          aria-label="Remover prêmio da loja"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    );
+                  })() : (
+                    <button
+                      type="button"
+                      onClick={() => setShopPickerOpen(true)}
+                      className="inline-flex items-center gap-2 h-10 px-4 rounded-lg bg-primary/15 text-primary border border-primary/40 text-sm font-bold hover:bg-primary/25"
+                    >
+                      <ShoppingBag className="h-4 w-4" /> Escolher prêmio na loja
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="text-xs uppercase tracking-wider font-bold text-muted-foreground mb-2">Ou cadastre seu próprio prêmio físico</div>
+
             <Field label="Nome do prêmio extra (opcional)">
               <input value={prizeName} onChange={(e) => setPrizeName(e.target.value)} placeholder="Ex.: 1 Camiseta do Brasil" className="input" />
             </Field>
@@ -672,6 +771,7 @@ function Criar() {
               </div>
             </div>
           </Section>
+
 
           {/* Missões */}
           <Section
@@ -1008,7 +1108,57 @@ function Criar() {
       `}</style>
       </>
       )}
+
+      {/* Picker de prêmio da loja */}
+      {shopPickerOpen && (
+        <div
+          className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm grid place-items-center p-4"
+          onClick={() => setShopPickerOpen(false)}
+        >
+          <div
+            className="relative w-full max-w-3xl max-h-[85vh] rounded-2xl border border-border bg-card shadow-2xl flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between p-4 border-b border-border">
+              <div className="flex items-center gap-2">
+                <ShoppingBag className="h-5 w-5 text-primary" />
+                <h3 className="font-display font-black text-lg">Escolher prêmio da loja</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShopPickerOpen(false)}
+                className="h-9 w-9 rounded-lg grid place-items-center hover:bg-muted"
+                aria-label="Fechar"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="overflow-y-auto p-4 grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {PRODUCTS.map((p) => {
+                const selected = shopPrizeId === p.id;
+                return (
+                  <button
+                    key={p.id}
+                    type="button"
+                    onClick={() => { setShopPrizeId(p.id); setShopPickerOpen(false); }}
+                    className={`text-left rounded-xl border bg-background/60 overflow-hidden hover:border-primary transition ${selected ? "border-primary ring-2 ring-primary/40" : "border-border/60"}`}
+                  >
+                    {p.image && <img src={p.image} alt={p.name} className="w-full aspect-square object-cover" />}
+                    <div className="p-2">
+                      <div className="text-xs font-bold line-clamp-2 leading-tight">{p.name}</div>
+                      <div className="mt-1 text-xs text-gold font-bold inline-flex items-center gap-1">
+                        <Coins className="h-3 w-3" /> {formatTokens(p.cost)}
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
     </AppShell>
+
   );
 }
 
