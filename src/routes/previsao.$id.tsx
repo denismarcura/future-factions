@@ -21,9 +21,9 @@ const PLATFORM_THEME: Record<SeqPlatform, { label: string; gradient: string; col
   tiktok:    { label: "TikTok",    gradient: "linear-gradient(135deg, #010101, #333333)", color: "#ffffff", Icon: TikTokIcon },
 };
 
-function TikTokIcon({ className }: { className?: string }) {
+function TikTokIcon({ className, style }: { className?: string; style?: React.CSSProperties }) {
   return (
-    <svg viewBox="0 0 24 24" className={className} fill="currentColor" aria-hidden="true">
+    <svg viewBox="0 0 24 24" className={className} style={style} fill="currentColor" aria-hidden="true">
       <path d="M19.6 6.3a5.3 5.3 0 0 1-3.2-1.1V15a5.7 5.7 0 1 1-5.7-5.7c.3 0 .6 0 .9.1v2.9a2.8 2.8 0 1 0 2 2.7V2h2.7a5.3 5.3 0 0 0 3.3 4.3z" />
     </svg>
   );
