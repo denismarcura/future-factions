@@ -143,24 +143,18 @@ function Feed() {
       </section>
 
       {/* Banners promocionais */}
-      <section className="mb-8 grid gap-4 sm:grid-cols-2">
-        {[
-          { src: bannerNaoGaste.url, alt: "Não gaste R$ 1 real em palpites" },
-          { src: bannerPalpitou.url, alt: "Palpitou, concorreu, ganhou!" },
-        ].map((b) => (
-          <Link
-            key={b.alt}
-            to="/desafios"
-            className="group block overflow-hidden rounded-2xl border border-border/60 hover:border-primary/60 hover:shadow-glow transition"
-          >
-            <img
-              src={b.src}
-              alt={b.alt}
-              className="w-full h-auto object-cover group-hover:scale-[1.02] transition duration-500"
-              loading="lazy"
-            />
-          </Link>
-        ))}
+      <section className="mb-8">
+        <Link
+          to="/desafios"
+          className="group block overflow-hidden rounded-2xl border border-border/60 hover:border-primary/60 hover:shadow-glow transition"
+        >
+          <img
+            src={bannerNaoGaste.url}
+            alt="Não gaste R$ 1 real em palpites"
+            className="w-full h-auto object-cover group-hover:scale-[1.02] transition duration-500"
+            loading="lazy"
+          />
+        </Link>
       </section>
 
       {/* Banners cadastrados no admin */}
