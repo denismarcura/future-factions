@@ -69,10 +69,10 @@ function PredictionPage() {
   const [selected, setSelected] = useState(p.options[0].id);
   const [amount, setAmount] = useState(p.entryFee ?? p.minTokens);
   const [subAnswers, setSubAnswers] = useState<Record<string, string>>({});
-  const [missionsByPlat, setMissionsByPlat] = useState<Partial<Record<SeqPlatform, Mission | null>>>({});
+  const [missionQueue, setMissionQueue] = useState<Mission[]>([]);
   const [missionStep, setMissionStep] = useState(0);
   const [missionStatus, setMissionStatus] = useState<"idle" | "verifying" | "done">("idle");
-  const [extraPalpites, setExtraPalpites] = useState<{ platform: SeqPlatform; sponsor: string }[]>([]);
+  const [extraPalpites, setExtraPalpites] = useState<{ platform: SeqPlatform; sponsor: string; answers: Record<string, string> }[]>([]);
   const [confirmed, setConfirmed] = useState(false);
   const [balance, setBalance] = useState<number | null>(null);
 
@@ -94,26 +94,24 @@ function PredictionPage() {
   useEffect(() => {
     (async () => {
       try {
-        const results = await Promise.all(
+        // Load all follow/subscribe missions ordered by platform: instagram → youtube → facebook → tiktok
+        const buckets = await Promise.all(
           PLATFORM_ORDER.map((pl) =>
             listMissions({ platform: pl, activeOnly: true })
-              .then((arr) => [pl, pickRandomFor(arr, p.id)] as const)
-              .catch(() => [pl, null] as const),
+              .then((arr) => arr.filter((m) => m.action_type === "follow" || m.action_type === "subscribe"))
+              .catch(() => [] as Mission[]),
           ),
         );
-        const map: Partial<Record<SeqPlatform, Mission | null>> = {};
-        results.forEach(([pl, m]) => (map[pl] = m));
-        setMissionsByPlat(map);
+        const queue: Mission[] = buckets.flat();
+        setMissionQueue(queue);
 
-        if (user) {
+        if (user && queue.length) {
           const claims = await listMyClaims(`challenge:${p.id}`);
-          const done: { platform: SeqPlatform; sponsor: string }[] = [];
+          const done: { platform: SeqPlatform; sponsor: string; answers: Record<string, string> }[] = [];
           let step = 0;
-          for (const pl of PLATFORM_ORDER) {
-            const m = map[pl];
-            if (!m) { step++; continue; }
+          for (const m of queue) {
             if (claims.some((c) => c.mission_id === m.id)) {
-              done.push({ platform: pl, sponsor: m.sponsor_name });
+              done.push({ platform: m.platform as SeqPlatform, sponsor: m.sponsor_name, answers: {} });
               step++;
             } else break;
           }
@@ -135,8 +133,7 @@ function PredictionPage() {
       toast.error("Faça login para ganhar palpites extras.");
       return;
     }
-    const current = PLATFORM_ORDER[missionStep];
-    const mission = current ? missionsByPlat[current] : null;
+    const mission = missionQueue[missionStep];
     if (!mission) return;
     window.open(mission.link, "_blank", "noopener,noreferrer");
     setMissionStatus("verifying");
@@ -146,15 +143,18 @@ function PredictionPage() {
       } catch {
         // ignore (likely already claimed)
       }
-      setExtraPalpites((prev) => [...prev, { platform: current, sponsor: mission.sponsor_name }]);
+      // Save current answers as a completed extra round, then reset for the next round
+      setExtraPalpites((prev) => [...prev, { platform: mission.platform as SeqPlatform, sponsor: mission.sponsor_name, answers: subAnswers }]);
+      setSubAnswers({});
       setMissionStatus("done");
-      toast.success("✅ Missão feita! +1 palpite extra liberado.");
+      toast.success("✅ Missão feita! Palpites zerados — preencha mais um round!");
       setTimeout(() => {
         setMissionStep((s) => s + 1);
         setMissionStatus("idle");
       }, 1500);
     }, 5000);
   }
+
 
   const sel = p.options.find((o) => o.id === selected)!;
   const newPool = totalPool + amount;
