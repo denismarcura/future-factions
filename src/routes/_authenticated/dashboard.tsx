@@ -672,7 +672,7 @@ function MyChallengesSection({ items }: { items: Prediction[] }) {
     <section className="glass-card rounded-2xl p-5 border border-border/60">
       <SectionTitle
         icon={ListChecks}
-        title="Desafios que eu participo / criei"
+        title="Desafios que eu Criei"
         right={
           <Link
             to="/criar"
