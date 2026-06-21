@@ -47,6 +47,8 @@ const COST = 100;
 const REWARD_PER_HIT = 50;
 const AUTO_PRIZE = 5000;
 const MAX_OPTIONS = 10;
+const MAX_SUBS = 10;
+const BRAZIL_BONUS = 10000;
 
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -143,6 +145,61 @@ function Criar() {
   const [aiUseExistingSubs, setAiUseExistingSubs] = useState(true);
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState<string | null>(null);
+
+  // Inline AI generator (inside Sub-categorias section)
+  const [inlineAiCount, setInlineAiCount] = useState(3);
+  const [inlineAiLoading, setInlineAiLoading] = useState(false);
+  const [inlineAiError, setInlineAiError] = useState<string | null>(null);
+
+  const hasBrazilMatch = useMemo(
+    () => subs.some(s => /\bbrasil\b/i.test(s.question)) || /\bbrasil\b/i.test(name),
+    [subs, name],
+  );
+
+  const handleInlineGenerate = async () => {
+    setInlineAiError(null);
+    const remaining = MAX_SUBS - subs.length;
+    if (remaining <= 0) {
+      setInlineAiError(`Você já tem o máximo de ${MAX_SUBS} palpites.`);
+      return;
+    }
+    const want = Math.min(inlineAiCount, remaining);
+    setInlineAiLoading(true);
+    try {
+      const result = await generateChallengeFn({
+        data: {
+          theme: (name.trim() || subcategory || category || "Desafio de palpites"),
+          category,
+          subcategory: subcategory || undefined,
+          userSubs: subs
+            .map(s => ({ question: s.question.trim(), options: s.options.map(o => o.trim()).filter(Boolean) }))
+            .filter(s => s.question.length > 0),
+          count: subs.filter(s => s.question.trim()).length + want,
+          prizeName: prizeName.trim() || undefined,
+          endsAt: endsAt || undefined,
+        },
+      });
+      const existingQs = new Set(subs.map(s => s.question.trim().toLowerCase()).filter(Boolean));
+      const fresh = result.subs
+        .filter(s => !existingQs.has(s.question.trim().toLowerCase()))
+        .slice(0, want)
+        .map(s => ({ id: uid(), question: s.question, options: s.options.slice(0, MAX_OPTIONS) }));
+      // Replace empty placeholder subs first, then append
+      setSubs(prev => {
+        const out = [...prev];
+        for (const ns of fresh) {
+          const emptyIdx = out.findIndex(s => !s.question.trim());
+          if (emptyIdx >= 0) out[emptyIdx] = ns;
+          else if (out.length < MAX_SUBS) out.push(ns);
+        }
+        return out;
+      });
+    } catch (err) {
+      setInlineAiError(err instanceof Error ? err.message : "Não foi possível gerar agora.");
+    } finally {
+      setInlineAiLoading(false);
+    }
+  };
 
   const handleGenerateChallenge = async () => {
     setAiError(null);
@@ -249,7 +306,7 @@ function Criar() {
   };
 
   const addSub = () => {
-    if (subs.length >= 5) return;
+    if (subs.length >= MAX_SUBS) return;
     setSubs([...subs, { id: uid(), question: "", options: ["Sim", "Não"] }]);
   };
   const removeSub = (id: string) => setSubs(subs.filter(s => s.id !== id));
@@ -296,7 +353,7 @@ function Criar() {
             <Sparkles className="h-7 w-7 text-primary" /> Cadastro de Desafio
           </h1>
           <p className="text-muted-foreground mt-1">
-            Monte seu desafio, escolha até 5 sub-categorias e defina o prêmio.
+            Monte seu desafio, escolha até 10 sub-categorias e defina o prêmio.
           </p>
         </div>
         <div className="flex items-center gap-2 rounded-xl glass-card px-4 py-2.5">
@@ -561,20 +618,69 @@ function Criar() {
 
           {/* Sub-categorias */}
           <Section
-            title={`Sub-categorias de palpites (${subs.length}/5)`}
-            description={`Até 5 perguntas, cada uma com até ${MAX_OPTIONS} opções de resposta. Cada acerto vale ${REWARD_PER_HIT} tokens.`}
+            title={`Sub-categorias de palpites (${subs.length}/${MAX_SUBS})`}
+            description={`Até ${MAX_SUBS} perguntas, cada uma com até ${MAX_OPTIONS} opções de resposta. Cada acerto vale ${REWARD_PER_HIT} tokens.`}
 
             action={
               <button
                 type="button"
                 onClick={addSub}
-                disabled={subs.length >= 5}
+                disabled={subs.length >= MAX_SUBS}
                 className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg bg-primary/15 text-primary border border-primary/30 text-sm font-semibold hover:bg-primary/20 disabled:opacity-50"
               >
                 <Plus className="h-4 w-4" /> Nova sub-categoria
               </button>
             }
           >
+            {/* Gerar palpites com IA — inline */}
+            <div className="mb-4 rounded-xl border border-primary/30 bg-primary/5 p-3">
+              <div className="flex items-center gap-2 mb-2">
+                <Sparkles className="h-4 w-4 text-primary" />
+                <span className="text-sm font-bold">Gerar palpites com a IA</span>
+              </div>
+              <div className="flex flex-wrap items-end gap-2">
+                <label className="flex flex-col gap-1">
+                  <span className="text-[11px] text-muted-foreground">Quantos palpites</span>
+                  <select
+                    value={inlineAiCount}
+                    onChange={(e) => setInlineAiCount(Number(e.target.value))}
+                    className="input h-10 w-24"
+                  >
+                    {Array.from({ length: 10 }, (_, i) => i + 1).map(n => (
+                      <option key={n} value={n}>{n}</option>
+                    ))}
+                  </select>
+                </label>
+                <button
+                  type="button"
+                  onClick={handleInlineGenerate}
+                  disabled={inlineAiLoading || subs.length >= MAX_SUBS}
+                  className="inline-flex items-center gap-2 h-10 px-4 rounded-lg bg-primary text-primary-foreground text-sm font-bold hover:opacity-90 disabled:opacity-50"
+                >
+                  {inlineAiLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4" />}
+                  {inlineAiLoading ? "Gerando…" : "Gerar com IA"}
+                </button>
+                <span className="text-[11px] text-muted-foreground">
+                  Usa o tema, categoria e prêmio já preenchidos.
+                </span>
+              </div>
+              {inlineAiError && (
+                <div className="mt-2 text-xs text-destructive">{inlineAiError}</div>
+              )}
+            </div>
+
+            {hasBrazilMatch && (
+              <div className="mb-4 rounded-xl border border-gold/40 bg-gold/10 p-3 flex items-start gap-2.5">
+                <Coins className="h-5 w-5 text-gold mt-0.5 shrink-0" />
+                <div className="text-sm">
+                  <div className="font-bold text-gold">Bônus Seleção Brasileira</div>
+                  <div className="text-xs text-muted-foreground">
+                    Quem acertar <span className="font-bold text-foreground">TODOS</span> os palpites de um jogo do Brasil ganha <span className="font-bold text-gold">{BRAZIL_BONUS.toLocaleString("pt-BR")} tokens</span> extras.
+                  </div>
+                </div>
+              </div>
+            )}
+
             <div className="space-y-3">
               {subs.map((s, idx) => (
                 <div key={s.id} className="rounded-xl border border-border/60 bg-background/40 p-4">
@@ -633,13 +739,15 @@ function Criar() {
               <button
                 type="button"
                 onClick={addSub}
-                disabled={subs.length >= 5}
+                disabled={subs.length >= MAX_SUBS}
                 className="w-full inline-flex items-center justify-center gap-2 h-12 rounded-xl border-2 border-dashed border-primary/40 bg-primary/5 text-primary text-sm font-bold hover:bg-primary/10 hover:border-primary/60 disabled:opacity-40 disabled:cursor-not-allowed transition"
               >
-                <Plus className="h-4 w-4" /> + mais Palpites {subs.length >= 5 ? "(máx. 5)" : `(${subs.length}/5)`}
+                <Plus className="h-4 w-4" /> + mais Palpites {subs.length >= MAX_SUBS ? `(máx. ${MAX_SUBS})` : `(${subs.length}/${MAX_SUBS})`}
               </button>
             </div>
           </Section>
+
+
 
           {/* Prêmio */}
           <Section
@@ -1083,7 +1191,7 @@ function Criar() {
           <div className="rounded-2xl glass-card p-5 space-y-3">
             <div className="text-xs uppercase tracking-wider font-bold text-gold">Resumo</div>
             <Row label="Custo de criação" value={`${COST} Tokens`} />
-            <Row label="Sub-categorias" value={`${totalQuestions}/5`} />
+            <Row label="Sub-categorias" value={`${totalQuestions}/${MAX_SUBS}`} />
             <Row label="Prêmio em tokens (auto)" value={`${AUTO_PRIZE.toLocaleString("pt-BR")} Tokens`} />
             <Row label="Recompensa total possível" value={`${maxReward} Tokens / usuário`} />
             <Row label="Visibilidade" value={isOpen ? "Aberto" : "Privado"} />
@@ -1092,7 +1200,7 @@ function Criar() {
           <div className="rounded-2xl glass-card p-5">
             <div className="text-xs uppercase tracking-wider font-bold text-gold mb-2">Dicas</div>
             <ul className="text-sm text-muted-foreground list-disc pl-4 space-y-1.5">
-              <li>Use até 5 sub-categorias bem objetivas.</li>
+              <li>Use até 10 sub-categorias bem objetivas.</li>
               <li>Adicione missões para gerar mais palpites.</li>
               <li>Prêmio físico aumenta engajamento.</li>
               <li>Encerre antes do evento acontecer.</li>
