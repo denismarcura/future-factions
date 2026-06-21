@@ -17,6 +17,15 @@ import { improveTitle } from "@/lib/title-ai.functions";
 import { listCategories, listSubcategories, type ChallengeCategory, type ChallengeSubcategory } from "@/lib/challenge-categories";
 import { generateChallenge, improveDescription, generateWhatsAppInvite } from "@/lib/challenge-ai.functions";
 import logoAsset from "@/assets/logo-desafio.png.asset.json";
+import { WORLD_CUP_MATCHES } from "@/lib/world-cup-matches";
+
+function getNextBrazilMatch() {
+  const now = Date.now();
+  const upcoming = WORLD_CUP_MATCHES
+    .filter(m => (m.home === "Brasil" || m.away === "Brasil") && new Date(m.kickoff).getTime() > now)
+    .sort((a, b) => new Date(a.kickoff).getTime() - new Date(b.kickoff).getTime());
+  return upcoming[0] ?? WORLD_CUP_MATCHES.find(m => m.home === "Brasil" || m.away === "Brasil")!;
+}
 
 export const Route = createFileRoute("/criar")({
   head: () => ({
