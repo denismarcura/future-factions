@@ -29,12 +29,14 @@ export const Route = createFileRoute("/criar")({
 type SubCat = {
   id: string;
   question: string;
-  options: string[]; // up to 3
+  options: string[]; // up to MAX_OPTIONS
 };
 
 const COST = 100;
 const REWARD_PER_HIT = 50;
 const AUTO_PRIZE = 5000;
+const MAX_OPTIONS = 10;
+
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
 
@@ -237,9 +239,10 @@ function Criar() {
   const setOption = (id: string, i: number, v: string) =>
     setSubs(subs.map(s => s.id === id ? { ...s, options: s.options.map((o, x) => x === i ? v : o) } : s));
   const addOption = (id: string) =>
-    setSubs(subs.map(s => s.id === id && s.options.length < 3 ? { ...s, options: [...s.options, ""] } : s));
+    setSubs(subs.map(s => s.id === id && s.options.length < MAX_OPTIONS ? { ...s, options: [...s.options, ""] } : s));
   const removeOption = (id: string, i: number) =>
     setSubs(subs.map(s => s.id === id && s.options.length > 2 ? { ...s, options: s.options.filter((_, x) => x !== i) } : s));
+
 
   const handleUpload = (file: File) => {
     const url = URL.createObjectURL(file);
@@ -540,7 +543,8 @@ function Criar() {
           {/* Sub-categorias */}
           <Section
             title={`Sub-categorias de palpites (${subs.length}/5)`}
-            description={`Até 5 perguntas, cada uma com até 3 opções. Cada acerto vale ${REWARD_PER_HIT} tokens.`}
+            description={`Até 5 perguntas, cada uma com até ${MAX_OPTIONS} opções de resposta. Cada acerto vale ${REWARD_PER_HIT} tokens.`}
+
             action={
               <button
                 type="button"
@@ -590,15 +594,16 @@ function Criar() {
                         </button>
                       </div>
                     ))}
-                    {s.options.length < 3 && (
+                    {s.options.length < MAX_OPTIONS && (
                       <button
                         type="button"
                         onClick={() => addOption(s.id)}
                         className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg border border-dashed border-border text-sm text-muted-foreground hover:text-primary hover:border-primary/60"
                       >
-                        <Plus className="h-4 w-4" /> Adicionar opção (até 3)
+                        <Plus className="h-4 w-4" /> Adicionar opção ({s.options.length}/{MAX_OPTIONS})
                       </button>
                     )}
+
                   </div>
                   <div className="mt-3 text-xs text-muted-foreground">
                     Quem acertar este palpite ganha <span className="text-primary font-bold">{REWARD_PER_HIT} tokens</span>.
