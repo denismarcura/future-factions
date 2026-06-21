@@ -185,7 +185,7 @@ function Missoes() {
                         <div className="font-semibold truncate">{m.sponsor_name}</div>
                         <div className="text-xs text-muted-foreground truncate">{ACTION_LABEL[m.action_type]}</div>
                         <div className="text-xs text-gold font-bold mt-0.5">
-                          +{m.tokens} Tokens{m.bonus_tokens > 0 && ` · +${m.bonus_tokens} bônus`}
+                          +{m.tokens} Tokens{m.bonus_tokens > 0 && ` · +${m.bonus_tokens} bônus`} · +{COMPLETION_BONUS_TOKENS} extra · +{COMPLETION_BONUS_CHANCES} chance
                         </div>
                       </div>
                       <button
