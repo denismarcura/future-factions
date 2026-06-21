@@ -402,11 +402,19 @@ function PredictionPage() {
                 <div className="mt-5 space-y-2 text-sm">
                   <Row label="Odds estimada" value={odds.toFixed(2) + "x"} />
                   <Row label="Possível retorno" value={`${formatTokens(possibleReturn)} TKN`} highlight />
-                  <Row label="Seu saldo" value={`${formatTokens(CURRENT_USER.tokens)} TKN`} />
+                  <Row label="Seu saldo" value={`${formatTokens(balance ?? CURRENT_USER.tokens)} TKN`} />
                 </div>
 
                 <button
                   onClick={() => {
+                    if (!user) {
+                      toast.error("Faça login para apostar.");
+                      return;
+                    }
+                    if (balance !== null && balance < amount) {
+                      toast.error(`Saldo insuficiente. Você tem ${formatTokens(balance)} TKN.`);
+                      return;
+                    }
                     saveParticipation({
                       id: p.id,
                       title: p.title,
@@ -419,9 +427,10 @@ function PredictionPage() {
                     });
                     toast.success(`✅ Aposta de ${amount} TKN em "${sel.label}" confirmada!`);
                   }}
-                  className="mt-5 w-full h-12 rounded-xl bg-gradient-brand text-primary-foreground font-display font-black tracking-wide shadow-glow hover:scale-[1.01] transition"
+                  disabled={balance !== null && balance < amount}
+                  className="mt-5 w-full h-12 rounded-xl bg-gradient-brand text-primary-foreground font-display font-black tracking-wide shadow-glow hover:scale-[1.01] transition disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  APOSTAR {amount} TOKENS
+                  {balance !== null && balance < amount ? "SALDO INSUFICIENTE" : `APOSTAR ${amount} TOKENS`}
                 </button>
 
                 <p className="mt-3 text-[11px] text-center text-muted-foreground">
