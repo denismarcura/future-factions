@@ -75,7 +75,7 @@ function DesafiosPage() {
     return list;
   }, [tab, cat, userChallenges, publicMock, privateMock, aiIds]);
 
-  const handleAiSearch = async (e: React.FormEvent) => {
+  const handleAiSearch = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
     const q = query.trim();
     if (!q) return;
