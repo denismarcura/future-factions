@@ -342,23 +342,35 @@ function PredictionPage() {
             </div>
           )}
 
-          {/* PARTICIPAR — botão verde único */}
+          {/* PARTICIPAR — botão verde único (também serve para CONFIRMAR PALPITE EXTRA) */}
           <button
             onClick={handleParticipate}
             disabled={
               isClosed ||
-              (p.subPredictions ? confirmed || Object.keys(subAnswers).length < p.subPredictions.length : false) ||
-              (balance !== null && balance < (p.entryFee ?? amount))
+              (p.subPredictions
+                ? (Object.keys(subAnswers).length < p.subPredictions.length) || (confirmed && !pendingExtra)
+                : false) ||
+              (!confirmed && balance !== null && balance < (p.entryFee ?? amount))
             }
             className="mt-6 w-full h-14 rounded-xl font-display font-black tracking-wide text-lg transition disabled:opacity-60 disabled:cursor-not-allowed text-white"
             style={{
-              background: confirmed
+              background: pendingExtra
+                ? "linear-gradient(135deg, #f59e0b, #d97706)"
+                : confirmed
                 ? "linear-gradient(135deg, #059669, #047857)"
                 : "linear-gradient(135deg, #22c55e, #16a34a)",
-              boxShadow: "0 0 28px rgba(34,197,94,0.45), 0 10px 24px -8px rgba(34,197,94,0.6)",
+              boxShadow: pendingExtra
+                ? "0 0 28px rgba(245,158,11,0.5), 0 10px 24px -8px rgba(245,158,11,0.6)"
+                : "0 0 28px rgba(34,197,94,0.45), 0 10px 24px -8px rgba(34,197,94,0.6)",
             }}
           >
-            {isClosed ? "APOSTAS ENCERRADAS" : confirmed ? "✓ PARTICIPAÇÃO CONFIRMADA" : "PARTICIPAR"}
+            {isClosed
+              ? "APOSTAS ENCERRADAS"
+              : pendingExtra
+              ? `🎁 CONFIRMAR PALPITE EXTRA Nº ${extraPalpites.length + 1}`
+              : confirmed
+              ? "✓ PARTICIPAÇÃO CONFIRMADA"
+              : "PARTICIPAR"}
           </button>
           {user && balance !== null && (
             <p className="mt-2 text-[11px] text-center text-muted-foreground">
