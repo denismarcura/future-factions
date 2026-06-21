@@ -149,6 +149,7 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
   const generateChallengeFn = useServerFn(generateChallenge);
   const improveDescriptionFn = useServerFn(improveDescription);
   const generateWhatsFn = useServerFn(generateWhatsAppInvite);
+  const generatePrizeImageFn = useServerFn(generatePrizeImage);
 
   // AI Challenge Generator state
   const [aiOpen, setAiOpen] = useState(false);
