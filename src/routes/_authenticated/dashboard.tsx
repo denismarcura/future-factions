@@ -899,20 +899,36 @@ function RecommendationsSection() {
 function FriendsSection({
   friends,
   inviterName,
+  userId,
   onChange,
 }: {
   friends: Friend[];
   inviterName: string;
+  userId: string;
   onChange: () => void;
 }) {
   const [name, setName] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
   const [email, setEmail] = useState("");
+  const [bulkText, setBulkText] = useState("");
 
   const registered = friends.filter((f) => f.registered);
   const pending = friends.filter((f) => !f.registered);
 
-  const inviteMessage = `Oi! Vem jogar comigo no Desafio dos Palpites. ${inviterName} te convidou — você ganha 1.000 tokens de boas-vindas. ${typeof window !== "undefined" ? window.location.origin : ""}/auth`;
+  const refCode = (userId || "").slice(0, 8) || "amigo";
+  const referralLink = `${SITE_URL}/auth?ref=${refCode}`;
+  const inviteMessage = `Oi! Vem jogar comigo no Desafio dos Palpites. ${inviterName} te convidou — você ganha 1.000 tokens de boas-vindas. ${referralLink}`;
+
+  function handleBulk() {
+    const n = addManyFromText(bulkText);
+    if (n === 0) {
+      toast.error("Nenhum amigo identificado no texto.");
+      return;
+    }
+    setBulkText("");
+    onChange();
+    toast.success(`${n} amigo(s) adicionado(s) à lista`);
+  }
 
   function handleAdd(e: React.FormEvent) {
     e.preventDefault();
