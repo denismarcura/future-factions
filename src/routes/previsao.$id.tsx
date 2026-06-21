@@ -421,17 +421,13 @@ function PredictionPage() {
                 </div>
               )}
 
-              {!confirmed && (
-                <div className="rounded-xl border-2 border-dashed border-border/60 bg-background/40 p-4 text-center">
-                  <Lock className="h-5 w-5 mx-auto text-muted-foreground mb-2" />
-                  <div className="text-sm font-bold text-muted-foreground">Missões bônus bloqueadas</div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Confirme sua participação para desbloquear missões e ganhar <strong className="text-gold">palpites extras</strong>.
-                  </p>
+              {!confirmed && missionQueue.length > 0 && (
+                <div className="rounded-xl border border-primary/30 bg-primary/5 p-3 text-xs text-center text-muted-foreground">
+                  💡 Faça as missões agora para ganhar <strong className="text-gold">tokens extras</strong> e depois usar nos palpites — ou confirme sua participação primeiro.
                 </div>
               )}
 
-              {confirmed && !allDone && currentMission && currentPlatform && (() => {
+              {!allDone && currentMission && currentPlatform && (() => {
                 const T = PLATFORM_THEME[currentPlatform];
                 const verifying = missionStatus === "verifying";
                 const done = missionStatus === "done";
@@ -445,10 +441,13 @@ function PredictionPage() {
                   >
                     <div className="flex items-center gap-2 text-sm font-display font-black mb-1">
                       <T.Icon className="h-4 w-4" style={{ color: T.color }} />
-                      <span style={{ color: T.color }}>Palpite extra grátis — {T.label}</span>
+                      <span style={{ color: T.color }}>
+                        {confirmed ? "Palpite extra grátis" : "Missão bônus"} — {T.label}
+                      </span>
                     </div>
                     <p className="text-xs text-muted-foreground mb-3">
-                      <strong>{ACTION_LABEL[currentMission.action_type]}</strong> {currentMission.sponsor_name} no {T.label} e ganhe <strong className="text-gold">+1 round</strong> de palpites (seus palpites serão zerados para preencher de novo).
+                      <strong>{ACTION_LABEL[currentMission.action_type]}</strong> {currentMission.sponsor_name} no {T.label} e ganhe <strong className="text-gold">+{currentMission.tokens} TKN</strong>
+                      {confirmed ? <> (libera +1 round de palpites extras).</> : <> no seu saldo.</>}
                     </p>
                     <button
                       onClick={handleMissionClick}
@@ -459,7 +458,7 @@ function PredictionPage() {
                       {verifying ? (
                         <><Loader2 className="h-4 w-4 animate-spin" /> Validando missão…</>
                       ) : done ? (
-                        <><Check className="h-4 w-4" /> Missão feita — palpites zerados!</>
+                        <><Check className="h-4 w-4" /> Missão concluída!</>
                       ) : (
                         <><ExternalLink className="h-4 w-4" /> {currentMission.title}</>
                       )}
