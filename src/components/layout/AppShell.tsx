@@ -16,6 +16,7 @@ import {
   Flame,
   ListChecks,
   Shield,
+  Brain,
   LogIn,
   LogOut,
 } from "lucide-react";
