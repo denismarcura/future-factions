@@ -81,6 +81,11 @@
   --gradient-gold: linear-gradient(135deg, oklch(0.92 0.14 95), oklch(0.78 0.18 80));
   --gradient-silver: linear-gradient(135deg, oklch(0.95 0.005 240), oklch(0.72 0.01 240));
   --gradient-radial: radial-gradient(ellipse at top, color-mix(in oklab, var(--primary) 20%, transparent), transparent 60%);
+
+  --gradient-instagram: linear-gradient(135deg, #E1306C, #833AB4);
+  --gradient-youtube: linear-gradient(135deg, #FF0000, #CC0000);
+  --gradient-facebook: linear-gradient(135deg, #1877F2, #0D5AA5);
+  --gradient-tiktok: linear-gradient(135deg, #010101, #333333);
 }
 
 .dark {
