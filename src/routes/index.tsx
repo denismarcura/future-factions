@@ -5,7 +5,7 @@ import imgCampeao from "@/assets/dd-campeao.jpg";
 import imgMalucos from "@/assets/pm-soccer.jpg";
 import imgAlien from "@/assets/cat-alienigenas.jpg";
 import bannerNaoGaste from "@/assets/banner-nao-gaste.png.asset.json";
-import bannerPalpitou from "@/assets/banner-palpitou.png.asset.json";
+
 import { AppShell } from "@/components/layout/AppShell";
 import { PredictionCard } from "@/components/PredictionCard";
 import { CATEGORIES, PREDICTIONS } from "@/lib/mock-data";
