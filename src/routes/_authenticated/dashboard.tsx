@@ -129,9 +129,16 @@ function Dashboard() {
   }, []);
 
   const claimedIds = useMemo(() => new Set(claims.map((c) => c.mission_id)), [claims]);
+  const spentTokens = useMemo(
+    () => participations.reduce((s, p) => s + (p.entryFee ?? 0), 0),
+    [participations],
+  );
   const tokens = useMemo(
-    () => (profile?.welcome_bonus ?? 0) + claims.reduce((s, c) => s + (c.tokens_awarded ?? 0), 0),
-    [claims, profile?.welcome_bonus],
+    () =>
+      (profile?.welcome_bonus ?? 0) +
+      claims.reduce((s, c) => s + (c.tokens_awarded ?? 0), 0) -
+      spentTokens,
+    [claims, profile?.welcome_bonus, spentTokens],
   );
   const missionsDone = claims.length;
   const missionsTodo = missions.filter((m) => !claimedIds.has(m.id)).length;
