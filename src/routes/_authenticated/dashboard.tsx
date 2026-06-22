@@ -515,6 +515,13 @@ function ProfileEditor({
           instagram: instagram.trim() || null,
           cpf: cpfDigits || null,
           avatar_url: avatar || null,
+          cep: cep.replace(/\D/g, "") || null,
+          endereco: endereco.trim() || null,
+          numero: numero.trim() || null,
+          complemento: complemento.trim() || null,
+          bairro: bairro.trim() || null,
+          cidade: cidade.trim() || null,
+          estado: estado.trim() || null,
         })
         .eq("id", profile!.id)
         .select()
