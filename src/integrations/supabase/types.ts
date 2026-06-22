@@ -38,6 +38,47 @@ export type Database = {
         }
         Relationships: []
       }
+      challenge_result_audit: {
+        Row: {
+          challenge_id: string
+          changed_by: string | null
+          created_at: string
+          id: string
+          new_result: Json | null
+          notes: string | null
+          previous_result: Json | null
+          source: string
+        }
+        Insert: {
+          challenge_id: string
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          new_result?: Json | null
+          notes?: string | null
+          previous_result?: Json | null
+          source: string
+        }
+        Update: {
+          challenge_id?: string
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          new_result?: Json | null
+          notes?: string | null
+          previous_result?: Json | null
+          source?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "challenge_result_audit_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "challenges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       challenge_results_log: {
         Row: {
           challenge_id: string
@@ -127,6 +168,7 @@ export type Database = {
         Row: {
           challenge_id: string
           created_at: string
+          email_notified_at: string | null
           id: string
           notes: string | null
           palpite_id: string | null
@@ -141,6 +183,7 @@ export type Database = {
         Insert: {
           challenge_id: string
           created_at?: string
+          email_notified_at?: string | null
           id?: string
           notes?: string | null
           palpite_id?: string | null
@@ -155,6 +198,7 @@ export type Database = {
         Update: {
           challenge_id?: string
           created_at?: string
+          email_notified_at?: string | null
           id?: string
           notes?: string | null
           palpite_id?: string | null
@@ -359,6 +403,62 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      email_notifications: {
+        Row: {
+          challenge_id: string
+          created_at: string
+          error: string | null
+          id: string
+          points: number | null
+          position: number | null
+          recipient_email: string
+          sent_at: string | null
+          status: string
+          template: string
+          tokens: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          challenge_id: string
+          created_at?: string
+          error?: string | null
+          id?: string
+          points?: number | null
+          position?: number | null
+          recipient_email: string
+          sent_at?: string | null
+          status?: string
+          template: string
+          tokens?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          challenge_id?: string
+          created_at?: string
+          error?: string | null
+          id?: string
+          points?: number | null
+          position?: number | null
+          recipient_email?: string
+          sent_at?: string | null
+          status?: string
+          template?: string
+          tokens?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_notifications_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "challenges"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       mission_claims: {
         Row: {
