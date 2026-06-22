@@ -17,6 +17,7 @@ function AdminHome() {
   ];
 
   const shortcuts = [
+    { to: "/admin/resultado-jogos", title: "Resultado dos Jogos", desc: "Placar oficial da Copa 2026 — atualiza os cards automaticamente.", icon: Trophy },
     { to: "/admin/apuracao-copa", title: "Apuração da Copa", desc: "IA + FIFA atualizam placares e liberam tokens automaticamente.", icon: Trophy },
     { to: "/admin/cadastros", title: "Cadastros", desc: "Veja todos os usuários, indicações, tokens e estatísticas.", icon: Users },
     { to: "/admin/apis", title: "Cadastro de APIs", desc: "Configure ChatGPT, Resend e Maritaca.", icon: KeyRound },

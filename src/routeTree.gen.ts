@@ -31,6 +31,7 @@ import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as RankingChallengeIdRouteImport } from './routes/ranking.$challengeId'
 import { Route as PrevisaoIdRouteImport } from './routes/previsao.$id'
 import { Route as EmpresaCriarRouteImport } from './routes/empresa.criar'
+import { Route as AdminResultadoJogosRouteImport } from './routes/admin.resultado-jogos'
 import { Route as AdminRegrasIaRouteImport } from './routes/admin.regras-ia'
 import { Route as AdminMissoesRouteImport } from './routes/admin.missoes'
 import { Route as AdminEmpresasRouteImport } from './routes/admin.empresas'
@@ -154,6 +155,11 @@ const EmpresaCriarRoute = EmpresaCriarRouteImport.update({
   path: '/empresa/criar',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminResultadoJogosRoute = AdminResultadoJogosRouteImport.update({
+  id: '/resultado-jogos',
+  path: '/resultado-jogos',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminRegrasIaRoute = AdminRegrasIaRouteImport.update({
   id: '/regras-ia',
   path: '/regras-ia',
@@ -251,6 +257,7 @@ export interface FileRoutesByFullPath {
   '/admin/empresas': typeof AdminEmpresasRoute
   '/admin/missoes': typeof AdminMissoesRoute
   '/admin/regras-ia': typeof AdminRegrasIaRoute
+  '/admin/resultado-jogos': typeof AdminResultadoJogosRoute
   '/empresa/criar': typeof EmpresaCriarRoute
   '/previsao/$id': typeof PrevisaoIdRoute
   '/ranking/$challengeId': typeof RankingChallengeIdRoute
@@ -286,6 +293,7 @@ export interface FileRoutesByTo {
   '/admin/empresas': typeof AdminEmpresasRoute
   '/admin/missoes': typeof AdminMissoesRoute
   '/admin/regras-ia': typeof AdminRegrasIaRoute
+  '/admin/resultado-jogos': typeof AdminResultadoJogosRoute
   '/empresa/criar': typeof EmpresaCriarRoute
   '/previsao/$id': typeof PrevisaoIdRoute
   '/ranking/$challengeId': typeof RankingChallengeIdRoute
@@ -324,6 +332,7 @@ export interface FileRoutesById {
   '/admin/empresas': typeof AdminEmpresasRoute
   '/admin/missoes': typeof AdminMissoesRoute
   '/admin/regras-ia': typeof AdminRegrasIaRoute
+  '/admin/resultado-jogos': typeof AdminResultadoJogosRoute
   '/empresa/criar': typeof EmpresaCriarRoute
   '/previsao/$id': typeof PrevisaoIdRoute
   '/ranking/$challengeId': typeof RankingChallengeIdRoute
@@ -362,6 +371,7 @@ export interface FileRouteTypes {
     | '/admin/empresas'
     | '/admin/missoes'
     | '/admin/regras-ia'
+    | '/admin/resultado-jogos'
     | '/empresa/criar'
     | '/previsao/$id'
     | '/ranking/$challengeId'
@@ -397,6 +407,7 @@ export interface FileRouteTypes {
     | '/admin/empresas'
     | '/admin/missoes'
     | '/admin/regras-ia'
+    | '/admin/resultado-jogos'
     | '/empresa/criar'
     | '/previsao/$id'
     | '/ranking/$challengeId'
@@ -434,6 +445,7 @@ export interface FileRouteTypes {
     | '/admin/empresas'
     | '/admin/missoes'
     | '/admin/regras-ia'
+    | '/admin/resultado-jogos'
     | '/empresa/criar'
     | '/previsao/$id'
     | '/ranking/$challengeId'
@@ -623,6 +635,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EmpresaCriarRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/resultado-jogos': {
+      id: '/admin/resultado-jogos'
+      path: '/resultado-jogos'
+      fullPath: '/admin/resultado-jogos'
+      preLoaderRoute: typeof AdminResultadoJogosRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/regras-ia': {
       id: '/admin/regras-ia'
       path: '/regras-ia'
@@ -739,6 +758,7 @@ interface AdminRouteChildren {
   AdminEmpresasRoute: typeof AdminEmpresasRoute
   AdminMissoesRoute: typeof AdminMissoesRoute
   AdminRegrasIaRoute: typeof AdminRegrasIaRoute
+  AdminResultadoJogosRoute: typeof AdminResultadoJogosRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
@@ -753,6 +773,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminEmpresasRoute: AdminEmpresasRoute,
   AdminMissoesRoute: AdminMissoesRoute,
   AdminRegrasIaRoute: AdminRegrasIaRoute,
+  AdminResultadoJogosRoute: AdminResultadoJogosRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
 
