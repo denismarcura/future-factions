@@ -65,9 +65,15 @@ function TikTokIcon({ className, style }: { className?: string; style?: React.CS
 }
 
 export const Route = createFileRoute("/previsao/$id")({
-  loader: ({ params }): { id: string; initial: Prediction | null } => {
-    const p = getPrediction(params.id);
-    return { id: params.id, initial: p ?? null };
+  loader: async ({ params }): Promise<{ id: string; initial: Prediction | null }> => {
+    const local = getPrediction(params.id);
+    if (local) return { id: params.id, initial: local };
+    try {
+      const corp = await getCorpChallenge({ data: { id: params.id } });
+      return { id: params.id, initial: corp ? corpToPrediction(corp) : null };
+    } catch {
+      return { id: params.id, initial: null };
+    }
   },
   head: ({ loaderData }) => ({
     meta: loaderData?.initial
@@ -76,6 +82,12 @@ export const Route = createFileRoute("/previsao/$id")({
           { name: "description", content: loaderData.initial.description },
           { property: "og:title", content: loaderData.initial.title },
           { property: "og:description", content: loaderData.initial.description },
+          ...(loaderData.initial.imageUrl
+            ? [
+                { property: "og:image", content: loaderData.initial.imageUrl },
+                { name: "twitter:image", content: loaderData.initial.imageUrl },
+              ]
+            : []),
         ]
       : [],
   }),
@@ -99,13 +111,31 @@ function PredictionPage() {
   const { id, initial } = Route.useLoaderData();
   const [p, setP] = useState<Prediction | null>(initial);
   const [resolving, setResolving] = useState<boolean>(!initial);
+  const getCorpChallengeFn = useServerFn(getCorpChallenge);
 
   useEffect(() => {
     if (p) return;
-    const found = getPrediction(id);
-    if (found) setP(found);
-    setResolving(false);
-  }, [id, p]);
+    let cancelled = false;
+    (async () => {
+      const found = getPrediction(id);
+      if (found) {
+        if (!cancelled) {
+          setP(found);
+          setResolving(false);
+        }
+        return;
+      }
+      try {
+        const corp = await getCorpChallengeFn({ data: { id } });
+        if (!cancelled && corp) setP(corpToPrediction(corp));
+      } catch {
+        /* ignore */
+      } finally {
+        if (!cancelled) setResolving(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [id, p, getCorpChallengeFn]);
 
   if (!p) {
     return (
