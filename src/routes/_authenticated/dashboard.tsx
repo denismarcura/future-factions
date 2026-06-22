@@ -67,6 +67,7 @@ import { generateChallenges, type GeneratedChallenge } from "@/lib/generate-chal
 import { generateInvitePromoText } from "@/lib/invite-ai.functions";
 import { listParticipations, type MyParticipation } from "@/lib/my-participations";
 import type { Prediction } from "@/lib/mock-data";
+import { uploadAvatar, takePendingAvatar } from "@/lib/avatar-upload";
 import arte01 from "@/assets/dashboard-arte-01.png.asset.json";
 import arte02 from "@/assets/dashboard-arte-02.png.asset.json";
 import arte03 from "@/assets/dashboard-arte-03.png.asset.json";
