@@ -808,10 +808,9 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
               <button
                 type="button"
                 onClick={addSub}
-                disabled={subs.length >= MAX_SUBS}
-                className="w-full inline-flex items-center justify-center gap-2 h-12 rounded-xl border-2 border-dashed border-primary/40 bg-primary/5 text-primary text-sm font-bold hover:bg-primary/10 hover:border-primary/60 disabled:opacity-40 disabled:cursor-not-allowed transition"
+                className="w-full inline-flex items-center justify-center gap-2 h-12 rounded-xl border-2 border-dashed border-primary/40 bg-primary/5 text-primary text-sm font-bold hover:bg-primary/10 hover:border-primary/60 transition"
               >
-                <Plus className="h-4 w-4" /> + mais Palpites {subs.length >= MAX_SUBS ? `(máx. ${MAX_SUBS})` : `(${subs.length}/${MAX_SUBS})`}
+                <Plus className="h-4 w-4" /> + mais Palpites ({subs.length})
               </button>
             </div>
           </Section>
