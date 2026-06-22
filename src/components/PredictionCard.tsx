@@ -3,6 +3,7 @@ import { MessageCircle, Heart, Share2, Users, Plus } from "lucide-react";
 import { type Prediction, formatTokens } from "@/lib/mock-data";
 import { CATEGORY_IMAGES } from "@/lib/category-images";
 import { ClosingTimerBadge } from "@/components/ClosingTimerBadge";
+import { findResult } from "@/lib/world-cup-matches";
 
 export function PredictionCard({ prediction: p, hideOptions = false }: { prediction: Prediction; hideOptions?: boolean }) {
   const navigate = useNavigate();
