@@ -122,7 +122,7 @@ function Feed() {
           <div className="mt-5 sm:mt-8">
             <Link
               to="/desafios"
-              className="inline-flex items-center justify-center gap-2 h-12 sm:h-16 px-7 sm:px-10 rounded-full bg-gradient-brand text-primary-foreground text-base sm:text-xl font-black uppercase tracking-wide shadow-glow hover:scale-[1.03] transition"
+              className="inline-flex items-center justify-center gap-2 h-12 sm:h-16 px-7 sm:px-10 rounded-full bg-gradient-brand text-primary-foreground text-base sm:text-xl font-black uppercase tracking-wide shadow-glow hover:scale-[1.03] transition btn-neon shine-on-hover float-soft"
             >
               COMEÇAR AGORA
             </Link>
