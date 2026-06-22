@@ -37,6 +37,7 @@ import { Route as AdminDesafiosRouteImport } from './routes/admin.desafios'
 import { Route as AdminCategoriasRouteImport } from './routes/admin.categorias'
 import { Route as AdminCadastrosRouteImport } from './routes/admin.cadastros'
 import { Route as AdminBannersRouteImport } from './routes/admin.banners'
+import { Route as AdminApuracaoCopaRouteImport } from './routes/admin.apuracao-copa'
 import { Route as AdminApisRouteImport } from './routes/admin.apis'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as ApiPublicHooksApurarCopaRouteImport } from './routes/api/public/hooks/apurar-copa'
@@ -180,6 +181,11 @@ const AdminBannersRoute = AdminBannersRouteImport.update({
   path: '/banners',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminApuracaoCopaRoute = AdminApuracaoCopaRouteImport.update({
+  id: '/apuracao-copa',
+  path: '/apuracao-copa',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminApisRoute = AdminApisRouteImport.update({
   id: '/apis',
   path: '/apis',
@@ -216,6 +222,7 @@ export interface FileRoutesByFullPath {
   '/top100': typeof Top100Route
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/admin/apis': typeof AdminApisRoute
+  '/admin/apuracao-copa': typeof AdminApuracaoCopaRoute
   '/admin/banners': typeof AdminBannersRoute
   '/admin/cadastros': typeof AdminCadastrosRoute
   '/admin/categorias': typeof AdminCategoriasRoute
@@ -247,6 +254,7 @@ export interface FileRoutesByTo {
   '/top100': typeof Top100Route
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/admin/apis': typeof AdminApisRoute
+  '/admin/apuracao-copa': typeof AdminApuracaoCopaRoute
   '/admin/banners': typeof AdminBannersRoute
   '/admin/cadastros': typeof AdminCadastrosRoute
   '/admin/categorias': typeof AdminCategoriasRoute
@@ -281,6 +289,7 @@ export interface FileRoutesById {
   '/top100': typeof Top100Route
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/admin/apis': typeof AdminApisRoute
+  '/admin/apuracao-copa': typeof AdminApuracaoCopaRoute
   '/admin/banners': typeof AdminBannersRoute
   '/admin/cadastros': typeof AdminCadastrosRoute
   '/admin/categorias': typeof AdminCategoriasRoute
@@ -315,6 +324,7 @@ export interface FileRouteTypes {
     | '/top100'
     | '/dashboard'
     | '/admin/apis'
+    | '/admin/apuracao-copa'
     | '/admin/banners'
     | '/admin/cadastros'
     | '/admin/categorias'
@@ -346,6 +356,7 @@ export interface FileRouteTypes {
     | '/top100'
     | '/dashboard'
     | '/admin/apis'
+    | '/admin/apuracao-copa'
     | '/admin/banners'
     | '/admin/cadastros'
     | '/admin/categorias'
@@ -379,6 +390,7 @@ export interface FileRouteTypes {
     | '/top100'
     | '/_authenticated/dashboard'
     | '/admin/apis'
+    | '/admin/apuracao-copa'
     | '/admin/banners'
     | '/admin/cadastros'
     | '/admin/categorias'
@@ -614,6 +626,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminBannersRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/apuracao-copa': {
+      id: '/admin/apuracao-copa'
+      path: '/apuracao-copa'
+      fullPath: '/admin/apuracao-copa'
+      preLoaderRoute: typeof AdminApuracaoCopaRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/apis': {
       id: '/admin/apis'
       path: '/apis'
@@ -651,6 +670,7 @@ const AuthenticatedRouteRouteWithChildren =
 
 interface AdminRouteChildren {
   AdminApisRoute: typeof AdminApisRoute
+  AdminApuracaoCopaRoute: typeof AdminApuracaoCopaRoute
   AdminBannersRoute: typeof AdminBannersRoute
   AdminCadastrosRoute: typeof AdminCadastrosRoute
   AdminCategoriasRoute: typeof AdminCategoriasRoute
@@ -664,6 +684,7 @@ interface AdminRouteChildren {
 
 const AdminRouteChildren: AdminRouteChildren = {
   AdminApisRoute: AdminApisRoute,
+  AdminApuracaoCopaRoute: AdminApuracaoCopaRoute,
   AdminBannersRoute: AdminBannersRoute,
   AdminCadastrosRoute: AdminCadastrosRoute,
   AdminCategoriasRoute: AdminCategoriasRoute,
