@@ -1,26 +1,18 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { MessageCircle, Heart, Share2, Users, Plus } from "lucide-react";
+import { MessageCircle, Heart, Share2, Users, Plus, Trophy, Radio } from "lucide-react";
 import { type Prediction, formatTokens } from "@/lib/mock-data";
 import { CATEGORY_IMAGES } from "@/lib/category-images";
 import { ClosingTimerBadge } from "@/components/ClosingTimerBadge";
-import { findResult } from "@/lib/world-cup-matches";
+import { useWorldCupResults, findOrientedResult } from "@/lib/world-cup-results-client";
 
 export function PredictionCard({ prediction: p, hideOptions = false }: { prediction: Prediction; hideOptions?: boolean }) {
   const navigate = useNavigate();
   const totalPool = p.options.reduce((s, o) => s + o.pool, 0);
-  const result = p.match ? findResult(p.match.home, p.match.away) : undefined;
-  // Normalize result orientation to current card's home/away
-  const oriented = result
-    ? (() => {
-        const norm = (s: string) => s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
-        const swap = norm(result.home) !== norm(p.match!.home);
-        return {
-          status: result.status,
-          homeScore: swap ? result.awayScore : result.homeScore,
-          awayScore: swap ? result.homeScore : result.awayScore,
-        };
-      })()
-    : null;
+  const { data: results } = useWorldCupResults();
+  const oriented = p.match ? findOrientedResult(results, p.match.home, p.match.away) : null;
+  const hasFinalResult = oriented?.status === "encerrado";
+  const isLive = oriented?.status === "em_andamento";
+
   return (
     <article className="group rounded-2xl bg-card border border-border/60 hover:border-primary/50 hover:shadow-glow transition overflow-hidden h-full flex flex-col">
       <Link
@@ -34,54 +26,85 @@ export function PredictionCard({ prediction: p, hideOptions = false }: { predict
               {p.category}
             </span>
             <span className="shrink-0">
-              <ClosingTimerBadge closesAt={p.closesAt} />
+              {hasFinalResult ? (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/15 text-primary border border-primary/30 font-bold uppercase tracking-wider text-[10px]">
+                  <Trophy className="h-3 w-3" /> Encerrado
+                </span>
+              ) : isLive ? (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-destructive/15 text-destructive border border-destructive/30 font-bold uppercase tracking-wider text-[10px] animate-pulse">
+                  <Radio className="h-3 w-3" /> Ao vivo
+                </span>
+              ) : (
+                <ClosingTimerBadge closesAt={p.closesAt} />
+              )}
             </span>
           </div>
 
           <h3 className="mt-3 font-display text-lg font-bold leading-snug group-hover:text-gradient-brand transition flex items-start gap-2">
-            <span className="mt-2 h-2.5 w-2.5 rounded-full bg-primary shadow-[0_0_10px_var(--primary)] flex-none" title="Desafio aberto" />
+            <span
+              className={`mt-2 h-2.5 w-2.5 rounded-full flex-none ${
+                hasFinalResult
+                  ? "bg-muted-foreground"
+                  : isLive
+                    ? "bg-destructive shadow-[0_0_10px_var(--destructive)] animate-pulse"
+                    : "bg-primary shadow-[0_0_10px_var(--primary)]"
+              }`}
+              title={hasFinalResult ? "Encerrado" : isLive ? "Ao vivo" : "Aberto"}
+            />
             <span>Desafio "{p.title}"</span>
           </h3>
 
           {p.match ? (
-            <div className="mt-3 rounded-xl overflow-hidden border border-border/60 bg-gradient-to-br from-primary/10 via-background/40 to-gold/10 p-4">
-              <div className="flex items-center justify-around gap-2">
-                <div className="flex flex-col items-center gap-1.5 flex-1 min-w-0">
-                  <img src={p.match.homeFlag} alt={p.match.home} className="h-12 w-16 object-cover rounded shadow" loading="lazy" />
-                  <span className="text-xs font-bold text-center truncate w-full">{p.match.home}</span>
+            <div className="mt-3 rounded-xl overflow-hidden border border-border/60 bg-gradient-to-br from-primary/10 via-background/40 to-gold/10">
+              {oriented?.imageUrl && (
+                <div className="aspect-[16/9] overflow-hidden bg-background/40">
+                  <img
+                    src={oriented.imageUrl}
+                    alt={`Foto do jogo ${p.match.home} x ${p.match.away}`}
+                    className="w-full h-full object-cover"
+                    loading="lazy"
+                  />
                 </div>
-                <div className="text-center">
-                  {oriented ? (
-                    <>
-                      <div className="font-display text-2xl font-black text-gradient-brand tabular-nums">
-                        {oriented.homeScore} <span className="text-muted-foreground">×</span> {oriented.awayScore}
-                      </div>
-                      <div className="text-[10px] text-muted-foreground">Grupo {p.match.group}</div>
-                    </>
+              )}
+              <div className="p-4">
+                <div className="flex items-center justify-around gap-2">
+                  <div className="flex flex-col items-center gap-1.5 flex-1 min-w-0">
+                    <img src={p.match.homeFlag} alt={p.match.home} className="h-12 w-16 object-cover rounded shadow" loading="lazy" />
+                    <span className="text-xs font-bold text-center truncate w-full">{p.match.home}</span>
+                  </div>
+                  <div className="text-center">
+                    {oriented ? (
+                      <>
+                        <div className="font-display text-2xl font-black text-gradient-brand tabular-nums">
+                          {oriented.homeScore} <span className="text-muted-foreground">×</span> {oriented.awayScore}
+                        </div>
+                        <div className="text-[10px] text-muted-foreground">Grupo {p.match.group}</div>
+                      </>
+                    ) : (
+                      <>
+                        <div className="font-display text-2xl font-black text-gradient-brand">VS</div>
+                        <div className="text-[10px] text-muted-foreground">Grupo {p.match.group}</div>
+                      </>
+                    )}
+                  </div>
+                  <div className="flex flex-col items-center gap-1.5 flex-1 min-w-0">
+                    <img src={p.match.awayFlag} alt={p.match.away} className="h-12 w-16 object-cover rounded shadow" loading="lazy" />
+                    <span className="text-xs font-bold text-center truncate w-full">{p.match.away}</span>
+                  </div>
+                </div>
+                <div className="mt-2 text-center text-[11px] text-muted-foreground">
+                  {hasFinalResult ? (
+                    <span className="font-bold text-primary uppercase tracking-wider text-[10px]">
+                      Resultado final
+                    </span>
+                  ) : isLive ? (
+                    <span className="font-bold text-destructive uppercase tracking-wider text-[10px]">
+                      Jogo em andamento
+                    </span>
                   ) : (
-                    <>
-                      <div className="font-display text-2xl font-black text-gradient-brand">VS</div>
-                      <div className="text-[10px] text-muted-foreground">Grupo {p.match.group}</div>
-                    </>
+                    <>{new Date(p.match.kickoff).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short", timeZone: "America/Sao_Paulo" })} (Brasília)</>
                   )}
                 </div>
-                <div className="flex flex-col items-center gap-1.5 flex-1 min-w-0">
-                  <img src={p.match.awayFlag} alt={p.match.away} className="h-12 w-16 object-cover rounded shadow" loading="lazy" />
-                  <span className="text-xs font-bold text-center truncate w-full">{p.match.away}</span>
-                </div>
-              </div>
-              <div className="mt-2 text-center text-[11px] text-muted-foreground">
-                {oriented?.status === "encerrado" ? (
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/15 text-primary border border-primary/30 font-bold uppercase tracking-wider text-[10px]">
-                    Encerrado
-                  </span>
-                ) : oriented?.status === "em_andamento" ? (
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-destructive/15 text-destructive border border-destructive/30 font-bold uppercase tracking-wider text-[10px] animate-pulse">
-                    Ao vivo
-                  </span>
-                ) : (
-                  <>{new Date(p.match.kickoff).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short", timeZone: "America/Sao_Paulo" })} (Brasília)</>
-                )}
               </div>
             </div>
           ) : (
@@ -138,16 +161,29 @@ export function PredictionCard({ prediction: p, hideOptions = false }: { predict
           )}
         </div>
 
-        <button
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            navigate({ to: "/previsao/$id", params: { id: p.id } });
-          }}
-          className="mt-4 w-full h-10 rounded-xl bg-gradient-brand text-primary-foreground font-display font-black text-sm tracking-wide shadow-glow hover:scale-[1.01] transition inline-flex items-center justify-center gap-2 shrink-0"
-        >
-          <Plus className="h-4 w-4" /> PARTICIPAR
-        </button>
+        {hasFinalResult ? (
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              navigate({ to: "/previsao/$id", params: { id: p.id } });
+            }}
+            className="mt-4 w-full h-10 rounded-xl bg-gradient-to-r from-gold to-primary text-primary-foreground font-display font-black text-sm tracking-wide shadow-glow hover:scale-[1.01] transition inline-flex items-center justify-center gap-2 shrink-0"
+          >
+            <Trophy className="h-4 w-4" /> VER RESULTADO
+          </button>
+        ) : (
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              navigate({ to: "/previsao/$id", params: { id: p.id } });
+            }}
+            className="mt-4 w-full h-10 rounded-xl bg-gradient-brand text-primary-foreground font-display font-black text-sm tracking-wide shadow-glow hover:scale-[1.01] transition inline-flex items-center justify-center gap-2 shrink-0"
+          >
+            <Plus className="h-4 w-4" /> PARTICIPAR
+          </button>
+        )}
 
         <div className="mt-3 flex items-center gap-4 text-xs text-muted-foreground shrink-0">
           <span className="inline-flex items-center gap-1">
