@@ -159,6 +159,22 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
   const improveDescriptionFn = useServerFn(improveDescription);
   const generateWhatsFn = useServerFn(generateWhatsAppInvite);
   const generatePrizeImageFn = useServerFn(generatePrizeImage);
+  const generateTiebreakerFn = useServerFn(generateTiebreaker);
+  const generateRegulationFn = useServerFn(generateRegulation);
+
+  // Company-only assets & rules
+  const [logoImg, setLogoImg] = useState<string | null>(null);
+  const [bannerImg, setBannerImg] = useState<string | null>(null);
+  const [instagramArts, setInstagramArts] = useState<string[]>([]);
+  const [inviteRewardText, setInviteRewardText] = useState<string>(
+    "Convide seus amigos para participar do desafio e ganhe mais créditos para fazer palpites! Os créditos serão validados somente quando seu amigo se cadastrar e fizer o palpite dele.",
+  );
+  const [tiebreaker, setTiebreaker] = useState<string>("");
+  const [tiebreakerLoading, setTiebreakerLoading] = useState(false);
+  const [regulation, setRegulation] = useState<string>("");
+  const [regulationLoading, setRegulationLoading] = useState(false);
+  const [companyName, setCompanyName] = useState<string>("");
+
 
   // AI Challenge Generator state
   const [aiOpen, setAiOpen] = useState(false);
