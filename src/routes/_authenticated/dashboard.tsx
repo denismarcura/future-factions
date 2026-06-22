@@ -90,6 +90,13 @@ type Profile = {
   whatsapp: string | null;
   instagram: string | null;
   cpf: string | null;
+  cep: string | null;
+  endereco: string | null;
+  numero: string | null;
+  complemento: string | null;
+  bairro: string | null;
+  cidade: string | null;
+  estado: string | null;
   avatar_url: string | null;
   provider: string | null;
   status: string;
