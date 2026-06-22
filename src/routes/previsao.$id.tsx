@@ -297,7 +297,7 @@ function PredictionInner({ p }: { p: Prediction }) {
           const claims = await listMyClaims();
           const claimedMissionIds = new Set(claims.map((c) => c.mission_id));
           const claimedCatalogIdentities = new Set(
-            queue.filter((m) => isCatalogMission(m) && claimedMissionIds.has(m.id)).map(getMissionIdentity),
+            rawQueue.filter((m) => isCatalogMission(m) && claimedMissionIds.has(m.id)).map(getMissionIdentity),
           );
           const done: { platform: SeqPlatform; sponsor: string; answers: Record<string, string> }[] = [];
           let step = 0;
