@@ -181,17 +181,14 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
 
   const handleInlineGenerate = async () => {
     setInlineAiError(null);
-    const remaining = MAX_SUBS - subs.length;
-    if (remaining <= 0) {
-      setInlineAiError(`Você já tem o máximo de ${MAX_SUBS} palpites.`);
-      return;
-    }
-    const want = Math.min(inlineAiCount, remaining);
+    const want = Math.max(1, Number(inlineAiCount) || 1);
     setInlineAiLoading(true);
     try {
+      const themeBase = (name.trim() || subcategory || category || "Desafio de palpites");
+      const theme = inlineAiFocus.trim() ? `${themeBase} — foco: ${inlineAiFocus.trim()}` : themeBase;
       const result = await generateChallengeFn({
         data: {
-          theme: (name.trim() || subcategory || category || "Desafio de palpites"),
+          theme,
           category,
           subcategory: subcategory || undefined,
           userSubs: subs
@@ -207,13 +204,12 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
         .filter(s => !existingQs.has(s.question.trim().toLowerCase()))
         .slice(0, want)
         .map(s => ({ id: uid(), question: s.question, options: s.options.slice(0, MAX_OPTIONS) }));
-      // Replace empty placeholder subs first, then append
       setSubs(prev => {
         const out = [...prev];
         for (const ns of fresh) {
           const emptyIdx = out.findIndex(s => !s.question.trim());
           if (emptyIdx >= 0) out[emptyIdx] = ns;
-          else if (out.length < MAX_SUBS) out.push(ns);
+          else out.push(ns);
         }
         return out;
       });
@@ -223,6 +219,7 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
       setInlineAiLoading(false);
     }
   };
+
 
   const handleGenerateChallenge = async () => {
     setAiError(null);
