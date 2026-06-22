@@ -1,77 +1,118 @@
-# Reorganização do widget de desafio + missões sequenciais
+# Apuração Inteligente da Copa do Mundo
 
-Página: `src/routes/previsao.$id.tsx` (lado direito do desafio com `subPredictions`, ex.: `/previsao/wc-23a`).
+Módulo que consulta automaticamente o site da FIFA, interpreta o resultado com IA, atualiza o card do desafio, apura os palpites e libera tokens — com fallback manual sempre que a confiança for baixa.
 
-## 1. Inverter a ordem do widget direito
+## Observação importante sobre a fonte de dados
 
-Hoje: título → custo → contagem → premiação → botão verde no fim.
+A IA, sozinha, **não navega** na página da FIFA. Para garantir resultado real (sem inventar placar), o fluxo correto é:
 
-Novo (estilo do print, mais limpo, verde chamativo no topo):
+1. O servidor baixa o HTML/markdown da página da FIFA com **Firecrawl** (conector já disponível na Lovable; se não estiver linkado, peço para conectar — sem custo de chave manual).
+2. Esse conteúdo + o jogo procurado é enviado para a **Lovable AI Gateway** (Gemini 3 Flash, já configurada via `LOVABLE_API_KEY`).
+3. A IA devolve **somente JSON estruturado** (com `confidence`). Sem chute.
 
-```text
-┌─────────────────────────────┐
-│  [ PARTICIPAR POR 100 TKN ] │  ← botão verde grande, primeiro
-│  Seu saldo: 700 TKN         │
-├─────────────────────────────┤
-│  Custo de entrada           │
-│  100 TKN                    │
-│  Palpites preenchidos  0/5  │
-│  Seu saldo         1.2k TKN │
-│                             │
-│  Premiação                  │
-│  5 acertos     10.000 TKN   │
-│  4 acertos      5.000 TKN   │
-│  3 acertos      2.000 TKN   │
-└─────────────────────────────┘
+Se você preferir usar a sua chave da OpenAI explicitamente, eu troco o provider — mas o gateway Lovable já cobre isso de graça e sem expor chave no frontend.
+
+## Banco de dados (migração única)
+
+Novas colunas em `public.challenges` (ou tabela equivalente — confirmo o nome lendo o código antes da migração):
+
+```
+fifa_match_url, fifa_match_id,
+home_team, away_team, match_date, match_time,
+match_status, home_score, away_score,
+winner_team, is_draw,
+result_source, result_checked_at, result_confirmed_at,
+result_payload_json (jsonb), apuration_status (enum)
 ```
 
-- Botão verde sólido bem chamativo (estilo Instagram: cor cheia + sombra glow + tracking forte). Mantém o gradiente da marca mas com mais peso (h-14, ring verde, hover scale).
-- Selo "✓ PARTICIPAÇÃO CONFIRMADA" quando `confirmed=true` (igual hoje).
-- Toda lógica de débito/validação/`saveParticipation` permanece intacta.
+Novo tipo `apuration_status`:
+`aguardando_jogo | jogo_em_andamento | aguardando_resultado | resultado_encontrado | apurado_automaticamente | requer_revisao_manual | finalizado | erro_na_consulta`
 
-## 2. Numerar os palpites bônus
+Novas tabelas:
+- `public.challenge_results_log` — toda consulta da IA (timestamp, desafio, fonte, confidence, JSON completo, erro). Auditoria.
+- `public.challenge_winners` — usuário, desafio, motivo, tokens calculados, status (`pendente`, `liberado`, `aguardando_premio_fisico`).
+- `public.token_transactions` — histórico de débito/crédito com referência ao desafio/win.
 
-Já existe `1. … 5.` na coluna de palpites principais. O pedido aqui é numerar **os palpites extras** ganhos via missão. Cada palpite bônus liberado aparece numerado: "Palpite extra #6", "Palpite extra #7"…, abaixo dos 5 originais, formando uma seção "Palpites extras" abaixo do bloco principal de palpites. Visualmente: card pequeno marcando ✅ "Palpite extra Nº 6 liberado por missão Instagram".
+RLS:
+- `challenges` e `challenge_winners`: SELECT público nas colunas seguras; INSERT/UPDATE só service_role.
+- `challenge_results_log`: só admin (via `has_role`).
+- `token_transactions`: usuário vê os próprios; admin vê todos.
 
-## 3. Sequência de missões (só desbloqueia após participar)
+GRANTs corretos em cada tabela (regra do projeto).
 
-### Estado bloqueado (antes de clicar em Participar)
+## Backend — server functions e rota pública
 
-O card de missão (hoje "Palpite extra grátis — Instagram") fica **desativado** com cadeado e texto: "Confirme sua participação para desbloquear missões bônus".
+Todas em TanStack `createServerFn` (não Edge Function):
 
-### Fluxo desbloqueado
+- `src/lib/fifa-results.functions.ts`
+  - `fetchFifaMatchResult({ challengeId })` — middleware `requireSupabaseAuth` + checagem `has_role('admin')`. Chama Firecrawl, manda para Lovable AI com prompt estruturado, valida com Zod, grava log, atualiza `challenges`.
+  - `recalculateWinners({ challengeId })` — apura todos os palpites do desafio segundo as regras (vencedor, empate, placar exato, mais/menos de 2, ambos marcam).
+  - `releaseTokens({ challengeId })` — cria registros em `challenge_winners` + `token_transactions`, atualiza saldo. Prêmios físicos ficam `aguardando_premio_fisico`.
+  - `manualConfirmResult({ challengeId, home_score, away_score, observation })` — admin sobrescreve.
 
-Após `confirmed=true`, vira uma trilha de 4 missões, **uma de cada vez**, na ordem:
+- `src/routes/api/public/hooks/apurar-copa.ts` — endpoint chamado pelo cron a cada 15min. Verifica `apikey` no header, busca desafios elegíveis, chama `fetchFifaMatchResult` para cada um, e quando `confidence >= 0.90 && status == finalizado` chama `recalculateWinners` + `releaseTokens`. Caso contrário marca `requer_revisao_manual`.
 
-```text
-1. Instagram   →  2. YouTube  →  3. Facebook  →  4. TikTok
-```
+Cron via `pg_cron + pg_net` apontando para esse hook (`*/15 * * * *`).
 
-Cada etapa:
+## Painel administrativo — `/admin/apuracao-copa`
 
-1. Mostra apenas a missão **atual** + as anteriores marcadas como ✅ "Missão feita".
-2. Botão temático da plataforma (Instagram rosa/laranja gradient, YouTube vermelho, Facebook azul, TikTok preto) — reaproveita os tokens em `src/styles.css` (`--gradient-instagram`, `--gradient-youtube`, `--gradient-facebook`, `--gradient-tiktok`) já criados no dashboard.
-3. Ao clicar: abre o link em nova aba (igual hoje) e **inicia um timer de 5s** no card com loader + "Validando missão…".
-4. Após 5s: texto muda para **"✅ Missão feita — +1 palpite extra liberado!"**, incrementa contador de palpites extras, persiste via `claimMission(...)` (lógica existente), e **revela** automaticamente o próximo card (YouTube → Facebook → TikTok).
-5. Quando as 4 forem concluídas: badge "🏆 Todas as missões concluídas — +4 palpites extras!"
+Nova rota dentro do admin com tabela:
 
-### Estado local (no `PredictionPage`)
+| Desafio | Jogo | Data/Hora | Status | Resultado | Fonte | Confiança | Participantes | Vencedores | Tokens a liberar |
 
-- `missionStep: 0..4` (0 = Instagram pendente, 4 = todas feitas).
-- `missionStatus: 'idle' | 'verifying' | 'done'` da missão atual.
-- `extraPalpites: number` — incrementado em cada missão concluída.
-- Persistência simples em `localStorage` por `challenge:${p.id}` para sobreviver a refresh (igual ao padrão atual de `my-participations`).
+Ações por linha:
+`Consultar agora · Atualizar resultado · Recalcular vencedores · Editar placar · Confirmar manualmente · Liberar tokens · Ver histórico (modal com logs)`
 
-## 4. Detalhes técnicos
+Filtros: status, data, busca por jogo.
 
-- Arquivo único alterado: `src/routes/previsao.$id.tsx`.
-- Buscar uma missão por plataforma usando `listMissions({ platform, activeOnly: true })` + `pickRandomFor` (já existe). Carregar as 4 ao montar.
-- Se alguma plataforma não tiver missão cadastrada, pula essa etapa silenciosamente.
-- Mantém `handleBonusClaim` mas adapta para receber a missão da etapa atual e disparar o timer de 5s antes de marcar `done`.
-- O bloco "⚡ Ganhe mais chances" (Fazer missões / Convidar amigos) **continua** abaixo, sem mudança.
-- Sem mudanças de backend, schema, ou outras rotas.
+## Card do desafio (visual)
 
-## Fora de escopo
+Atualizar `PredictionCard` para desafios com `match` da Copa:
 
-- Verificação real por IA se o usuário seguiu (você pediu isso antes — fica para depois; aqui é só o timer de 5s simulando validação).
-- Aplicar o mesmo fluxo em desafios sem `subPredictions` (continuam como estão).
+- **Antes**: `Brasil x Escócia · 24/06/2026 19h · selo "Aguardando Jogo"`
+- **Ao vivo**: `Brasil 1 × 0 Escócia · selo vermelho pulsante "AO VIVO"`
+- **Final**: bandeiras + placar grande + selo dourado `Resultado Final` + `✅ Apurado automaticamente` (ou `Revisão Manual`).
+- Botões: `Ver Palpites · Ver Vencedores · Compartilhar Resultado · Criar Novo Desafio`
+- Rodapé: `www.desafiodospalpites.com.br`
+
+Selos reutilizáveis em `src/components/MatchStatusBadge.tsx` (verde/prata/dourado, com glow neon — já temos as utilities `btn-neon`, `shadow-glow-gold`).
+
+## Apuração — regras implementadas
+
+Cada palpite tem um `kind` (vencedor, empate, placar_exato, mais_2, menos_2, ambos_marcam). A função `recalculateWinners` aplica:
+
+- `vencedor`: `option == winner_team`
+- `empate`: `is_draw == true`
+- `placar_exato`: casa/visitante batem
+- `mais_2 / menos_2`: `home + away` vs 2
+- `ambos_marcam`: ambos > 0
+
+Tokens distribuídos conforme `prizeTiers` do desafio (já existe no mock). Mensagem padrão:
+`"Você ganhou X tokens por acertar [motivo] em [home] [hxa] [away]"`.
+
+## Segurança / regras-chave
+
+- IA **nunca** inventa placar — se `confidence < 0.90` ou `match_found=false` → `requer_revisao_manual`, zero tokens liberados.
+- Prêmio físico **sempre** entra como `aguardando_premio_fisico`; admin valida manualmente.
+- Hook público autentica via `apikey` header (padrão pg_cron). Server fns admin verificam `has_role('admin')`.
+- Todo upsert de placar passa por log auditável.
+
+## Entregáveis (em ordem)
+
+1. Migração SQL (tabelas + enum + RLS + GRANTs + trigger updated_at).
+2. Helper Firecrawl + server fns de IA/apuração/payout.
+3. Hook `/api/public/hooks/apurar-copa` + cron SQL (`*/15 * * * *`).
+4. Tela admin `/admin/apuracao-copa`.
+5. Atualização visual do `PredictionCard` + selos da partida.
+6. Smoke test: forçar "consultar agora" num desafio existente e validar o ciclo completo.
+
+## Pré-requisitos antes de começar
+
+- Confirmar conector **Firecrawl** está linkado (eu verifico). Se não estiver, te peço para conectar antes da etapa 2.
+- Confirmar se a tabela atual de desafios persistidos é `public.challenges` ou outra (leio o código no início).
+
+## Pergunto antes de começar
+
+1. Posso usar a **Lovable AI Gateway (Gemini 3 Flash)** com `LOVABLE_API_KEY` que já existe, ou você quer mesmo a chave da OpenAI/ChatGPT separada?
+2. Tokens dos vencedores: pego do campo `prizeTiers` que já existe no desafio, certo? (1º coloca, 2º, 3º)
+3. Os palpites dos usuários hoje ficam só em mock (`mock-data`). Posso criar a tabela `palpites` real nessa mesma migração para a apuração funcionar de verdade, ou você prefere que a apuração leia os mocks por enquanto?
