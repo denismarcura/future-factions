@@ -88,12 +88,19 @@ type Profile = {
   full_name: string | null;
   email: string | null;
   whatsapp: string | null;
+  instagram: string | null;
+  cpf: string | null;
   avatar_url: string | null;
   provider: string | null;
   status: string;
   created_at: string;
   welcome_bonus?: number | null;
 };
+
+function isProfileIncomplete(p: Profile | null): boolean {
+  if (!p) return false;
+  return !p.cpf || !p.whatsapp || !p.instagram || !p.avatar_url;
+}
 
 function Dashboard() {
   const [profile, setProfile] = useState<Profile | null>(null);
