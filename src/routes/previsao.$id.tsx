@@ -187,7 +187,7 @@ function PredictionPage() {
 
       {(() => {
 
-        const handleParticipate = () => {
+        const doConfirm = () => {
           if (p.subPredictions) {
             const filled = Object.keys(subAnswers).length;
             if (filled < p.subPredictions.length) {
@@ -229,6 +229,26 @@ function PredictionPage() {
             toast.success(`✅ Aposta de ${amount} TKN em "${sel.label}" confirmada!`);
           }
         };
+
+        const handleParticipate = () => {
+          // Extra rounds (after first confirmation) skip regulamento — already accepted
+          if (confirmed && pendingExtra) { doConfirm(); return; }
+          // Validate basics before opening regulamento
+          if (p.subPredictions) {
+            const filled = Object.keys(subAnswers).length;
+            if (filled < p.subPredictions.length) {
+              toast.error(`Preencha todos os ${p.subPredictions.length} palpites.`);
+              return;
+            }
+          }
+          if (!user) { toast.error("Faça login para participar."); return; }
+          if (regAccepted) { doConfirm(); return; }
+          // Open regulamento for first-time acceptance
+          pendingConfirmRef.current = doConfirm;
+          setRegChoice(null);
+          setRegOpen(true);
+        };
+
 
         return (
       <div className="space-y-6">
