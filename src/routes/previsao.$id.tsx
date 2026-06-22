@@ -100,14 +100,14 @@ function TikTokIcon({ className, style }: { className?: string; style?: React.CS
 
 export const Route = createFileRoute("/previsao/$id")({
   loader: async ({ params }): Promise<{ id: string; initial: Prediction | null }> => {
-    const local = getPrediction(params.id);
-    if (local) return { id: params.id, initial: local };
     try {
       const corp = await getCorpChallenge({ data: { id: params.id } });
-      return { id: params.id, initial: corp ? corpToPrediction(corp) : null };
+      if (corp) return { id: params.id, initial: corpToPrediction(corp) };
     } catch {
-      return { id: params.id, initial: null };
+      // fallback to local challenges below
     }
+    const local = getPrediction(params.id);
+    return { id: params.id, initial: local ?? null };
   },
   head: ({ loaderData }) => ({
     meta: loaderData?.initial
@@ -151,6 +151,16 @@ function PredictionPage() {
     if (p) return;
     let cancelled = false;
     (async () => {
+      try {
+        const corp = await getCorpChallengeFn({ data: { id } });
+        if (!cancelled && corp) {
+          setP(corpToPrediction(corp));
+          setResolving(false);
+          return;
+        }
+      } catch {
+        /* fallback to local */
+      }
       const found = getPrediction(id);
       if (found) {
         if (!cancelled) {
@@ -159,14 +169,7 @@ function PredictionPage() {
         }
         return;
       }
-      try {
-        const corp = await getCorpChallengeFn({ data: { id } });
-        if (!cancelled && corp) setP(corpToPrediction(corp));
-      } catch {
-        /* ignore */
-      } finally {
-        if (!cancelled) setResolving(false);
-      }
+      if (!cancelled) setResolving(false);
     })();
     return () => { cancelled = true; };
   }, [id, p, getCorpChallengeFn]);
