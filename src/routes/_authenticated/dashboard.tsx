@@ -1297,8 +1297,8 @@ function FriendsSection({
   const registered = friends.filter((f) => f.registered);
   const pending = friends.filter((f) => !f.registered);
 
-  const refCode = (userId || "").slice(0, 8) || "amigo";
-  const referralLink = `${SITE_URL}/auth?ref=${refCode}`;
+  const refCode = (userId || "").slice(0, 8);
+  const referralLink = refCode ? `${SITE_URL}/auth?ref=${refCode}` : `${SITE_URL}/auth`;
   const inviteMessage = `Oi! Vem jogar comigo no Desafio dos Palpites. ${inviterName} te convidou — você ganha 1.000 tokens de boas-vindas. ${referralLink}`;
 
   function handleBulk() {
@@ -1565,7 +1565,7 @@ function Empty({ children }: { children: React.ReactNode }) {
 
 /* ---------- Invite Promo (email + whatsapp + artes prontas) ---------- */
 
-const SITE_URL = "https://desafiodospalpites.com.br";
+const SITE_URL = "https://www.desafiodospalpites.com.br";
 
 function InvitePromoSection({
   inviterName,
@@ -1576,8 +1576,8 @@ function InvitePromoSection({
   userId: string;
   myChallenges: Prediction[];
 }) {
-  const refCode = (userId || "").slice(0, 8) || "amigo";
-  const link = `${SITE_URL}/auth?ref=${refCode}`;
+  const refCode = (userId || "").slice(0, 8);
+  const link = refCode ? `${SITE_URL}/auth?ref=${refCode}` : `${SITE_URL}/auth`;
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=320x320&margin=10&data=${encodeURIComponent(link)}`;
   const defaultWhats = `🎯 Já imaginou dar seus palpites e ainda ganhar prêmios?\n\nConheça o Desafio dos Palpites!\n\n✅ Totalmente gratuito\n✅ Ganhe tokens participando dos desafios\n✅ Troque seus tokens por produtos, brindes e vale-compras\n✅ Crie seus próprios desafios para amigos, familiares ou empresas\n✅ Convide amigos e ganhe ainda mais créditos\n\nTem desafios de futebol, Copa do Mundo, Brasileirão, UFC, reality shows e muito mais!\n\nCadastre-se agora e comece a acumular tokens:\n\n👉 ${link}\n\nNos vemos no ranking! 🏆🚀`;
   const defaultEmail = `Olá!\n\nQuero te convidar para conhecer o Desafio dos Palpites, uma plataforma gratuita onde você participa de desafios, acumula tokens e troca por prêmios incríveis.\n\nNa plataforma você pode:\n\n🏆 Participar de desafios esportivos e promocionais\n🎁 Ganhar tokens gratuitamente\n🎯 Trocar tokens por produtos, serviços e vale-compras\n👥 Criar seus próprios desafios para amigos, familiares ou clientes\n🚀 Participar de rankings e competir com outros usuários\n\nO melhor de tudo: a participação é totalmente gratuita.\n\nFaça seu cadastro através do link abaixo:\n\n👉 ${link}\n\nVenha se divertir, dar seus palpites e concorrer a prêmios!\n\nEquipe Desafio dos Palpites\nwww.desafiodospalpites.com.br`;
