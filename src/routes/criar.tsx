@@ -107,11 +107,12 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
   const [prizeName, setPrizeName] = useState("");
   const [socialLink, setSocialLink] = useState("");
   const [missionStep, setMissionStep] = useState(0);
-  const [missionLinks, setMissionLinks] = useState({
+  const [missionData, setMissionData] = useState<MissionData>({
     instagram: "",
-    facebook: "",
-    youtube: "",
-    tiktok: "",
+    likeCount: 4,
+    likeLinks: ["", "", "", ""],
+    extras: {},
+    bonusChance: false,
   });
   const [subs, setSubs] = useState<SubCat[]>(() => {
     const next = getNextBrazilMatch();
