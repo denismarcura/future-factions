@@ -92,11 +92,14 @@ function TokenPill() {
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { user } = useAuth();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const isAdmin = !!(user?.email && ADMIN_EMAILS.includes(user.email.toLowerCase()));
+  const visibleNav = NAV.filter((n) => !n.adminOnly || isAdmin);
 
   return (
     <div className="min-h-screen bg-background bg-radial-brand">
       <header className="sticky top-0 z-40 backdrop-blur-xl bg-background/75 border-b border-border/60">
-        <div className="max-w-7xl mx-auto px-4 h-18 py-2 flex items-center gap-4">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 h-14 sm:h-18 py-2 flex items-center gap-2 sm:gap-4">
           <Logo />
 
           <div className="hidden lg:flex flex-1 max-w-md ml-6">
@@ -111,9 +114,9 @@ export function AppShell({ children }: { children: ReactNode }) {
 
           <div className="flex-1 lg:hidden" />
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             <TokenPill />
-            <button className="h-9 w-9 grid place-items-center rounded-full bg-card border border-border/60 hover:border-primary/60 transition">
+            <button className="hidden sm:grid h-9 w-9 place-items-center rounded-full bg-card border border-border/60 hover:border-primary/60 transition">
               <Bell className="h-4 w-4" />
             </button>
             <Link
@@ -133,7 +136,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 </Link>
                 <button
                   onClick={() => signOut()}
-                  className="h-9 w-9 grid place-items-center rounded-full bg-card border border-border/60 hover:border-destructive/60 hover:text-destructive transition"
+                  className="hidden sm:grid h-9 w-9 place-items-center rounded-full bg-card border border-border/60 hover:border-destructive/60 hover:text-destructive transition"
                   aria-label="Sair"
                 >
                   <LogOut className="h-4 w-4" />
@@ -142,14 +145,104 @@ export function AppShell({ children }: { children: ReactNode }) {
             ) : (
               <Link
                 to="/auth"
-                className="inline-flex items-center gap-2 h-10 px-4 rounded-full bg-card border border-border/60 hover:border-primary/60 text-sm font-semibold transition"
+                className="hidden sm:inline-flex items-center gap-2 h-10 px-4 rounded-full bg-card border border-border/60 hover:border-primary/60 text-sm font-semibold transition"
               >
                 <LogIn className="h-4 w-4" /> Entrar
               </Link>
             )}
+
+            {/* Hamburger - mobile only */}
+            <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
+              <SheetTrigger asChild>
+                <button
+                  className="md:hidden h-9 w-9 grid place-items-center rounded-full bg-card border border-border/60 hover:border-primary/60 transition"
+                  aria-label="Abrir menu"
+                >
+                  <Menu className="h-5 w-5" />
+                </button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-[85vw] max-w-sm bg-background p-0 overflow-y-auto">
+                <div className="p-5 border-b border-border/60">
+                  {user ? (
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-full bg-gradient-brand grid place-items-center text-primary-foreground font-bold">
+                        {(user.email || "U")[0].toUpperCase()}
+                      </div>
+                      <div className="min-w-0">
+                        <div className="text-sm font-semibold truncate">{user.email}</div>
+                        <div className="text-[11px] text-muted-foreground">Bem-vindo de volta</div>
+                      </div>
+                    </div>
+                  ) : (
+                    <SheetClose asChild>
+                      <Link
+                        to="/auth"
+                        className="flex items-center justify-center gap-2 h-11 rounded-full bg-gradient-brand text-primary-foreground font-bold text-sm shadow-glow"
+                      >
+                        <LogIn className="h-4 w-4" /> Entrar / Cadastrar
+                      </Link>
+                    </SheetClose>
+                  )}
+                </div>
+
+                {user && (
+                  <div className="p-3 border-b border-border/60 grid grid-cols-2 gap-2">
+                    <SheetClose asChild>
+                      <Link
+                        to="/dashboard"
+                        className="flex items-center justify-center gap-2 h-11 rounded-lg bg-gradient-brand text-primary-foreground text-sm font-bold shadow-glow"
+                      >
+                        <LayoutDashboard className="h-4 w-4" /> Dashboard
+                      </Link>
+                    </SheetClose>
+                    <SheetClose asChild>
+                      <Link
+                        to="/perfil"
+                        className="flex items-center justify-center gap-2 h-11 rounded-lg border border-border/60 text-sm font-semibold hover:border-primary/60"
+                      >
+                        <UserIcon className="h-4 w-4" /> Perfil
+                      </Link>
+                    </SheetClose>
+                  </div>
+                )}
+
+                <nav className="p-3 space-y-1">
+                  {visibleNav.map(({ to, label, icon: Icon }) => {
+                    const active = to === "/" ? pathname === "/" : pathname.startsWith(to);
+                    return (
+                      <SheetClose asChild key={to}>
+                        <Link
+                          to={to}
+                          className={`flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-medium transition ${
+                            active
+                              ? "bg-gradient-brand text-primary-foreground shadow-glow"
+                              : "text-muted-foreground hover:text-foreground hover:bg-card"
+                          }`}
+                        >
+                          <Icon className="h-4 w-4" />
+                          {label}
+                        </Link>
+                      </SheetClose>
+                    );
+                  })}
+                </nav>
+
+                {user && (
+                  <div className="p-3 border-t border-border/60">
+                    <button
+                      onClick={() => { setMenuOpen(false); signOut(); }}
+                      className="w-full flex items-center justify-center gap-2 h-11 rounded-lg border border-destructive/40 text-destructive text-sm font-bold hover:bg-destructive/10"
+                    >
+                      <LogOut className="h-4 w-4" /> Sair
+                    </button>
+                  </div>
+                )}
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
       </header>
+
 
       <div className="max-w-7xl mx-auto px-4 pb-24 md:pb-12 md:flex md:gap-8 pt-6">
         <aside className="hidden md:block w-60 shrink-0">
