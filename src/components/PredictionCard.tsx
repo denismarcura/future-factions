@@ -8,6 +8,19 @@ import { findResult } from "@/lib/world-cup-matches";
 export function PredictionCard({ prediction: p, hideOptions = false }: { prediction: Prediction; hideOptions?: boolean }) {
   const navigate = useNavigate();
   const totalPool = p.options.reduce((s, o) => s + o.pool, 0);
+  const result = p.match ? findResult(p.match.home, p.match.away) : undefined;
+  // Normalize result orientation to current card's home/away
+  const oriented = result
+    ? (() => {
+        const norm = (s: string) => s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+        const swap = norm(result.home) !== norm(p.match!.home);
+        return {
+          status: result.status,
+          homeScore: swap ? result.awayScore : result.homeScore,
+          awayScore: swap ? result.homeScore : result.awayScore,
+        };
+      })()
+    : null;
   return (
     <article className="group rounded-2xl bg-card border border-border/60 hover:border-primary/50 hover:shadow-glow transition overflow-hidden h-full flex flex-col">
       <Link
