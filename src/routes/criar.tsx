@@ -1234,8 +1234,8 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
             </ul>
           </div>
 
-          <button type="submit" className="w-full h-12 rounded-xl bg-gradient-brand text-primary-foreground font-display font-black shadow-glow hover:scale-[1.01] transition">
-            Publicar desafio • {COST} Tokens
+          <button type="submit" disabled={publishing} className="w-full h-12 rounded-xl bg-gradient-brand text-primary-foreground font-display font-black shadow-glow hover:scale-[1.01] transition disabled:opacity-60 disabled:cursor-not-allowed inline-flex items-center justify-center gap-2">
+            {publishing ? (<><Loader2 className="h-4 w-4 animate-spin" /> Publicando…</>) : (<>Publicar desafio • {COST} Tokens</>)}
           </button>
           <Link to="/" className="block text-center text-sm text-muted-foreground hover:text-foreground">
             Cancelar
