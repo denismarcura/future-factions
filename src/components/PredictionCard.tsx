@@ -4,7 +4,7 @@ import { type Prediction, formatTokens } from "@/lib/mock-data";
 import { CATEGORY_IMAGES } from "@/lib/category-images";
 import { ClosingTimerBadge } from "@/components/ClosingTimerBadge";
 
-export function PredictionCard({ prediction: p }: { prediction: Prediction }) {
+export function PredictionCard({ prediction: p, hideOptions = false }: { prediction: Prediction; hideOptions?: boolean }) {
   const navigate = useNavigate();
   const totalPool = p.options.reduce((s, o) => s + o.pool, 0);
   return (
