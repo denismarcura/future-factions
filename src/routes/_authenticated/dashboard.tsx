@@ -190,6 +190,31 @@ function Dashboard() {
   return (
     <AppShell>
       <div className="space-y-6">
+        {/* Banner: complete profile (mostly for Google sign-ups) */}
+        {isProfileIncomplete(profile) && (
+          <a
+            href="#meus-dados"
+            className="flex items-center gap-3 p-4 rounded-2xl border-2 border-destructive/60 bg-destructive/10 text-destructive hover:bg-destructive/15 transition"
+          >
+            <AlertCircle className="h-5 w-5 shrink-0" />
+            <div className="flex-1">
+              <div className="font-display font-black text-sm sm:text-base">Complete seu cadastro</div>
+              <div className="text-xs sm:text-sm opacity-90">
+                Faltam dados obrigatórios:{" "}
+                {[
+                  !profile?.avatar_url && "foto",
+                  !profile?.cpf && "CPF",
+                  !profile?.whatsapp && "WhatsApp",
+                  !profile?.instagram && "Instagram",
+                ]
+                  .filter(Boolean)
+                  .join(", ")}
+                . Necessário para validar prêmios.
+              </div>
+            </div>
+            <span className="text-xs font-bold uppercase tracking-wider underline">Completar agora</span>
+          </a>
+        )}
         {/* HEADER */}
         <div className="glass-card rounded-2xl p-6 border border-border/60 flex flex-col sm:flex-row items-start sm:items-center gap-4 justify-between">
           <div className="flex items-center gap-4">
