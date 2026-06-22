@@ -18,6 +18,8 @@ import { improveTitle } from "@/lib/title-ai.functions";
 import { listCategories, listSubcategories, type ChallengeCategory, type ChallengeSubcategory } from "@/lib/challenge-categories";
 import { generateChallenge, improveDescription, generateWhatsAppInvite, generateTiebreaker, generateRegulation } from "@/lib/challenge-ai.functions";
 import { generatePrizeImage } from "@/lib/prize-image.functions";
+import { createCorpChallenge } from "@/lib/corp-challenges.functions";
+import { uploadCorpAsset, uploadCorpAssets } from "@/lib/corp-storage";
 import logoAsset from "@/assets/logo-desafio.png.asset.json";
 import { WORLD_CUP_MATCHES } from "@/lib/world-cup-matches";
 
