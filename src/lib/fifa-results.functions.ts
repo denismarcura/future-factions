@@ -226,10 +226,11 @@ export const recalculateWinners = createServerFn({ method: "POST" })
     const isDraw = home === away;
     const winnerTeam = isDraw ? "" : home > away ? ch.home_team : ch.away_team;
 
-    const { data: palpites = [] } = await supabaseAdmin
+    const palpRes = await supabaseAdmin
       .from("palpites")
       .select("*")
       .eq("challenge_id", ch.id);
+    const palpites = palpRes.data ?? [];
 
     type Pal = (typeof palpites)[number];
     const evaluate = (p: Pal): { correct: boolean; reason: string } => {
