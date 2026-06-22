@@ -397,6 +397,14 @@ function SectionTitle({
 
 /* ---------- Profile editor ---------- */
 
+function formatCPFView(v: string) {
+  const d = v.replace(/\D/g, "").slice(0, 11);
+  return d
+    .replace(/(\d{3})(\d)/, "$1.$2")
+    .replace(/(\d{3})(\d)/, "$1.$2")
+    .replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+}
+
 function ProfileEditor({
   profile,
   onSaved,
@@ -404,26 +412,61 @@ function ProfileEditor({
   profile: Profile | null;
   onSaved: (p: Profile) => void;
 }) {
-  const [editing, setEditing] = useState(false);
+  const incomplete = isProfileIncomplete(profile);
+  const [editing, setEditing] = useState(incomplete);
   const [fullName, setFullName] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
+  const [instagram, setInstagram] = useState("");
+  const [cpf, setCpf] = useState("");
   const [avatar, setAvatar] = useState("");
+  const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     setFullName(profile?.full_name ?? "");
     setWhatsapp(profile?.whatsapp ?? "");
+    setInstagram(profile?.instagram ?? "");
+    setCpf(profile?.cpf ? formatCPFView(profile.cpf) : "");
     setAvatar(profile?.avatar_url ?? "");
+    if (isProfileIncomplete(profile)) setEditing(true);
   }, [profile]);
 
   if (!profile) return null;
 
+  async function handleFile(file: File) {
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("A foto deve ter no máximo 5MB.");
+      return;
+    }
+    setUploading(true);
+    try {
+      const url = await uploadAvatar(profile!.id, file);
+      setAvatar(url);
+      toast.success("Foto enviada");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Erro ao enviar a foto");
+    } finally {
+      setUploading(false);
+    }
+  }
+
   async function save() {
+    const cpfDigits = cpf.replace(/\D/g, "");
+    if (cpf && cpfDigits.length !== 11) {
+      toast.error("CPF inválido");
+      return;
+    }
     setSaving(true);
     try {
       const { data, error } = await supabase
         .from("profiles")
-        .update({ full_name: fullName, whatsapp, avatar_url: avatar })
+        .update({
+          full_name: fullName,
+          whatsapp,
+          instagram: instagram.trim() || null,
+          cpf: cpfDigits || null,
+          avatar_url: avatar || null,
+        })
         .eq("id", profile!.id)
         .select()
         .single();
@@ -439,7 +482,7 @@ function ProfileEditor({
   }
 
   return (
-    <section className="glass-card rounded-2xl p-5 border border-border/60">
+    <section id="meus-dados" className="glass-card rounded-2xl p-5 border border-border/60">
       <SectionTitle
         icon={UserPlus}
         title="Meus dados"
@@ -476,6 +519,38 @@ function ProfileEditor({
           )
         }
       />
+
+      {/* Avatar uploader */}
+      <div className="flex items-center gap-4 mb-4 p-3 rounded-xl border border-border/60 bg-background/40">
+        <div className="relative h-20 w-20 rounded-full overflow-hidden border border-border/60 bg-background grid place-items-center shrink-0">
+          {avatar ? (
+            <img src={avatar} alt="Foto" className="h-full w-full object-cover" />
+          ) : (
+            <Camera className="h-7 w-7 text-muted-foreground" />
+          )}
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="text-xs font-bold uppercase tracking-wider text-foreground/80">Foto de perfil</div>
+          <div className="text-[11px] text-muted-foreground mb-2">JPG ou PNG, até 5MB.</div>
+          {editing && (
+            <label className="inline-flex items-center gap-1.5 text-xs font-bold px-3 h-8 rounded-full border border-primary/40 text-primary hover:bg-primary/10 cursor-pointer">
+              {uploading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
+              {avatar ? "Trocar foto" : "Enviar foto"}
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  e.target.value = "";
+                  if (f) void handleFile(f);
+                }}
+              />
+            </label>
+          )}
+        </div>
+      </div>
+
       <div className="grid sm:grid-cols-2 gap-3">
         <Field label="Nome" value={fullName} onChange={setFullName} disabled={!editing} />
         <Field
@@ -486,7 +561,20 @@ function ProfileEditor({
           placeholder="(11) 98888-7777"
         />
         <Field label="E-mail" value={profile.email ?? ""} onChange={() => {}} disabled />
-        <Field label="Foto (URL)" value={avatar} onChange={setAvatar} disabled={!editing} />
+        <Field
+          label="Instagram"
+          value={instagram}
+          onChange={setInstagram}
+          disabled={!editing}
+          placeholder="@seuinstagram"
+        />
+        <Field
+          label="CPF"
+          value={cpf}
+          onChange={(v) => setCpf(formatCPFView(v))}
+          disabled={!editing}
+          placeholder="000.000.000-00"
+        />
       </div>
     </section>
   );
