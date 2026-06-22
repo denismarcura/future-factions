@@ -6,6 +6,7 @@ import {
   Gift, Coins, Instagram, Facebook, Youtube, Music2, Globe, Lock,
   CheckCircle2, Share2, Copy, AlertCircle, UserPlus, Mail, Users, Loader2,
   PencilLine, MessageCircle, Download, ImageIcon, ShoppingBag, X,
+  Linkedin, Twitter, Star, Heart, Check,
 } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { CATEGORIES, CURRENT_USER, formatTokens } from "@/lib/mock-data";
