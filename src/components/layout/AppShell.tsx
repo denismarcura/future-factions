@@ -284,7 +284,9 @@ export function AppShell({ children }: { children: ReactNode }) {
                 Acerte palpites improváveis e ganhe um selo dourado. Compartilhe com seus amigos.
               </p>
             </div>
+            <LiveUsersBadge />
           </nav>
+
         </aside>
 
         <main className="flex-1 min-w-0">{children}</main>
