@@ -1,7 +1,8 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
-import { Trophy, Crown, Medal, Users, Calendar, ArrowLeft, ShoppingBag, UserPlus, Sparkles } from "lucide-react";
+import { Trophy, Users, Calendar, ArrowLeft, ShoppingBag, UserPlus, Sparkles } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
+import { TrophyBadge } from "@/components/TrophyBadge";
 import { getChallengeRanking } from "@/lib/challenge-ranking.functions";
 
 const rankingQuery = (challengeId: string) =>
@@ -96,7 +97,6 @@ function RankingPage() {
         <ArrowLeft className="h-3.5 w-3.5" /> Voltar para desafios
       </Link>
 
-      {/* Hero */}
       <section className="relative overflow-hidden rounded-3xl border border-border/60 glass-card mb-6">
         {c.image_url && (
           <div className="absolute inset-0 opacity-20 bg-cover bg-center" style={{ backgroundImage: `url(${c.image_url})` }} />
@@ -143,7 +143,6 @@ function RankingPage() {
         </div>
       ) : (
         <>
-          {/* Top 3 podium */}
           {top3.length >= 1 && (
             <section className="grid sm:grid-cols-3 gap-3 mb-6">
               {top3.map((u, i) => {
@@ -153,20 +152,22 @@ function RankingPage() {
                     : i === 1
                       ? "border-muted bg-muted/30"
                       : "border-amber-600/40 bg-amber-600/10";
-                const Icon = i === 0 ? Crown : i === 1 ? Medal : Trophy;
+                const position = (i + 1) as 1 | 2 | 3;
                 return (
                   <div key={u.user_id} className={`rounded-2xl border ${tone} p-4 flex items-center gap-3`}>
-                    <div className="relative">
+                    <div className="relative shrink-0">
+                      <TrophyBadge
+                        position={position}
+                        size={i === 0 ? 90 : 76}
+                        className="object-contain drop-shadow-[0_10px_24px_rgba(0,0,0,0.28)]"
+                      />
                       {u.avatar_url ? (
-                        <img src={u.avatar_url} alt="" className="h-14 w-14 rounded-2xl object-cover border border-border/60" />
+                        <img src={u.avatar_url} alt="" className="absolute -bottom-1 -right-1 h-14 w-14 rounded-2xl object-cover border border-border/60 bg-card" />
                       ) : (
-                        <div className="h-14 w-14 rounded-2xl bg-card grid place-items-center font-display font-black text-lg border border-border/60">
+                        <div className="absolute -bottom-1 -right-1 h-14 w-14 rounded-2xl bg-card grid place-items-center font-display font-black text-lg border border-border/60">
                           {initials(u.full_name)}
                         </div>
                       )}
-                      <div className="absolute -top-2 -left-2 h-7 w-7 rounded-full bg-gradient-brand grid place-items-center text-primary-foreground">
-                        <Icon className="h-3.5 w-3.5" />
-                      </div>
                     </div>
                     <div className="min-w-0">
                       <div className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground">#{u.position} lugar</div>
@@ -178,6 +179,7 @@ function RankingPage() {
               })}
             </section>
           )}
+
 
           {/* Full ranking list */}
           <section className="glass-card rounded-2xl border border-border/60 overflow-hidden mb-6">

@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AppShell } from "@/components/layout/AppShell";
+import { TrophyBadge } from "@/components/TrophyBadge";
 import { RANKING_TOP100 } from "@/lib/mock-extra";
 import { formatTokens } from "@/lib/mock-data";
 import { Crown, Trophy } from "lucide-react";
@@ -31,13 +32,17 @@ function Top100Page() {
             "from-silver/20 to-silver/5 border-silver/40",
             "from-primary/20 to-primary/5 border-primary/40",
           ][i];
-          const medal = ["🥇", "🥈", "🥉"][i];
+          const position = (i + 1) as 1 | 2 | 3;
           return (
             <div
               key={u.id}
               className={`rounded-2xl p-5 border bg-gradient-to-br ${styles} flex items-center gap-3`}
             >
-              <div className="text-3xl">{medal}</div>
+              <TrophyBadge
+                position={position}
+                size={i === 0 ? 90 : 78}
+                className="shrink-0 object-contain drop-shadow-[0_10px_24px_rgba(0,0,0,0.24)]"
+              />
               <img src={u.avatar} alt="" className="h-14 w-14 rounded-full border-2 border-gold/60" />
               <div className="min-w-0">
                 <div className="font-display font-black truncate">{u.username}</div>
@@ -85,3 +90,4 @@ function Top100Page() {
     </AppShell>
   );
 }
+

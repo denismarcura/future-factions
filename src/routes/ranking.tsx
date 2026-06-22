@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { Trophy, Crown, Medal } from "lucide-react";
+import { Trophy } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
+import { TrophyBadge } from "@/components/TrophyBadge";
 import { USERS, formatTokens } from "@/lib/mock-data";
 
 export const Route = createFileRoute("/ranking")({
@@ -45,11 +46,9 @@ function Ranking() {
         ))}
       </div>
 
-      {/* Top 3 podium */}
       <section className="grid sm:grid-cols-3 gap-3 mb-6">
         {sorted.slice(0, 3).map((u, i) => {
-          const Icon = i === 0 ? Crown : Medal;
-          const color = i === 0 ? "text-gold" : i === 1 ? "text-foreground" : "text-primary";
+          const position = (i + 1) as 1 | 2 | 3;
           return (
             <div
               key={u.id}
@@ -57,7 +56,11 @@ function Ranking() {
                 i === 0 ? "shadow-glow-gold border-gold/60 sm:-translate-y-2" : ""
               }`}
             >
-              <Icon className={`mx-auto h-6 w-6 ${color}`} />
+              <TrophyBadge
+                position={position}
+                size={i === 0 ? 94 : 82}
+                className="mx-auto object-contain drop-shadow-[0_10px_24px_rgba(0,0,0,0.28)]"
+              />
               <img src={u.avatar} className="mx-auto mt-3 h-16 w-16 rounded-full border-2 border-border/60" alt="" />
               <div className="font-display font-black mt-2">{u.username}</div>
               <div className="text-xs text-muted-foreground">{u.level} · {u.city}/{u.state}</div>
@@ -109,3 +112,4 @@ function Ranking() {
     </AppShell>
   );
 }
+
