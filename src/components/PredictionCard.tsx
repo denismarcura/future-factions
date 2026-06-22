@@ -79,33 +79,35 @@ export function PredictionCard({ prediction: p, hideOptions = false }: { predict
             </div>
           )}
 
-          <div className="mt-4 space-y-2">
-            {p.options.slice(0, 5).map((o) => {
-              const pct = totalPool ? Math.round((o.pool / totalPool) * 100) : 50;
-              return (
-                <div key={o.id} className="relative">
-                  <div className="relative h-9 rounded-lg bg-background/60 border border-border/60 overflow-hidden">
-                    <div
-                      className="absolute inset-y-0 left-0 bg-gradient-brand/30"
-                      style={{
-                        width: `${pct}%`,
-                        background: "linear-gradient(90deg, color-mix(in oklab, var(--primary) 35%, transparent), color-mix(in oklab, var(--gold) 25%, transparent))",
-                      }}
-                    />
-                    <div className="relative h-full flex items-center justify-between px-3 text-sm">
-                      <span className="font-semibold">{o.label}</span>
-                      <span className="tabular-nums font-bold text-foreground">{pct}%</span>
+          {!hideOptions && (
+            <div className="mt-4 space-y-2">
+              {p.options.slice(0, 5).map((o) => {
+                const pct = totalPool ? Math.round((o.pool / totalPool) * 100) : 50;
+                return (
+                  <div key={o.id} className="relative">
+                    <div className="relative h-9 rounded-lg bg-background/60 border border-border/60 overflow-hidden">
+                      <div
+                        className="absolute inset-y-0 left-0 bg-gradient-brand/30"
+                        style={{
+                          width: `${pct}%`,
+                          background: "linear-gradient(90deg, color-mix(in oklab, var(--primary) 35%, transparent), color-mix(in oklab, var(--gold) 25%, transparent))",
+                        }}
+                      />
+                      <div className="relative h-full flex items-center justify-between px-3 text-sm">
+                        <span className="font-semibold">{o.label}</span>
+                        <span className="tabular-nums font-bold text-foreground">{pct}%</span>
+                      </div>
                     </div>
                   </div>
+                );
+              })}
+              {p.options.length > 5 && (
+                <div className="text-xs text-center text-muted-foreground py-1">
+                  +{p.options.length - 5} opções no desafio
                 </div>
-              );
-            })}
-            {p.options.length > 5 && (
-              <div className="text-xs text-center text-muted-foreground py-1">
-                +{p.options.length - 5} opções no desafio
-              </div>
-            )}
-          </div>
+              )}
+            </div>
+          )}
         </div>
 
         <button
