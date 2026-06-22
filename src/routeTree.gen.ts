@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as Top100RouteImport } from './routes/top100'
+import { Route as TermosRouteImport } from './routes/termos'
 import { Route as ShopRouteImport } from './routes/shop'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as RankingRouteImport } from './routes/ranking'
@@ -46,6 +47,11 @@ import { Route as ApiPublicHooksApurarCopaRouteImport } from './routes/api/publi
 const Top100Route = Top100RouteImport.update({
   id: '/top100',
   path: '/top100',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermosRoute = TermosRouteImport.update({
+  id: '/termos',
+  path: '/termos',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ShopRoute = ShopRouteImport.update({
@@ -225,6 +231,7 @@ export interface FileRoutesByFullPath {
   '/ranking': typeof RankingRouteWithChildren
   '/reset-password': typeof ResetPasswordRoute
   '/shop': typeof ShopRoute
+  '/termos': typeof TermosRoute
   '/top100': typeof Top100Route
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/admin/apis': typeof AdminApisRoute
@@ -258,6 +265,7 @@ export interface FileRoutesByTo {
   '/ranking': typeof RankingRouteWithChildren
   '/reset-password': typeof ResetPasswordRoute
   '/shop': typeof ShopRoute
+  '/termos': typeof TermosRoute
   '/top100': typeof Top100Route
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/admin/apis': typeof AdminApisRoute
@@ -294,6 +302,7 @@ export interface FileRoutesById {
   '/ranking': typeof RankingRouteWithChildren
   '/reset-password': typeof ResetPasswordRoute
   '/shop': typeof ShopRoute
+  '/termos': typeof TermosRoute
   '/top100': typeof Top100Route
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/admin/apis': typeof AdminApisRoute
@@ -330,6 +339,7 @@ export interface FileRouteTypes {
     | '/ranking'
     | '/reset-password'
     | '/shop'
+    | '/termos'
     | '/top100'
     | '/dashboard'
     | '/admin/apis'
@@ -363,6 +373,7 @@ export interface FileRouteTypes {
     | '/ranking'
     | '/reset-password'
     | '/shop'
+    | '/termos'
     | '/top100'
     | '/dashboard'
     | '/admin/apis'
@@ -398,6 +409,7 @@ export interface FileRouteTypes {
     | '/ranking'
     | '/reset-password'
     | '/shop'
+    | '/termos'
     | '/top100'
     | '/_authenticated/dashboard'
     | '/admin/apis'
@@ -434,6 +446,7 @@ export interface RootRouteChildren {
   RankingRoute: typeof RankingRouteWithChildren
   ResetPasswordRoute: typeof ResetPasswordRoute
   ShopRoute: typeof ShopRoute
+  TermosRoute: typeof TermosRoute
   Top100Route: typeof Top100Route
   EmpresaCriarRoute: typeof EmpresaCriarRoute
   PrevisaoIdRoute: typeof PrevisaoIdRoute
@@ -447,6 +460,13 @@ declare module '@tanstack/react-router' {
       path: '/top100'
       fullPath: '/top100'
       preLoaderRoute: typeof Top100RouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/termos': {
+      id: '/termos'
+      path: '/termos'
+      fullPath: '/termos'
+      preLoaderRoute: typeof TermosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/shop': {
@@ -745,6 +765,7 @@ const rootRouteChildren: RootRouteChildren = {
   RankingRoute: RankingRouteWithChildren,
   ResetPasswordRoute: ResetPasswordRoute,
   ShopRoute: ShopRoute,
+  TermosRoute: TermosRoute,
   Top100Route: Top100Route,
   EmpresaCriarRoute: EmpresaCriarRoute,
   PrevisaoIdRoute: PrevisaoIdRoute,
