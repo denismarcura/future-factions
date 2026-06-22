@@ -11,7 +11,7 @@ const Input = z.object({
     .array(
       z.object({
         question: z.string().trim().min(1).max(200),
-        options: z.array(z.string().trim().min(1).max(60)).min(2).max(3).optional(),
+        options: z.array(z.string().trim().min(1).max(60)).min(2).max(10).optional(),
       }),
     )
     .max(10)
