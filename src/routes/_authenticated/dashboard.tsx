@@ -36,6 +36,10 @@ import {
   Clock,
   ClipboardPaste,
   Check,
+  AlertCircle,
+  Camera,
+  Upload,
+  FileText,
 } from "lucide-react";
 import { toast } from "sonner";
 import { CATEGORIES, formatTokens, type Category } from "@/lib/mock-data";
