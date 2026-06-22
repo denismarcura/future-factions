@@ -446,13 +446,14 @@ export const listChallengesForAdmin = createServerFn({ method: "GET" })
     if (!isAdmin) throw new Error("Forbidden");
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: challenges = [] } = await supabaseAdmin
+    const chRes = await supabaseAdmin
       .from("challenges")
       .select("*")
       .order("match_kickoff", { ascending: true, nullsFirst: false });
+    const challenges = chRes.data ?? [];
 
     const ids = challenges.map((c) => c.id);
-    const [{ data: palpitesCount = [] }, { data: winners = [] }] = await Promise.all([
+    const [palpRes, winRes] = await Promise.all([
       ids.length
         ? supabaseAdmin.from("palpites").select("challenge_id").in("challenge_id", ids)
         : Promise.resolve({ data: [] as { challenge_id: string }[] }),
@@ -465,6 +466,8 @@ export const listChallengesForAdmin = createServerFn({ method: "GET" })
             data: [] as { challenge_id: string; status: string; tokens: number }[],
           }),
     ]);
+    const palpitesCount = palpRes.data ?? [];
+    const winners = winRes.data ?? [];
 
     const palpCount: Record<string, number> = {};
     for (const p of palpitesCount) palpCount[p.challenge_id] = (palpCount[p.challenge_id] || 0) + 1;
