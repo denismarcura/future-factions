@@ -19,10 +19,13 @@ import {
   Brain,
   LogIn,
   LogOut,
+  Menu,
+  LayoutDashboard,
 } from "lucide-react";
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { CURRENT_USER, formatTokens } from "@/lib/mock-data";
 import { useAuth, signOut } from "@/hooks/use-auth";
+import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
 import logoAsset from "@/assets/logo-desafio.png.asset.json";
 
 const ADMIN_EMAILS = ["denismarcura@gmail.com", "antoinio.salvador@gmail.com"];
