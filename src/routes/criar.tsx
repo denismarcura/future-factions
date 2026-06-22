@@ -163,6 +163,8 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
   const generatePrizeImageFn = useServerFn(generatePrizeImage);
   const generateTiebreakerFn = useServerFn(generateTiebreaker);
   const generateRegulationFn = useServerFn(generateRegulation);
+  const createCorpChallengeFn = useServerFn(createCorpChallenge);
+  const [publishing, setPublishing] = useState(false);
 
   // Company-only assets & rules
   const [logoImg, setLogoImg] = useState<string | null>(null);
