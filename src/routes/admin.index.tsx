@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { USERS } from "@/lib/mock-data";
 import { COMPANIES } from "@/lib/mock-extra";
-import { Users, KeyRound, Mail, TrendingUp, Building2, Coins } from "lucide-react";
+import { Users, KeyRound, Mail, TrendingUp, Building2, Coins, Trophy } from "lucide-react";
 
 export const Route = createFileRoute("/admin/")({
   component: AdminHome,
@@ -17,6 +17,7 @@ function AdminHome() {
   ];
 
   const shortcuts = [
+    { to: "/admin/apuracao-copa", title: "Apuração da Copa", desc: "IA + FIFA atualizam placares e liberam tokens automaticamente.", icon: Trophy },
     { to: "/admin/cadastros", title: "Cadastros", desc: "Veja todos os usuários, indicações, tokens e estatísticas.", icon: Users },
     { to: "/admin/apis", title: "Cadastro de APIs", desc: "Configure ChatGPT, Resend e Maritaca.", icon: KeyRound },
     { to: "/admin/email-marketing", title: "E-mail Marketing", desc: "Disparos inteligentes por preferência usando IA.", icon: Mail },
