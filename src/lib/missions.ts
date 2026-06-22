@@ -84,17 +84,30 @@ export async function deleteMission(id: string) {
 }
 
 export async function listMyClaims(context?: string) {
-  let q = supabase.from("mission_claims").select("*");
+  let q = supabase.from("mission_claims").select("*").order("created_at", { ascending: true });
   if (context) q = q.eq("context", context);
   const { data, error } = await q;
   if (error) throw error;
-  return (data ?? []) as MissionClaim[];
+  const byMission = new Map<string, MissionClaim>();
+  for (const claim of (data ?? []) as MissionClaim[]) {
+    if (!byMission.has(claim.mission_id)) byMission.set(claim.mission_id, claim);
+  }
+  return Array.from(byMission.values());
 }
 
 export async function claimMission(missionId: string, context: string, tokensAwarded: number) {
   const { data: userRes } = await supabase.auth.getUser();
   const user = userRes.user;
   if (!user) throw new Error("Faça login para concluir missões.");
+  const { data: existing } = await supabase
+    .from("mission_claims")
+    .select("*")
+    .eq("user_id", user.id)
+    .eq("mission_id", missionId)
+    .order("created_at", { ascending: true })
+    .limit(1)
+    .maybeSingle();
+  if (existing) return existing as MissionClaim;
   const { data, error } = await supabase
     .from("mission_claims")
     .insert({
@@ -105,7 +118,18 @@ export async function claimMission(missionId: string, context: string, tokensAwa
     })
     .select()
     .single();
-  if (error) throw error;
+  if (error) {
+    const { data: retryExisting } = await supabase
+      .from("mission_claims")
+      .select("*")
+      .eq("user_id", user.id)
+      .eq("mission_id", missionId)
+      .order("created_at", { ascending: true })
+      .limit(1)
+      .maybeSingle();
+    if (retryExisting) return retryExisting as MissionClaim;
+    throw error;
+  }
   return data as MissionClaim;
 }
 
