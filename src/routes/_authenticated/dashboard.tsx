@@ -40,6 +40,7 @@ import {
   Camera,
   Upload,
   FileText,
+  MapPin,
 } from "lucide-react";
 import { toast } from "sonner";
 import { CATEGORIES, formatTokens, type Category } from "@/lib/mock-data";
