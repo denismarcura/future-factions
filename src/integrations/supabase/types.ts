@@ -487,13 +487,20 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          bairro: string | null
+          cep: string | null
+          cidade: string | null
+          complemento: string | null
           cpf: string | null
           created_at: string
           email: string | null
+          endereco: string | null
+          estado: string | null
           full_name: string | null
           id: string
           instagram: string | null
           marketing_opt_in: boolean
+          numero: string | null
           provider: string | null
           signup_city: string | null
           signup_ip: string | null
@@ -505,13 +512,20 @@ export type Database = {
         }
         Insert: {
           avatar_url?: string | null
+          bairro?: string | null
+          cep?: string | null
+          cidade?: string | null
+          complemento?: string | null
           cpf?: string | null
           created_at?: string
           email?: string | null
+          endereco?: string | null
+          estado?: string | null
           full_name?: string | null
           id: string
           instagram?: string | null
           marketing_opt_in?: boolean
+          numero?: string | null
           provider?: string | null
           signup_city?: string | null
           signup_ip?: string | null
@@ -523,13 +537,20 @@ export type Database = {
         }
         Update: {
           avatar_url?: string | null
+          bairro?: string | null
+          cep?: string | null
+          cidade?: string | null
+          complemento?: string | null
           cpf?: string | null
           created_at?: string
           email?: string | null
+          endereco?: string | null
+          estado?: string | null
           full_name?: string | null
           id?: string
           instagram?: string | null
           marketing_opt_in?: boolean
+          numero?: string | null
           provider?: string | null
           signup_city?: string | null
           signup_ip?: string | null
