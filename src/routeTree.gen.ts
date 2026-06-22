@@ -27,6 +27,7 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as RankingChallengeIdRouteImport } from './routes/ranking.$challengeId'
 import { Route as PrevisaoIdRouteImport } from './routes/previsao.$id'
 import { Route as EmpresaCriarRouteImport } from './routes/empresa.criar'
 import { Route as AdminRegrasIaRouteImport } from './routes/admin.regras-ia'
@@ -131,6 +132,11 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AdminRoute,
 } as any)
+const RankingChallengeIdRoute = RankingChallengeIdRouteImport.update({
+  id: '/$challengeId',
+  path: '/$challengeId',
+  getParentRoute: () => RankingRoute,
+} as any)
 const PrevisaoIdRoute = PrevisaoIdRouteImport.update({
   id: '/previsao/$id',
   path: '/previsao/$id',
@@ -216,7 +222,7 @@ export interface FileRoutesByFullPath {
   '/missoes': typeof MissoesRoute
   '/palpite-ia': typeof PalpiteIaRoute
   '/perfil': typeof PerfilRoute
-  '/ranking': typeof RankingRoute
+  '/ranking': typeof RankingRouteWithChildren
   '/reset-password': typeof ResetPasswordRoute
   '/shop': typeof ShopRoute
   '/top100': typeof Top100Route
@@ -233,6 +239,7 @@ export interface FileRoutesByFullPath {
   '/admin/regras-ia': typeof AdminRegrasIaRoute
   '/empresa/criar': typeof EmpresaCriarRoute
   '/previsao/$id': typeof PrevisaoIdRoute
+  '/ranking/$challengeId': typeof RankingChallengeIdRoute
   '/admin/': typeof AdminIndexRoute
   '/api/public/hooks/apurar-copa': typeof ApiPublicHooksApurarCopaRoute
 }
@@ -248,7 +255,7 @@ export interface FileRoutesByTo {
   '/missoes': typeof MissoesRoute
   '/palpite-ia': typeof PalpiteIaRoute
   '/perfil': typeof PerfilRoute
-  '/ranking': typeof RankingRoute
+  '/ranking': typeof RankingRouteWithChildren
   '/reset-password': typeof ResetPasswordRoute
   '/shop': typeof ShopRoute
   '/top100': typeof Top100Route
@@ -265,6 +272,7 @@ export interface FileRoutesByTo {
   '/admin/regras-ia': typeof AdminRegrasIaRoute
   '/empresa/criar': typeof EmpresaCriarRoute
   '/previsao/$id': typeof PrevisaoIdRoute
+  '/ranking/$challengeId': typeof RankingChallengeIdRoute
   '/admin': typeof AdminIndexRoute
   '/api/public/hooks/apurar-copa': typeof ApiPublicHooksApurarCopaRoute
 }
@@ -283,7 +291,7 @@ export interface FileRoutesById {
   '/missoes': typeof MissoesRoute
   '/palpite-ia': typeof PalpiteIaRoute
   '/perfil': typeof PerfilRoute
-  '/ranking': typeof RankingRoute
+  '/ranking': typeof RankingRouteWithChildren
   '/reset-password': typeof ResetPasswordRoute
   '/shop': typeof ShopRoute
   '/top100': typeof Top100Route
@@ -300,6 +308,7 @@ export interface FileRoutesById {
   '/admin/regras-ia': typeof AdminRegrasIaRoute
   '/empresa/criar': typeof EmpresaCriarRoute
   '/previsao/$id': typeof PrevisaoIdRoute
+  '/ranking/$challengeId': typeof RankingChallengeIdRoute
   '/admin/': typeof AdminIndexRoute
   '/api/public/hooks/apurar-copa': typeof ApiPublicHooksApurarCopaRoute
 }
@@ -335,6 +344,7 @@ export interface FileRouteTypes {
     | '/admin/regras-ia'
     | '/empresa/criar'
     | '/previsao/$id'
+    | '/ranking/$challengeId'
     | '/admin/'
     | '/api/public/hooks/apurar-copa'
   fileRoutesByTo: FileRoutesByTo
@@ -367,6 +377,7 @@ export interface FileRouteTypes {
     | '/admin/regras-ia'
     | '/empresa/criar'
     | '/previsao/$id'
+    | '/ranking/$challengeId'
     | '/admin'
     | '/api/public/hooks/apurar-copa'
   id:
@@ -401,6 +412,7 @@ export interface FileRouteTypes {
     | '/admin/regras-ia'
     | '/empresa/criar'
     | '/previsao/$id'
+    | '/ranking/$challengeId'
     | '/admin/'
     | '/api/public/hooks/apurar-copa'
   fileRoutesById: FileRoutesById
@@ -419,7 +431,7 @@ export interface RootRouteChildren {
   MissoesRoute: typeof MissoesRoute
   PalpiteIaRoute: typeof PalpiteIaRoute
   PerfilRoute: typeof PerfilRoute
-  RankingRoute: typeof RankingRoute
+  RankingRoute: typeof RankingRouteWithChildren
   ResetPasswordRoute: typeof ResetPasswordRoute
   ShopRoute: typeof ShopRoute
   Top100Route: typeof Top100Route
@@ -555,6 +567,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/'
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRoute
+    }
+    '/ranking/$challengeId': {
+      id: '/ranking/$challengeId'
+      path: '/$challengeId'
+      fullPath: '/ranking/$challengeId'
+      preLoaderRoute: typeof RankingChallengeIdRouteImport
+      parentRoute: typeof RankingRoute
     }
     '/previsao/$id': {
       id: '/previsao/$id'
@@ -698,6 +717,17 @@ const AdminRouteChildren: AdminRouteChildren = {
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
+interface RankingRouteChildren {
+  RankingChallengeIdRoute: typeof RankingChallengeIdRoute
+}
+
+const RankingRouteChildren: RankingRouteChildren = {
+  RankingChallengeIdRoute: RankingChallengeIdRoute,
+}
+
+const RankingRouteWithChildren =
+  RankingRoute._addFileChildren(RankingRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
@@ -712,7 +742,7 @@ const rootRouteChildren: RootRouteChildren = {
   MissoesRoute: MissoesRoute,
   PalpiteIaRoute: PalpiteIaRoute,
   PerfilRoute: PerfilRoute,
-  RankingRoute: RankingRoute,
+  RankingRoute: RankingRouteWithChildren,
   ResetPasswordRoute: ResetPasswordRoute,
   ShopRoute: ShopRoute,
   Top100Route: Top100Route,
