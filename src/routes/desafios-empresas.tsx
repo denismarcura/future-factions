@@ -1,12 +1,54 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { AppShell } from "@/components/layout/AppShell";
+import { CountdownTimer } from "@/components/CountdownTimer";
 import {
   Megaphone, Trophy, Users, Sparkles, ArrowRight, CheckCircle2, Pizza,
   Beef, Shirt, IceCream, Car, Dumbbell, Rocket, TrendingUp, Heart,
   Target, Award, Instagram, Facebook, Youtube, Share2, ThumbsUp,
   MessageCircle, Globe, ClipboardList, UserPlus, Gift, Calendar,
-  MapPin, ShieldCheck, BarChart3, Bell, Image as ImageIcon, Flame,
+  MapPin, ShieldCheck, BarChart3, Bell, Image as ImageIcon, Flame, Clock,
 } from "lucide-react";
+
+type CorpChallengeLite = {
+  id: string;
+  title: string;
+  subtitle?: string;
+  prizeName?: string;
+  endsAt?: string;
+  createdAt?: string;
+  logoImg?: string | null;
+  bannerImg?: string | null;
+  status?: string;
+};
+
+function useLatestCorpChallenges(limit = 6): CorpChallengeLite[] {
+  const [list, setList] = useState<CorpChallengeLite[]>([]);
+  useEffect(() => {
+    const read = () => {
+      try {
+        const raw = window.localStorage.getItem("ddp:admin:corp-challenges");
+        const arr = raw ? (JSON.parse(raw) as CorpChallengeLite[]) : [];
+        const sorted = [...arr]
+          .filter((c) => (c.status ?? "ativo") === "ativo")
+          .sort((a, b) => (b.createdAt ?? "").localeCompare(a.createdAt ?? ""))
+          .slice(0, limit);
+        setList(sorted);
+      } catch {
+        setList([]);
+      }
+    };
+    read();
+    window.addEventListener("ddp:corp-challenges-updated", read);
+    window.addEventListener("storage", read);
+    return () => {
+      window.removeEventListener("ddp:corp-challenges-updated", read);
+      window.removeEventListener("storage", read);
+    };
+  }, [limit]);
+  return list;
+}
+
 
 export const Route = createFileRoute("/desafios-empresas")({
   head: () => ({
