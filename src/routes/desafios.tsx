@@ -297,7 +297,7 @@ function DesafiosPage() {
 
       {tab === "empresas" && (
         <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {COMPANY_CHALLENGES.map((c) => (
+          {[...COMPANY_CHALLENGES].reverse().map((c) => (
             <article
               key={c.id}
               className="rounded-2xl border border-border/60 bg-card p-5 hover:border-primary/50 hover:shadow-glow transition"
