@@ -927,16 +927,14 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
           {/* Missões */}
           <Section
             title="Cadastre as missões obrigatórias"
-            description="Informe o endereço completo de cada rede social do desafio. Os usuários precisarão Seguir, Curtir e Comentar para ganhar +1 chance de palpite e 50 tokens."
+            description="Monte o passo a passo de missões. Cada missão concluída pelo usuário vale +50 tokens e +1 chance de palpite."
           >
             <MissionWizard
               step={missionStep}
               setStep={setMissionStep}
-              links={missionLinks}
-              setLinks={setMissionLinks}
-              onComplete={(links) => {
-                setSocialLink(links.instagram || links.facebook || links.youtube || links.tiktok);
-              }}
+              data={missionData}
+              setData={setMissionData}
+              onComplete={(d) => setSocialLink(d.instagram)}
             />
           </Section>
 
