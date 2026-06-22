@@ -317,11 +317,12 @@ export const releaseTokens = createServerFn({ method: "POST" })
       .single();
     if (!ch) throw new Error("Desafio não encontrado");
 
-    const { data: pending = [] } = await supabaseAdmin
+    const pendRes = await supabaseAdmin
       .from("challenge_winners")
       .select("*")
       .eq("challenge_id", ch.id)
       .eq("status", "pendente");
+    const pending = pendRes.data ?? [];
 
     if (pending.length === 0) {
       return { ok: true, released: 0, message: "Nada a liberar" };
