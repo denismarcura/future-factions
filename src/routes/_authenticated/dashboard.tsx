@@ -657,7 +657,6 @@ function ProfileEditor({
           <Field label="Estado" value={estado} onChange={setEstado} disabled placeholder="UF" />
         </div>
       </div>
-      </div>
     </section>
   );
 }
