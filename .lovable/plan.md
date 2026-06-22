@@ -1,33 +1,135 @@
-## Problema
+## Reestruturação do Administrativo — Plano em Fases
 
-Em `src/routes/_authenticated/dashboard.tsx` a mesma constante alimenta os textos do WhatsApp, do e-mail, o "Link para incluir na postagem" **e o QR Code**:
+Mantém tudo que já existe funcionando. Reorganiza o menu lateral em grupos, expande o Dashboard com KPIs/gráficos reais e adiciona novas seções em etapas.
 
-- Linha 1568: `const SITE_URL = "https://desafiodospalpites.com.br";` → falta `www.` (domínio oficial é `www.desafiodospalpites.com.br`).
-- Linhas 1300 e 1579: `const refCode = (userId || "").slice(0, 8) || "amigo";` → quando `userId` ainda não carregou, o link sai como `?ref=amigo` (literal).
-- O QR Code (linha 1816) usa o mesmo `link`, então mostra a URL errada e o arquivo baixado vira `qrcode-convite-amigo.png`.
+---
 
-## Correções
+### Fase 1 — Reorganização do menu + Dashboard real (esta entrega)
 
-1. **Domínio**: trocar `SITE_URL` para `"https://www.desafiodospalpites.com.br"`.
+**Sidebar agrupado** em `src/routes/admin.tsx`, recolhível (já é) e responsivo:
 
-2. **Ref code**: remover o fallback `"amigo"`. Criar helper `buildReferralLink(userId)`:
-   - Com `userId` → `${SITE_URL}/auth?ref=${userId.slice(0, 8)}`.
-   - Sem `userId` → `${SITE_URL}/auth` (sem `?ref=`).
+```text
+PAINEL
+  └── Dashboard
 
-3. **Esperar `userId`** antes de gerar textos e QR: enquanto não houver `userId`, mostrar placeholder "Carregando link de convite..." nos blocos:
-   - "Texto para WhatsApp"
-   - "Texto para e-mail"
-   - "Link para incluir na postagem"
-   - "Seu QR Code de convite" (desativa o botão Baixar/Copiar até ter o link válido)
+OPERAÇÃO
+  ├── Cadastros (usuários)
+  ├── Empresas
+  └── Convites                       ← novo (placeholder)
 
-4. **Centralizar**: extrair `SITE_URL` + `buildReferralLink` para o topo do arquivo, eliminando a duplicação entre as linhas 1301 e 1580 (e o uso no QR).
+CONTEÚDO
+  ├── Desafios
+  ├── Categorias
+  ├── Banners
+  └── Resultado dos Jogos
 
-## Arquivo afetado
+GAMIFICAÇÃO
+  ├── Missões
+  ├── Bônus de Login                 ← NOVO funcional nesta fase
+  ├── Raspadinha                     ← novo (placeholder)
+  ├── Loja de Prêmios                ← novo (placeholder)
+  └── Ranking                        ← novo (placeholder)
 
-- `src/routes/_authenticated/dashboard.tsx` — linhas ~1300, 1568, 1579–1583, 1810–1816.
+COMUNICAÇÃO
+  ├── E-mail Marketing
+  └── Notificações                   ← novo (placeholder)
 
-## Fora do escopo
+SISTEMA
+  ├── Regras IA
+  ├── APIs
+  ├── Configurações de Tokens        ← novo (placeholder)
+  ├── Relatórios                     ← novo (placeholder)
+  └── Segurança / Logs               ← novo (placeholder)
+```
 
-- Não muda o visual dos blocos.
-- Não muda os textos prontos (apenas o link dentro deles).
-- Não muda a geração da imagem do QR em si — herda o link correto automaticamente.
+Placeholders são páginas reais com cabeçalho, descrição do que virá e botão "Em breve" — não quebram navegação. Cada uma vira funcional nas fases seguintes.
+
+**Dashboard (`/admin`) — KPIs e gráficos reais consultando o banco:**
+
+KPIs (cards):
+- Usuários cadastrados (total)
+- Empresas cadastradas (total)
+- Desafios ativos / encerrados
+- Participações totais (palpites)
+- Tokens distribuídos (soma de `token_transactions`)
+- Usuários ativos hoje / semana / mês (DAU/WAU/MAU baseado em `palpites.created_at`)
+- Novos cadastros (7d / 30d)
+
+Listas Top:
+- Top 5 desafios (por nº de palpites)
+- Top 5 empresas (por nº de desafios)
+
+Gráficos (recharts, já instalado):
+- Crescimento de usuários (linha, 30 dias)
+- Participações por dia (área, 30 dias)
+- Tokens distribuídos por dia (barra, 30 dias)
+- Cadastros por dia (linha, 30 dias)
+
+Tudo via um único server function `getAdminDashboard` (`src/lib/admin-stats.functions.ts` já existe — vou estender) com `requireSupabaseAuth` + checagem de role admin.
+
+---
+
+### Fase 2 — Bônus de Login (30 dias) — funcional
+
+**Banco** (migração):
+- `daily_login_rewards` (config por dia 1–30: tokens, é marco/sim-não)
+- `user_login_streak` (user_id, current_streak, longest_streak, last_claim_date, total_claimed)
+- `daily_login_claims` (histórico: user_id, day_number, tokens, claimed_at)
+
+**Admin** (`/admin/bonus-login`):
+- Tabela editável dia 1 → 30 com tokens de cada dia
+- Regras: reinício após X dias sem claim (configurável)
+- KPIs: usuários ativos hoje, sequência média, top streaks
+- Histórico paginado
+
+**Cliente** (a discutir em outra rodada — esta fase entrega só o admin + a base de dados + server fn `claimDailyBonus` pronta).
+
+---
+
+### Fases seguintes (resumo, não entregues agora)
+
+- **Fase 3 — Ranking Semanal/Mensal** (critérios, premiação, medalhas, histórico)
+- **Fase 4 — Raspadinha** (probabilidades, prêmios, limite diário)
+- **Fase 5 — Loja de Prêmios** (produtos, estoque, resgates, aprovação)
+- **Fase 6 — Convites & Notificações** (visualização + envio segmentado/agendado)
+- **Fase 7 — Configurações de Tokens** (parametrização: cadastro, convite, acerto, missão, raspadinha, login)
+- **Fase 8 — Relatórios** (exportação Excel/CSV/PDF)
+- **Fase 9 — Segurança / Logs** (audit trail: login, alterações, tokens, aprovações, exclusões, IP)
+- **Fase 10 — Permissões** (papéis admin/moderador/suporte — hoje só existe `admin`)
+
+Cada uma será planejada e aprovada individualmente.
+
+---
+
+### Detalhes técnicos da Fase 1
+
+**Arquivos alterados/criados:**
+- `src/routes/admin.tsx` — sidebar agrupado por categoria com headers (`OPERAÇÃO`, `CONTEÚDO`, etc.), mantendo `collapsible` e responsividade mobile já existentes.
+- `src/routes/admin.index.tsx` — substituir conteúdo atual por dashboard com KPIs + gráficos (recharts).
+- `src/lib/admin-stats.functions.ts` — estender com `getAdminDashboard()` que retorna `{ kpis, topChallenges, topCompanies, series: { users, predictions, tokens, signups } }`.
+- Novas rotas placeholder (página simples com título + "Em breve"):
+  - `src/routes/admin.convites.tsx`
+  - `src/routes/admin.bonus-login.tsx` *(funcional na Fase 2; placeholder agora)*
+  - `src/routes/admin.raspadinha.tsx`
+  - `src/routes/admin.loja.tsx`
+  - `src/routes/admin.ranking.tsx`
+  - `src/routes/admin.notificacoes.tsx`
+  - `src/routes/admin.tokens-config.tsx`
+  - `src/routes/admin.relatorios.tsx`
+  - `src/routes/admin.seguranca.tsx`
+
+**Sem mudanças** em: conteúdo das telas Cadastros, Desafios, Empresas, Categorias, Banners, Missões, Regras IA, APIs, E-mail Marketing, Resultado Jogos, Apuração Copa.
+
+**Segurança:** todas as queries do dashboard rodam em server function com `requireSupabaseAuth` + `has_role(userId, 'admin')`. Sem mudanças em RLS.
+
+**Visual:** mantém identidade atual do admin (verde/prata/dourado, logo do Desafio dos Palpites já presentes no `AppShell`).
+
+---
+
+### O que NÃO está nesta fase
+
+- Bloquear/banir/resetar senha/ajustar tokens na tela de Cadastros (você escolheu manter as telas existentes como estão)
+- Aprovar/rejeitar empresas (idem)
+- Qualquer feature das Fases 2–10
+
+Aprova essa Fase 1 para eu implementar?

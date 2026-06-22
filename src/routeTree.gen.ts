@@ -31,14 +31,23 @@ import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as RankingChallengeIdRouteImport } from './routes/ranking.$challengeId'
 import { Route as PrevisaoIdRouteImport } from './routes/previsao.$id'
 import { Route as EmpresaCriarRouteImport } from './routes/empresa.criar'
+import { Route as AdminTokensConfigRouteImport } from './routes/admin.tokens-config'
+import { Route as AdminSegurancaRouteImport } from './routes/admin.seguranca'
 import { Route as AdminResultadoJogosRouteImport } from './routes/admin.resultado-jogos'
+import { Route as AdminRelatoriosRouteImport } from './routes/admin.relatorios'
 import { Route as AdminRegrasIaRouteImport } from './routes/admin.regras-ia'
+import { Route as AdminRaspadinhaRouteImport } from './routes/admin.raspadinha'
+import { Route as AdminRankingRouteImport } from './routes/admin.ranking'
+import { Route as AdminNotificacoesRouteImport } from './routes/admin.notificacoes'
 import { Route as AdminMissoesRouteImport } from './routes/admin.missoes'
+import { Route as AdminLojaRouteImport } from './routes/admin.loja'
 import { Route as AdminEmpresasRouteImport } from './routes/admin.empresas'
 import { Route as AdminEmailMarketingRouteImport } from './routes/admin.email-marketing'
 import { Route as AdminDesafiosRouteImport } from './routes/admin.desafios'
+import { Route as AdminConvitesRouteImport } from './routes/admin.convites'
 import { Route as AdminCategoriasRouteImport } from './routes/admin.categorias'
 import { Route as AdminCadastrosRouteImport } from './routes/admin.cadastros'
+import { Route as AdminBonusLoginRouteImport } from './routes/admin.bonus-login'
 import { Route as AdminBannersRouteImport } from './routes/admin.banners'
 import { Route as AdminApuracaoCopaRouteImport } from './routes/admin.apuracao-copa'
 import { Route as AdminApisRouteImport } from './routes/admin.apis'
@@ -155,9 +164,24 @@ const EmpresaCriarRoute = EmpresaCriarRouteImport.update({
   path: '/empresa/criar',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminTokensConfigRoute = AdminTokensConfigRouteImport.update({
+  id: '/tokens-config',
+  path: '/tokens-config',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminSegurancaRoute = AdminSegurancaRouteImport.update({
+  id: '/seguranca',
+  path: '/seguranca',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminResultadoJogosRoute = AdminResultadoJogosRouteImport.update({
   id: '/resultado-jogos',
   path: '/resultado-jogos',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminRelatoriosRoute = AdminRelatoriosRouteImport.update({
+  id: '/relatorios',
+  path: '/relatorios',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminRegrasIaRoute = AdminRegrasIaRouteImport.update({
@@ -165,9 +189,29 @@ const AdminRegrasIaRoute = AdminRegrasIaRouteImport.update({
   path: '/regras-ia',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminRaspadinhaRoute = AdminRaspadinhaRouteImport.update({
+  id: '/raspadinha',
+  path: '/raspadinha',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminRankingRoute = AdminRankingRouteImport.update({
+  id: '/ranking',
+  path: '/ranking',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminNotificacoesRoute = AdminNotificacoesRouteImport.update({
+  id: '/notificacoes',
+  path: '/notificacoes',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminMissoesRoute = AdminMissoesRouteImport.update({
   id: '/missoes',
   path: '/missoes',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminLojaRoute = AdminLojaRouteImport.update({
+  id: '/loja',
+  path: '/loja',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminEmpresasRoute = AdminEmpresasRouteImport.update({
@@ -185,6 +229,11 @@ const AdminDesafiosRoute = AdminDesafiosRouteImport.update({
   path: '/desafios',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminConvitesRoute = AdminConvitesRouteImport.update({
+  id: '/convites',
+  path: '/convites',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminCategoriasRoute = AdminCategoriasRouteImport.update({
   id: '/categorias',
   path: '/categorias',
@@ -193,6 +242,11 @@ const AdminCategoriasRoute = AdminCategoriasRouteImport.update({
 const AdminCadastrosRoute = AdminCadastrosRouteImport.update({
   id: '/cadastros',
   path: '/cadastros',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminBonusLoginRoute = AdminBonusLoginRouteImport.update({
+  id: '/bonus-login',
+  path: '/bonus-login',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminBannersRoute = AdminBannersRouteImport.update({
@@ -250,14 +304,23 @@ export interface FileRoutesByFullPath {
   '/admin/apis': typeof AdminApisRoute
   '/admin/apuracao-copa': typeof AdminApuracaoCopaRoute
   '/admin/banners': typeof AdminBannersRoute
+  '/admin/bonus-login': typeof AdminBonusLoginRoute
   '/admin/cadastros': typeof AdminCadastrosRoute
   '/admin/categorias': typeof AdminCategoriasRoute
+  '/admin/convites': typeof AdminConvitesRoute
   '/admin/desafios': typeof AdminDesafiosRoute
   '/admin/email-marketing': typeof AdminEmailMarketingRoute
   '/admin/empresas': typeof AdminEmpresasRoute
+  '/admin/loja': typeof AdminLojaRoute
   '/admin/missoes': typeof AdminMissoesRoute
+  '/admin/notificacoes': typeof AdminNotificacoesRoute
+  '/admin/ranking': typeof AdminRankingRoute
+  '/admin/raspadinha': typeof AdminRaspadinhaRoute
   '/admin/regras-ia': typeof AdminRegrasIaRoute
+  '/admin/relatorios': typeof AdminRelatoriosRoute
   '/admin/resultado-jogos': typeof AdminResultadoJogosRoute
+  '/admin/seguranca': typeof AdminSegurancaRoute
+  '/admin/tokens-config': typeof AdminTokensConfigRoute
   '/empresa/criar': typeof EmpresaCriarRoute
   '/previsao/$id': typeof PrevisaoIdRoute
   '/ranking/$challengeId': typeof RankingChallengeIdRoute
@@ -286,14 +349,23 @@ export interface FileRoutesByTo {
   '/admin/apis': typeof AdminApisRoute
   '/admin/apuracao-copa': typeof AdminApuracaoCopaRoute
   '/admin/banners': typeof AdminBannersRoute
+  '/admin/bonus-login': typeof AdminBonusLoginRoute
   '/admin/cadastros': typeof AdminCadastrosRoute
   '/admin/categorias': typeof AdminCategoriasRoute
+  '/admin/convites': typeof AdminConvitesRoute
   '/admin/desafios': typeof AdminDesafiosRoute
   '/admin/email-marketing': typeof AdminEmailMarketingRoute
   '/admin/empresas': typeof AdminEmpresasRoute
+  '/admin/loja': typeof AdminLojaRoute
   '/admin/missoes': typeof AdminMissoesRoute
+  '/admin/notificacoes': typeof AdminNotificacoesRoute
+  '/admin/ranking': typeof AdminRankingRoute
+  '/admin/raspadinha': typeof AdminRaspadinhaRoute
   '/admin/regras-ia': typeof AdminRegrasIaRoute
+  '/admin/relatorios': typeof AdminRelatoriosRoute
   '/admin/resultado-jogos': typeof AdminResultadoJogosRoute
+  '/admin/seguranca': typeof AdminSegurancaRoute
+  '/admin/tokens-config': typeof AdminTokensConfigRoute
   '/empresa/criar': typeof EmpresaCriarRoute
   '/previsao/$id': typeof PrevisaoIdRoute
   '/ranking/$challengeId': typeof RankingChallengeIdRoute
@@ -325,14 +397,23 @@ export interface FileRoutesById {
   '/admin/apis': typeof AdminApisRoute
   '/admin/apuracao-copa': typeof AdminApuracaoCopaRoute
   '/admin/banners': typeof AdminBannersRoute
+  '/admin/bonus-login': typeof AdminBonusLoginRoute
   '/admin/cadastros': typeof AdminCadastrosRoute
   '/admin/categorias': typeof AdminCategoriasRoute
+  '/admin/convites': typeof AdminConvitesRoute
   '/admin/desafios': typeof AdminDesafiosRoute
   '/admin/email-marketing': typeof AdminEmailMarketingRoute
   '/admin/empresas': typeof AdminEmpresasRoute
+  '/admin/loja': typeof AdminLojaRoute
   '/admin/missoes': typeof AdminMissoesRoute
+  '/admin/notificacoes': typeof AdminNotificacoesRoute
+  '/admin/ranking': typeof AdminRankingRoute
+  '/admin/raspadinha': typeof AdminRaspadinhaRoute
   '/admin/regras-ia': typeof AdminRegrasIaRoute
+  '/admin/relatorios': typeof AdminRelatoriosRoute
   '/admin/resultado-jogos': typeof AdminResultadoJogosRoute
+  '/admin/seguranca': typeof AdminSegurancaRoute
+  '/admin/tokens-config': typeof AdminTokensConfigRoute
   '/empresa/criar': typeof EmpresaCriarRoute
   '/previsao/$id': typeof PrevisaoIdRoute
   '/ranking/$challengeId': typeof RankingChallengeIdRoute
@@ -364,14 +445,23 @@ export interface FileRouteTypes {
     | '/admin/apis'
     | '/admin/apuracao-copa'
     | '/admin/banners'
+    | '/admin/bonus-login'
     | '/admin/cadastros'
     | '/admin/categorias'
+    | '/admin/convites'
     | '/admin/desafios'
     | '/admin/email-marketing'
     | '/admin/empresas'
+    | '/admin/loja'
     | '/admin/missoes'
+    | '/admin/notificacoes'
+    | '/admin/ranking'
+    | '/admin/raspadinha'
     | '/admin/regras-ia'
+    | '/admin/relatorios'
     | '/admin/resultado-jogos'
+    | '/admin/seguranca'
+    | '/admin/tokens-config'
     | '/empresa/criar'
     | '/previsao/$id'
     | '/ranking/$challengeId'
@@ -400,14 +490,23 @@ export interface FileRouteTypes {
     | '/admin/apis'
     | '/admin/apuracao-copa'
     | '/admin/banners'
+    | '/admin/bonus-login'
     | '/admin/cadastros'
     | '/admin/categorias'
+    | '/admin/convites'
     | '/admin/desafios'
     | '/admin/email-marketing'
     | '/admin/empresas'
+    | '/admin/loja'
     | '/admin/missoes'
+    | '/admin/notificacoes'
+    | '/admin/ranking'
+    | '/admin/raspadinha'
     | '/admin/regras-ia'
+    | '/admin/relatorios'
     | '/admin/resultado-jogos'
+    | '/admin/seguranca'
+    | '/admin/tokens-config'
     | '/empresa/criar'
     | '/previsao/$id'
     | '/ranking/$challengeId'
@@ -438,14 +537,23 @@ export interface FileRouteTypes {
     | '/admin/apis'
     | '/admin/apuracao-copa'
     | '/admin/banners'
+    | '/admin/bonus-login'
     | '/admin/cadastros'
     | '/admin/categorias'
+    | '/admin/convites'
     | '/admin/desafios'
     | '/admin/email-marketing'
     | '/admin/empresas'
+    | '/admin/loja'
     | '/admin/missoes'
+    | '/admin/notificacoes'
+    | '/admin/ranking'
+    | '/admin/raspadinha'
     | '/admin/regras-ia'
+    | '/admin/relatorios'
     | '/admin/resultado-jogos'
+    | '/admin/seguranca'
+    | '/admin/tokens-config'
     | '/empresa/criar'
     | '/previsao/$id'
     | '/ranking/$challengeId'
@@ -635,11 +743,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EmpresaCriarRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/tokens-config': {
+      id: '/admin/tokens-config'
+      path: '/tokens-config'
+      fullPath: '/admin/tokens-config'
+      preLoaderRoute: typeof AdminTokensConfigRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/seguranca': {
+      id: '/admin/seguranca'
+      path: '/seguranca'
+      fullPath: '/admin/seguranca'
+      preLoaderRoute: typeof AdminSegurancaRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/resultado-jogos': {
       id: '/admin/resultado-jogos'
       path: '/resultado-jogos'
       fullPath: '/admin/resultado-jogos'
       preLoaderRoute: typeof AdminResultadoJogosRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/relatorios': {
+      id: '/admin/relatorios'
+      path: '/relatorios'
+      fullPath: '/admin/relatorios'
+      preLoaderRoute: typeof AdminRelatoriosRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/regras-ia': {
@@ -649,11 +778,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminRegrasIaRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/raspadinha': {
+      id: '/admin/raspadinha'
+      path: '/raspadinha'
+      fullPath: '/admin/raspadinha'
+      preLoaderRoute: typeof AdminRaspadinhaRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/ranking': {
+      id: '/admin/ranking'
+      path: '/ranking'
+      fullPath: '/admin/ranking'
+      preLoaderRoute: typeof AdminRankingRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/notificacoes': {
+      id: '/admin/notificacoes'
+      path: '/notificacoes'
+      fullPath: '/admin/notificacoes'
+      preLoaderRoute: typeof AdminNotificacoesRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/missoes': {
       id: '/admin/missoes'
       path: '/missoes'
       fullPath: '/admin/missoes'
       preLoaderRoute: typeof AdminMissoesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/loja': {
+      id: '/admin/loja'
+      path: '/loja'
+      fullPath: '/admin/loja'
+      preLoaderRoute: typeof AdminLojaRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/empresas': {
@@ -677,6 +834,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminDesafiosRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/convites': {
+      id: '/admin/convites'
+      path: '/convites'
+      fullPath: '/admin/convites'
+      preLoaderRoute: typeof AdminConvitesRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/categorias': {
       id: '/admin/categorias'
       path: '/categorias'
@@ -689,6 +853,13 @@ declare module '@tanstack/react-router' {
       path: '/cadastros'
       fullPath: '/admin/cadastros'
       preLoaderRoute: typeof AdminCadastrosRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/bonus-login': {
+      id: '/admin/bonus-login'
+      path: '/bonus-login'
+      fullPath: '/admin/bonus-login'
+      preLoaderRoute: typeof AdminBonusLoginRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/banners': {
@@ -751,14 +922,23 @@ interface AdminRouteChildren {
   AdminApisRoute: typeof AdminApisRoute
   AdminApuracaoCopaRoute: typeof AdminApuracaoCopaRoute
   AdminBannersRoute: typeof AdminBannersRoute
+  AdminBonusLoginRoute: typeof AdminBonusLoginRoute
   AdminCadastrosRoute: typeof AdminCadastrosRoute
   AdminCategoriasRoute: typeof AdminCategoriasRoute
+  AdminConvitesRoute: typeof AdminConvitesRoute
   AdminDesafiosRoute: typeof AdminDesafiosRoute
   AdminEmailMarketingRoute: typeof AdminEmailMarketingRoute
   AdminEmpresasRoute: typeof AdminEmpresasRoute
+  AdminLojaRoute: typeof AdminLojaRoute
   AdminMissoesRoute: typeof AdminMissoesRoute
+  AdminNotificacoesRoute: typeof AdminNotificacoesRoute
+  AdminRankingRoute: typeof AdminRankingRoute
+  AdminRaspadinhaRoute: typeof AdminRaspadinhaRoute
   AdminRegrasIaRoute: typeof AdminRegrasIaRoute
+  AdminRelatoriosRoute: typeof AdminRelatoriosRoute
   AdminResultadoJogosRoute: typeof AdminResultadoJogosRoute
+  AdminSegurancaRoute: typeof AdminSegurancaRoute
+  AdminTokensConfigRoute: typeof AdminTokensConfigRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
@@ -766,14 +946,23 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminApisRoute: AdminApisRoute,
   AdminApuracaoCopaRoute: AdminApuracaoCopaRoute,
   AdminBannersRoute: AdminBannersRoute,
+  AdminBonusLoginRoute: AdminBonusLoginRoute,
   AdminCadastrosRoute: AdminCadastrosRoute,
   AdminCategoriasRoute: AdminCategoriasRoute,
+  AdminConvitesRoute: AdminConvitesRoute,
   AdminDesafiosRoute: AdminDesafiosRoute,
   AdminEmailMarketingRoute: AdminEmailMarketingRoute,
   AdminEmpresasRoute: AdminEmpresasRoute,
+  AdminLojaRoute: AdminLojaRoute,
   AdminMissoesRoute: AdminMissoesRoute,
+  AdminNotificacoesRoute: AdminNotificacoesRoute,
+  AdminRankingRoute: AdminRankingRoute,
+  AdminRaspadinhaRoute: AdminRaspadinhaRoute,
   AdminRegrasIaRoute: AdminRegrasIaRoute,
+  AdminRelatoriosRoute: AdminRelatoriosRoute,
   AdminResultadoJogosRoute: AdminResultadoJogosRoute,
+  AdminSegurancaRoute: AdminSegurancaRoute,
+  AdminTokensConfigRoute: AdminTokensConfigRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
 
