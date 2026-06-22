@@ -1286,6 +1286,64 @@ function Field({ label, action, children }: { label: string; action?: React.Reac
   );
 }
 
+function UploadCard({
+  label,
+  hint,
+  image,
+  onChange,
+  aspect = "aspect-square",
+}: {
+  label: string;
+  hint: string;
+  image: string | null;
+  onChange: (v: string | null) => void;
+  aspect?: string;
+}) {
+  return (
+    <div>
+      <div className="text-xs uppercase tracking-wider font-bold text-muted-foreground mb-1.5">{label}</div>
+      <div className={`relative rounded-xl border border-dashed border-border/70 bg-background/40 ${aspect} overflow-hidden grid place-items-center`}>
+        {image ? (
+          <>
+            <img src={image} alt={label} className="w-full h-full object-contain" />
+            <button
+              type="button"
+              onClick={() => onChange(null)}
+              className="absolute top-2 right-2 h-8 w-8 rounded-lg bg-background/80 backdrop-blur grid place-items-center text-destructive hover:bg-background"
+              aria-label="Remover"
+            >
+              <Trash2 className="h-4 w-4" />
+            </button>
+          </>
+        ) : (
+          <label className="w-full h-full grid place-items-center cursor-pointer text-center text-muted-foreground text-xs hover:text-primary">
+            <div>
+              <Upload className="h-7 w-7 mx-auto mb-1.5 text-gold" />
+              Clique para enviar
+            </div>
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (!f) return;
+                const reader = new FileReader();
+                reader.onload = () => {
+                  if (typeof reader.result === "string") onChange(reader.result);
+                };
+                reader.readAsDataURL(f);
+                e.target.value = "";
+              }}
+            />
+          </label>
+        )}
+      </div>
+      <p className="text-[11px] text-muted-foreground mt-1.5">{hint}</p>
+    </div>
+  );
+}
+
 function Row({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-center justify-between text-sm">
