@@ -1130,7 +1130,7 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
               {/* Critérios de desempate */}
               <Section
                 title="Critérios de desempate"
-                description="Escreva o básico — a IA pode reescrever em formato oficial."
+                description="Altere e clique em Gerar novamente"
                 action={
                   <button
                     type="button"
