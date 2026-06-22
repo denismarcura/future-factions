@@ -1813,7 +1813,7 @@ function InvitePromoSection({
             <div className="flex flex-wrap gap-2 justify-center sm:justify-start">
               <a
                 href={qrUrl}
-                download={`qrcode-convite-${refCode}.png`}
+                download={`qrcode-convite-${refCode || "desafiodospalpites"}.png`}
                 className="h-9 px-3 rounded-full bg-gradient-brand text-primary-foreground text-xs font-bold inline-flex items-center gap-1.5"
               >
                 <Download className="h-3.5 w-3.5" /> Baixar QR Code
