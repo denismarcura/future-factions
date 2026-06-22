@@ -160,10 +160,10 @@ export const fetchFifaMatchResult = createServerFn({ method: "POST" })
           ? "aguardando_jogo"
           : "requer_revisao_manual";
 
-    const updates: Record<string, unknown> = {
+    const updates: Record<string, any> = {
       result_source: FIFA_FIXTURES_URL,
       result_checked_at: new Date().toISOString(),
-      result_payload_json: result as unknown as Record<string, unknown>,
+      result_payload_json: result as any,
       apuration_status: newStatus,
       match_status: result.status,
     };
@@ -181,14 +181,14 @@ export const fetchFifaMatchResult = createServerFn({ method: "POST" })
       updates.result_confirmed_at = new Date().toISOString();
     }
 
-    await supabaseAdmin.from("challenges").update(updates).eq("id", ch.id);
+    await supabaseAdmin.from("challenges").update(updates as any).eq("id", ch.id);
     await supabaseAdmin.from("challenge_results_log").insert({
       challenge_id: ch.id,
       triggered_by: userId,
       source: FIFA_FIXTURES_URL,
       confidence: result.confidence,
       status_at_check: newStatus,
-      payload: result as unknown as Record<string, unknown>,
+      payload: result as any,
     });
 
     return { ok: true, status: newStatus, result };
@@ -411,7 +411,7 @@ export const manualConfirmResult = createServerFn({ method: "POST" })
           manual: true,
           observation: data.observation ?? null,
           by: userId,
-        } as Record<string, unknown>,
+        } as any,
       })
       .eq("id", ch.id);
 
@@ -426,7 +426,7 @@ export const manualConfirmResult = createServerFn({ method: "POST" })
         home_score: data.home_score,
         away_score: data.away_score,
         observation: data.observation ?? null,
-      } as Record<string, unknown>,
+      } as any,
     });
 
     return { ok: true };
