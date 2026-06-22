@@ -49,6 +49,59 @@ export function flagUrl(code: string) {
   return `https://flagcdn.com/w80/${code}.png`;
 }
 
+// Build a unique catalog of all known countries from WC matches.
+const COUNTRY_CATALOG: { name: string; code: string }[] = (() => {
+  const seen = new Map<string, string>();
+  for (const m of WORLD_CUP_MATCHES) {
+    if (!seen.has(m.home.toLowerCase())) seen.set(m.home.toLowerCase(), m.homeCode);
+    if (!seen.has(m.away.toLowerCase())) seen.set(m.away.toLowerCase(), m.awayCode);
+  }
+  return Array.from(seen.entries()).map(([name, code]) => ({ name, code }));
+})();
+
+function normalize(s: string) {
+  return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+}
+
+/**
+ * Detect two known countries mentioned in any text (e.g. challenge title).
+ * Returns a MatchInfo-shaped object with flag URLs, or null.
+ */
+export function detectMatchFromText(text: string): {
+  home: string; away: string; homeFlag: string; awayFlag: string; kickoff: string; group: string;
+} | null {
+  if (!text) return null;
+  const norm = ` ${normalize(text)} `;
+  const found: { name: string; code: string; idx: number }[] = [];
+  for (const c of COUNTRY_CATALOG) {
+    const n = normalize(c.name);
+    const idx = norm.indexOf(` ${n} `);
+    const idx2 = idx === -1 ? norm.indexOf(` ${n}.`) : idx;
+    const idx3 = idx2 === -1 ? norm.indexOf(` ${n},`) : idx2;
+    const idx4 = idx3 === -1 ? norm.indexOf(`${n} x `) : idx3;
+    const finalIdx = idx4 === -1 ? norm.indexOf(` x ${n}`) : idx4;
+    if (finalIdx !== -1) found.push({ name: c.name, code: c.code, idx: finalIdx });
+  }
+  if (found.length < 2) return null;
+  found.sort((a, b) => a.idx - b.idx);
+  const home = found[0];
+  const away = found.find((f) => f.name !== home.name) ?? found[1];
+  // Try to match the official WC fixture to grab kickoff & group.
+  const wc = WORLD_CUP_MATCHES.find(
+    (m) =>
+      (normalize(m.home) === normalize(home.name) && normalize(m.away) === normalize(away.name)) ||
+      (normalize(m.away) === normalize(home.name) && normalize(m.home) === normalize(away.name)),
+  );
+  return {
+    home: home.name.replace(/\b\w/g, (c) => c.toUpperCase()),
+    away: away.name.replace(/\b\w/g, (c) => c.toUpperCase()),
+    homeFlag: flagUrl(home.code),
+    awayFlag: flagUrl(away.code),
+    kickoff: wc?.kickoff ?? new Date().toISOString(),
+    group: wc?.group ?? "—",
+  };
+}
+
 const ENTRY_FEE = 100;
 const PRIZE_TIERS = [
   { hits: 5, tokens: 10000 },
