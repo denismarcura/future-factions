@@ -1377,74 +1377,196 @@ function MissionBlock({ icon, name }: { icon: React.ReactNode; name: string }) {
   );
 }
 
-type MissionLinks = { instagram: string; facebook: string; youtube: string; tiktok: string };
+type MissionData = {
+  instagram: string;
+  likeCount: number;
+  likeLinks: string[];
+  extras: Record<string, string>;
+  bonusChance: boolean;
+};
 
-const MISSION_STEPS: Array<{
-  key: keyof MissionLinks;
-  label: string;
-  question: string;
-  placeholder: string;
-  icon: React.ReactNode;
-}> = [
-  { key: "instagram", label: "Instagram", question: "Qual é o endereço do seu Instagram?", placeholder: "https://www.instagram.com/seu-perfil", icon: <Instagram className="h-4 w-4" /> },
-  { key: "facebook", label: "Facebook", question: "Qual é o endereço do seu Facebook?", placeholder: "https://www.facebook.com/sua-pagina", icon: <Facebook className="h-4 w-4" /> },
-  { key: "youtube", label: "YouTube", question: "Qual é o endereço do seu canal no YouTube?", placeholder: "https://www.youtube.com/@seu-canal", icon: <Youtube className="h-4 w-4" /> },
-  { key: "tiktok", label: "TikTok", question: "Qual é o endereço do seu TikTok?", placeholder: "https://www.tiktok.com/@seu-perfil", icon: <Music2 className="h-4 w-4" /> },
+const EXTRA_SOCIALS: Array<{ key: string; label: string; icon: React.ReactNode; placeholder: string }> = [
+  { key: "facebook", label: "Facebook", icon: <Facebook className="h-4 w-4" />, placeholder: "https://www.facebook.com/sua-pagina" },
+  { key: "youtube", label: "YouTube", icon: <Youtube className="h-4 w-4" />, placeholder: "https://www.youtube.com/@seu-canal" },
+  { key: "tiktok", label: "TikTok", icon: <Music2 className="h-4 w-4" />, placeholder: "https://www.tiktok.com/@seu-perfil" },
+  { key: "google", label: "Avaliação no Google Meu Negócio", icon: <Star className="h-4 w-4" />, placeholder: "https://g.page/r/..." },
+  { key: "twitter", label: "Twitter / X", icon: <Twitter className="h-4 w-4" />, placeholder: "https://twitter.com/seu-perfil" },
+  { key: "linkedin", label: "LinkedIn", icon: <Linkedin className="h-4 w-4" />, placeholder: "https://www.linkedin.com/company/sua-empresa" },
 ];
+
+const WIZARD_STEPS = ["Instagram", "Curtidas", "Outras redes", "Bônus"] as const;
 
 function MissionWizard({
   step,
   setStep,
-  links,
-  setLinks,
+  data,
+  setData,
   onComplete,
 }: {
   step: number;
   setStep: (n: number) => void;
-  links: MissionLinks;
-  setLinks: React.Dispatch<React.SetStateAction<MissionLinks>>;
-  onComplete: (links: MissionLinks) => void;
+  data: MissionData;
+  setData: React.Dispatch<React.SetStateAction<MissionData>>;
+  onComplete: (data: MissionData) => void;
 }) {
-  const total = MISSION_STEPS.length;
+  const total = WIZARD_STEPS.length;
   const done = step >= total;
-  const current = !done ? MISSION_STEPS[step] : null;
-  const value = current ? links[current.key] : "";
 
-  const next = () => {
-    if (current) onComplete({ ...links });
-    if (step + 1 >= total) {
+  const goNext = () => {
+    const nextStep = step + 1;
+    if (nextStep >= total) {
       setStep(total);
-      onComplete({ ...links });
+      onComplete(data);
     } else {
-      setStep(step + 1);
+      setStep(nextStep);
     }
+  };
+
+  const setLikeCount = (n: number) => {
+    const clamped = Math.max(1, Math.min(10, n));
+    setData((prev) => {
+      const arr = prev.likeLinks.slice(0, clamped);
+      while (arr.length < clamped) arr.push("");
+      return { ...prev, likeCount: clamped, likeLinks: arr };
+    });
   };
 
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-1.5">
-        {MISSION_STEPS.map((s, i) => (
-          <div key={s.key} className={`h-1.5 flex-1 rounded-full ${i < step ? "bg-primary" : i === step ? "bg-primary/60" : "bg-border"}`} />
+        {WIZARD_STEPS.map((s, i) => (
+          <div key={s} className={`h-1.5 flex-1 rounded-full ${i < step ? "bg-primary" : i === step ? "bg-primary/60" : "bg-border"}`} />
         ))}
       </div>
 
-      {current ? (
+      <div className="rounded-xl border border-gold/30 bg-gold/5 p-3 flex items-start gap-2 text-xs">
+        <Coins className="h-4 w-4 text-gold mt-0.5 shrink-0" />
+        <span><span className="text-gold font-bold">Cada missão vale 50 tokens</span> e dá +1 chance de palpite ao usuário.</span>
+      </div>
+
+      {!done && (
         <div className="rounded-xl border border-border/60 bg-background/40 p-4 space-y-3">
-          <div className="flex items-center gap-2">
-            <span className="h-8 w-8 grid place-items-center rounded-md bg-primary/15 text-primary">{current.icon}</span>
-            <div>
-              <div className="text-xs text-muted-foreground">Passo {step + 1} de {total} • {current.label}</div>
-              <div className="font-semibold text-sm">{current.question}</div>
+          <div className="text-xs text-muted-foreground">Passo {step + 1} de {total} • {WIZARD_STEPS[step]}</div>
+
+          {step === 0 && (
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <span className="h-8 w-8 grid place-items-center rounded-md bg-primary/15 text-primary"><Instagram className="h-4 w-4" /></span>
+                <div className="font-semibold text-sm">Qual é o endereço do seu Instagram?</div>
+              </div>
+              <input
+                value={data.instagram}
+                onChange={(e) => setData((p) => ({ ...p, instagram: e.target.value }))}
+                placeholder="https://www.instagram.com/casadinapoli/"
+                className="input"
+                autoFocus
+              />
+              <p className="text-[11px] text-muted-foreground">Cole o endereço completo do perfil (com https://).</p>
             </div>
-          </div>
-          <input
-            value={value}
-            onChange={(e) => setLinks((prev) => ({ ...prev, [current.key]: e.target.value }))}
-            placeholder={current.placeholder}
-            className="input"
-            autoFocus
-          />
-          <p className="text-[11px] text-muted-foreground">Cole o endereço completo (com https://). Os usuários precisarão Seguir, Curtir e Comentar para concluir a missão.</p>
+          )}
+
+          {step === 1 && (
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <span className="h-8 w-8 grid place-items-center rounded-md bg-primary/15 text-primary"><Heart className="h-4 w-4" /></span>
+                <div className="font-semibold text-sm">Quais links você gostaria que curtissem?</div>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-muted-foreground">Número de links:</span>
+                <button type="button" onClick={() => setLikeCount(data.likeCount - 1)} className="h-8 w-8 rounded-md border border-border font-bold">−</button>
+                <span className="w-10 text-center font-display font-bold">{String(data.likeCount).padStart(2, "0")}</span>
+                <button type="button" onClick={() => setLikeCount(data.likeCount + 1)} className="h-8 w-8 rounded-md border border-border font-bold">+</button>
+              </div>
+              <div className="space-y-2">
+                {data.likeLinks.map((link, i) => (
+                  <input
+                    key={i}
+                    value={link}
+                    onChange={(e) => setData((p) => {
+                      const arr = [...p.likeLinks];
+                      arr[i] = e.target.value;
+                      return { ...p, likeLinks: arr };
+                    })}
+                    placeholder={`Link ${i + 1} — https://www.instagram.com/.../p/...`}
+                    className="input"
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {step === 2 && (
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <span className="h-8 w-8 grid place-items-center rounded-md bg-primary/15 text-primary"><Globe className="h-4 w-4" /></span>
+                <div className="font-semibold text-sm">Gostaria de cadastrar outras redes sociais?</div>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {EXTRA_SOCIALS.map((s) => {
+                  const checked = s.key in data.extras;
+                  return (
+                    <label key={s.key} className={`flex items-center gap-2 rounded-lg border p-2 cursor-pointer text-sm ${checked ? "border-primary bg-primary/5" : "border-border"}`}>
+                      <input
+                        type="checkbox"
+                        checked={checked}
+                        onChange={(e) => setData((p) => {
+                          const extras = { ...p.extras };
+                          if (e.target.checked) extras[s.key] = extras[s.key] ?? "";
+                          else delete extras[s.key];
+                          return { ...p, extras };
+                        })}
+                        className="accent-primary"
+                      />
+                      <span className="h-7 w-7 grid place-items-center rounded-md bg-primary/15 text-primary">{s.icon}</span>
+                      <span className="font-semibold flex-1">{s.label}</span>
+                      {checked && <Check className="h-4 w-4 text-primary" />}
+                    </label>
+                  );
+                })}
+              </div>
+              {Object.keys(data.extras).length > 0 && (
+                <div className="space-y-2 pt-1">
+                  {EXTRA_SOCIALS.filter((s) => s.key in data.extras).map((s) => (
+                    <div key={s.key} className="space-y-1">
+                      <label className="text-xs font-semibold flex items-center gap-1.5">{s.icon} {s.label}</label>
+                      <input
+                        value={data.extras[s.key] || ""}
+                        onChange={(e) => setData((p) => ({ ...p, extras: { ...p.extras, [s.key]: e.target.value } }))}
+                        placeholder={s.placeholder}
+                        className="input"
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {step === 3 && (
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <span className="h-8 w-8 grid place-items-center rounded-md bg-gold/15 text-gold"><Sparkles className="h-4 w-4" /></span>
+                <div className="font-semibold text-sm">Dar uma chance extra para quem completar todas as missões?</div>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setData((p) => ({ ...p, bonusChance: true }))}
+                  className={`flex-1 h-11 rounded-lg border text-sm font-bold ${data.bonusChance ? "border-primary bg-primary/15 text-primary" : "border-border"}`}
+                >
+                  Sim, dar +1 chance extra
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setData((p) => ({ ...p, bonusChance: false }))}
+                  className={`flex-1 h-11 rounded-lg border text-sm font-bold ${!data.bonusChance ? "border-primary bg-primary/15 text-primary" : "border-border"}`}
+                >
+                  Não, obrigado
+                </button>
+              </div>
+            </div>
+          )}
+
           <div className="flex justify-between gap-2 pt-1">
             <button
               type="button"
@@ -1454,28 +1576,26 @@ function MissionWizard({
             >
               Voltar
             </button>
-            <div className="flex gap-2">
-              <button type="button" onClick={() => setStep(step + 1)} className="h-10 px-4 rounded-lg border border-border text-sm font-semibold">
-                Pular
-              </button>
-              <button type="button" onClick={next} className="h-10 px-4 rounded-lg bg-primary text-primary-foreground text-sm font-bold">
-                {step + 1 === total ? "Concluir" : "Próximo"}
-              </button>
-            </div>
+            <button type="button" onClick={goNext} className="h-10 px-4 rounded-lg bg-primary text-primary-foreground text-sm font-bold">
+              {step + 1 === total ? "Concluir" : "Próximo"}
+            </button>
           </div>
         </div>
-      ) : (
-        <div className="rounded-xl border border-primary/30 bg-primary/5 p-4 space-y-3">
+      )}
+
+      {done && (
+        <div className="rounded-xl border border-primary/30 bg-primary/5 p-4 space-y-3 text-xs">
           <div className="font-semibold text-sm text-primary">Missões cadastradas ✓</div>
-          <ul className="space-y-1.5 text-xs">
-            {MISSION_STEPS.map((s) => (
-              <li key={s.key} className="flex items-center gap-2">
-                <span className="h-6 w-6 grid place-items-center rounded-md bg-primary/15 text-primary">{s.icon}</span>
-                <span className="font-semibold w-20">{s.label}:</span>
-                <span className="text-muted-foreground truncate">{links[s.key] || <em>não informado</em>}</span>
-              </li>
-            ))}
-          </ul>
+          <div className="flex items-start gap-2"><Instagram className="h-4 w-4 text-primary mt-0.5" /><div><div className="font-semibold">Instagram</div><div className="text-muted-foreground truncate">{data.instagram || <em>não informado</em>}</div></div></div>
+          <div className="flex items-start gap-2"><Heart className="h-4 w-4 text-primary mt-0.5" /><div><div className="font-semibold">{data.likeCount} link(s) para curtir</div><ul className="text-muted-foreground list-disc list-inside">{data.likeLinks.filter(Boolean).map((l, i) => <li key={i} className="truncate">{l}</li>)}</ul></div></div>
+          {Object.keys(data.extras).length > 0 && (
+            <div className="flex items-start gap-2"><Globe className="h-4 w-4 text-primary mt-0.5" /><div><div className="font-semibold">Outras redes</div><ul className="text-muted-foreground">{EXTRA_SOCIALS.filter((s) => s.key in data.extras).map((s) => <li key={s.key}>{s.label}: {data.extras[s.key] || <em>—</em>}</li>)}</ul></div></div>
+          )}
+          <div className="flex items-center gap-2 pt-1">
+            <Sparkles className="h-4 w-4 text-gold" />
+            <span className="font-semibold">Chance extra:</span>
+            <span className="text-muted-foreground">{data.bonusChance ? "Sim — +1 chance ao completar todas" : "Não"}</span>
+          </div>
           <button type="button" onClick={() => setStep(0)} className="h-9 px-3 rounded-lg border border-border text-xs font-semibold">
             Editar missões
           </button>
