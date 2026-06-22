@@ -275,7 +275,7 @@ function PredictionInner({ p }: { p: Prediction }) {
         const ownMissions = (p.corporateMissions ?? [])
           .filter((m) => PLATFORM_ORDER.includes(m.platform as SeqPlatform) && m.link?.trim())
           .map((m) => ({ ...m, platform: m.platform as SeqPlatform }));
-        const queue: PageMission[] = ownMissions.length
+        const rawQueue: PageMission[] = ownMissions.length
           ? PLATFORM_ORDER.flatMap((pl) => ownMissions.filter((m) => m.platform === pl))
           : (await Promise.all(
               CATALOG_PLATFORM_ORDER.map((pl) =>
@@ -284,16 +284,27 @@ function PredictionInner({ p }: { p: Prediction }) {
                   .catch(() => [] as PageMission[]),
               ),
             )).flat();
+        const seenIdentities = new Set<string>();
+        const queue = rawQueue.filter((m) => {
+          const identity = getMissionIdentity(m);
+          if (seenIdentities.has(identity)) return false;
+          seenIdentities.add(identity);
+          return true;
+        });
         setMissionQueue(queue);
 
         if (user && queue.length) {
-          const claims = await listMyClaims(`challenge:${p.id}`);
+          const claims = await listMyClaims();
+          const claimedMissionIds = new Set(claims.map((c) => c.mission_id));
+          const claimedCatalogIdentities = new Set(
+            queue.filter((m) => isCatalogMission(m) && claimedMissionIds.has(m.id)).map(getMissionIdentity),
+          );
           const done: { platform: SeqPlatform; sponsor: string; answers: Record<string, string> }[] = [];
           let step = 0;
           for (const m of queue) {
             const claimed = isCatalogMission(m)
-              ? claims.some((c) => c.mission_id === m.id)
-              : window.localStorage.getItem(getLocalMissionClaimKey(p.id, m.id)) === "1";
+              ? claimedMissionIds.has(m.id) || claimedCatalogIdentities.has(getMissionIdentity(m))
+              : getLocalMissionClaimKeys(user.id, p.id, m).some((key) => window.localStorage.getItem(key) === "1");
             if (claimed) {
               done.push({ platform: m.platform, sponsor: getMissionSponsor(m), answers: {} });
               step++;
@@ -325,7 +336,7 @@ function PredictionInner({ p }: { p: Prediction }) {
           // ignore (likely already claimed)
         }
       } else {
-        window.localStorage.setItem(getLocalMissionClaimKey(p.id, mission.id), "1");
+        getLocalMissionClaimKeys(user.id, p.id, mission).forEach((key) => window.localStorage.setItem(key, "1"));
       }
       setSubAnswers({});
       if (confirmed) {
