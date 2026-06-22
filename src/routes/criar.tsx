@@ -319,7 +319,7 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
         result.subs.map((s) => ({
           id: uid(),
           question: s.question,
-          options: s.options.slice(0, 3),
+          options: s.options.slice(0, MAX_OPTIONS),
         })),
       );
       // mantém a janela aberta para o usuário revisar; ele fecha manualmente.
