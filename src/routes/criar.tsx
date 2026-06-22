@@ -18,6 +18,8 @@ import { improveTitle } from "@/lib/title-ai.functions";
 import { listCategories, listSubcategories, type ChallengeCategory, type ChallengeSubcategory } from "@/lib/challenge-categories";
 import { generateChallenge, improveDescription, generateWhatsAppInvite, generateTiebreaker, generateRegulation } from "@/lib/challenge-ai.functions";
 import { generatePrizeImage } from "@/lib/prize-image.functions";
+import { createCorpChallenge } from "@/lib/corp-challenges.functions";
+import { uploadCorpAsset, uploadCorpAssets } from "@/lib/corp-storage";
 import logoAsset from "@/assets/logo-desafio.png.asset.json";
 import { WORLD_CUP_MATCHES } from "@/lib/world-cup-matches";
 
@@ -161,6 +163,8 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
   const generatePrizeImageFn = useServerFn(generatePrizeImage);
   const generateTiebreakerFn = useServerFn(generateTiebreaker);
   const generateRegulationFn = useServerFn(generateRegulation);
+  const createCorpChallengeFn = useServerFn(createCorpChallenge);
+  const [publishing, setPublishing] = useState(false);
 
   // Company-only assets & rules
   const [logoImg, setLogoImg] = useState<string | null>(null);
@@ -310,7 +314,7 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const errs: string[] = [];
     if (!name.trim()) errs.push("Informe o nome do desafio.");
@@ -329,60 +333,69 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
       return;
     }
     setErrors([]);
+    setPublishing(true);
     const id = uid();
-    saveUserChallenge({
-      id,
-      name: name.trim(),
-      category: category as never,
-      endsAt,
-      isOpen,
-      subs,
-      prizeName: prizeName.trim() || undefined,
-      prizeImg,
-    });
-    if (forCompany && typeof window !== "undefined") {
-      // Persist as a corporate challenge so it appears on Admin → Desafios p/ Empresas → Ativos
-      // and on the public "Desafios para Empresas" page.
-      try {
-        const LS = "ddp:admin:corp-challenges";
-        const raw = window.localStorage.getItem(LS);
-        const list = raw ? (JSON.parse(raw) as unknown[]) : [];
-        const record = {
-          id,
-          companyId: "",
-          title: name.trim(),
-          subtitle: companyName.trim(),
-          description: subs.map((s, i) => `${i + 1}. ${s.question}`).join(" • "),
-          category,
-          tipo: subcategory || "Aberto",
-          cidade: "",
-          estado: "",
-          prizeType: "personalizado",
-          prizeName: prizeName.trim(),
-          prizeValue: "",
-          winners: 1,
-          startsAt: new Date().toISOString(),
-          endsAt: endsAt ? new Date(endsAt).toISOString() : "",
-          awardAt: endsAt ? new Date(endsAt).toISOString() : "",
-          missions: [missionData.instagram && `Seguir Instagram ${missionData.instagram}`].filter(Boolean) as string[],
-          rules: regulation ? [regulation] : [],
-          status: "ativo",
-          participants: 0,
-          createdAt: new Date().toISOString(),
-          logoImg,
-          bannerImg,
-          instagramArts,
-          tiebreaker,
-          inviteRewardText,
-        };
-        window.localStorage.setItem(LS, JSON.stringify([record, ...list]));
-        window.dispatchEvent(new Event("ddp:corp-challenges-updated"));
-      } catch {
-        // ignore
+    try {
+      saveUserChallenge({
+        id,
+        name: name.trim(),
+        category: category as never,
+        endsAt,
+        isOpen,
+        subs,
+        prizeName: prizeName.trim() || undefined,
+        prizeImg,
+      });
+
+      if (forCompany) {
+        // Upload assets to Storage, then persist the challenge to the database
+        // so it is visible on every device and shareable links work.
+        const [logoUrl, bannerUrl, artsUrls] = await Promise.all([
+          uploadCorpAsset(id, "logo", logoImg),
+          uploadCorpAsset(id, "banner", bannerImg),
+          uploadCorpAssets(id, instagramArts),
+        ]);
+
+        await createCorpChallengeFn({
+          data: {
+            id,
+            title: name.trim(),
+            companyName: companyName.trim() || undefined,
+            category,
+            subcategory: subcategory || undefined,
+            description: subs
+              .map((s, i) => `${i + 1}. ${s.question} — ${s.options.filter(Boolean).join(" / ")}`)
+              .join("  •  "),
+            subs,
+            prizeName: prizeName.trim() || undefined,
+            logoUrl: logoUrl ?? undefined,
+            bannerUrl: bannerUrl ?? undefined,
+            instagramArts: artsUrls,
+            tiebreaker: tiebreaker || undefined,
+            regulation: regulation || undefined,
+            inviteRewardText: inviteRewardText || undefined,
+            missions: [missionData.instagram && `Seguir Instagram ${missionData.instagram}`].filter(Boolean) as string[],
+            endsAt,
+          },
+        });
+
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new Event("ddp:corp-challenges-updated"));
+        }
       }
+
+      setPublished({ id, name: name.trim() });
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } catch (err) {
+      setErrors([
+        err instanceof Error
+          ? `Não foi possível publicar: ${err.message}`
+          : "Não foi possível publicar o desafio.",
+      ]);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } finally {
+      setPublishing(false);
     }
-    setPublished({ id, name: name.trim() });
-    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const addSub = () => {
@@ -1221,8 +1234,8 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
             </ul>
           </div>
 
-          <button type="submit" className="w-full h-12 rounded-xl bg-gradient-brand text-primary-foreground font-display font-black shadow-glow hover:scale-[1.01] transition">
-            Publicar desafio • {COST} Tokens
+          <button type="submit" disabled={publishing} className="w-full h-12 rounded-xl bg-gradient-brand text-primary-foreground font-display font-black shadow-glow hover:scale-[1.01] transition disabled:opacity-60 disabled:cursor-not-allowed inline-flex items-center justify-center gap-2">
+            {publishing ? (<><Loader2 className="h-4 w-4 animate-spin" /> Publicando…</>) : (<>Publicar desafio • {COST} Tokens</>)}
           </button>
           <Link to="/" className="block text-center text-sm text-muted-foreground hover:text-foreground">
             Cancelar

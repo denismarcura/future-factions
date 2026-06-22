@@ -1,19 +1,49 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import {
   Clock, Users, Flame, Heart, MessageCircle, Share2, Coins, TrendingUp, ArrowLeft, Instagram, Youtube, Facebook, Check, ExternalLink, Loader2, ScrollText, ShieldCheck,
 } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell } from "@/components/layout/AppShell";
-import { formatTokens, getPrediction, PREDICTIONS, type Prediction, timeLeft } from "@/lib/mock-data";
+import { formatTokens, getPrediction, PREDICTIONS, USERS, type Prediction, type Category, timeLeft } from "@/lib/mock-data";
 import { listMissions, listMyClaims, claimMission, type Mission, ACTION_LABEL } from "@/lib/missions";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
+import { getCorpChallenge, type CorpChallengeRecord } from "@/lib/corp-challenges.functions";
 
 import { useAuth } from "@/hooks/use-auth";
 import { hasParticipated, saveParticipation } from "@/lib/my-participations";
 import { getTokenBalance } from "@/lib/balance";
+
+function corpToPrediction(c: CorpChallengeRecord): Prediction {
+  const first = c.subs[0];
+  const labels = first?.options?.filter((o) => o && o.trim()) ?? ["Sim", "Não"];
+  return {
+    id: c.id,
+    title: c.title,
+    description:
+      c.description ??
+      c.subs
+        .map((s, i) => `${i + 1}. ${s.question} — ${s.options.filter(Boolean).join(" / ")}`)
+        .join("  •  "),
+    category: (c.category as Category) ?? ("Entretenimento" as Category),
+    author: USERS[0],
+    createdAt: c.createdAt,
+    closesAt: c.endsAt ?? new Date(Date.now() + 7 * 86400000).toISOString(),
+    minTokens: 10,
+    options: labels.map((label, i) => ({ id: `o${i}`, label, pool: 0 })),
+    bettors: c.participants ?? 0,
+    comments: 0,
+    likes: 0,
+    shares: 0,
+    tags: ["empresa", "ativo"],
+    hot: true,
+    imageUrl: c.bannerUrl ?? c.logoUrl ?? undefined,
+  };
+}
+
 
 
 const PLATFORM_ORDER = ["instagram", "youtube", "facebook", "tiktok"] as const;
@@ -35,9 +65,15 @@ function TikTokIcon({ className, style }: { className?: string; style?: React.CS
 }
 
 export const Route = createFileRoute("/previsao/$id")({
-  loader: ({ params }): { id: string; initial: Prediction | null } => {
-    const p = getPrediction(params.id);
-    return { id: params.id, initial: p ?? null };
+  loader: async ({ params }): Promise<{ id: string; initial: Prediction | null }> => {
+    const local = getPrediction(params.id);
+    if (local) return { id: params.id, initial: local };
+    try {
+      const corp = await getCorpChallenge({ data: { id: params.id } });
+      return { id: params.id, initial: corp ? corpToPrediction(corp) : null };
+    } catch {
+      return { id: params.id, initial: null };
+    }
   },
   head: ({ loaderData }) => ({
     meta: loaderData?.initial
@@ -46,6 +82,12 @@ export const Route = createFileRoute("/previsao/$id")({
           { name: "description", content: loaderData.initial.description },
           { property: "og:title", content: loaderData.initial.title },
           { property: "og:description", content: loaderData.initial.description },
+          ...(loaderData.initial.imageUrl
+            ? [
+                { property: "og:image", content: loaderData.initial.imageUrl },
+                { name: "twitter:image", content: loaderData.initial.imageUrl },
+              ]
+            : []),
         ]
       : [],
   }),
@@ -69,13 +111,31 @@ function PredictionPage() {
   const { id, initial } = Route.useLoaderData();
   const [p, setP] = useState<Prediction | null>(initial);
   const [resolving, setResolving] = useState<boolean>(!initial);
+  const getCorpChallengeFn = useServerFn(getCorpChallenge);
 
   useEffect(() => {
     if (p) return;
-    const found = getPrediction(id);
-    if (found) setP(found);
-    setResolving(false);
-  }, [id, p]);
+    let cancelled = false;
+    (async () => {
+      const found = getPrediction(id);
+      if (found) {
+        if (!cancelled) {
+          setP(found);
+          setResolving(false);
+        }
+        return;
+      }
+      try {
+        const corp = await getCorpChallengeFn({ data: { id } });
+        if (!cancelled && corp) setP(corpToPrediction(corp));
+      } catch {
+        /* ignore */
+      } finally {
+        if (!cancelled) setResolving(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [id, p, getCorpChallengeFn]);
 
   if (!p) {
     return (

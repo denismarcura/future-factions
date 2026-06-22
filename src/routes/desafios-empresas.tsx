@@ -1,7 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { AppShell } from "@/components/layout/AppShell";
 import { CountdownTimer } from "@/components/CountdownTimer";
+import { listLatestCorpChallenges } from "@/lib/corp-challenges.functions";
 import {
   Megaphone, Trophy, Users, Sparkles, ArrowRight, CheckCircle2, Pizza,
   Beef, Shirt, IceCream, Car, Dumbbell, Rocket, TrendingUp, Heart,
@@ -24,28 +26,38 @@ type CorpChallengeLite = {
 
 function useLatestCorpChallenges(limit = 6): CorpChallengeLite[] {
   const [list, setList] = useState<CorpChallengeLite[]>([]);
+  const listFn = useServerFn(listLatestCorpChallenges);
   useEffect(() => {
-    const read = () => {
+    let cancelled = false;
+    const read = async () => {
       try {
-        const raw = window.localStorage.getItem("ddp:admin:corp-challenges");
-        const arr = raw ? (JSON.parse(raw) as CorpChallengeLite[]) : [];
-        const sorted = [...arr]
-          .filter((c) => (c.status ?? "ativo") === "ativo")
-          .sort((a, b) => (b.createdAt ?? "").localeCompare(a.createdAt ?? ""))
-          .slice(0, limit);
-        setList(sorted);
+        const rows = await listFn({ data: { limit } });
+        if (cancelled) return;
+        setList(
+          rows.map((r) => ({
+            id: r.id,
+            title: r.title,
+            subtitle: r.companyName ?? undefined,
+            prizeName: r.prizeName ?? undefined,
+            endsAt: r.endsAt ?? undefined,
+            createdAt: r.createdAt,
+            logoImg: r.logoUrl,
+            bannerImg: r.bannerUrl,
+            status: r.status,
+          })),
+        );
       } catch {
-        setList([]);
+        if (!cancelled) setList([]);
       }
     };
     read();
-    window.addEventListener("ddp:corp-challenges-updated", read);
-    window.addEventListener("storage", read);
+    const onUpdated = () => { read(); };
+    window.addEventListener("ddp:corp-challenges-updated", onUpdated);
     return () => {
-      window.removeEventListener("ddp:corp-challenges-updated", read);
-      window.removeEventListener("storage", read);
+      cancelled = true;
+      window.removeEventListener("ddp:corp-challenges-updated", onUpdated);
     };
-  }, [limit]);
+  }, [limit, listFn]);
   return list;
 }
 
