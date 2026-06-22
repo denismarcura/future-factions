@@ -81,6 +81,11 @@ function PredictionPage() {
   const [confirmed, setConfirmed] = useState(false);
   const [pendingExtra, setPendingExtra] = useState<{ platform: SeqPlatform; sponsor: string } | null>(null);
   const [balance, setBalance] = useState<number | null>(null);
+  const [regOpen, setRegOpen] = useState(false);
+  const [regAccepted, setRegAccepted] = useState<boolean | null>(null);
+  const [regChoice, setRegChoice] = useState<"accept" | "reject" | null>(null);
+  const pendingConfirmRef = useRef<null | (() => void)>(null);
+
 
   useEffect(() => {
     if (hasParticipated(p.id)) setConfirmed(true);
