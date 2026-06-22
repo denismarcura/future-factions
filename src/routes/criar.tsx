@@ -381,6 +381,7 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
     setErrors([]);
     setPublishing(true);
     const id = uid();
+    const corporateMissions = forCompany ? buildCorporateMissions(missionData, companyName || name) : undefined;
     try {
       saveUserChallenge({
         id,
@@ -392,6 +393,7 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
         prizeName: prizeName.trim() || undefined,
         prizeImg,
         bannerImg,
+        corporateMissions,
       });
 
       if (forCompany) {
@@ -421,7 +423,7 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
             tiebreaker: tiebreaker || undefined,
             regulation: regulation || undefined,
             inviteRewardText: inviteRewardText || undefined,
-            missions: buildCorporateMissions(missionData, companyName || name),
+            missions: corporateMissions,
             endsAt,
           },
         });
