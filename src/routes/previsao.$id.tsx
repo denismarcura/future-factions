@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import {
-  Clock, Users, Heart, MessageCircle, Share2, Coins, TrendingUp, ArrowLeft, Instagram, Youtube, Facebook, Check, ExternalLink, Loader2, ScrollText, ShieldCheck,
+  Clock, Users, Heart, MessageCircle, Share2, Coins, TrendingUp, ArrowLeft, Instagram, Youtube, Facebook, Check, ExternalLink, Loader2, ScrollText, ShieldCheck, Star, Twitter, Linkedin,
 } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell } from "@/components/layout/AppShell";
@@ -11,7 +11,7 @@ import { listMissions, listMyClaims, claimMission, type Mission, ACTION_LABEL } 
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
-import { getCorpChallenge, type CorpChallengeRecord } from "@/lib/corp-challenges.functions";
+import { getCorpChallenge, type CorpChallengeRecord, type CorporateMission } from "@/lib/corp-challenges.functions";
 import { detectMatchFromText } from "@/lib/world-cup-matches";
 
 import { useAuth } from "@/hooks/use-auth";
@@ -52,20 +52,70 @@ function corpToPrediction(c: CorpChallengeRecord): Prediction {
     tags: ["empresa", "ativo"],
     hot: true,
     imageUrl: c.bannerUrl ?? c.logoUrl ?? undefined,
+    corporateMissions: normalizeCorporateMissions(c),
     match,
   };
 }
 
+function normalizeCorporateMissions(c: CorpChallengeRecord): CorporateMission[] {
+  return ((c.missions as unknown[]) ?? []).flatMap((mission, index) => {
+    if (typeof mission === "string") {
+      const link = mission.match(/https?:\/\/\S+/)?.[0] ?? mission.replace(/^Seguir Instagram\s*/i, "").trim();
+      return link ? [{
+        id: `corp-${c.id}-${index}`,
+        sponsorName: c.companyName || c.title,
+        platform: "instagram",
+        actionType: "follow",
+        title: `Seguir ${c.companyName || "Instagram"}`,
+        link,
+        tokens: 50,
+      }] : [];
+    }
+    if (!mission || typeof mission !== "object") return [];
+    const item = mission as Partial<CorporateMission>;
+    return item.link && item.platform ? [{
+      id: String(item.id ?? `corp-${c.id}-${index}`),
+      sponsorName: String(item.sponsorName ?? c.companyName ?? c.title),
+      platform: String(item.platform),
+      actionType: String(item.actionType ?? "follow"),
+      title: String(item.title ?? `Seguir ${c.companyName || "empresa"}`),
+      link: String(item.link),
+      tokens: Number(item.tokens ?? 50),
+    }] : [];
+  });
+}
 
 
-const PLATFORM_ORDER = ["instagram", "youtube", "facebook", "tiktok"] as const;
+
+const PLATFORM_ORDER = ["instagram", "youtube", "facebook", "tiktok", "google", "twitter", "linkedin"] as const;
+const CATALOG_PLATFORM_ORDER = ["instagram", "youtube", "facebook", "tiktok"] as const;
 type SeqPlatform = typeof PLATFORM_ORDER[number];
+type PageMission = (Mission | CorporateMission) & { platform: SeqPlatform };
+
+function getMissionSponsor(m: PageMission) {
+  return "sponsor_name" in m ? m.sponsor_name : m.sponsorName;
+}
+
+function getMissionAction(m: PageMission) {
+  return "action_type" in m ? m.action_type : m.actionType;
+}
+
+function isCatalogMission(m: PageMission): m is Mission & { platform: SeqPlatform } {
+  return "sponsor_name" in m;
+}
+
+function getLocalMissionClaimKey(challengeId: string, missionId: string) {
+  return `ddp:corp-mission:${challengeId}:${missionId}`;
+}
 
 const PLATFORM_THEME: Record<SeqPlatform, { label: string; gradient: string; color: string; Icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }> }> = {
   instagram: { label: "Instagram", gradient: "linear-gradient(135deg, #E1306C, #833AB4)", color: "#E1306C", Icon: Instagram },
   youtube:   { label: "YouTube",   gradient: "linear-gradient(135deg, #FF0000, #CC0000)", color: "#FF0000", Icon: Youtube },
   facebook:  { label: "Facebook",  gradient: "linear-gradient(135deg, #1877F2, #0D5AA5)", color: "#1877F2", Icon: Facebook },
   tiktok:    { label: "TikTok",    gradient: "linear-gradient(135deg, #010101, #333333)", color: "#ffffff", Icon: TikTokIcon },
+  google:    { label: "Google",    gradient: "linear-gradient(135deg, #34A853, #FABB05)", color: "#34A853", Icon: Star },
+  twitter:   { label: "Twitter / X", gradient: "linear-gradient(135deg, #111111, #3b3b3b)", color: "#ffffff", Icon: Twitter },
+  linkedin:  { label: "LinkedIn",  gradient: "linear-gradient(135deg, #0A66C2, #004182)", color: "#0A66C2", Icon: Linkedin },
 };
 
 function TikTokIcon({ className, style }: { className?: string; style?: React.CSSProperties }) {
@@ -78,14 +128,14 @@ function TikTokIcon({ className, style }: { className?: string; style?: React.CS
 
 export const Route = createFileRoute("/previsao/$id")({
   loader: async ({ params }): Promise<{ id: string; initial: Prediction | null }> => {
-    const local = getPrediction(params.id);
-    if (local) return { id: params.id, initial: local };
     try {
       const corp = await getCorpChallenge({ data: { id: params.id } });
-      return { id: params.id, initial: corp ? corpToPrediction(corp) : null };
+      if (corp) return { id: params.id, initial: corpToPrediction(corp) };
     } catch {
-      return { id: params.id, initial: null };
+      // fallback to local challenges below
     }
+    const local = getPrediction(params.id);
+    return { id: params.id, initial: local ?? null };
   },
   head: ({ loaderData }) => ({
     meta: loaderData?.initial
@@ -129,6 +179,16 @@ function PredictionPage() {
     if (p) return;
     let cancelled = false;
     (async () => {
+      try {
+        const corp = await getCorpChallengeFn({ data: { id } });
+        if (!cancelled && corp) {
+          setP(corpToPrediction(corp));
+          setResolving(false);
+          return;
+        }
+      } catch {
+        /* fallback to local */
+      }
       const found = getPrediction(id);
       if (found) {
         if (!cancelled) {
@@ -137,14 +197,7 @@ function PredictionPage() {
         }
         return;
       }
-      try {
-        const corp = await getCorpChallengeFn({ data: { id } });
-        if (!cancelled && corp) setP(corpToPrediction(corp));
-      } catch {
-        /* ignore */
-      } finally {
-        if (!cancelled) setResolving(false);
-      }
+      if (!cancelled) setResolving(false);
     })();
     return () => { cancelled = true; };
   }, [id, p, getCorpChallengeFn]);
@@ -175,7 +228,7 @@ function PredictionInner({ p }: { p: Prediction }) {
   const [selected, setSelected] = useState(p.options[0].id);
   const [amount, setAmount] = useState(p.entryFee ?? p.minTokens);
   const [subAnswers, setSubAnswers] = useState<Record<string, string>>({});
-  const [missionQueue, setMissionQueue] = useState<Mission[]>([]);
+  const [missionQueue, setMissionQueue] = useState<PageMission[]>([]);
   const [missionStep, setMissionStep] = useState(0);
   const [missionStatus, setMissionStatus] = useState<"idle" | "verifying" | "done">("idle");
   const [extraPalpites, setExtraPalpites] = useState<{ platform: SeqPlatform; sponsor: string; answers: Record<string, string> }[]>([]);
@@ -206,15 +259,18 @@ function PredictionInner({ p }: { p: Prediction }) {
   useEffect(() => {
     (async () => {
       try {
-        // Load all follow/subscribe missions ordered by platform: instagram → youtube → facebook → tiktok
-        const buckets = await Promise.all(
-          PLATFORM_ORDER.map((pl) =>
-            listMissions({ platform: pl, activeOnly: true })
-              .then((arr) => arr.filter((m) => m.action_type === "follow" || m.action_type === "subscribe"))
-              .catch(() => [] as Mission[]),
-          ),
-        );
-        const queue: Mission[] = buckets.flat();
+        const ownMissions = (p.corporateMissions ?? [])
+          .filter((m) => PLATFORM_ORDER.includes(m.platform as SeqPlatform) && m.link?.trim())
+          .map((m) => ({ ...m, platform: m.platform as SeqPlatform }));
+        const queue: PageMission[] = ownMissions.length
+          ? PLATFORM_ORDER.flatMap((pl) => ownMissions.filter((m) => m.platform === pl))
+          : (await Promise.all(
+              CATALOG_PLATFORM_ORDER.map((pl) =>
+                listMissions({ platform: pl, activeOnly: true })
+                  .then((arr) => arr.filter((m) => m.action_type === "follow" || m.action_type === "subscribe") as PageMission[])
+                  .catch(() => [] as PageMission[]),
+              ),
+            )).flat();
         setMissionQueue(queue);
 
         if (user && queue.length) {
@@ -222,8 +278,11 @@ function PredictionInner({ p }: { p: Prediction }) {
           const done: { platform: SeqPlatform; sponsor: string; answers: Record<string, string> }[] = [];
           let step = 0;
           for (const m of queue) {
-            if (claims.some((c) => c.mission_id === m.id)) {
-              done.push({ platform: m.platform as SeqPlatform, sponsor: m.sponsor_name, answers: {} });
+            const claimed = isCatalogMission(m)
+              ? claims.some((c) => c.mission_id === m.id)
+              : window.localStorage.getItem(getLocalMissionClaimKey(p.id, m.id)) === "1";
+            if (claimed) {
+              done.push({ platform: m.platform, sponsor: getMissionSponsor(m), answers: {} });
               step++;
             } else break;
           }
@@ -246,18 +305,22 @@ function PredictionInner({ p }: { p: Prediction }) {
     window.open(mission.link, "_blank", "noopener,noreferrer");
     setMissionStatus("verifying");
     setTimeout(async () => {
-      try {
-        await claimMission(mission.id, `challenge:${p.id}`, mission.tokens);
-      } catch {
-        // ignore (likely already claimed)
+      if (isCatalogMission(mission)) {
+        try {
+          await claimMission(mission.id, `challenge:${p.id}`, mission.tokens);
+        } catch {
+          // ignore (likely already claimed)
+        }
+      } else {
+        window.localStorage.setItem(getLocalMissionClaimKey(p.id, mission.id), "1");
       }
       setSubAnswers({});
       if (confirmed) {
-        setPendingExtra({ platform: mission.platform as SeqPlatform, sponsor: mission.sponsor_name });
+        setPendingExtra({ platform: mission.platform, sponsor: getMissionSponsor(mission) });
         toast.success("✅ Missão feita! Preencha o novo palpite e clique em CONFIRMAR PALPITE EXTRA.");
       } else {
         // Mission done before confirming participation: just credit tokens
-        setExtraPalpites((prev) => [...prev, { platform: mission.platform as SeqPlatform, sponsor: mission.sponsor_name, answers: {} }]);
+        setExtraPalpites((prev) => [...prev, { platform: mission.platform, sponsor: getMissionSponsor(mission), answers: {} }]);
         toast.success(`✅ Missão feita! +${mission.tokens} TKN no seu saldo. Você pode continuar ou já participar do desafio.`);
       }
       setMissionStatus("done");
@@ -571,7 +634,7 @@ function PredictionInner({ p }: { p: Prediction }) {
                       </span>
                     </div>
                     <p className="text-xs text-muted-foreground mb-3">
-                      <strong>{ACTION_LABEL[currentMission.action_type]}</strong> {currentMission.sponsor_name} no {T.label} e ganhe <strong className="text-gold">+{currentMission.tokens} TKN</strong>
+                      <strong>{ACTION_LABEL[getMissionAction(currentMission) as keyof typeof ACTION_LABEL] ?? "Abrir"}</strong> {getMissionSponsor(currentMission)} no {T.label} e ganhe <strong className="text-gold">+{currentMission.tokens} TKN</strong>
                       {confirmed ? <> (libera +1 round de palpites extras).</> : <> no seu saldo.</>}
                     </p>
                     <button

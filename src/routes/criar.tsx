@@ -18,7 +18,7 @@ import { improveTitle } from "@/lib/title-ai.functions";
 import { listCategories, listSubcategories, type ChallengeCategory, type ChallengeSubcategory } from "@/lib/challenge-categories";
 import { generateChallenge, improveDescription, generateWhatsAppInvite, generateTiebreaker, generateRegulation } from "@/lib/challenge-ai.functions";
 import { generatePrizeImage } from "@/lib/prize-image.functions";
-import { createCorpChallenge } from "@/lib/corp-challenges.functions";
+import { createCorpChallenge, type CorporateMission } from "@/lib/corp-challenges.functions";
 import { uploadCorpAsset, uploadCorpAssets } from "@/lib/corp-storage";
 import logoAsset from "@/assets/logo-desafio.png.asset.json";
 import { WORLD_CUP_MATCHES } from "@/lib/world-cup-matches";
@@ -67,6 +67,48 @@ const BRAZIL_BONUS = 10000;
 
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
+
+function buildCorporateMissions(data: MissionData, sponsorName: string): CorporateMission[] {
+  const sponsor = sponsorName.trim() || "Empresa";
+  const missions: CorporateMission[] = [];
+  const instagram = data.instagram.trim();
+  if (instagram) {
+    missions.push({
+      id: uid(),
+      sponsorName: sponsor,
+      platform: "instagram",
+      actionType: "follow",
+      title: `Seguir ${sponsor}`,
+      link: instagram,
+      tokens: 50,
+    });
+  }
+  data.likeLinks.map((l) => l.trim()).filter(Boolean).forEach((link, index) => {
+    missions.push({
+      id: uid(),
+      sponsorName: sponsor,
+      platform: "instagram",
+      actionType: "like_comment",
+      title: `Curtir post ${index + 1}`,
+      link,
+      tokens: 50,
+    });
+  });
+  Object.entries(data.extras).forEach(([platform, rawLink]) => {
+    const link = rawLink.trim();
+    if (!link) return;
+    missions.push({
+      id: uid(),
+      sponsorName: sponsor,
+      platform,
+      actionType: platform === "youtube" ? "subscribe" : platform === "google" ? "review" : "follow",
+      title: platform === "youtube" ? `Inscrever-se em ${sponsor}` : `Seguir ${sponsor}`,
+      link,
+      tokens: 50,
+    });
+  });
+  return missions;
+}
 
 function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bare?: boolean } = {}) {
   const [isOpen, setIsOpen] = useState(true);
@@ -339,6 +381,7 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
     setErrors([]);
     setPublishing(true);
     const id = uid();
+    const corporateMissions = forCompany ? buildCorporateMissions(missionData, companyName || name) : undefined;
     try {
       saveUserChallenge({
         id,
@@ -350,6 +393,7 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
         prizeName: prizeName.trim() || undefined,
         prizeImg,
         bannerImg,
+        corporateMissions,
       });
 
       if (forCompany) {
@@ -379,7 +423,7 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
             tiebreaker: tiebreaker || undefined,
             regulation: regulation || undefined,
             inviteRewardText: inviteRewardText || undefined,
-            missions: [missionData.instagram && `Seguir Instagram ${missionData.instagram}`].filter(Boolean) as string[],
+            missions: corporateMissions,
             endsAt,
           },
         });

@@ -13,6 +13,7 @@ export type CreateChallengeInput = {
   prizeName?: string;
   prizeImg?: string | null;
   bannerImg?: string | null;
+  corporateMissions?: Prediction["corporateMissions"];
 };
 
 function read(): Prediction[] {
@@ -76,6 +77,7 @@ export function saveUserChallenge(input: CreateChallengeInput): Prediction {
     tags: ["meu-desafio", input.isOpen ? "aberto" : "privado"],
     hot: true,
     imageUrl: input.bannerImg ?? input.prizeImg ?? undefined,
+    corporateMissions: input.corporateMissions,
     match,
   };
   const list = read();
