@@ -39,6 +39,7 @@ import { Route as AdminCadastrosRouteImport } from './routes/admin.cadastros'
 import { Route as AdminBannersRouteImport } from './routes/admin.banners'
 import { Route as AdminApisRouteImport } from './routes/admin.apis'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as ApiPublicHooksApurarCopaRouteImport } from './routes/api/public/hooks/apurar-copa'
 
 const Top100Route = Top100RouteImport.update({
   id: '/top100',
@@ -189,6 +190,12 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const ApiPublicHooksApurarCopaRoute =
+  ApiPublicHooksApurarCopaRouteImport.update({
+    id: '/api/public/hooks/apurar-copa',
+    path: '/api/public/hooks/apurar-copa',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -220,6 +227,7 @@ export interface FileRoutesByFullPath {
   '/empresa/criar': typeof EmpresaCriarRoute
   '/previsao/$id': typeof PrevisaoIdRoute
   '/admin/': typeof AdminIndexRoute
+  '/api/public/hooks/apurar-copa': typeof ApiPublicHooksApurarCopaRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -250,6 +258,7 @@ export interface FileRoutesByTo {
   '/empresa/criar': typeof EmpresaCriarRoute
   '/previsao/$id': typeof PrevisaoIdRoute
   '/admin': typeof AdminIndexRoute
+  '/api/public/hooks/apurar-copa': typeof ApiPublicHooksApurarCopaRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -283,6 +292,7 @@ export interface FileRoutesById {
   '/empresa/criar': typeof EmpresaCriarRoute
   '/previsao/$id': typeof PrevisaoIdRoute
   '/admin/': typeof AdminIndexRoute
+  '/api/public/hooks/apurar-copa': typeof ApiPublicHooksApurarCopaRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -316,6 +326,7 @@ export interface FileRouteTypes {
     | '/empresa/criar'
     | '/previsao/$id'
     | '/admin/'
+    | '/api/public/hooks/apurar-copa'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -346,6 +357,7 @@ export interface FileRouteTypes {
     | '/empresa/criar'
     | '/previsao/$id'
     | '/admin'
+    | '/api/public/hooks/apurar-copa'
   id:
     | '__root__'
     | '/'
@@ -378,6 +390,7 @@ export interface FileRouteTypes {
     | '/empresa/criar'
     | '/previsao/$id'
     | '/admin/'
+    | '/api/public/hooks/apurar-copa'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -400,6 +413,7 @@ export interface RootRouteChildren {
   Top100Route: typeof Top100Route
   EmpresaCriarRoute: typeof EmpresaCriarRoute
   PrevisaoIdRoute: typeof PrevisaoIdRoute
+  ApiPublicHooksApurarCopaRoute: typeof ApiPublicHooksApurarCopaRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -614,6 +628,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/public/hooks/apurar-copa': {
+      id: '/api/public/hooks/apurar-copa'
+      path: '/api/public/hooks/apurar-copa'
+      fullPath: '/api/public/hooks/apurar-copa'
+      preLoaderRoute: typeof ApiPublicHooksApurarCopaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -676,6 +697,7 @@ const rootRouteChildren: RootRouteChildren = {
   Top100Route: Top100Route,
   EmpresaCriarRoute: EmpresaCriarRoute,
   PrevisaoIdRoute: PrevisaoIdRoute,
+  ApiPublicHooksApurarCopaRoute: ApiPublicHooksApurarCopaRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
