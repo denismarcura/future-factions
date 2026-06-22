@@ -997,6 +997,20 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
             </div>
           </Section>
 
+          {/* Banner personalizado (para todos) */}
+          <Section
+            title="Banner do desafio (opcional)"
+            description="Imagem horizontal exibida no topo do desafio. Recomendado 1600×600px (proporção 8:3) em JPG ou PNG."
+          >
+            <UploadCard
+              label="Banner"
+              hint="JPG/PNG 1600×600px — aparece no topo da página do desafio."
+              image={bannerImg}
+              onChange={setBannerImg}
+              aspect="aspect-[8/3]"
+            />
+          </Section>
+
 
           {/* Missões */}
           <Section
