@@ -20,13 +20,52 @@ export type CorpChallengeRecord = {
   tiebreaker: string | null;
   regulation: string | null;
   inviteRewardText: string | null;
-  missions: string[];
+  missions: CorporateMission[];
   startsAt: string;
   endsAt: string | null;
   status: string;
   participants: number;
   createdAt: string;
 };
+
+export type CorporateMission = {
+  id: string;
+  sponsorName: string;
+  platform: string;
+  actionType: string;
+  title: string;
+  link: string;
+  tokens: number;
+};
+
+function normalizeMission(value: unknown, index: number, companyName?: string | null): CorporateMission | null {
+  if (typeof value === "string") {
+    const text = value.trim();
+    if (!text) return null;
+    const link = text.match(/https?:\/\/\S+/)?.[0] ?? text.replace(/^Seguir Instagram\s*/i, "").trim();
+    return {
+      id: `legacy-${index}`,
+      sponsorName: companyName || "Empresa",
+      platform: "instagram",
+      actionType: "follow",
+      title: "Seguir Instagram",
+      link,
+      tokens: 50,
+    };
+  }
+  if (!value || typeof value !== "object") return null;
+  const raw = value as Partial<CorporateMission>;
+  if (!raw.link || !raw.platform) return null;
+  return {
+    id: String(raw.id ?? `mission-${index}`),
+    sponsorName: String(raw.sponsorName ?? companyName ?? "Empresa"),
+    platform: String(raw.platform),
+    actionType: String(raw.actionType ?? "follow"),
+    title: String(raw.title ?? "Abrir missão"),
+    link: String(raw.link),
+    tokens: Number(raw.tokens ?? 50),
+  };
+}
 
 type Row = Database["public"]["Tables"]["corporate_challenges"]["Row"];
 
@@ -47,7 +86,9 @@ function rowToRecord(r: Row): CorpChallengeRecord {
     tiebreaker: r.tiebreaker,
     regulation: r.regulation,
     inviteRewardText: r.invite_reward_text,
-    missions: (r.missions as string[]) ?? [],
+    missions: ((r.missions as unknown[]) ?? [])
+      .map((m, i) => normalizeMission(m, i, r.company_name))
+      .filter((m): m is CorporateMission => Boolean(m)),
     startsAt: r.starts_at,
     endsAt: r.ends_at,
     status: r.status,
@@ -70,6 +111,16 @@ const subSchema = z.object({
   options: z.array(z.string()),
 });
 
+const corporateMissionSchema = z.object({
+  id: z.string(),
+  sponsorName: z.string(),
+  platform: z.string(),
+  actionType: z.string(),
+  title: z.string(),
+  link: z.string(),
+  tokens: z.number(),
+});
+
 const createSchema = z.object({
   id: z.string().min(3),
   title: z.string().min(1),
@@ -85,7 +136,7 @@ const createSchema = z.object({
   tiebreaker: z.string().optional(),
   regulation: z.string().optional(),
   inviteRewardText: z.string().optional(),
-  missions: z.array(z.string()).optional(),
+  missions: z.array(z.union([z.string(), corporateMissionSchema])).optional(),
   endsAt: z.string().optional(),
 });
 
