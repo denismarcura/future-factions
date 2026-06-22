@@ -143,12 +143,22 @@ export function AppShell({ children }: { children: ReactNode }) {
                 </button>
               </>
             ) : (
-              <Link
-                to="/auth"
-                className="hidden sm:inline-flex items-center gap-2 h-10 px-4 rounded-full bg-card border border-border/60 hover:border-primary/60 text-sm font-semibold transition"
-              >
-                <LogIn className="h-4 w-4" /> Entrar
-              </Link>
+              <>
+                <Link
+                  to="/auth"
+                  className="hidden sm:inline-flex items-center gap-2 h-10 px-4 rounded-full bg-card border border-border/60 hover:border-primary/60 text-sm font-semibold transition"
+                >
+                  <LogIn className="h-4 w-4" /> Entrar
+                </Link>
+                <Link
+                  to="/auth"
+                  search={{ mode: "signup" }}
+                  className="hidden sm:inline-flex items-center gap-2 h-10 px-4 rounded-full border-2 border-gold text-gold bg-gold/5 hover:bg-gold/10 text-sm font-bold transition"
+                >
+                  Cadastre-se
+                </Link>
+              </>
+
             )}
 
             {/* Hamburger - mobile only */}
