@@ -22,6 +22,11 @@ type Company = {
   responsavel: string;
   email: string;
   whatsapp: string;
+  cep: string;
+  rua: string;
+  numero: string;
+  complemento: string;
+  bairro: string;
   cidade: string;
   estado: string;
   instagram: string;
