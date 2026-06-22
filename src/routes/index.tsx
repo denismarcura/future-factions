@@ -382,3 +382,128 @@ function Feed() {
     </AppShell>
   );
 }
+
+function SmartSearch() {
+  const aiSearch = useServerFn(aiSearchChallenges);
+  const [q, setQ] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [results, setResults] = useState<string[] | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const submit = async (e?: React.FormEvent) => {
+    e?.preventDefault();
+    const query = q.trim();
+    if (!query) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const items = PREDICTIONS.slice(0, 80).map((p) => ({
+        id: p.id,
+        title: p.title,
+        category: p.category,
+      }));
+      const res = await aiSearch({ data: { query, items } });
+      setResults(res.ids);
+    } catch (err) {
+      console.error(err);
+      setError("Não foi possível buscar agora. Tente novamente.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const clear = () => {
+    setQ("");
+    setResults(null);
+    setError(null);
+  };
+
+  const found = results
+    ? results
+        .map((id) => PREDICTIONS.find((p) => p.id === id))
+        .filter((p): p is (typeof PREDICTIONS)[number] => !!p)
+        .slice(0, 8)
+    : [];
+
+  return (
+    <section className="mb-8">
+      <div className="relative overflow-hidden rounded-2xl border border-primary/30 glass-card p-4 sm:p-5">
+        <div className="absolute -top-16 -right-12 h-40 w-40 rounded-full bg-primary/20 blur-3xl pointer-events-none" />
+        <div className="relative">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/15 text-primary text-[10px] sm:text-xs font-black uppercase tracking-wider border border-primary/30">
+              <Sparkles className="h-3 w-3" /> Busca inteligente
+            </span>
+            <span className="text-[11px] text-muted-foreground hidden sm:block">
+              Diga em linguagem natural o que procura
+            </span>
+          </div>
+
+          <form onSubmit={submit} className="flex items-center gap-2">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <input
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder="Ex.: desafios de futebol da Copa com prêmios altos"
+                className="w-full h-11 sm:h-12 pl-9 pr-9 rounded-full bg-background/70 border border-border/60 text-sm focus:outline-none focus:ring-2 focus:ring-primary/60"
+              />
+              {q && (
+                <button
+                  type="button"
+                  onClick={clear}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 h-7 w-7 grid place-items-center rounded-full hover:bg-muted"
+                  aria-label="Limpar"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              )}
+            </div>
+            <button
+              type="submit"
+              disabled={loading || !q.trim()}
+              className="h-11 sm:h-12 px-4 sm:px-5 rounded-full bg-gradient-brand text-primary-foreground text-sm font-black uppercase tracking-wide shadow-glow disabled:opacity-50 inline-flex items-center gap-2"
+            >
+              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
+              <span className="hidden sm:inline">Buscar</span>
+            </button>
+          </form>
+
+          {error && (
+            <p className="mt-3 text-xs text-destructive">{error}</p>
+          )}
+
+          {results && !loading && (
+            <div className="mt-4">
+              {found.length === 0 ? (
+                <p className="text-sm text-muted-foreground">Nenhum desafio encontrado. Tente outras palavras.</p>
+              ) : (
+                <ul className="space-y-2">
+                  {found.map((p) => (
+                    <li key={p.id}>
+                      <Link
+                        to="/previsao/$id"
+                        params={{ id: p.id }}
+                        className="flex items-center gap-3 p-3 rounded-xl border border-border/60 hover:border-primary/60 hover:bg-card transition"
+                      >
+                        <span className="h-9 w-9 rounded-lg bg-primary/15 text-primary grid place-items-center shrink-0">
+                          <Trophy className="h-4 w-4" />
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <div className="text-sm font-semibold truncate">{p.title}</div>
+                          <div className="text-[11px] text-muted-foreground truncate">{p.category}</div>
+                        </div>
+                        <span className="text-[11px] font-bold text-primary shrink-0">Abrir →</span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    </section>
+  );
+}
+
