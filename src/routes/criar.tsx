@@ -340,6 +340,47 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
       prizeName: prizeName.trim() || undefined,
       prizeImg,
     });
+    if (forCompany && typeof window !== "undefined") {
+      // Persist as a corporate challenge so it appears on Admin → Desafios p/ Empresas → Ativos
+      // and on the public "Desafios para Empresas" page.
+      try {
+        const LS = "ddp:admin:corp-challenges";
+        const raw = window.localStorage.getItem(LS);
+        const list = raw ? (JSON.parse(raw) as unknown[]) : [];
+        const record = {
+          id,
+          companyId: "",
+          title: name.trim(),
+          subtitle: companyName.trim(),
+          description: subs.map((s, i) => `${i + 1}. ${s.question}`).join(" • "),
+          category,
+          tipo: subcategory || "Aberto",
+          cidade: "",
+          estado: "",
+          prizeType: "personalizado",
+          prizeName: prizeName.trim(),
+          prizeValue: "",
+          winners: 1,
+          startsAt: new Date().toISOString(),
+          endsAt: endsAt ? new Date(endsAt).toISOString() : "",
+          awardAt: endsAt ? new Date(endsAt).toISOString() : "",
+          missions: [missionData.instagram && `Seguir Instagram ${missionData.instagram}`].filter(Boolean) as string[],
+          rules: regulation ? [regulation] : [],
+          status: "ativo",
+          participants: 0,
+          createdAt: new Date().toISOString(),
+          logoImg,
+          bannerImg,
+          instagramArts,
+          tiebreaker,
+          inviteRewardText,
+        };
+        window.localStorage.setItem(LS, JSON.stringify([record, ...list]));
+        window.dispatchEvent(new Event("ddp:corp-challenges-updated"));
+      } catch {
+        // ignore
+      }
+    }
     setPublished({ id, name: name.trim() });
     window.scrollTo({ top: 0, behavior: "smooth" });
   };

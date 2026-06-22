@@ -1,4 +1,4 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import {
   Clock, Users, Flame, Heart, MessageCircle, Share2, Coins, TrendingUp, ArrowLeft, Instagram, Youtube, Facebook, Check, ExternalLink, Loader2, ScrollText, ShieldCheck,
@@ -35,18 +35,17 @@ function TikTokIcon({ className, style }: { className?: string; style?: React.CS
 }
 
 export const Route = createFileRoute("/previsao/$id")({
-  loader: ({ params }): Prediction => {
+  loader: ({ params }): { id: string; initial: Prediction | null } => {
     const p = getPrediction(params.id);
-    if (!p) throw notFound();
-    return p;
+    return { id: params.id, initial: p ?? null };
   },
   head: ({ loaderData }) => ({
-    meta: loaderData
+    meta: loaderData?.initial
       ? [
-          { title: `${loaderData.title} — EU ACHO QUE VAI DAR @#&` },
-          { name: "description", content: loaderData.description },
-          { property: "og:title", content: loaderData.title },
-          { property: "og:description", content: loaderData.description },
+          { title: `${loaderData.initial.title} — EU ACHO QUE VAI DAR @#&` },
+          { name: "description", content: loaderData.initial.description },
+          { property: "og:title", content: loaderData.initial.title },
+          { property: "og:description", content: loaderData.initial.description },
         ]
       : [],
   }),
@@ -67,8 +66,38 @@ export const Route = createFileRoute("/previsao/$id")({
 });
 
 function PredictionPage() {
-  // navigate removed: user stays on the page to complete bonus missions
-  const p = Route.useLoaderData() as Prediction;
+  const { id, initial } = Route.useLoaderData();
+  const [p, setP] = useState<Prediction | null>(initial);
+  const [resolving, setResolving] = useState<boolean>(!initial);
+
+  useEffect(() => {
+    if (p) return;
+    const found = getPrediction(id);
+    if (found) setP(found);
+    setResolving(false);
+  }, [id, p]);
+
+  if (!p) {
+    return (
+      <AppShell>
+        <div className="p-10 text-center">
+          {resolving ? (
+            <div className="text-muted-foreground">Carregando previsão…</div>
+          ) : (
+            <>
+              <h2 className="font-display text-2xl">Previsão não encontrada</h2>
+              <Link to="/" className="text-primary mt-3 inline-block">Voltar ao feed</Link>
+            </>
+          )}
+        </div>
+      </AppShell>
+    );
+  }
+
+  return <PredictionInner p={p} />;
+}
+
+function PredictionInner({ p }: { p: Prediction }) {
   const { user } = useAuth();
   const totalPool = p.options.reduce((s: number, o) => s + o.pool, 0);
   const [selected, setSelected] = useState(p.options[0].id);

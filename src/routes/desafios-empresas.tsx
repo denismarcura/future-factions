@@ -1,12 +1,54 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { AppShell } from "@/components/layout/AppShell";
+import { CountdownTimer } from "@/components/CountdownTimer";
 import {
   Megaphone, Trophy, Users, Sparkles, ArrowRight, CheckCircle2, Pizza,
   Beef, Shirt, IceCream, Car, Dumbbell, Rocket, TrendingUp, Heart,
   Target, Award, Instagram, Facebook, Youtube, Share2, ThumbsUp,
   MessageCircle, Globe, ClipboardList, UserPlus, Gift, Calendar,
-  MapPin, ShieldCheck, BarChart3, Bell, Image as ImageIcon, Flame,
+  MapPin, ShieldCheck, BarChart3, Bell, Image as ImageIcon, Flame, Clock,
 } from "lucide-react";
+
+type CorpChallengeLite = {
+  id: string;
+  title: string;
+  subtitle?: string;
+  prizeName?: string;
+  endsAt?: string;
+  createdAt?: string;
+  logoImg?: string | null;
+  bannerImg?: string | null;
+  status?: string;
+};
+
+function useLatestCorpChallenges(limit = 6): CorpChallengeLite[] {
+  const [list, setList] = useState<CorpChallengeLite[]>([]);
+  useEffect(() => {
+    const read = () => {
+      try {
+        const raw = window.localStorage.getItem("ddp:admin:corp-challenges");
+        const arr = raw ? (JSON.parse(raw) as CorpChallengeLite[]) : [];
+        const sorted = [...arr]
+          .filter((c) => (c.status ?? "ativo") === "ativo")
+          .sort((a, b) => (b.createdAt ?? "").localeCompare(a.createdAt ?? ""))
+          .slice(0, limit);
+        setList(sorted);
+      } catch {
+        setList([]);
+      }
+    };
+    read();
+    window.addEventListener("ddp:corp-challenges-updated", read);
+    window.addEventListener("storage", read);
+    return () => {
+      window.removeEventListener("ddp:corp-challenges-updated", read);
+      window.removeEventListener("storage", read);
+    };
+  }, [limit]);
+  return list;
+}
+
 
 export const Route = createFileRoute("/desafios-empresas")({
   head: () => ({
@@ -86,6 +128,7 @@ const ADVANTAGES = [
 ];
 
 function DesafiosEmpresasPage() {
+  const latest = useLatestCorpChallenges(6);
   return (
     <AppShell>
       {/* HERO */}
@@ -113,6 +156,57 @@ function DesafiosEmpresasPage() {
           </div>
         </div>
       </section>
+
+      {/* ÚLTIMOS DESAFIOS CADASTRADOS */}
+      {latest.length > 0 && (
+        <section className="mb-10">
+          <div className="flex items-center justify-between mb-5 gap-3 flex-wrap">
+            <h2 className="font-display text-2xl sm:text-3xl font-black flex items-center gap-2">
+              <Flame className="h-7 w-7 text-gold" /> Últimos desafios cadastrados
+            </h2>
+            <Link to="/desafios" className="text-sm font-semibold text-primary hover:underline">Ver todos</Link>
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {latest.map((c) => {
+              const closed = c.endsAt ? new Date(c.endsAt).getTime() <= Date.now() : false;
+              return (
+                <Link
+                  key={c.id}
+                  to="/previsao/$id"
+                  params={{ id: c.id }}
+                  className="group rounded-2xl border border-primary/30 glass-card overflow-hidden hover:border-primary/60 transition flex flex-col"
+                >
+                  {c.bannerImg ? (
+                    <img src={c.bannerImg} alt={c.title} className="w-full h-32 object-cover" />
+                  ) : (
+                    <div className="w-full h-32 bg-gradient-to-br from-primary/20 via-background to-gold/20" />
+                  )}
+                  <div className="p-4 flex-1 flex flex-col">
+                    <div className="flex items-start gap-3 mb-2">
+                      {c.logoImg && (
+                        <img src={c.logoImg} alt="" className="h-10 w-10 rounded-lg object-cover border border-border/60 -mt-8 bg-background" />
+                      )}
+                      <div className="min-w-0 flex-1">
+                        <h3 className="font-display font-black truncate">{c.title}</h3>
+                        {c.subtitle && <div className="text-xs text-muted-foreground truncate">{c.subtitle}</div>}
+                      </div>
+                    </div>
+                    {c.prizeName && (
+                      <div className="text-sm text-gold font-bold mb-2">🏆 {c.prizeName}</div>
+                    )}
+                    {c.endsAt && (
+                      <div className={`mt-auto inline-flex items-center gap-1.5 text-xs font-bold px-2.5 py-1.5 rounded-lg border ${closed ? "border-destructive/40 text-destructive bg-destructive/10" : "border-primary/40 text-primary bg-primary/10"}`}>
+                        <Clock className="h-3.5 w-3.5" />
+                        {closed ? "Apostas encerradas" : <>Encerra em <CountdownTimer closesAt={c.endsAt} /></>}
+                      </div>
+                    )}
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </section>
+      )}
 
       {/* COMO FUNCIONA */}
       <section className="mb-10">
