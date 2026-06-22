@@ -329,7 +329,6 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
   };
 
   const addSub = () => {
-    if (subs.length >= MAX_SUBS) return;
     setSubs([...subs, { id: uid(), question: "", options: ["Sim", "Não"] }]);
   };
   const removeSub = (id: string) => setSubs(subs.filter(s => s.id !== id));
