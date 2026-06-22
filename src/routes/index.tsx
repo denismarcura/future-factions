@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { Flame, Sparkles, TrendingUp, Clock, ShoppingBag, Trophy, Coins, Gift, Users, Zap, Diamond, Building2 } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
+import { Flame, Sparkles, TrendingUp, Clock, ShoppingBag, Trophy, Coins, Gift, Users, Zap, Diamond, Building2, Search, Loader2, X } from "lucide-react";
 import imgCampeao from "@/assets/dd-campeao.jpg";
 import imgMalucos from "@/assets/pm-soccer.jpg";
 import imgAlien from "@/assets/cat-alienigenas.jpg";
@@ -10,6 +11,7 @@ import { AppShell } from "@/components/layout/AppShell";
 import { PredictionCard } from "@/components/PredictionCard";
 import { CATEGORIES, PREDICTIONS } from "@/lib/mock-data";
 import { listActiveBanners, type Banner } from "@/lib/banners";
+import { aiSearchChallenges } from "@/lib/search-ai.functions";
 import logoAsset from "@/assets/logo-desafio.png.asset.json";
 
 export const Route = createFileRoute("/")({
