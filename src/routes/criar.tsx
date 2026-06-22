@@ -345,6 +345,7 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
         subs,
         prizeName: prizeName.trim() || undefined,
         prizeImg,
+        bannerImg,
       });
 
       if (forCompany) {
