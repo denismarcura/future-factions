@@ -866,6 +866,45 @@ export type Database = {
         }
         Relationships: []
       }
+      world_cup_results: {
+        Row: {
+          away_score: number
+          away_team: string
+          created_at: string
+          home_score: number
+          home_team: string
+          id: string
+          image_url: string | null
+          match_date: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          away_score?: number
+          away_team: string
+          created_at?: string
+          home_score?: number
+          home_team: string
+          id?: string
+          image_url?: string | null
+          match_date: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          away_score?: number
+          away_team?: string
+          created_at?: string
+          home_score?: number
+          home_team?: string
+          id?: string
+          image_url?: string | null
+          match_date?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
