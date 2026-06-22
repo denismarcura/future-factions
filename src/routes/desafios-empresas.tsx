@@ -128,6 +128,7 @@ const ADVANTAGES = [
 ];
 
 function DesafiosEmpresasPage() {
+  const latest = useLatestCorpChallenges(6);
   return (
     <AppShell>
       {/* HERO */}
