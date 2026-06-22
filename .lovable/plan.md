@@ -1,37 +1,33 @@
-## Objetivo
-Adicionar os 3 troféus enviados para destacar visualmente o 1º, 2º e 3º colocados nas telas de ranking.
+## Problema
 
-## O que vou implementar
+Em `src/routes/_authenticated/dashboard.tsx` a mesma constante alimenta os textos do WhatsApp, do e-mail, o "Link para incluir na postagem" **e o QR Code**:
 
-1. Preparar as 3 artes de troféu para web
-- Otimizar as imagens para uso leve na internet
-- Publicar como assets do projeto para carregarem rápido
-- Manter proporção e boa definição para mobile e desktop
+- Linha 1568: `const SITE_URL = "https://desafiodospalpites.com.br";` → falta `www.` (domínio oficial é `www.desafiodospalpites.com.br`).
+- Linhas 1300 e 1579: `const refCode = (userId || "").slice(0, 8) || "amigo";` → quando `userId` ainda não carregou, o link sai como `?ref=amigo` (literal).
+- O QR Code (linha 1816) usa o mesmo `link`, então mostra a URL errada e o arquivo baixado vira `qrcode-convite-amigo.png`.
 
-2. Criar um componente reutilizável de troféu por posição
-- Componente para escolher automaticamente:
-  - 1º lugar: troféu dourado
-  - 2º lugar: troféu prata
-  - 3º lugar: troféu bronze
-- Aceitar tamanho menor para cards e maior para destaques
+## Correções
 
-3. Aplicar nas telas onde o Top 3 já existe
-- `src/routes/ranking.$challengeId.tsx`
-  - substituir o ícone atual do bloco Top 3 pelo troféu real de cada posição
-- `src/routes/ranking.tsx`
-  - usar os troféus reais nos 3 cards do topo
-- `src/routes/top100.tsx`
-  - trocar os emojis/ícones do Top 3 pelos troféus enviados
+1. **Domínio**: trocar `SITE_URL` para `"https://www.desafiodospalpites.com.br"`.
 
-4. Ajustar layout para não pesar visualmente
-- No mobile, os troféus entram em tamanho contido
-- No desktop, o 1º lugar pode ganhar mais destaque visual
-- Preservar o estilo verde/dourado já existente
+2. **Ref code**: remover o fallback `"amigo"`. Criar helper `buildReferralLink(userId)`:
+   - Com `userId` → `${SITE_URL}/auth?ref=${userId.slice(0, 8)}`.
+   - Sem `userId` → `${SITE_URL}/auth` (sem `?ref=`).
 
-## Resultado esperado
-Ao abrir ranking, ranking do desafio e Top 100, os três primeiros colocados aparecem com os troféus reais que você enviou, reforçando o pódio de forma mais forte e profissional.
+3. **Esperar `userId`** antes de gerar textos e QR: enquanto não houver `userId`, mostrar placeholder "Carregando link de convite..." nos blocos:
+   - "Texto para WhatsApp"
+   - "Texto para e-mail"
+   - "Link para incluir na postagem"
+   - "Seu QR Code de convite" (desativa o botão Baixar/Copiar até ter o link válido)
 
-## Detalhes técnicos
-- Vou usar assets otimizados em vez dos PNGs pesados originais.
-- A lógica do componente será por posição (`1`, `2`, `3`).
-- Não vou mexer na regra do ranking, só na apresentação visual dos 3 primeiros.
+4. **Centralizar**: extrair `SITE_URL` + `buildReferralLink` para o topo do arquivo, eliminando a duplicação entre as linhas 1301 e 1580 (e o uso no QR).
+
+## Arquivo afetado
+
+- `src/routes/_authenticated/dashboard.tsx` — linhas ~1300, 1568, 1579–1583, 1810–1816.
+
+## Fora do escopo
+
+- Não muda o visual dos blocos.
+- Não muda os textos prontos (apenas o link dentro deles).
+- Não muda a geração da imagem do QR em si — herda o link correto automaticamente.
