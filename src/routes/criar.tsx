@@ -957,9 +957,207 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
             />
           </Section>
 
+          {forCompany && (
+            <>
+              {/* Identidade Visual */}
+              <Section
+                title="Identidade visual da empresa"
+                description="Faça upload do logotipo e do banner do desafio. Recomendamos PNG/JPG de alta qualidade."
+              >
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <UploadCard
+                    label="Logotipo"
+                    hint="PNG quadrado, recomendado 512×512px (fundo transparente)"
+                    image={logoImg}
+                    onChange={setLogoImg}
+                    aspect="aspect-square"
+                  />
+                  <UploadCard
+                    label="Banner personalizado"
+                    hint="JPG/PNG 1600×600px (proporção 8:3)"
+                    image={bannerImg}
+                    onChange={setBannerImg}
+                    aspect="aspect-[8/3]"
+                  />
+                </div>
+                <Field label="Nome da empresa (aparece no regulamento)">
+                  <input
+                    value={companyName}
+                    onChange={(e) => setCompanyName(e.target.value)}
+                    placeholder="Ex.: Casa di Napoli Pizzaria"
+                    className="input"
+                  />
+                </Field>
+              </Section>
 
+              {/* Artes para Instagram */}
+              <Section
+                title="Artes para divulgação no Instagram"
+                description="Adicione imagens prontas (feed 1080×1080px ou story 1080×1920px) que os usuários poderão baixar e compartilhar."
+              >
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  {instagramArts.map((art, idx) => (
+                    <div key={idx} className="relative rounded-xl border border-border/60 bg-background/40 overflow-hidden aspect-square">
+                      <img src={art} alt={`Arte ${idx + 1}`} className="w-full h-full object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => setInstagramArts((a) => a.filter((_, i) => i !== idx))}
+                        className="absolute top-2 right-2 h-8 w-8 rounded-lg bg-background/80 backdrop-blur grid place-items-center text-destructive hover:bg-background"
+                        aria-label="Remover arte"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  ))}
+                  <label className="aspect-square rounded-xl border-2 border-dashed border-primary/40 bg-primary/5 grid place-items-center cursor-pointer hover:bg-primary/10 transition text-center text-xs text-primary font-semibold p-3">
+                    <div>
+                      <Upload className="h-6 w-6 mx-auto mb-1.5" />
+                      Adicionar arte
+                      <div className="text-[10px] text-muted-foreground mt-1">1080×1080 ou 1080×1920</div>
+                    </div>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      className="hidden"
+                      onChange={(e) => {
+                        const files = Array.from(e.target.files ?? []);
+                        files.forEach((f) => {
+                          const reader = new FileReader();
+                          reader.onload = () => {
+                            if (typeof reader.result === "string") {
+                              setInstagramArts((prev) => [...prev, reader.result as string]);
+                            }
+                          };
+                          reader.readAsDataURL(f);
+                        });
+                        e.target.value = "";
+                      }}
+                    />
+                  </label>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Os participantes verão essas artes na página do desafio para download e compartilhamento.
+                </p>
+              </Section>
+
+              {/* Convite com recompensa */}
+              <Section
+                title="Convite e recompensa de indicação"
+                description="Texto que aparece para o usuário convidar amigos. Os créditos são liberados apenas quando o amigo se cadastrar e fizer o palpite."
+              >
+                <Field label="Mensagem de convite (editável)">
+                  <textarea
+                    value={inviteRewardText}
+                    onChange={(e) => setInviteRewardText(e.target.value)}
+                    rows={4}
+                    className="input min-h-[100px] resize-y"
+                    placeholder="Convide seus amigos e ganhe créditos extras…"
+                  />
+                </Field>
+                <div className="flex items-start gap-2 text-xs text-muted-foreground rounded-lg bg-gold/5 border border-gold/30 p-3">
+                  <Coins className="h-4 w-4 text-gold mt-0.5 shrink-0" />
+                  <span>Os créditos do organizador serão validados <strong>somente quando o amigo se cadastrar e fizer o palpite dele</strong>.</span>
+                </div>
+              </Section>
+
+              {/* Critérios de desempate */}
+              <Section
+                title="Critérios de desempate"
+                description="Escreva o básico — a IA pode reescrever em formato oficial."
+                action={
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      setTiebreakerLoading(true);
+                      try {
+                        const { text } = await generateTiebreakerFn({
+                          data: {
+                            base: tiebreaker.trim() || undefined,
+                            challengeName: name.trim() || undefined,
+                            category,
+                          },
+                        });
+                        setTiebreaker(text);
+                      } catch (err) {
+                        alert(err instanceof Error ? err.message : "Não foi possível gerar agora.");
+                      } finally {
+                        setTiebreakerLoading(false);
+                      }
+                    }}
+                    disabled={tiebreakerLoading}
+                    className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg bg-primary/15 text-primary border border-primary/30 text-sm font-semibold hover:bg-primary/20 disabled:opacity-50"
+                  >
+                    {tiebreakerLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4" />}
+                    {tiebreakerLoading ? "Gerando…" : "Gerar pela IA"}
+                  </button>
+                }
+              >
+                <textarea
+                  value={tiebreaker}
+                  onChange={(e) => setTiebreaker(e.target.value)}
+                  rows={5}
+                  placeholder="Ex.: 1) Maior número de acertos. 2) Quem palpitou primeiro. 3) Sorteio."
+                  className="input min-h-[120px] resize-y"
+                />
+              </Section>
+
+              {/* Regulamento */}
+              <Section
+                title="Regulamento da promoção"
+                description="Verifique o texto e aprove. Será exibido para o usuário antes de cada palpite, com aceite obrigatório."
+                action={
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      if (!name.trim()) {
+                        alert("Informe o nome do desafio antes de gerar o regulamento.");
+                        return;
+                      }
+                      setRegulationLoading(true);
+                      try {
+                        const { text } = await generateRegulationFn({
+                          data: {
+                            companyName: companyName.trim() || undefined,
+                            challengeName: name.trim(),
+                            category,
+                            prizeName: prizeName.trim() || undefined,
+                            endsAt: endsAt || undefined,
+                            tiebreaker: tiebreaker.trim() || undefined,
+                          },
+                        });
+                        setRegulation(text);
+                      } catch (err) {
+                        alert(err instanceof Error ? err.message : "Não foi possível gerar agora.");
+                      } finally {
+                        setRegulationLoading(false);
+                      }
+                    }}
+                    disabled={regulationLoading}
+                    className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg bg-primary/15 text-primary border border-primary/30 text-sm font-semibold hover:bg-primary/20 disabled:opacity-50"
+                  >
+                    {regulationLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4" />}
+                    {regulationLoading ? "Gerando…" : "Gerar regulamento com IA"}
+                  </button>
+                }
+              >
+                <textarea
+                  value={regulation}
+                  onChange={(e) => setRegulation(e.target.value)}
+                  rows={12}
+                  placeholder="Clique em 'Gerar regulamento com IA' e revise o texto. Você pode editar livremente."
+                  className="input min-h-[280px] resize-y font-mono text-xs leading-relaxed"
+                />
+                <div className="flex items-start gap-2 text-xs text-muted-foreground rounded-lg bg-primary/5 border border-primary/20 p-3">
+                  <AlertCircle className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                  <span>Quando o usuário for fazer um palpite, este regulamento aparecerá em tela cheia com as opções <strong>Aceito</strong> ou <strong>Não aceito</strong>. Sem aceite, o palpite não é registrado.</span>
+                </div>
+              </Section>
+            </>
+          )}
 
         </div>
+
 
         {/* Sidebar */}
         <aside className="lg:sticky lg:top-24 lg:self-start space-y-4">
