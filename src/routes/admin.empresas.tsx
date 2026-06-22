@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { generateCorporateChallenge } from "@/lib/corporate-challenge-ai.functions";
+import { getCorpStats, type CorpStats } from "@/lib/admin-stats.functions";
 import { Criar } from "@/routes/criar";
 
 export const Route = createFileRoute("/admin/empresas")({
@@ -21,6 +22,11 @@ type Company = {
   responsavel: string;
   email: string;
   whatsapp: string;
+  cep: string;
+  rua: string;
+  numero: string;
+  complemento: string;
+  bairro: string;
   cidade: string;
   estado: string;
   instagram: string;
@@ -139,12 +145,27 @@ function StatCard({ label, value, icon: Icon }: { label: string; value: string |
 }
 
 function DashboardTab({ companies, challenges }: { companies: Company[]; challenges: CorpChallenge[] }) {
-  const totalParticipants = challenges.reduce((s, c) => s + (c.participants || 0), 0);
+  const fetchStats = useServerFn(getCorpStats);
+  const [stats, setStats] = useState<CorpStats | null>(null);
+  useEffect(() => {
+    let mounted = true;
+    fetchStats()
+      .then((s) => { if (mounted) setStats(s); })
+      .catch(() => { /* silent — fallback to local */ });
+    return () => { mounted = false; };
+  }, [fetchStats]);
+
+  const localParticipants = challenges.reduce((s, c) => s + (c.participants || 0), 0);
+  const companiesCount = Math.max(stats?.companies ?? 0, companies.length);
+  const activeCount = Math.max(stats?.activeChallenges ?? 0, challenges.filter((c) => c.status === "ativo").length);
+  const closedCount = Math.max(stats?.closedChallenges ?? 0, challenges.filter((c) => c.status === "encerrado").length);
+  const totalParticipants = Math.max(stats?.totalParticipants ?? 0, localParticipants);
+
   return (
     <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      <StatCard label="Empresas cadastradas" value={companies.length} icon={Building2} />
-      <StatCard label="Desafios ativos" value={challenges.filter((c) => c.status === "ativo").length} icon={ListChecks} />
-      <StatCard label="Desafios encerrados" value={challenges.filter((c) => c.status === "encerrado").length} icon={Archive} />
+      <StatCard label="Empresas cadastradas" value={companiesCount} icon={Building2} />
+      <StatCard label="Desafios ativos" value={activeCount} icon={ListChecks} />
+      <StatCard label="Desafios encerrados" value={closedCount} icon={Archive} />
       <StatCard label="Participações totais" value={totalParticipants.toLocaleString("pt-BR")} icon={BarChart3} />
     </div>
   );
@@ -152,6 +173,7 @@ function DashboardTab({ companies, challenges }: { companies: Company[]; challen
 
 const EMPTY_COMPANY: Company = {
   id: "", razaoSocial: "", nomeFantasia: "", cnpj: "", responsavel: "", email: "", whatsapp: "",
+  cep: "", rua: "", numero: "", complemento: "", bairro: "",
   cidade: "", estado: "", instagram: "", status: "ativa", plano: "gratuito", createdAt: "",
 };
 
@@ -161,13 +183,15 @@ function EmpresasTab({ companies, onChange }: { companies: Company[]; onChange: 
   function startNew() { setEditing({ ...EMPTY_COMPANY, id: crypto.randomUUID() }); }
   function saveCompany(c: Company) {
     if (!c.nomeFantasia.trim()) { toast.error("Nome fantasia é obrigatório"); return; }
+    if (!c.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(c.email)) { toast.error("E-mail válido é obrigatório"); return; }
+    if (!c.responsavel.trim()) { toast.error("Responsável é obrigatório"); return; }
     const exists = companies.find((x) => x.id === c.id);
     const next = exists
       ? companies.map((x) => (x.id === c.id ? c : x))
       : [{ ...c, createdAt: new Date().toISOString() }, ...companies];
     onChange(next);
     setEditing(null);
-    toast.success(exists ? "Empresa atualizada" : "Empresa cadastrada");
+    toast.success(exists ? "✅ Empresa atualizada com sucesso!" : `✅ Cadastro de ${c.nomeFantasia} recebido com sucesso!`);
   }
   function remove(id: string) {
     if (!confirm("Excluir esta empresa?")) return;
@@ -227,19 +251,71 @@ function TextField({ label, value, onChange, ...rest }: { label: string; value: 
 
 function CompanyForm({ value, onSave, onCancel }: { value: Company; onSave: (c: Company) => void; onCancel: () => void }) {
   const [c, setC] = useState<Company>(value);
-  const set = (k: keyof Company) => (v: string) => setC({ ...c, [k]: v });
+  const [cepLoading, setCepLoading] = useState(false);
+  const set = (k: keyof Company) => (v: string) => setC((prev) => ({ ...prev, [k]: v }));
+
+  async function lookupCep(rawCep: string) {
+    const cep = rawCep.replace(/\D/g, "");
+    if (cep.length !== 8) return;
+    setCepLoading(true);
+    try {
+      const res = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+      const data = await res.json();
+      if (data.erro) { toast.error("CEP não encontrado. Verifique e tente novamente."); return; }
+      setC((prev) => ({
+        ...prev,
+        rua: data.logradouro || prev.rua,
+        bairro: data.bairro || prev.bairro,
+        cidade: data.localidade || prev.cidade,
+        estado: data.uf || prev.estado,
+      }));
+      toast.success("Endereço preenchido automaticamente");
+    } catch {
+      toast.error("Não foi possível consultar o CEP no momento");
+    } finally {
+      setCepLoading(false);
+    }
+  }
+
   return (
     <div className="glass-card rounded-2xl p-5 space-y-4 border border-primary/30">
       <div className="grid sm:grid-cols-2 gap-3">
         <TextField label="Razão social" value={c.razaoSocial} onChange={set("razaoSocial")} />
         <TextField label="Nome fantasia *" value={c.nomeFantasia} onChange={set("nomeFantasia")} />
         <TextField label="CNPJ" value={c.cnpj} onChange={set("cnpj")} />
-        <TextField label="Responsável" value={c.responsavel} onChange={set("responsavel")} />
-        <TextField label="E-mail" value={c.email} onChange={set("email")} type="email" />
+        <TextField label="Responsável *" value={c.responsavel} onChange={set("responsavel")} />
+        <TextField label="E-mail *" value={c.email} onChange={set("email")} type="email" />
         <TextField label="WhatsApp" value={c.whatsapp} onChange={set("whatsapp")} />
-        <TextField label="Cidade" value={c.cidade} onChange={set("cidade")} />
-        <TextField label="Estado" value={c.estado} onChange={set("estado")} maxLength={2} />
         <TextField label="Instagram" value={c.instagram} onChange={set("instagram")} placeholder="@empresa" />
+      </div>
+
+      <div className="pt-2 border-t border-border/40">
+        <h4 className="text-xs font-bold uppercase tracking-wider text-gold mb-3">Endereço</h4>
+        <div className="grid sm:grid-cols-2 gap-3">
+          <label className="block text-sm sm:col-span-1">
+            <span className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">CEP</span>
+            <div className="relative mt-1">
+              <input
+                value={c.cep}
+                onChange={(e) => { const v = e.target.value; set("cep")(v); if (v.replace(/\D/g, "").length === 8) lookupCep(v); }}
+                onBlur={(e) => lookupCep(e.target.value)}
+                maxLength={9}
+                placeholder="00000-000"
+                className="w-full h-10 px-3 rounded-lg bg-card border border-border/60 focus:border-primary outline-none text-sm"
+              />
+              {cepLoading && <Loader2 className="absolute right-3 top-3 h-4 w-4 animate-spin text-primary" />}
+            </div>
+          </label>
+          <TextField label="Rua" value={c.rua} onChange={set("rua")} />
+          <TextField label="Número" value={c.numero} onChange={set("numero")} placeholder="123" />
+          <TextField label="Complemento" value={c.complemento} onChange={set("complemento")} placeholder="Sala 1 / Bloco A" />
+          <TextField label="Bairro" value={c.bairro} onChange={set("bairro")} />
+          <TextField label="Cidade" value={c.cidade} onChange={set("cidade")} />
+          <TextField label="Estado" value={c.estado} onChange={set("estado")} maxLength={2} placeholder="UF" />
+        </div>
+      </div>
+
+      <div className="grid sm:grid-cols-2 gap-3">
         <label className="block text-sm">
           <span className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Plano</span>
           <select value={c.plano} onChange={(e) => setC({ ...c, plano: e.target.value as Company["plano"] })}
@@ -255,6 +331,7 @@ function CompanyForm({ value, onSave, onCancel }: { value: Company; onSave: (c: 
           </select>
         </label>
       </div>
+
       <div className="flex gap-2 justify-end">
         <button onClick={onCancel} className="h-10 px-4 rounded-full bg-card text-sm font-bold flex items-center gap-2"><X className="h-4 w-4" /> Cancelar</button>
         <button onClick={() => onSave(c)} className="h-10 px-4 rounded-full bg-gradient-brand text-primary-foreground text-sm font-bold flex items-center gap-2 shadow-glow"><Save className="h-4 w-4" /> Salvar</button>
