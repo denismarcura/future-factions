@@ -119,6 +119,14 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
   const [dbSubcategories, setDbSubcategories] = useState<ChallengeSubcategory[]>([]);
   const [loadingCats, setLoadingCats] = useState(true);
 
+  // Sempre que a tela de criação for aberta, rolar para o topo.
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+    }
+  }, []);
+
+
   useEffect(() => {
     let cancelled = false;
     Promise.all([listCategories(), listSubcategories()])
