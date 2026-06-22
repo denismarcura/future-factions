@@ -51,7 +51,7 @@ export function PredictionCard({ prediction: p, hideOptions = false }: { predict
                 </div>
               </div>
               <div className="mt-2 text-center text-[11px] text-muted-foreground">
-                {new Date(p.match.kickoff).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })} (Brasília)
+                {new Date(p.match.kickoff).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short", timeZone: "America/Sao_Paulo" })} (Brasília)
               </div>
             </div>
           ) : (
