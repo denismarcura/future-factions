@@ -27,6 +27,8 @@ import { CURRENT_USER, formatTokens } from "@/lib/mock-data";
 import { useAuth, signOut } from "@/hooks/use-auth";
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
 import logoAsset from "@/assets/logo-desafio.png.asset.json";
+import { LiveUsersBadge } from "@/components/LiveUsersBadge";
+
 
 const ADMIN_EMAILS = ["denismarcura@gmail.com", "antoinio.salvador@gmail.com"];
 
