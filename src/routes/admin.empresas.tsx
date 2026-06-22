@@ -183,13 +183,15 @@ function EmpresasTab({ companies, onChange }: { companies: Company[]; onChange: 
   function startNew() { setEditing({ ...EMPTY_COMPANY, id: crypto.randomUUID() }); }
   function saveCompany(c: Company) {
     if (!c.nomeFantasia.trim()) { toast.error("Nome fantasia é obrigatório"); return; }
+    if (!c.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(c.email)) { toast.error("E-mail válido é obrigatório"); return; }
+    if (!c.responsavel.trim()) { toast.error("Responsável é obrigatório"); return; }
     const exists = companies.find((x) => x.id === c.id);
     const next = exists
       ? companies.map((x) => (x.id === c.id ? c : x))
       : [{ ...c, createdAt: new Date().toISOString() }, ...companies];
     onChange(next);
     setEditing(null);
-    toast.success(exists ? "Empresa atualizada" : "Empresa cadastrada");
+    toast.success(exists ? "✅ Empresa atualizada com sucesso!" : `✅ Cadastro de ${c.nomeFantasia} recebido com sucesso!`);
   }
   function remove(id: string) {
     if (!confirm("Excluir esta empresa?")) return;
