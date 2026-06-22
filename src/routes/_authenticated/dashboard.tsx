@@ -141,6 +141,29 @@ function Dashboard() {
     };
   }, []);
 
+  // Auto-upload pending avatar saved during signup (before email confirmation).
+  useEffect(() => {
+    if (!profile) return;
+    if (profile.avatar_url) return;
+    const pending = takePendingAvatar();
+    if (!pending) return;
+    (async () => {
+      try {
+        const url = await uploadAvatar(profile.id, pending);
+        const { data, error } = await supabase
+          .from("profiles")
+          .update({ avatar_url: url })
+          .eq("id", profile.id)
+          .select()
+          .single();
+        if (error) throw error;
+        setProfile(data as Profile);
+      } catch (err) {
+        console.warn("avatar upload failed", err);
+      }
+    })();
+  }, [profile]);
+
   const claimedIds = useMemo(() => new Set(claims.map((c) => c.mission_id)), [claims]);
   const spentTokens = useMemo(
     () => participations.reduce((s, p) => s + (p.entryFee ?? 0), 0),
