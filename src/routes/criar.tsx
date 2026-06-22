@@ -170,6 +170,7 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
 
   // Inline AI generator (inside Sub-categorias section)
   const [inlineAiCount, setInlineAiCount] = useState(3);
+  const [inlineAiFocus, setInlineAiFocus] = useState("");
   const [inlineAiLoading, setInlineAiLoading] = useState(false);
   const [inlineAiError, setInlineAiError] = useState<string | null>(null);
 
@@ -180,17 +181,14 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
 
   const handleInlineGenerate = async () => {
     setInlineAiError(null);
-    const remaining = MAX_SUBS - subs.length;
-    if (remaining <= 0) {
-      setInlineAiError(`Você já tem o máximo de ${MAX_SUBS} palpites.`);
-      return;
-    }
-    const want = Math.min(inlineAiCount, remaining);
+    const want = Math.max(1, Number(inlineAiCount) || 1);
     setInlineAiLoading(true);
     try {
+      const themeBase = (name.trim() || subcategory || category || "Desafio de palpites");
+      const theme = inlineAiFocus.trim() ? `${themeBase} — foco: ${inlineAiFocus.trim()}` : themeBase;
       const result = await generateChallengeFn({
         data: {
-          theme: (name.trim() || subcategory || category || "Desafio de palpites"),
+          theme,
           category,
           subcategory: subcategory || undefined,
           userSubs: subs
@@ -206,13 +204,12 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
         .filter(s => !existingQs.has(s.question.trim().toLowerCase()))
         .slice(0, want)
         .map(s => ({ id: uid(), question: s.question, options: s.options.slice(0, MAX_OPTIONS) }));
-      // Replace empty placeholder subs first, then append
       setSubs(prev => {
         const out = [...prev];
         for (const ns of fresh) {
           const emptyIdx = out.findIndex(s => !s.question.trim());
           if (emptyIdx >= 0) out[emptyIdx] = ns;
-          else if (out.length < MAX_SUBS) out.push(ns);
+          else out.push(ns);
         }
         return out;
       });
@@ -222,6 +219,7 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
       setInlineAiLoading(false);
     }
   };
+
 
   const handleGenerateChallenge = async () => {
     setAiError(null);
@@ -331,7 +329,6 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
   };
 
   const addSub = () => {
-    if (subs.length >= MAX_SUBS) return;
     setSubs([...subs, { id: uid(), question: "", options: ["Sim", "Não"] }]);
   };
   const removeSub = (id: string) => setSubs(subs.filter(s => s.id !== id));
@@ -680,17 +677,15 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
             )}
           </Section>
 
-          {/* Sub-categorias */}
           <Section
-            title={`Sub-categorias de palpites (${subs.length}/${MAX_SUBS})`}
-            description={`Até ${MAX_SUBS} perguntas, cada uma com até ${MAX_OPTIONS} opções de resposta. Cada acerto vale ${REWARD_PER_HIT} tokens.`}
+            title={`Sub-categorias de palpites (${subs.length})`}
+            description={`Crie quantas perguntas quiser, cada uma com até ${MAX_OPTIONS} opções. Cada acerto vale ${REWARD_PER_HIT} tokens.`}
 
             action={
               <button
                 type="button"
                 onClick={addSub}
-                disabled={subs.length >= MAX_SUBS}
-                className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg bg-primary/15 text-primary border border-primary/30 text-sm font-semibold hover:bg-primary/20 disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg bg-primary/15 text-primary border border-primary/30 text-sm font-semibold hover:bg-primary/20"
               >
                 <Plus className="h-4 w-4" /> Nova sub-categoria
               </button>
@@ -702,36 +697,45 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
                 <Sparkles className="h-4 w-4 text-primary" />
                 <span className="text-sm font-bold">Gerar palpites com a IA</span>
               </div>
-              <div className="flex flex-wrap items-end gap-2">
+              <div className="grid gap-2 sm:grid-cols-[7rem_1fr_auto] items-end">
                 <label className="flex flex-col gap-1">
                   <span className="text-[11px] text-muted-foreground">Quantos palpites</span>
-                  <select
+                  <input
+                    type="number"
+                    min={1}
                     value={inlineAiCount}
-                    onChange={(e) => setInlineAiCount(Number(e.target.value))}
-                    className="input h-10 w-24"
-                  >
-                    {Array.from({ length: 10 }, (_, i) => i + 1).map(n => (
-                      <option key={n} value={n}>{n}</option>
-                    ))}
-                  </select>
+                    onChange={(e) => setInlineAiCount(Math.max(1, Number(e.target.value) || 1))}
+                    className="input h-10 w-full"
+                  />
+                </label>
+                <label className="flex flex-col gap-1">
+                  <span className="text-[11px] text-muted-foreground">Sobre o que devem ser os palpites?</span>
+                  <input
+                    type="text"
+                    value={inlineAiFocus}
+                    onChange={(e) => setInlineAiFocus(e.target.value)}
+                    placeholder='Ex.: "placar do jogo, primeiro gol, cartões…"'
+                    className="input h-10 w-full"
+                  />
                 </label>
                 <button
                   type="button"
                   onClick={handleInlineGenerate}
-                  disabled={inlineAiLoading || subs.length >= MAX_SUBS}
+                  disabled={inlineAiLoading}
                   className="inline-flex items-center gap-2 h-10 px-4 rounded-lg bg-primary text-primary-foreground text-sm font-bold hover:opacity-90 disabled:opacity-50"
                 >
                   {inlineAiLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4" />}
                   {inlineAiLoading ? "Gerando…" : "Gerar com IA"}
                 </button>
-                <span className="text-[11px] text-muted-foreground">
-                  Usa o tema, categoria e prêmio já preenchidos.
-                </span>
               </div>
+              <p className="mt-2 text-[11px] text-muted-foreground">
+                Usa o tema, categoria, prêmio e o foco que você descrever acima.
+              </p>
               {inlineAiError && (
                 <div className="mt-2 text-xs text-destructive">{inlineAiError}</div>
               )}
             </div>
+
 
             {hasBrazilMatch && (
               <div className="mb-4 rounded-xl border border-gold/40 bg-gold/10 p-3 flex items-start gap-2.5">
@@ -803,10 +807,9 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
               <button
                 type="button"
                 onClick={addSub}
-                disabled={subs.length >= MAX_SUBS}
-                className="w-full inline-flex items-center justify-center gap-2 h-12 rounded-xl border-2 border-dashed border-primary/40 bg-primary/5 text-primary text-sm font-bold hover:bg-primary/10 hover:border-primary/60 disabled:opacity-40 disabled:cursor-not-allowed transition"
+                className="w-full inline-flex items-center justify-center gap-2 h-12 rounded-xl border-2 border-dashed border-primary/40 bg-primary/5 text-primary text-sm font-bold hover:bg-primary/10 hover:border-primary/60 transition"
               >
-                <Plus className="h-4 w-4" /> + mais Palpites {subs.length >= MAX_SUBS ? `(máx. ${MAX_SUBS})` : `(${subs.length}/${MAX_SUBS})`}
+                <Plus className="h-4 w-4" /> + mais Palpites ({subs.length})
               </button>
             </div>
           </Section>
@@ -940,279 +943,6 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
 
 
 
-          {/* Convide Amigos */}
-          <Section
-            title="Convide amigos"
-            description="Cada amigo cadastrado = 100 tokens para você. Se ele criar um Desafio, vocês dois ganham +100 tokens cada. Convide quantos amigos quiser e aumente suas chances de ganhar prêmios."
-          >
-            <div className="rounded-xl border border-gold/30 bg-gold/5 p-3 mb-3 flex items-start gap-2.5">
-              <Users className="h-4 w-4 text-gold mt-0.5 shrink-0" />
-              <p className="text-xs text-muted-foreground">
-                <span className="text-gold font-bold">+100 tokens</span> por amigo cadastrado ·{" "}
-                <span className="text-gold font-bold">+100 tokens</span> para cada um quando seu amigo criar um desafio.
-              </p>
-            </div>
-
-            <div className="space-y-2">
-              {friends.map((f, idx) => (
-                <div key={f.id} className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_auto] gap-2 items-stretch">
-                  <input
-                    value={f.name}
-                    onChange={(e) => updateFriend(f.id, { name: e.target.value })}
-                    placeholder={`Nome do amigo #${idx + 1}`}
-                    className="input"
-                  />
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-                    <input
-                      type="email"
-                      value={f.email}
-                      onChange={(e) => updateFriend(f.id, { email: e.target.value })}
-                      placeholder="email@exemplo.com"
-                      className="input pl-9"
-                    />
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => removeFriend(f.id)}
-                    disabled={friends.length <= 1}
-                    className="h-11 w-11 rounded-lg border border-border/60 grid place-items-center text-muted-foreground hover:text-destructive hover:border-destructive/60 disabled:opacity-40 justify-self-end"
-                    aria-label="Remover amigo"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
-                </div>
-              ))}
-
-              <button
-                type="button"
-                onClick={addFriend}
-                className="w-full inline-flex items-center justify-center gap-2 h-12 rounded-xl border-2 border-dashed border-primary/40 bg-primary/5 text-primary text-sm font-bold hover:bg-primary/10 hover:border-primary/60 transition"
-              >
-                <UserPlus className="h-4 w-4" /> + convide mais amigos
-              </button>
-
-              <div className="pt-3 mt-2 border-t border-border/40">
-                <Field label="Ou cole vários e-mails de uma vez (separados por vírgula, espaço ou linha)">
-                  <textarea
-                    value={bulkEmails}
-                    onChange={(e) => setBulkEmails(e.target.value)}
-                    rows={3}
-                    placeholder="amigo1@email.com, amigo2@email.com&#10;amigo3@email.com"
-                    className="input min-h-[88px] resize-y"
-                  />
-                </Field>
-                <button
-                  type="button"
-                  onClick={() => {
-                    const emails = Array.from(new Set(
-                      bulkEmails.split(/[\s,;]+/).map((e) => e.trim()).filter((e) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e))
-                    ));
-                    if (!emails.length) return;
-                    setFriends((prev) => {
-                      const existing = new Set(prev.map((p) => p.email.trim().toLowerCase()));
-                      const additions = emails
-                        .filter((e) => !existing.has(e.toLowerCase()))
-                        .map((email) => ({ id: uid(), name: "", email }));
-                      const cleaned = prev.filter((p) => p.email.trim() || p.name.trim());
-                      return [...(cleaned.length ? cleaned : []), ...additions, ...(cleaned.length ? [] : [])];
-                    });
-                    setBulkEmails("");
-                  }}
-                  className="mt-2 inline-flex items-center gap-1.5 h-9 px-3 rounded-lg bg-primary/15 text-primary border border-primary/30 text-xs font-bold"
-                >
-                  <Plus className="h-3.5 w-3.5" /> Adicionar e-mails à lista
-                </button>
-              </div>
-            </div>
-
-            <div className="mt-5 pt-5 border-t border-border/40 space-y-3">
-              <Field label="Seu nome (quem está convidando)">
-                <input
-                  value={inviterName}
-                  onChange={(e) => setInviterName(e.target.value)}
-                  placeholder="Ex.: João Silva"
-                  className="input"
-                />
-              </Field>
-
-              <div className="flex items-center justify-between gap-2">
-                <label className="text-xs uppercase tracking-wider font-bold text-muted-foreground">
-                  Texto do e-mail de convite
-                </label>
-                <button
-                  type="button"
-                  onClick={handleGenerateInvite}
-                  disabled={genLoading}
-                  className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg bg-gradient-to-r from-primary to-gold text-background text-xs font-bold hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed transition"
-                >
-                  {genLoading ? (
-                    <><Loader2 className="h-3.5 w-3.5 animate-spin" /> Gerando…</>
-                  ) : (
-                    <><Wand2 className="h-3.5 w-3.5" /> Gerar com IA</>
-                  )}
-                </button>
-              </div>
-
-              <textarea
-                value={inviteText}
-                onChange={(e) => setInviteText(e.target.value)}
-                rows={8}
-                placeholder="Escreva aqui o texto do e-mail de convite, ou clique em &quot;Gerar com IA&quot; para criar automaticamente um convite com o nome do desafio e os palpites."
-                className="input min-h-[180px] resize-y leading-relaxed"
-              />
-
-              {genError && (
-                <div className="flex items-start gap-2 rounded-lg border border-destructive/40 bg-destructive/10 p-2.5 text-xs text-destructive">
-                  <AlertCircle className="h-3.5 w-3.5 mt-0.5 shrink-0" />
-                  <span>{genError}</span>
-                </div>
-              )}
-
-              <p className="text-xs text-muted-foreground">
-                A IA usa seu nome, o nome do desafio e os palpites cadastrados para escrever um convite pronto para enviar.
-              </p>
-            </div>
-          </Section>
-
-          {/* Criativo + WhatsApp */}
-          <Section
-            title="Divulgue seu desafio"
-            description="Gere uma arte para o Instagram e um texto pronto para enviar no WhatsApp."
-          >
-            <div className="grid sm:grid-cols-2 gap-5">
-              {/* Criativo */}
-              <div className="space-y-3">
-                <div className="text-xs uppercase tracking-wider font-bold text-muted-foreground">Criativo para Instagram</div>
-                <div className="rounded-xl border border-dashed border-border/70 bg-background/40 aspect-square grid place-items-center overflow-hidden">
-                  {creativeUrl ? (
-                    <img src={creativeUrl} alt="Criativo" className="w-full h-full object-cover" />
-                  ) : (
-                    <div className="text-center text-muted-foreground text-xs p-4">
-                      <ImageIcon className="h-8 w-8 mx-auto mb-2 text-primary" />
-                      Clique em "Gerar criativo" para criar uma arte 1080×1080 com o logo, nome e prêmio do desafio.
-                    </div>
-                  )}
-                </div>
-                <canvas ref={canvasRef} width={1080} height={1080} className="hidden" />
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    type="button"
-                    onClick={async () => {
-                      setCreatingCreative(true);
-                      try {
-                        const url = await renderCreative(canvasRef.current, {
-                          name: name.trim() || "Meu Desafio",
-                          category,
-                          prizeName: prizeName.trim(),
-                          autoPrize: AUTO_PRIZE,
-                          description: !isOpen ? privateDescription.trim() : "",
-                          inviter: inviterName.trim(),
-                          logoUrl: logoAsset.url,
-                        });
-                        setCreativeUrl(url);
-                      } catch (err) {
-                        alert(err instanceof Error ? err.message : "Não foi possível gerar o criativo.");
-                      } finally {
-                        setCreatingCreative(false);
-                      }
-                    }}
-                    disabled={creatingCreative}
-                    className="inline-flex items-center gap-2 h-11 px-4 rounded-lg bg-gradient-brand text-primary-foreground font-bold shadow-glow disabled:opacity-50"
-                  >
-                    {creatingCreative ? <Loader2 className="h-4 w-4 animate-spin" /> : <Instagram className="h-4 w-4" />}
-                    {creatingCreative ? "Gerando…" : "Gerar criativo"}
-                  </button>
-                  {creativeUrl && (
-                    <a
-                      href={creativeUrl}
-                      download={`criativo-${(name || "desafio").toLowerCase().replace(/\s+/g, "-")}.png`}
-                      className="inline-flex items-center gap-2 h-11 px-4 rounded-lg border border-border text-sm font-semibold"
-                    >
-                      <Download className="h-4 w-4" /> Baixar
-                    </a>
-                  )}
-                </div>
-              </div>
-
-              {/* WhatsApp */}
-              <div className="space-y-3">
-                <div className="flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-2">
-                    <span className="h-7 w-7 grid place-items-center rounded-md bg-[#25D366]/15 text-[#25D366]">
-                      <MessageCircle className="h-4 w-4" />
-                    </span>
-                    <div className="text-xs uppercase tracking-wider font-bold text-muted-foreground">Texto para WhatsApp</div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={async () => {
-                      if (!name.trim()) { alert("Dê um nome ao desafio antes."); return; }
-                      setWhatsLoading(true);
-                      try {
-                        const link = "https://www.desafiodospalpites.com.br/auth?ref=convite";
-                        const { text } = await generateWhatsFn({
-                          data: {
-                            inviterName: inviterName.trim() || undefined,
-                            challengeName: name.trim(),
-                            description: privateDescription.trim() || undefined,
-                            prizeName: prizeName.trim() || undefined,
-                            link,
-                          },
-                        });
-                        setWhatsText(text);
-                      } catch (err) {
-                        alert(err instanceof Error ? err.message : "Não foi possível gerar o texto.");
-                      } finally {
-                        setWhatsLoading(false);
-                      }
-                    }}
-                    disabled={whatsLoading}
-                    className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg bg-[#25D366] text-black text-xs font-bold hover:opacity-90 disabled:opacity-50"
-                  >
-                    {whatsLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Wand2 className="h-3.5 w-3.5" />}
-                    {whatsLoading ? "Gerando…" : "Gerar com IA"}
-                  </button>
-                </div>
-                <textarea
-                  value={whatsText}
-                  onChange={(e) => setWhatsText(e.target.value)}
-                  rows={10}
-                  placeholder="Clique em &quot;Gerar com IA&quot; para criar um texto explicando como funciona, quem está participando e convidando a pessoa — destacando que é 100% gratuito."
-                  className="input min-h-[220px] resize-y leading-relaxed text-sm"
-                />
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    type="button"
-                    onClick={async () => {
-                      if (!whatsText.trim()) return;
-                      try {
-                        await navigator.clipboard.writeText(whatsText);
-                        setWhatsCopied(true);
-                        setTimeout(() => setWhatsCopied(false), 1500);
-                      } catch {}
-                    }}
-                    disabled={!whatsText.trim()}
-                    className="inline-flex items-center gap-2 h-11 px-4 rounded-lg bg-primary/15 text-primary border border-primary/30 text-sm font-bold disabled:opacity-50"
-                  >
-                    <Copy className="h-4 w-4" /> {whatsCopied ? "Copiado!" : "Copiar texto"}
-                  </button>
-                  <a
-                    href={`https://wa.me/?text=${encodeURIComponent(whatsText)}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    onClick={(e) => { if (!whatsText.trim()) e.preventDefault(); }}
-                    className={`inline-flex items-center gap-2 h-11 px-4 rounded-lg bg-[#25D366] text-black text-sm font-bold ${!whatsText.trim() ? "opacity-50 pointer-events-none" : ""}`}
-                  >
-                    <MessageCircle className="h-4 w-4" /> Abrir WhatsApp
-                  </a>
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  O texto inclui o link de cadastro e deixa claro que a participação é 100% gratuita.
-                </p>
-              </div>
-            </div>
-          </Section>
         </div>
 
         {/* Sidebar */}
