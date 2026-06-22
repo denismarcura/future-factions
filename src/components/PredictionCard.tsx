@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Flame, MessageCircle, Heart, Share2, Users, Plus } from "lucide-react";
+import { MessageCircle, Heart, Share2, Users, Plus } from "lucide-react";
 import { type Prediction, formatTokens } from "@/lib/mock-data";
 import { CATEGORY_IMAGES } from "@/lib/category-images";
 import { ClosingTimerBadge } from "@/components/ClosingTimerBadge";
@@ -15,16 +15,11 @@ export function PredictionCard({ prediction: p, hideOptions = false }: { predict
         className="flex flex-col h-full p-5"
       >
         <div className="flex-1 flex flex-col min-h-0">
-          <div className="flex items-center gap-2 text-xs">
+          <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 text-xs">
             <span className="px-2 py-0.5 rounded-full bg-primary/15 text-primary font-semibold border border-primary/30">
               {p.category}
             </span>
-            {p.hot && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-destructive/15 text-destructive font-semibold border border-destructive/30">
-                <Flame className="h-3 w-3" /> Em alta
-              </span>
-            )}
-            <span className="ml-auto">
+            <span className="shrink-0">
               <ClosingTimerBadge closesAt={p.closesAt} />
             </span>
           </div>
@@ -64,10 +59,8 @@ export function PredictionCard({ prediction: p, hideOptions = false }: { predict
               />
             </div>
           )}
-          <p className="mt-1 text-sm text-muted-foreground line-clamp-2">{p.description}</p>
-
           {p.entryFee && (
-            <div className="mt-2 flex items-center gap-2 text-xs">
+            <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
               <span className="px-2 py-0.5 rounded-full bg-gold/15 text-gold font-bold border border-gold/30">
                 Entrada: {p.entryFee} TKN
               </span>
