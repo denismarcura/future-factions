@@ -547,6 +547,86 @@ function PredictionPage() {
         );
       })()}
 
+      <Dialog open={regOpen} onOpenChange={setRegOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 font-display">
+              <ScrollText className="h-5 w-5 text-primary" />
+              Regulamento da Promoção
+            </DialogTitle>
+            <DialogDescription>
+              Antes de confirmar seu palpite em <strong>{p.title}</strong>, leia e
+              indique se aceita as regras desta promoção.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="max-h-72 overflow-y-auto rounded-lg border border-border/60 bg-background/40 p-4 text-sm leading-relaxed space-y-3">
+            <p><strong>1. Objeto.</strong> Esta promoção é um desafio de palpites
+            organizado em <em>{p.title}</em>, na categoria {p.category}, com
+            encerramento em {new Date(p.closesAt).toLocaleString("pt-BR")}.</p>
+            <p><strong>2. Participação.</strong> Para participar, o usuário deve
+            estar cadastrado, possuir saldo suficiente em tokens e enviar seu
+            palpite antes do encerramento.</p>
+            <p><strong>3. Prêmios.</strong> Os prêmios anunciados são de
+            responsabilidade do organizador do desafio. A plataforma Desafio dos
+            Palpites atua exclusivamente como intermediadora tecnológica.</p>
+            <p><strong>4. Apuração.</strong> O resultado é apurado conforme o
+            evento oficial. Em caso de empate em pontos, aplicam-se os critérios
+            de desempate definidos pelo organizador.</p>
+            <p><strong>5. Conduta.</strong> Fraudes, múltiplas contas ou
+            tentativas de manipulação resultam em desclassificação e perda dos
+            tokens utilizados.</p>
+            <p><strong>6. LGPD.</strong> Os dados pessoais são tratados conforme
+            a Política de Privacidade da plataforma.</p>
+            <p><strong>7. Aceite.</strong> Ao marcar “Aceito”, o participante
+            declara ter lido e concordado integralmente com este regulamento.</p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3 pt-2">
+            <label className={`flex items-start gap-2 rounded-lg border p-3 cursor-pointer transition ${regChoice === "accept" ? "border-emerald-500 bg-emerald-500/10" : "border-border/60 hover:border-emerald-500/40"}`}>
+              <Checkbox
+                checked={regChoice === "accept"}
+                onCheckedChange={(v) => setRegChoice(v ? "accept" : null)}
+                className="mt-0.5"
+              />
+              <span className="text-sm font-semibold">Aceito o regulamento</span>
+            </label>
+            <label className={`flex items-start gap-2 rounded-lg border p-3 cursor-pointer transition ${regChoice === "reject" ? "border-destructive bg-destructive/10" : "border-border/60 hover:border-destructive/40"}`}>
+              <Checkbox
+                checked={regChoice === "reject"}
+                onCheckedChange={(v) => setRegChoice(v ? "reject" : null)}
+                className="mt-0.5"
+              />
+              <span className="text-sm font-semibold">Não aceito</span>
+            </label>
+          </div>
+
+          <DialogFooter className="gap-2 sm:gap-2">
+            <Button variant="outline" onClick={() => setRegOpen(false)}>Cancelar</Button>
+            <Button
+              disabled={regChoice === null}
+              onClick={() => {
+                if (regChoice === "accept") {
+                  setRegAccepted(true);
+                  setRegOpen(false);
+                  const fn = pendingConfirmRef.current;
+                  pendingConfirmRef.current = null;
+                  if (fn) fn();
+                } else {
+                  setRegAccepted(false);
+                  setRegOpen(false);
+                  toast.error("Você precisa aceitar o regulamento para participar.");
+                }
+              }}
+              className="gap-2"
+            >
+              <ShieldCheck className="h-4 w-4" /> Confirmar escolha
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
     </AppShell>
   );
 }
+
