@@ -44,7 +44,7 @@ function corpToPrediction(c: CorpChallengeRecord): Prediction {
     minTokens: 10,
     entryFee: 10,
     options: labels.map((label, i) => ({ id: `o${i}`, label, pool: 0 })),
-    subPredictions: subPredictions.length > 1 ? subPredictions : undefined,
+    subPredictions: subPredictions.length >= 1 ? subPredictions : undefined,
     bettors: c.participants ?? 0,
     comments: 0,
     likes: 0,
