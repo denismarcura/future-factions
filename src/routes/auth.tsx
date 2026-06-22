@@ -1,12 +1,14 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { useAuth } from "@/hooks/use-auth";
 import { prepareSignup } from "@/lib/signup.functions";
+import { savePendingAvatar } from "@/lib/avatar-upload";
 import {
   Loader2, Mail, Lock, User as UserIcon, Phone, AlertCircle, Instagram, ShieldCheck,
+  Camera, FileText, Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
 import logoAsset from "@/assets/logo-desafio.png.asset.json";
@@ -14,6 +16,29 @@ import logoAsset from "@/assets/logo-desafio.png.asset.json";
 export const Route = createFileRoute("/auth")({
   component: AuthPage,
 });
+
+function formatCPF(v: string) {
+  const d = v.replace(/\D/g, "").slice(0, 11);
+  return d
+    .replace(/(\d{3})(\d)/, "$1.$2")
+    .replace(/(\d{3})(\d)/, "$1.$2")
+    .replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+}
+
+function isValidCPF(v: string): boolean {
+  const c = v.replace(/\D/g, "");
+  if (c.length !== 11 || /^(\d)\1{10}$/.test(c)) return false;
+  let s = 0;
+  for (let i = 0; i < 9; i++) s += parseInt(c[i]) * (10 - i);
+  let d1 = 11 - (s % 11);
+  if (d1 >= 10) d1 = 0;
+  if (d1 !== parseInt(c[9])) return false;
+  s = 0;
+  for (let i = 0; i < 10; i++) s += parseInt(c[i]) * (11 - i);
+  let d2 = 11 - (s % 11);
+  if (d2 >= 10) d2 = 0;
+  return d2 === parseInt(c[10]);
+}
 
 function AuthPage() {
   const navigate = useNavigate();
@@ -25,6 +50,9 @@ function AuthPage() {
   const [name, setName] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
   const [instagram, setInstagram] = useState("");
+  const [cpf, setCpf] = useState("");
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [marketing, setMarketing] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -83,6 +111,8 @@ function AuthPage() {
         if (!name.trim()) throw new Error("Informe seu nome completo");
         if (!whatsapp.trim()) throw new Error("Informe seu WhatsApp");
         if (!instagram.trim()) throw new Error("Informe seu Instagram");
+        if (!cpf.trim()) throw new Error("Informe seu CPF");
+        if (!isValidCPF(cpf)) throw new Error("CPF inválido");
         if (password.length < 6) throw new Error("Senha deve ter pelo menos 6 caracteres");
         if (!acceptTerms) throw new Error("Você precisa aceitar as regras para continuar");
 
@@ -100,6 +130,7 @@ function AuthPage() {
               full_name: name,
               whatsapp,
               instagram,
+              cpf: cpf.replace(/\D/g, ""),
               signup_ip: ip,
               signup_city: city,
               terms_accepted_at: acceptedAt,
@@ -108,6 +139,9 @@ function AuthPage() {
           },
         });
         if (error) throw error;
+
+        // Store the avatar locally so it gets uploaded on first login.
+        if (avatarPreview) savePendingAvatar(avatarPreview);
 
         setInfo(
           "Cadastro recebido! Enviamos um e-mail de confirmação para " +
@@ -178,9 +212,69 @@ function AuthPage() {
           <form onSubmit={handleEmail} className="space-y-3">
             {mode === "signup" && (
               <>
+                {/* Foto de perfil */}
+                <div className="flex items-center gap-3 p-3 rounded-2xl border border-border/60 bg-card">
+                  <div className="relative h-16 w-16 rounded-full overflow-hidden border border-border/60 bg-background/60 grid place-items-center shrink-0">
+                    {avatarPreview ? (
+                      <img src={avatarPreview} alt="Foto" className="h-full w-full object-cover" />
+                    ) : (
+                      <Camera className="h-6 w-6 text-muted-foreground" />
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-xs font-bold uppercase tracking-wider text-foreground/80">Foto de perfil</div>
+                    <div className="text-[11px] text-muted-foreground">JPG ou PNG, até 5MB. Opcional.</div>
+                    <div className="mt-1.5 flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => fileRef.current?.click()}
+                        className="text-xs font-bold px-3 h-7 rounded-full border border-primary/40 text-primary hover:bg-primary/10"
+                      >
+                        {avatarPreview ? "Trocar" : "Enviar foto"}
+                      </button>
+                      {avatarPreview && (
+                        <button
+                          type="button"
+                          onClick={() => setAvatarPreview(null)}
+                          className="text-xs font-bold px-3 h-7 rounded-full border border-border/60 text-muted-foreground hover:text-destructive"
+                        >
+                          <Trash2 className="h-3 w-3 inline mr-1" /> Remover
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                  <input
+                    ref={fileRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const f = e.target.files?.[0];
+                      e.target.value = "";
+                      if (!f) return;
+                      if (f.size > 5 * 1024 * 1024) {
+                        setError("A foto deve ter no máximo 5MB.");
+                        return;
+                      }
+                      const reader = new FileReader();
+                      reader.onload = () => {
+                        if (typeof reader.result === "string") setAvatarPreview(reader.result);
+                      };
+                      reader.readAsDataURL(f);
+                    }}
+                  />
+                </div>
+
                 <Field icon={UserIcon} placeholder="Nome completo" value={name} onChange={setName} required />
                 <Field icon={Phone} placeholder="WhatsApp (com DDD)" value={whatsapp} onChange={setWhatsapp} required />
                 <Field icon={Instagram} placeholder="Instagram (@usuario)" value={instagram} onChange={setInstagram} required />
+                <Field
+                  icon={FileText}
+                  placeholder="CPF (000.000.000-00)"
+                  value={cpf}
+                  onChange={(v) => setCpf(formatCPF(v))}
+                  required
+                />
               </>
             )}
             <Field icon={Mail} type="email" placeholder="E-mail" value={email} onChange={setEmail} required />
