@@ -412,6 +412,11 @@ function formatCPFView(v: string) {
     .replace(/(\d{3})(\d{1,2})$/, "$1-$2");
 }
 
+function formatCEPView(v: string) {
+  const d = v.replace(/\D/g, "").slice(0, 8);
+  return d.replace(/(\d{5})(\d)/, "$1-$2");
+}
+
 function ProfileEditor({
   profile,
   onSaved,
