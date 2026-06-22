@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import {
-  Clock, Users, Flame, Heart, MessageCircle, Share2, Coins, TrendingUp, ArrowLeft, Instagram, Youtube, Facebook, Check, ExternalLink, Loader2, ScrollText, ShieldCheck,
+  Clock, Users, Heart, MessageCircle, Share2, Coins, TrendingUp, ArrowLeft, Instagram, Youtube, Facebook, Check, ExternalLink, Loader2, ScrollText, ShieldCheck,
 } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell } from "@/components/layout/AppShell";
@@ -354,13 +354,8 @@ function PredictionInner({ p }: { p: Prediction }) {
         return (
       <div className="space-y-6">
         <article className="rounded-2xl bg-card border border-border/60 p-6">
-          <div className="flex flex-wrap items-center gap-2 text-xs">
+          <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 text-xs sm:flex sm:flex-wrap">
             <span className="px-2 py-0.5 rounded-full bg-primary/15 text-primary font-semibold border border-primary/30">{p.category}</span>
-            {p.hot && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-destructive/15 text-destructive font-semibold border border-destructive/30">
-                <Flame className="h-3 w-3" /> Em alta
-              </span>
-            )}
             <span className="inline-flex items-center gap-1 text-muted-foreground"><Clock className="h-3 w-3" /> {isClosed ? "Apostas encerradas" : `Encerra em ${timeLeft(p.closesAt)}`}</span>
             <span className="inline-flex items-center gap-1 text-muted-foreground"><Users className="h-3 w-3" /> {p.bettors} apostadores</span>
           </div>
@@ -391,7 +386,7 @@ function PredictionInner({ p }: { p: Prediction }) {
           )}
 
           <h1 className="mt-4 font-display text-2xl sm:text-3xl font-black leading-tight">{p.title}</h1>
-          <p className="mt-2 text-muted-foreground">{p.description}</p>
+          {!p.match && <p className="mt-2 text-muted-foreground">{p.description}</p>}
 
           {p.prizeTiers && (
             <div className="mt-5 grid grid-cols-3 gap-3">
