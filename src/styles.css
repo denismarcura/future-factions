@@ -285,8 +285,6 @@
   position: relative;
   overflow: hidden;
   isolation: isolate;
-}
-@utility shine-on-hover {
   &::after {
     content: "";
     position: absolute;
