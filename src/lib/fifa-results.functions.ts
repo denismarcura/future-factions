@@ -503,11 +503,11 @@ export const getChallengeLogs = createServerFn({ method: "POST" })
     if (!isAdmin) throw new Error("Forbidden");
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: logs = [] } = await supabaseAdmin
+    const logsRes = await supabaseAdmin
       .from("challenge_results_log")
       .select("*")
       .eq("challenge_id", data.challengeId)
       .order("created_at", { ascending: false })
       .limit(50);
-    return logs;
+    return logsRes.data ?? [];
   });
