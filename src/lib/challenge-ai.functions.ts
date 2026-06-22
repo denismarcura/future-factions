@@ -88,7 +88,7 @@ Retorne APENAS um JSON válido (sem markdown, sem comentários) no formato exato
         options: (Array.isArray(s.options) ? s.options : ["Sim", "Não"])
           .map((o) => String(o).slice(0, 60).trim())
           .filter(Boolean)
-          .slice(0, 3),
+          .slice(0, 10),
       }))
       .filter((s) => s.question.length > 0 && s.options.length >= 2);
 
