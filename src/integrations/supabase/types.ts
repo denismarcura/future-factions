@@ -285,6 +285,81 @@ export type Database = {
         }
         Relationships: []
       }
+      corporate_challenges: {
+        Row: {
+          banner_url: string | null
+          category: string | null
+          company_name: string | null
+          created_at: string
+          description: string | null
+          ends_at: string | null
+          id: string
+          instagram_arts: Json
+          invite_reward_text: string | null
+          logo_url: string | null
+          missions: Json
+          owner_id: string | null
+          participants: number
+          prize_name: string | null
+          regulation: string | null
+          starts_at: string
+          status: string
+          subcategory: string | null
+          subs: Json
+          tiebreaker: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          banner_url?: string | null
+          category?: string | null
+          company_name?: string | null
+          created_at?: string
+          description?: string | null
+          ends_at?: string | null
+          id: string
+          instagram_arts?: Json
+          invite_reward_text?: string | null
+          logo_url?: string | null
+          missions?: Json
+          owner_id?: string | null
+          participants?: number
+          prize_name?: string | null
+          regulation?: string | null
+          starts_at?: string
+          status?: string
+          subcategory?: string | null
+          subs?: Json
+          tiebreaker?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          banner_url?: string | null
+          category?: string | null
+          company_name?: string | null
+          created_at?: string
+          description?: string | null
+          ends_at?: string | null
+          id?: string
+          instagram_arts?: Json
+          invite_reward_text?: string | null
+          logo_url?: string | null
+          missions?: Json
+          owner_id?: string | null
+          participants?: number
+          prize_name?: string | null
+          regulation?: string | null
+          starts_at?: string
+          status?: string
+          subcategory?: string | null
+          subs?: Json
+          tiebreaker?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       mission_claims: {
         Row: {
           context: string
