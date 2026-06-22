@@ -632,6 +632,32 @@ function ProfileEditor({
           placeholder="000.000.000-00"
         />
       </div>
+
+      <div className="mt-5 pt-5 border-t border-border/60">
+        <div className="text-xs font-bold uppercase tracking-wider text-foreground/80 mb-3 flex items-center gap-2">
+          <MapPin className="h-3.5 w-3.5 text-primary" /> Endereço
+        </div>
+        <div className="grid sm:grid-cols-2 gap-3">
+          <Field
+            label={cepLoading ? "CEP (buscando...)" : "CEP"}
+            value={cep}
+            onChange={(v) => {
+              const formatted = formatCEPView(v);
+              setCep(formatted);
+              if (formatted.replace(/\D/g, "").length === 8) void lookupCep(formatted);
+            }}
+            disabled={!editing}
+            placeholder="00000-000"
+          />
+          <Field label="Endereço" value={endereco} onChange={setEndereco} disabled placeholder="Preenchido pelo CEP" />
+          <Field label="Número" value={numero} onChange={setNumero} disabled={!editing} placeholder="123" />
+          <Field label="Complemento" value={complemento} onChange={setComplemento} disabled={!editing} placeholder="Apto / Bloco" />
+          <Field label="Bairro" value={bairro} onChange={setBairro} disabled placeholder="Preenchido pelo CEP" />
+          <Field label="Cidade" value={cidade} onChange={setCidade} disabled placeholder="Preenchido pelo CEP" />
+          <Field label="Estado" value={estado} onChange={setEstado} disabled placeholder="UF" />
+        </div>
+      </div>
+      </div>
     </section>
   );
 }
