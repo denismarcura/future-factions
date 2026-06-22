@@ -40,6 +40,7 @@ import {
   Camera,
   Upload,
   FileText,
+  MapPin,
 } from "lucide-react";
 import { toast } from "sonner";
 import { CATEGORIES, formatTokens, type Category } from "@/lib/mock-data";
@@ -90,6 +91,13 @@ type Profile = {
   whatsapp: string | null;
   instagram: string | null;
   cpf: string | null;
+  cep: string | null;
+  endereco: string | null;
+  numero: string | null;
+  complemento: string | null;
+  bairro: string | null;
+  cidade: string | null;
+  estado: string | null;
   avatar_url: string | null;
   provider: string | null;
   status: string;
@@ -405,6 +413,11 @@ function formatCPFView(v: string) {
     .replace(/(\d{3})(\d{1,2})$/, "$1-$2");
 }
 
+function formatCEPView(v: string) {
+  const d = v.replace(/\D/g, "").slice(0, 8);
+  return d.replace(/(\d{5})(\d)/, "$1-$2");
+}
+
 function ProfileEditor({
   profile,
   onSaved,
@@ -419,6 +432,14 @@ function ProfileEditor({
   const [instagram, setInstagram] = useState("");
   const [cpf, setCpf] = useState("");
   const [avatar, setAvatar] = useState("");
+  const [cep, setCep] = useState("");
+  const [endereco, setEndereco] = useState("");
+  const [numero, setNumero] = useState("");
+  const [complemento, setComplemento] = useState("");
+  const [bairro, setBairro] = useState("");
+  const [cidade, setCidade] = useState("");
+  const [estado, setEstado] = useState("");
+  const [cepLoading, setCepLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
 
@@ -428,8 +449,37 @@ function ProfileEditor({
     setInstagram(profile?.instagram ?? "");
     setCpf(profile?.cpf ? formatCPFView(profile.cpf) : "");
     setAvatar(profile?.avatar_url ?? "");
+    setCep(profile?.cep ? formatCEPView(profile.cep) : "");
+    setEndereco(profile?.endereco ?? "");
+    setNumero(profile?.numero ?? "");
+    setComplemento(profile?.complemento ?? "");
+    setBairro(profile?.bairro ?? "");
+    setCidade(profile?.cidade ?? "");
+    setEstado(profile?.estado ?? "");
     if (isProfileIncomplete(profile)) setEditing(true);
   }, [profile]);
+
+  async function lookupCep(rawCep: string) {
+    const digits = rawCep.replace(/\D/g, "");
+    if (digits.length !== 8) return;
+    setCepLoading(true);
+    try {
+      const res = await fetch(`https://viacep.com.br/ws/${digits}/json/`);
+      const data = await res.json();
+      if (data?.erro) {
+        toast.error("CEP não encontrado");
+        return;
+      }
+      setEndereco(data.logradouro ?? "");
+      setBairro(data.bairro ?? "");
+      setCidade(data.localidade ?? "");
+      setEstado(data.uf ?? "");
+    } catch {
+      toast.error("Não foi possível buscar o CEP");
+    } finally {
+      setCepLoading(false);
+    }
+  }
 
   if (!profile) return null;
 
@@ -466,6 +516,13 @@ function ProfileEditor({
           instagram: instagram.trim() || null,
           cpf: cpfDigits || null,
           avatar_url: avatar || null,
+          cep: cep.replace(/\D/g, "") || null,
+          endereco: endereco.trim() || null,
+          numero: numero.trim() || null,
+          complemento: complemento.trim() || null,
+          bairro: bairro.trim() || null,
+          cidade: cidade.trim() || null,
+          estado: estado.trim() || null,
         })
         .eq("id", profile!.id)
         .select()
@@ -575,6 +632,31 @@ function ProfileEditor({
           disabled={!editing}
           placeholder="000.000.000-00"
         />
+      </div>
+
+      <div className="mt-5 pt-5 border-t border-border/60">
+        <div className="text-xs font-bold uppercase tracking-wider text-foreground/80 mb-3 flex items-center gap-2">
+          <MapPin className="h-3.5 w-3.5 text-primary" /> Endereço
+        </div>
+        <div className="grid sm:grid-cols-2 gap-3">
+          <Field
+            label={cepLoading ? "CEP (buscando...)" : "CEP"}
+            value={cep}
+            onChange={(v) => {
+              const formatted = formatCEPView(v);
+              setCep(formatted);
+              if (formatted.replace(/\D/g, "").length === 8) void lookupCep(formatted);
+            }}
+            disabled={!editing}
+            placeholder="00000-000"
+          />
+          <Field label="Endereço" value={endereco} onChange={setEndereco} disabled placeholder="Preenchido pelo CEP" />
+          <Field label="Número" value={numero} onChange={setNumero} disabled={!editing} placeholder="123" />
+          <Field label="Complemento" value={complemento} onChange={setComplemento} disabled={!editing} placeholder="Apto / Bloco" />
+          <Field label="Bairro" value={bairro} onChange={setBairro} disabled placeholder="Preenchido pelo CEP" />
+          <Field label="Cidade" value={cidade} onChange={setCidade} disabled placeholder="Preenchido pelo CEP" />
+          <Field label="Estado" value={estado} onChange={setEstado} disabled placeholder="UF" />
+        </div>
       </div>
     </section>
   );
