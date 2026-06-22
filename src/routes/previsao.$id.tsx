@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import {
-  Clock, Users, Heart, MessageCircle, Share2, Coins, TrendingUp, ArrowLeft, Instagram, Youtube, Facebook, Check, ExternalLink, Loader2, ScrollText, ShieldCheck,
+  Clock, Users, Heart, MessageCircle, Share2, Coins, TrendingUp, ArrowLeft, Instagram, Youtube, Facebook, Check, ExternalLink, Loader2, ScrollText, ShieldCheck, Star, Twitter, Linkedin,
 } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell } from "@/components/layout/AppShell";
@@ -59,7 +59,7 @@ function corpToPrediction(c: CorpChallengeRecord): Prediction {
 
 
 
-const PLATFORM_ORDER = ["instagram", "youtube", "facebook", "tiktok"] as const;
+const PLATFORM_ORDER = ["instagram", "youtube", "facebook", "tiktok", "google", "twitter", "linkedin"] as const;
 type SeqPlatform = typeof PLATFORM_ORDER[number];
 type PageMission = (Mission | CorporateMission) & { platform: SeqPlatform };
 
@@ -76,6 +76,9 @@ const PLATFORM_THEME: Record<SeqPlatform, { label: string; gradient: string; col
   youtube:   { label: "YouTube",   gradient: "linear-gradient(135deg, #FF0000, #CC0000)", color: "#FF0000", Icon: Youtube },
   facebook:  { label: "Facebook",  gradient: "linear-gradient(135deg, #1877F2, #0D5AA5)", color: "#1877F2", Icon: Facebook },
   tiktok:    { label: "TikTok",    gradient: "linear-gradient(135deg, #010101, #333333)", color: "#ffffff", Icon: TikTokIcon },
+  google:    { label: "Google",    gradient: "linear-gradient(135deg, #34A853, #FABB05)", color: "#34A853", Icon: Star },
+  twitter:   { label: "Twitter / X", gradient: "linear-gradient(135deg, #111111, #3b3b3b)", color: "#ffffff", Icon: Twitter },
+  linkedin:  { label: "LinkedIn",  gradient: "linear-gradient(135deg, #0A66C2, #004182)", color: "#0A66C2", Icon: Linkedin },
 };
 
 function TikTokIcon({ className, style }: { className?: string; style?: React.CSSProperties }) {
