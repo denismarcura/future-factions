@@ -170,6 +170,7 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
 
   // Inline AI generator (inside Sub-categorias section)
   const [inlineAiCount, setInlineAiCount] = useState(3);
+  const [inlineAiFocus, setInlineAiFocus] = useState("");
   const [inlineAiLoading, setInlineAiLoading] = useState(false);
   const [inlineAiError, setInlineAiError] = useState<string | null>(null);
 
