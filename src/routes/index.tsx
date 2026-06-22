@@ -202,6 +202,9 @@ function Feed() {
         </section>
       )}
 
+      {/* Busca inteligente */}
+      <SmartSearch />
+
       {/* Desafios mais recentes */}
       <section className="mb-8">
         <div className="flex items-end justify-between mb-4">
@@ -221,10 +224,11 @@ function Feed() {
             .sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt))
             .slice(0, 6)
             .map((p) => (
-              <PredictionCard key={p.id} prediction={p} />
+              <PredictionCard key={p.id} prediction={p} hideOptions />
             ))}
         </div>
       </section>
+
 
 
       {/* Destaque: Desafios para Empresas */}
