@@ -156,3 +156,93 @@ Regras:
     });
     return { text: text.trim() };
   });
+
+// Critérios de desempate generator
+export const generateTiebreaker = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z.object({
+      base: z.string().trim().max(500).optional(),
+      challengeName: z.string().trim().max(200).optional(),
+      category: z.string().trim().max(100).optional(),
+    }).parse(input),
+  )
+  .handler(async ({ data }) => {
+    const key = process.env.LOVABLE_API_KEY;
+    if (!key) throw new Error("Missing LOVABLE_API_KEY");
+    const { createLovableAiGatewayProvider } = await import("./ai-gateway.server");
+    const gateway = createLovableAiGatewayProvider(key);
+
+    const prompt = `Escreva os "Critérios de Desempate" para um desafio de palpites em português do Brasil.
+${data.challengeName ? `Desafio: ${data.challengeName}` : ""}
+${data.category ? `Categoria: ${data.category}` : ""}
+${data.base ? `Base do organizador: ${data.base}` : ""}
+
+Regras:
+- 3 a 5 critérios numerados, claros e objetivos.
+- Comece com o critério mais relevante (ex.: maior número de acertos).
+- Inclua um último critério de sorteio em caso de empate persistente.
+- Tom formal, sem emojis. Sem aspas, sem markdown.
+- Retorne APENAS o texto.`;
+
+    const { text } = await generateText({
+      model: gateway("google/gemini-3-flash-preview"),
+      prompt,
+    });
+    return { text: text.trim() };
+  });
+
+// Regulamento generator
+export const generateRegulation = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z.object({
+      companyName: z.string().trim().max(200).optional(),
+      challengeName: z.string().trim().min(1).max(200),
+      category: z.string().trim().max(100).optional(),
+      prizeName: z.string().trim().max(300).optional(),
+      endsAt: z.string().trim().max(50).optional(),
+      tiebreaker: z.string().trim().max(2000).optional(),
+      extras: z.string().trim().max(1000).optional(),
+    }).parse(input),
+  )
+  .handler(async ({ data }) => {
+    const key = process.env.LOVABLE_API_KEY;
+    if (!key) throw new Error("Missing LOVABLE_API_KEY");
+    const { createLovableAiGatewayProvider } = await import("./ai-gateway.server");
+    const gateway = createLovableAiGatewayProvider(key);
+
+    const prompt = `Gere um "Regulamento Oficial" para a promoção/desafio de palpites abaixo, em português do Brasil.
+
+Dados:
+- Empresa organizadora: ${data.companyName || "Organizador"}
+- Nome do desafio: ${data.challengeName}
+${data.category ? `- Categoria: ${data.category}` : ""}
+${data.prizeName ? `- Prêmio: ${data.prizeName}` : ""}
+${data.endsAt ? `- Encerramento dos palpites: ${data.endsAt}` : ""}
+${data.tiebreaker ? `- Critérios de desempate fornecidos:\n${data.tiebreaker}` : ""}
+${data.extras ? `- Observações do organizador: ${data.extras}` : ""}
+
+Estruture com as seções numeradas:
+1. Do Objeto
+2. Da Participação (gratuita, sem dinheiro real, +18, aceite obrigatório destes termos)
+3. Do Período (datas e encerramento)
+4. Da Mecânica (como palpitar e pontuar)
+5. Da Premiação
+6. Dos Critérios de Desempate
+7. Da Entrega do Prêmio (responsabilidade do organizador)
+8. Das Disposições Gerais
+   - A plataforma Desafio dos Palpites atua apenas como intermediadora tecnológica.
+   - Não há garantia de entrega de prêmios oferecidos por terceiros pela plataforma.
+   - O organizador é o único responsável pela premiação e entrega.
+   - A plataforma pode remover desafios ou suspender contas em caso de fraude ou conteúdo inadequado.
+9. Do Foro
+
+Tom formal, claro, sem emojis, sem markdown (apenas títulos numerados e parágrafos). Retorne APENAS o texto do regulamento.`;
+
+    const { text } = await generateText({
+      model: gateway("google/gemini-3-flash-preview"),
+      prompt,
+    });
+    return { text: text.trim() };
+  });
