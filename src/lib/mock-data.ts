@@ -103,6 +103,15 @@ export type Prediction = {
   entryFee?: number;
   prizeTiers?: PrizeTier[];
   imageUrl?: string;
+  corporateMissions?: Array<{
+    id: string;
+    sponsorName: string;
+    platform: string;
+    actionType: string;
+    title: string;
+    link: string;
+    tokens: number;
+  }>;
 };
 
 const COPA_LOUCA = [

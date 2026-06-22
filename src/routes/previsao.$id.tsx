@@ -7,11 +7,11 @@ import {
 import { toast } from "sonner";
 import { AppShell } from "@/components/layout/AppShell";
 import { formatTokens, getPrediction, PREDICTIONS, USERS, type Prediction, type Category, timeLeft } from "@/lib/mock-data";
-import { listMissions, listMyClaims, claimMission, type Mission, ACTION_LABEL } from "@/lib/missions";
+import { listMyClaims, claimMission, ACTION_LABEL } from "@/lib/missions";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
-import { getCorpChallenge, type CorpChallengeRecord } from "@/lib/corp-challenges.functions";
+import { getCorpChallenge, type CorpChallengeRecord, type CorporateMission } from "@/lib/corp-challenges.functions";
 import { detectMatchFromText } from "@/lib/world-cup-matches";
 
 import { useAuth } from "@/hooks/use-auth";
@@ -52,6 +52,7 @@ function corpToPrediction(c: CorpChallengeRecord): Prediction {
     tags: ["empresa", "ativo"],
     hot: true,
     imageUrl: c.bannerUrl ?? c.logoUrl ?? undefined,
+    corporateMissions: c.missions,
     match,
   };
 }
