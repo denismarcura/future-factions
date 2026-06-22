@@ -1608,7 +1608,8 @@ function MissionWizard({
 
 function PublishedSuccess({ name, id, onCreateAnother }: { name: string; id: string; onCreateAnother: () => void }) {
   const [copied, setCopied] = useState(false);
-  const link = typeof window !== "undefined" ? `${window.location.origin}/previsao/${id}` : `/previsao/${id}`;
+  const PUBLIC_DOMAIN = "https://www.desafiodospalpites.com.br";
+  const link = `${PUBLIC_DOMAIN}/previsao/${id}`;
   const copy = async () => {
     try { await navigator.clipboard.writeText(link); setCopied(true); setTimeout(() => setCopied(false), 1500); } catch {}
   };
