@@ -299,12 +299,17 @@ function AuthPage() {
                   REGRAS DE PARTICIPAÇÃO
                 </div>
                 <div className="text-xs text-muted-foreground max-h-32 overflow-y-auto leading-relaxed space-y-1.5 pr-1">
-                  <p>1. Cada CPF/pessoa pode ter apenas uma conta. Até 5 cadastros são permitidos por IP.</p>
-                  <p>2. Os palpites devem ser enviados até 10 minutos antes do início do jogo.</p>
-                  <p>3. Prêmios em tokens são creditados após confirmação oficial dos resultados.</p>
-                  <p>4. Contas com dados falsos ou múltiplas contas serão suspensas e os tokens cancelados.</p>
+                  <p>1. Plataforma gratuita de entretenimento. Tokens não têm valor monetário e não podem ser vendidos ou convertidos em dinheiro.</p>
+                  <p>2. Cada CPF/pessoa pode ter apenas uma conta. Até 5 cadastros são permitidos por IP.</p>
+                  <p>3. Prêmios são entregues pelo organizador do desafio em até 13 a 30 dias corridos.</p>
+                  <p>4. Bullying, fraudes, perfis falsos, manipulação de missões ou de resultados levam à suspensão e banimento sem aviso.</p>
                   <p>5. Ao aceitar, você autoriza o registro de data, hora, cidade e endereço IP deste cadastro como prova de aceite.</p>
-                  <p>6. Você pode revogar consentimentos a qualquer momento no seu painel.</p>
+                  <p>
+                    6. Leia o documento completo em{" "}
+                    <Link to="/termos" target="_blank" className="text-primary font-semibold hover:underline">
+                      Termos de Uso e Participação
+                    </Link>.
+                  </p>
                 </div>
 
                 <label className="flex items-start gap-2 text-xs cursor-pointer">
@@ -316,7 +321,11 @@ function AuthPage() {
                     required
                   />
                   <span className="text-foreground/90">
-                    Li e aceito as regras, os Termos de Uso e a Política de Privacidade.
+                    Li e aceito os{" "}
+                    <Link to="/termos" target="_blank" className="text-primary font-semibold hover:underline">
+                      Termos de Uso e Participação
+                    </Link>{" "}
+                    e autorizo o registro do meu IP, data e horário deste aceite.
                   </span>
                 </label>
 
