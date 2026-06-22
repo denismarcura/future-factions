@@ -3,10 +3,24 @@ import { MessageCircle, Heart, Share2, Users, Plus } from "lucide-react";
 import { type Prediction, formatTokens } from "@/lib/mock-data";
 import { CATEGORY_IMAGES } from "@/lib/category-images";
 import { ClosingTimerBadge } from "@/components/ClosingTimerBadge";
+import { findResult } from "@/lib/world-cup-matches";
 
 export function PredictionCard({ prediction: p, hideOptions = false }: { prediction: Prediction; hideOptions?: boolean }) {
   const navigate = useNavigate();
   const totalPool = p.options.reduce((s, o) => s + o.pool, 0);
+  const result = p.match ? findResult(p.match.home, p.match.away) : undefined;
+  // Normalize result orientation to current card's home/away
+  const oriented = result
+    ? (() => {
+        const norm = (s: string) => s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+        const swap = norm(result.home) !== norm(p.match!.home);
+        return {
+          status: result.status,
+          homeScore: swap ? result.awayScore : result.homeScore,
+          awayScore: swap ? result.homeScore : result.awayScore,
+        };
+      })()
+    : null;
   return (
     <article className="group rounded-2xl bg-card border border-border/60 hover:border-primary/50 hover:shadow-glow transition overflow-hidden h-full flex flex-col">
       <Link
@@ -37,8 +51,19 @@ export function PredictionCard({ prediction: p, hideOptions = false }: { predict
                   <span className="text-xs font-bold text-center truncate w-full">{p.match.home}</span>
                 </div>
                 <div className="text-center">
-                  <div className="font-display text-2xl font-black text-gradient-brand">VS</div>
-                  <div className="text-[10px] text-muted-foreground">Grupo {p.match.group}</div>
+                  {oriented ? (
+                    <>
+                      <div className="font-display text-2xl font-black text-gradient-brand tabular-nums">
+                        {oriented.homeScore} <span className="text-muted-foreground">×</span> {oriented.awayScore}
+                      </div>
+                      <div className="text-[10px] text-muted-foreground">Grupo {p.match.group}</div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="font-display text-2xl font-black text-gradient-brand">VS</div>
+                      <div className="text-[10px] text-muted-foreground">Grupo {p.match.group}</div>
+                    </>
+                  )}
                 </div>
                 <div className="flex flex-col items-center gap-1.5 flex-1 min-w-0">
                   <img src={p.match.awayFlag} alt={p.match.away} className="h-12 w-16 object-cover rounded shadow" loading="lazy" />
@@ -46,7 +71,17 @@ export function PredictionCard({ prediction: p, hideOptions = false }: { predict
                 </div>
               </div>
               <div className="mt-2 text-center text-[11px] text-muted-foreground">
-                {new Date(p.match.kickoff).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short", timeZone: "America/Sao_Paulo" })} (Brasília)
+                {oriented?.status === "encerrado" ? (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/15 text-primary border border-primary/30 font-bold uppercase tracking-wider text-[10px]">
+                    Encerrado
+                  </span>
+                ) : oriented?.status === "em_andamento" ? (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-destructive/15 text-destructive border border-destructive/30 font-bold uppercase tracking-wider text-[10px] animate-pulse">
+                    Ao vivo
+                  </span>
+                ) : (
+                  <>{new Date(p.match.kickoff).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short", timeZone: "America/Sao_Paulo" })} (Brasília)</>
+                )}
               </div>
             </div>
           ) : (

@@ -49,6 +49,76 @@ export function flagUrl(code: string) {
   return `https://flagcdn.com/w80/${code}.png`;
 }
 
+// ============================================================
+// Resultados oficiais — Copa do Mundo 2026
+// ============================================================
+export type WCResult = {
+  date: string; // dd/MM/yyyy
+  home: string;
+  away: string;
+  homeScore: number;
+  awayScore: number;
+  status: "encerrado" | "em_andamento";
+};
+
+export const WORLD_CUP_RESULTS: WCResult[] = [
+  { date: "11/06/2026", home: "México", away: "África do Sul", homeScore: 2, awayScore: 0, status: "encerrado" },
+  { date: "11/06/2026", home: "Coreia do Sul", away: "República Tcheca", homeScore: 2, awayScore: 1, status: "encerrado" },
+  { date: "12/06/2026", home: "Canadá", away: "Bósnia e Herzegovina", homeScore: 1, awayScore: 1, status: "encerrado" },
+  { date: "12/06/2026", home: "Estados Unidos", away: "Paraguai", homeScore: 4, awayScore: 1, status: "encerrado" },
+  { date: "13/06/2026", home: "Catar", away: "Suíça", homeScore: 1, awayScore: 1, status: "encerrado" },
+  { date: "13/06/2026", home: "Brasil", away: "Marrocos", homeScore: 1, awayScore: 1, status: "encerrado" },
+  { date: "13/06/2026", home: "Haiti", away: "Escócia", homeScore: 0, awayScore: 1, status: "encerrado" },
+  { date: "14/06/2026", home: "Austrália", away: "Turquia", homeScore: 2, awayScore: 0, status: "encerrado" },
+  { date: "14/06/2026", home: "Alemanha", away: "Curaçao", homeScore: 7, awayScore: 1, status: "encerrado" },
+  { date: "14/06/2026", home: "Holanda", away: "Japão", homeScore: 2, awayScore: 2, status: "encerrado" },
+  { date: "14/06/2026", home: "Costa do Marfim", away: "Equador", homeScore: 1, awayScore: 0, status: "encerrado" },
+  { date: "14/06/2026", home: "Suécia", away: "Tunísia", homeScore: 5, awayScore: 1, status: "encerrado" },
+  { date: "15/06/2026", home: "Espanha", away: "Cabo Verde", homeScore: 0, awayScore: 0, status: "encerrado" },
+  { date: "15/06/2026", home: "Bélgica", away: "Egito", homeScore: 1, awayScore: 1, status: "encerrado" },
+  { date: "15/06/2026", home: "Arábia Saudita", away: "Uruguai", homeScore: 1, awayScore: 1, status: "encerrado" },
+  { date: "15/06/2026", home: "Irã", away: "Nova Zelândia", homeScore: 2, awayScore: 2, status: "encerrado" },
+  { date: "16/06/2026", home: "França", away: "Senegal", homeScore: 3, awayScore: 1, status: "encerrado" },
+  { date: "16/06/2026", home: "Iraque", away: "Noruega", homeScore: 1, awayScore: 4, status: "encerrado" },
+  { date: "16/06/2026", home: "Argentina", away: "Argélia", homeScore: 3, awayScore: 0, status: "encerrado" },
+  { date: "17/06/2026", home: "Áustria", away: "Jordânia", homeScore: 3, awayScore: 1, status: "encerrado" },
+  { date: "17/06/2026", home: "Portugal", away: "República Democrática do Congo", homeScore: 1, awayScore: 1, status: "encerrado" },
+  { date: "17/06/2026", home: "Inglaterra", away: "Croácia", homeScore: 4, awayScore: 2, status: "encerrado" },
+  { date: "17/06/2026", home: "Gana", away: "Panamá", homeScore: 1, awayScore: 0, status: "encerrado" },
+  { date: "17/06/2026", home: "Uzbequistão", away: "Colômbia", homeScore: 1, awayScore: 3, status: "encerrado" },
+  { date: "18/06/2026", home: "República Tcheca", away: "África do Sul", homeScore: 1, awayScore: 1, status: "encerrado" },
+  { date: "18/06/2026", home: "Suíça", away: "Bósnia e Herzegovina", homeScore: 4, awayScore: 1, status: "encerrado" },
+  { date: "18/06/2026", home: "Canadá", away: "Catar", homeScore: 6, awayScore: 0, status: "encerrado" },
+  { date: "18/06/2026", home: "México", away: "Coreia do Sul", homeScore: 1, awayScore: 0, status: "encerrado" },
+  { date: "19/06/2026", home: "Estados Unidos", away: "Austrália", homeScore: 2, awayScore: 0, status: "encerrado" },
+  { date: "19/06/2026", home: "Escócia", away: "Marrocos", homeScore: 0, awayScore: 1, status: "encerrado" },
+  { date: "19/06/2026", home: "Brasil", away: "Haiti", homeScore: 3, awayScore: 0, status: "encerrado" },
+  { date: "19/06/2026", home: "Turquia", away: "Paraguai", homeScore: 0, awayScore: 1, status: "encerrado" },
+  { date: "20/06/2026", home: "Holanda", away: "Suécia", homeScore: 5, awayScore: 1, status: "encerrado" },
+  { date: "20/06/2026", home: "Alemanha", away: "Costa do Marfim", homeScore: 2, awayScore: 1, status: "encerrado" },
+  { date: "20/06/2026", home: "Equador", away: "Curaçao", homeScore: 0, awayScore: 0, status: "encerrado" },
+  { date: "21/06/2026", home: "Tunísia", away: "Japão", homeScore: 0, awayScore: 4, status: "encerrado" },
+  { date: "21/06/2026", home: "Espanha", away: "Arábia Saudita", homeScore: 4, awayScore: 0, status: "encerrado" },
+  { date: "21/06/2026", home: "Bélgica", away: "Irã", homeScore: 0, awayScore: 0, status: "encerrado" },
+  { date: "21/06/2026", home: "Uruguai", away: "Cabo Verde", homeScore: 2, awayScore: 2, status: "encerrado" },
+  { date: "21/06/2026", home: "Nova Zelândia", away: "Egito", homeScore: 1, awayScore: 3, status: "encerrado" },
+  { date: "22/06/2026", home: "Argentina", away: "Áustria", homeScore: 0, awayScore: 0, status: "em_andamento" },
+];
+
+function normResult(s: string) {
+  return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+}
+
+export function findResult(home: string, away: string): WCResult | undefined {
+  const h = normResult(home);
+  const a = normResult(away);
+  return WORLD_CUP_RESULTS.find(
+    (r) =>
+      (normResult(r.home) === h && normResult(r.away) === a) ||
+      (normResult(r.home) === a && normResult(r.away) === h),
+  );
+}
+
 // Build a unique catalog of all known countries from WC matches.
 const COUNTRY_CATALOG: { name: string; code: string }[] = (() => {
   const seen = new Map<string, string>();
