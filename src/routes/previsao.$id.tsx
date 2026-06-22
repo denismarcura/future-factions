@@ -52,9 +52,37 @@ function corpToPrediction(c: CorpChallengeRecord): Prediction {
     tags: ["empresa", "ativo"],
     hot: true,
     imageUrl: c.bannerUrl ?? c.logoUrl ?? undefined,
-    corporateMissions: c.missions,
+    corporateMissions: normalizeCorporateMissions(c),
     match,
   };
+}
+
+function normalizeCorporateMissions(c: CorpChallengeRecord): CorporateMission[] {
+  return ((c.missions as unknown[]) ?? []).flatMap((mission, index) => {
+    if (typeof mission === "string") {
+      const link = mission.match(/https?:\/\/\S+/)?.[0] ?? mission.replace(/^Seguir Instagram\s*/i, "").trim();
+      return link ? [{
+        id: `corp-${c.id}-${index}`,
+        sponsorName: c.companyName || c.title,
+        platform: "instagram",
+        actionType: "follow",
+        title: `Seguir ${c.companyName || "Instagram"}`,
+        link,
+        tokens: 50,
+      }] : [];
+    }
+    if (!mission || typeof mission !== "object") return [];
+    const item = mission as Partial<CorporateMission>;
+    return item.link && item.platform ? [{
+      id: String(item.id ?? `corp-${c.id}-${index}`),
+      sponsorName: String(item.sponsorName ?? c.companyName ?? c.title),
+      platform: String(item.platform),
+      actionType: String(item.actionType ?? "follow"),
+      title: String(item.title ?? `Seguir ${c.companyName || "empresa"}`),
+      link: String(item.link),
+      tokens: Number(item.tokens ?? 50),
+    }] : [];
+  });
 }
 
 
