@@ -72,6 +72,14 @@ function getMissionAction(m: PageMission) {
   return "action_type" in m ? m.action_type : m.actionType;
 }
 
+function isCatalogMission(m: PageMission): m is Mission & { platform: SeqPlatform } {
+  return "sponsor_name" in m;
+}
+
+function getLocalMissionClaimKey(challengeId: string, missionId: string) {
+  return `ddp:corp-mission:${challengeId}:${missionId}`;
+}
+
 const PLATFORM_THEME: Record<SeqPlatform, { label: string; gradient: string; color: string; Icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }> }> = {
   instagram: { label: "Instagram", gradient: "linear-gradient(135deg, #E1306C, #833AB4)", color: "#E1306C", Icon: Instagram },
   youtube:   { label: "YouTube",   gradient: "linear-gradient(135deg, #FF0000, #CC0000)", color: "#FF0000", Icon: Youtube },
@@ -239,7 +247,10 @@ function PredictionInner({ p }: { p: Prediction }) {
           const done: { platform: SeqPlatform; sponsor: string; answers: Record<string, string> }[] = [];
           let step = 0;
           for (const m of queue) {
-            if (claims.some((c) => c.mission_id === m.id)) {
+            const claimed = isCatalogMission(m)
+              ? claims.some((c) => c.mission_id === m.id)
+              : window.localStorage.getItem(getLocalMissionClaimKey(p.id, m.id)) === "1";
+            if (claimed) {
               done.push({ platform: m.platform, sponsor: getMissionSponsor(m), answers: {} });
               step++;
             } else break;
@@ -263,10 +274,14 @@ function PredictionInner({ p }: { p: Prediction }) {
     window.open(mission.link, "_blank", "noopener,noreferrer");
     setMissionStatus("verifying");
     setTimeout(async () => {
-      try {
-        await claimMission(mission.id, `challenge:${p.id}`, mission.tokens);
-      } catch {
-        // ignore (likely already claimed)
+      if (isCatalogMission(mission)) {
+        try {
+          await claimMission(mission.id, `challenge:${p.id}`, mission.tokens);
+        } catch {
+          // ignore (likely already claimed)
+        }
+      } else {
+        window.localStorage.setItem(getLocalMissionClaimKey(p.id, mission.id), "1");
       }
       setSubAnswers({});
       if (confirmed) {
