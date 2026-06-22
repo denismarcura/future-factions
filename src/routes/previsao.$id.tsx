@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { getCorpChallenge, type CorpChallengeRecord } from "@/lib/corp-challenges.functions";
+import { detectMatchFromText } from "@/lib/world-cup-matches";
 
 import { useAuth } from "@/hooks/use-auth";
 import { hasParticipated, saveParticipation } from "@/lib/my-participations";
@@ -20,6 +21,14 @@ import { getTokenBalance } from "@/lib/balance";
 function corpToPrediction(c: CorpChallengeRecord): Prediction {
   const first = c.subs[0];
   const labels = first?.options?.filter((o) => o && o.trim()) ?? ["Sim", "Não"];
+  const subPredictions = c.subs
+    .filter((s) => s.question?.trim())
+    .map((s) => ({
+      id: s.id,
+      question: s.question,
+      options: s.options.filter((o) => o && o.trim()),
+    }));
+  const match = detectMatchFromText(c.title) ?? undefined;
   return {
     id: c.id,
     title: c.title,
@@ -33,7 +42,9 @@ function corpToPrediction(c: CorpChallengeRecord): Prediction {
     createdAt: c.createdAt,
     closesAt: c.endsAt ?? new Date(Date.now() + 7 * 86400000).toISOString(),
     minTokens: 10,
+    entryFee: 10,
     options: labels.map((label, i) => ({ id: `o${i}`, label, pool: 0 })),
+    subPredictions: subPredictions.length > 1 ? subPredictions : undefined,
     bettors: c.participants ?? 0,
     comments: 0,
     likes: 0,
@@ -41,6 +52,7 @@ function corpToPrediction(c: CorpChallengeRecord): Prediction {
     tags: ["empresa", "ativo"],
     hot: true,
     imageUrl: c.bannerUrl ?? c.logoUrl ?? undefined,
+    match,
   };
 }
 
