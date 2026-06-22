@@ -367,7 +367,7 @@ function Feed() {
 
       <section className="grid gap-4 sm:grid-cols-2">
         {items.map((p) => (
-          <PredictionCard key={p.id} prediction={p} />
+          <PredictionCard key={p.id} prediction={p} hideOptions />
         ))}
       </section>
 
