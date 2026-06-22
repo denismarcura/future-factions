@@ -63,6 +63,14 @@ const PLATFORM_ORDER = ["instagram", "youtube", "facebook", "tiktok"] as const;
 type SeqPlatform = typeof PLATFORM_ORDER[number];
 type PageMission = (Mission | CorporateMission) & { platform: SeqPlatform };
 
+function getMissionSponsor(m: PageMission) {
+  return "sponsor_name" in m ? m.sponsor_name : m.sponsorName;
+}
+
+function getMissionAction(m: PageMission) {
+  return "action_type" in m ? m.action_type : m.actionType;
+}
+
 const PLATFORM_THEME: Record<SeqPlatform, { label: string; gradient: string; color: string; Icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }> }> = {
   instagram: { label: "Instagram", gradient: "linear-gradient(135deg, #E1306C, #833AB4)", color: "#E1306C", Icon: Instagram },
   youtube:   { label: "YouTube",   gradient: "linear-gradient(135deg, #FF0000, #CC0000)", color: "#FF0000", Icon: Youtube },
@@ -228,7 +236,7 @@ function PredictionInner({ p }: { p: Prediction }) {
           let step = 0;
           for (const m of queue) {
             if (claims.some((c) => c.mission_id === m.id)) {
-              done.push({ platform: m.platform, sponsor: "sponsor_name" in m ? m.sponsor_name : m.sponsorName, answers: {} });
+              done.push({ platform: m.platform, sponsor: getMissionSponsor(m), answers: {} });
               step++;
             } else break;
           }
@@ -258,11 +266,11 @@ function PredictionInner({ p }: { p: Prediction }) {
       }
       setSubAnswers({});
       if (confirmed) {
-        setPendingExtra({ platform: mission.platform as SeqPlatform, sponsor: mission.sponsor_name });
+        setPendingExtra({ platform: mission.platform, sponsor: getMissionSponsor(mission) });
         toast.success("✅ Missão feita! Preencha o novo palpite e clique em CONFIRMAR PALPITE EXTRA.");
       } else {
         // Mission done before confirming participation: just credit tokens
-        setExtraPalpites((prev) => [...prev, { platform: mission.platform as SeqPlatform, sponsor: mission.sponsor_name, answers: {} }]);
+        setExtraPalpites((prev) => [...prev, { platform: mission.platform, sponsor: getMissionSponsor(mission), answers: {} }]);
         toast.success(`✅ Missão feita! +${mission.tokens} TKN no seu saldo. Você pode continuar ou já participar do desafio.`);
       }
       setMissionStatus("done");
@@ -576,7 +584,7 @@ function PredictionInner({ p }: { p: Prediction }) {
                       </span>
                     </div>
                     <p className="text-xs text-muted-foreground mb-3">
-                      <strong>{ACTION_LABEL[currentMission.action_type]}</strong> {currentMission.sponsor_name} no {T.label} e ganhe <strong className="text-gold">+{currentMission.tokens} TKN</strong>
+                      <strong>{ACTION_LABEL[getMissionAction(currentMission) as keyof typeof ACTION_LABEL] ?? "Abrir"}</strong> {getMissionSponsor(currentMission)} no {T.label} e ganhe <strong className="text-gold">+{currentMission.tokens} TKN</strong>
                       {confirmed ? <> (libera +1 round de palpites extras).</> : <> no seu saldo.</>}
                     </p>
                     <button
