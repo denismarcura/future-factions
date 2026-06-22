@@ -38,6 +38,56 @@ export type Database = {
         }
         Relationships: []
       }
+      challenge_results_log: {
+        Row: {
+          challenge_id: string
+          confidence: number | null
+          created_at: string
+          error: string | null
+          id: string
+          payload: Json | null
+          source: string | null
+          status_at_check:
+            | Database["public"]["Enums"]["apuration_status"]
+            | null
+          triggered_by: string | null
+        }
+        Insert: {
+          challenge_id: string
+          confidence?: number | null
+          created_at?: string
+          error?: string | null
+          id?: string
+          payload?: Json | null
+          source?: string | null
+          status_at_check?:
+            | Database["public"]["Enums"]["apuration_status"]
+            | null
+          triggered_by?: string | null
+        }
+        Update: {
+          challenge_id?: string
+          confidence?: number | null
+          created_at?: string
+          error?: string | null
+          id?: string
+          payload?: Json | null
+          source?: string | null
+          status_at_check?:
+            | Database["public"]["Enums"]["apuration_status"]
+            | null
+          triggered_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "challenge_results_log_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "challenges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       challenge_subcategories: {
         Row: {
           category_id: string
@@ -72,6 +122,168 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      challenge_winners: {
+        Row: {
+          challenge_id: string
+          created_at: string
+          id: string
+          notes: string | null
+          palpite_id: string | null
+          reason: string
+          released_at: string | null
+          released_by: string | null
+          status: Database["public"]["Enums"]["winner_payout_status"]
+          tokens: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          challenge_id: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          palpite_id?: string | null
+          reason: string
+          released_at?: string | null
+          released_by?: string | null
+          status?: Database["public"]["Enums"]["winner_payout_status"]
+          tokens?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          challenge_id?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          palpite_id?: string | null
+          reason?: string
+          released_at?: string | null
+          released_by?: string | null
+          status?: Database["public"]["Enums"]["winner_payout_status"]
+          tokens?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "challenge_winners_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "challenges"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "challenge_winners_palpite_id_fkey"
+            columns: ["palpite_id"]
+            isOneToOne: false
+            referencedRelation: "palpites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      challenges: {
+        Row: {
+          apuration_status: Database["public"]["Enums"]["apuration_status"]
+          away_flag_code: string | null
+          away_score: number | null
+          away_team: string | null
+          category: string | null
+          closes_at: string | null
+          created_at: string
+          description: string | null
+          entry_fee: number
+          fifa_match_id: string | null
+          fifa_match_url: string | null
+          home_flag_code: string | null
+          home_score: number | null
+          home_team: string | null
+          id: string
+          image_url: string | null
+          is_draw: boolean | null
+          is_physical_prize: boolean
+          match_date: string | null
+          match_kickoff: string | null
+          match_status: string | null
+          match_time: string | null
+          owner_id: string | null
+          prize_pool: number
+          result_checked_at: string | null
+          result_confirmed_at: string | null
+          result_payload_json: Json | null
+          result_source: string | null
+          title: string
+          updated_at: string
+          winner_team: string | null
+        }
+        Insert: {
+          apuration_status?: Database["public"]["Enums"]["apuration_status"]
+          away_flag_code?: string | null
+          away_score?: number | null
+          away_team?: string | null
+          category?: string | null
+          closes_at?: string | null
+          created_at?: string
+          description?: string | null
+          entry_fee?: number
+          fifa_match_id?: string | null
+          fifa_match_url?: string | null
+          home_flag_code?: string | null
+          home_score?: number | null
+          home_team?: string | null
+          id?: string
+          image_url?: string | null
+          is_draw?: boolean | null
+          is_physical_prize?: boolean
+          match_date?: string | null
+          match_kickoff?: string | null
+          match_status?: string | null
+          match_time?: string | null
+          owner_id?: string | null
+          prize_pool?: number
+          result_checked_at?: string | null
+          result_confirmed_at?: string | null
+          result_payload_json?: Json | null
+          result_source?: string | null
+          title: string
+          updated_at?: string
+          winner_team?: string | null
+        }
+        Update: {
+          apuration_status?: Database["public"]["Enums"]["apuration_status"]
+          away_flag_code?: string | null
+          away_score?: number | null
+          away_team?: string | null
+          category?: string | null
+          closes_at?: string | null
+          created_at?: string
+          description?: string | null
+          entry_fee?: number
+          fifa_match_id?: string | null
+          fifa_match_url?: string | null
+          home_flag_code?: string | null
+          home_score?: number | null
+          home_team?: string | null
+          id?: string
+          image_url?: string | null
+          is_draw?: boolean | null
+          is_physical_prize?: boolean
+          match_date?: string | null
+          match_kickoff?: string | null
+          match_status?: string | null
+          match_time?: string | null
+          owner_id?: string | null
+          prize_pool?: number
+          result_checked_at?: string | null
+          result_confirmed_at?: string | null
+          result_payload_json?: Json | null
+          result_source?: string | null
+          title?: string
+          updated_at?: string
+          winner_team?: string | null
+        }
+        Relationships: []
       }
       mission_claims: {
         Row: {
@@ -149,6 +361,53 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      palpites: {
+        Row: {
+          challenge_id: string
+          created_at: string
+          evaluated_at: string | null
+          id: string
+          is_correct: boolean | null
+          kind: Database["public"]["Enums"]["palpite_kind"]
+          option_value: string | null
+          predicted_away_score: number | null
+          predicted_home_score: number | null
+          user_id: string
+        }
+        Insert: {
+          challenge_id: string
+          created_at?: string
+          evaluated_at?: string | null
+          id?: string
+          is_correct?: boolean | null
+          kind: Database["public"]["Enums"]["palpite_kind"]
+          option_value?: string | null
+          predicted_away_score?: number | null
+          predicted_home_score?: number | null
+          user_id: string
+        }
+        Update: {
+          challenge_id?: string
+          created_at?: string
+          evaluated_at?: string | null
+          id?: string
+          is_correct?: boolean | null
+          kind?: Database["public"]["Enums"]["palpite_kind"]
+          option_value?: string | null
+          predicted_away_score?: number | null
+          predicted_home_score?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "palpites_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "challenges"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -234,6 +493,51 @@ export type Database = {
         }
         Relationships: []
       }
+      token_transactions: {
+        Row: {
+          challenge_id: string | null
+          created_at: string
+          delta: number
+          id: string
+          reason: string
+          user_id: string
+          winner_id: string | null
+        }
+        Insert: {
+          challenge_id?: string | null
+          created_at?: string
+          delta: number
+          id?: string
+          reason: string
+          user_id: string
+          winner_id?: string | null
+        }
+        Update: {
+          challenge_id?: string | null
+          created_at?: string
+          delta?: number
+          id?: string
+          reason?: string
+          user_id?: string
+          winner_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "token_transactions_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "challenges"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "token_transactions_winner_id_fkey"
+            columns: ["winner_id"]
+            isOneToOne: false
+            referencedRelation: "challenge_winners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -270,6 +574,27 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "user"
+      apuration_status:
+        | "aguardando_jogo"
+        | "jogo_em_andamento"
+        | "aguardando_resultado"
+        | "resultado_encontrado"
+        | "apurado_automaticamente"
+        | "requer_revisao_manual"
+        | "finalizado"
+        | "erro_na_consulta"
+      palpite_kind:
+        | "vencedor"
+        | "empate"
+        | "placar_exato"
+        | "mais_2"
+        | "menos_2"
+        | "ambos_marcam"
+      winner_payout_status:
+        | "pendente"
+        | "liberado"
+        | "aguardando_premio_fisico"
+        | "cancelado"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -398,6 +723,30 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user"],
+      apuration_status: [
+        "aguardando_jogo",
+        "jogo_em_andamento",
+        "aguardando_resultado",
+        "resultado_encontrado",
+        "apurado_automaticamente",
+        "requer_revisao_manual",
+        "finalizado",
+        "erro_na_consulta",
+      ],
+      palpite_kind: [
+        "vencedor",
+        "empate",
+        "placar_exato",
+        "mais_2",
+        "menos_2",
+        "ambos_marcam",
+      ],
+      winner_payout_status: [
+        "pendente",
+        "liberado",
+        "aguardando_premio_fisico",
+        "cancelado",
+      ],
     },
   },
 } as const
