@@ -212,9 +212,69 @@ function AuthPage() {
           <form onSubmit={handleEmail} className="space-y-3">
             {mode === "signup" && (
               <>
+                {/* Foto de perfil */}
+                <div className="flex items-center gap-3 p-3 rounded-2xl border border-border/60 bg-card">
+                  <div className="relative h-16 w-16 rounded-full overflow-hidden border border-border/60 bg-background/60 grid place-items-center shrink-0">
+                    {avatarPreview ? (
+                      <img src={avatarPreview} alt="Foto" className="h-full w-full object-cover" />
+                    ) : (
+                      <Camera className="h-6 w-6 text-muted-foreground" />
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-xs font-bold uppercase tracking-wider text-foreground/80">Foto de perfil</div>
+                    <div className="text-[11px] text-muted-foreground">JPG ou PNG, até 5MB. Opcional.</div>
+                    <div className="mt-1.5 flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => fileRef.current?.click()}
+                        className="text-xs font-bold px-3 h-7 rounded-full border border-primary/40 text-primary hover:bg-primary/10"
+                      >
+                        {avatarPreview ? "Trocar" : "Enviar foto"}
+                      </button>
+                      {avatarPreview && (
+                        <button
+                          type="button"
+                          onClick={() => setAvatarPreview(null)}
+                          className="text-xs font-bold px-3 h-7 rounded-full border border-border/60 text-muted-foreground hover:text-destructive"
+                        >
+                          <Trash2 className="h-3 w-3 inline mr-1" /> Remover
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                  <input
+                    ref={fileRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const f = e.target.files?.[0];
+                      e.target.value = "";
+                      if (!f) return;
+                      if (f.size > 5 * 1024 * 1024) {
+                        setError("A foto deve ter no máximo 5MB.");
+                        return;
+                      }
+                      const reader = new FileReader();
+                      reader.onload = () => {
+                        if (typeof reader.result === "string") setAvatarPreview(reader.result);
+                      };
+                      reader.readAsDataURL(f);
+                    }}
+                  />
+                </div>
+
                 <Field icon={UserIcon} placeholder="Nome completo" value={name} onChange={setName} required />
                 <Field icon={Phone} placeholder="WhatsApp (com DDD)" value={whatsapp} onChange={setWhatsapp} required />
                 <Field icon={Instagram} placeholder="Instagram (@usuario)" value={instagram} onChange={setInstagram} required />
+                <Field
+                  icon={FileText}
+                  placeholder="CPF (000.000.000-00)"
+                  value={cpf}
+                  onChange={(v) => setCpf(formatCPF(v))}
+                  required
+                />
               </>
             )}
             <Field icon={Mail} type="email" placeholder="E-mail" value={email} onChange={setEmail} required />
