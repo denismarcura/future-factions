@@ -1150,7 +1150,7 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
                       if (!name.trim()) { alert("Dê um nome ao desafio antes."); return; }
                       setWhatsLoading(true);
                       try {
-                        const link = typeof window !== "undefined" ? `${window.location.origin}/auth?ref=convite` : "";
+                        const link = "https://www.desafiodospalpites.com.br/auth?ref=convite";
                         const { text } = await generateWhatsFn({
                           data: {
                             inviterName: inviterName.trim() || undefined,
