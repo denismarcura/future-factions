@@ -390,6 +390,15 @@ export const manualConfirmResult = createServerFn({ method: "POST" })
       .single();
     if (!ch) throw new Error("Desafio não encontrado");
 
+    const previous = {
+      home_score: ch.home_score,
+      away_score: ch.away_score,
+      is_draw: ch.is_draw,
+      winner_team: ch.winner_team,
+      result_source: ch.result_source,
+      result_payload_json: ch.result_payload_json,
+    };
+
     const isDraw = data.home_score === data.away_score;
     const winnerTeam = isDraw
       ? ""
@@ -416,6 +425,21 @@ export const manualConfirmResult = createServerFn({ method: "POST" })
         } as any,
       })
       .eq("id", ch.id);
+
+    // Audit imutável da alteração manual
+    await supabaseAdmin.from("challenge_result_audit").insert({
+      challenge_id: ch.id,
+      changed_by: userId,
+      source: "manual",
+      previous_result: previous as any,
+      new_result: {
+        home_score: data.home_score,
+        away_score: data.away_score,
+        is_draw: isDraw,
+        winner_team: winnerTeam,
+      } as any,
+      notes: data.observation ?? null,
+    });
 
     await supabaseAdmin.from("challenge_results_log").insert({
       challenge_id: ch.id,
