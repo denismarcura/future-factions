@@ -111,6 +111,8 @@ function AuthPage() {
         if (!name.trim()) throw new Error("Informe seu nome completo");
         if (!whatsapp.trim()) throw new Error("Informe seu WhatsApp");
         if (!instagram.trim()) throw new Error("Informe seu Instagram");
+        if (!cpf.trim()) throw new Error("Informe seu CPF");
+        if (!isValidCPF(cpf)) throw new Error("CPF inválido");
         if (password.length < 6) throw new Error("Senha deve ter pelo menos 6 caracteres");
         if (!acceptTerms) throw new Error("Você precisa aceitar as regras para continuar");
 
@@ -128,6 +130,7 @@ function AuthPage() {
               full_name: name,
               whatsapp,
               instagram,
+              cpf: cpf.replace(/\D/g, ""),
               signup_ip: ip,
               signup_city: city,
               terms_accepted_at: acceptedAt,
@@ -136,6 +139,9 @@ function AuthPage() {
           },
         });
         if (error) throw error;
+
+        // Store the avatar locally so it gets uploaded on first login.
+        if (avatarPreview) savePendingAvatar(avatarPreview);
 
         setInfo(
           "Cadastro recebido! Enviamos um e-mail de confirmação para " +
