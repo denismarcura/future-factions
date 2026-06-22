@@ -324,7 +324,7 @@ function Feed() {
       </section>
 
       {/* Filters */}
-      <section id="feed" className="mb-4 flex items-center gap-2 overflow-x-auto -mx-4 px-4 pb-2">
+      <section id="feed" className="mb-4 flex items-center gap-2 overflow-x-auto -mx-4 px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {sorts.map(({ key, label, icon: Icon }) => (
           <button
             key={key}
@@ -340,7 +340,7 @@ function Feed() {
         ))}
       </section>
 
-      <section className="mb-6 flex items-center gap-2 overflow-x-auto -mx-4 px-4 pb-2">
+      <section className="mb-6 flex items-center gap-2 overflow-x-auto -mx-4 px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {["Todas", ...CATEGORIES, "Encerrados"].map((c) => (
           <button
             key={c}
@@ -357,6 +357,7 @@ function Feed() {
           </button>
         ))}
       </section>
+
 
       <section className="grid gap-4 sm:grid-cols-2">
         {items.map((p) => (
