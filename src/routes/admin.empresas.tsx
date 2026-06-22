@@ -145,12 +145,27 @@ function StatCard({ label, value, icon: Icon }: { label: string; value: string |
 }
 
 function DashboardTab({ companies, challenges }: { companies: Company[]; challenges: CorpChallenge[] }) {
-  const totalParticipants = challenges.reduce((s, c) => s + (c.participants || 0), 0);
+  const fetchStats = useServerFn(getCorpStats);
+  const [stats, setStats] = useState<CorpStats | null>(null);
+  useEffect(() => {
+    let mounted = true;
+    fetchStats()
+      .then((s) => { if (mounted) setStats(s); })
+      .catch(() => { /* silent — fallback to local */ });
+    return () => { mounted = false; };
+  }, [fetchStats]);
+
+  const localParticipants = challenges.reduce((s, c) => s + (c.participants || 0), 0);
+  const companiesCount = Math.max(stats?.companies ?? 0, companies.length);
+  const activeCount = Math.max(stats?.activeChallenges ?? 0, challenges.filter((c) => c.status === "ativo").length);
+  const closedCount = Math.max(stats?.closedChallenges ?? 0, challenges.filter((c) => c.status === "encerrado").length);
+  const totalParticipants = Math.max(stats?.totalParticipants ?? 0, localParticipants);
+
   return (
     <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      <StatCard label="Empresas cadastradas" value={companies.length} icon={Building2} />
-      <StatCard label="Desafios ativos" value={challenges.filter((c) => c.status === "ativo").length} icon={ListChecks} />
-      <StatCard label="Desafios encerrados" value={challenges.filter((c) => c.status === "encerrado").length} icon={Archive} />
+      <StatCard label="Empresas cadastradas" value={companiesCount} icon={Building2} />
+      <StatCard label="Desafios ativos" value={activeCount} icon={ListChecks} />
+      <StatCard label="Desafios encerrados" value={closedCount} icon={Archive} />
       <StatCard label="Participações totais" value={totalParticipants.toLocaleString("pt-BR")} icon={BarChart3} />
     </div>
   );
@@ -158,6 +173,7 @@ function DashboardTab({ companies, challenges }: { companies: Company[]; challen
 
 const EMPTY_COMPANY: Company = {
   id: "", razaoSocial: "", nomeFantasia: "", cnpj: "", responsavel: "", email: "", whatsapp: "",
+  cep: "", rua: "", numero: "", complemento: "", bairro: "",
   cidade: "", estado: "", instagram: "", status: "ativa", plano: "gratuito", createdAt: "",
 };
 
