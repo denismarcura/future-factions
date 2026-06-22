@@ -345,6 +345,7 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
         subs,
         prizeName: prizeName.trim() || undefined,
         prizeImg,
+        bannerImg,
       });
 
       if (forCompany) {
@@ -416,11 +417,7 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
     const url = URL.createObjectURL(file);
     const img = new Image();
     img.onload = () => {
-      if (img.width === 500 && img.height === 500) {
-        setPrizeImg(url);
-        return;
-      }
-      // Auto-resize to 500x500 (center-crop to square, then scale)
+      // Auto-resize: center-crop to square, scale to 500x500, compress as JPEG.
       const size = 500;
       const canvas = document.createElement("canvas");
       canvas.width = size;
@@ -433,13 +430,17 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
       const side = Math.min(img.width, img.height);
       const sx = (img.width - side) / 2;
       const sy = (img.height - side) / 2;
+      // Fill with white for transparent PNGs converted to JPEG
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, size, size);
       ctx.drawImage(img, sx, sy, side, side, 0, 0, size, size);
-      const resized = canvas.toDataURL("image/png");
+      // JPEG @ 0.85 keeps quality but drops file size dramatically vs PNG.
+      const resized = canvas.toDataURL("image/jpeg", 0.85);
       setPrizeImg(resized);
       URL.revokeObjectURL(url);
     };
     img.onerror = () => {
-      alert("Não foi possível ler a imagem.");
+      alert("Não foi possível ler a imagem. Tente um arquivo PNG ou JPG.");
       URL.revokeObjectURL(url);
     };
     img.src = url;
@@ -996,6 +997,20 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
             </div>
           </Section>
 
+          {/* Banner personalizado (para todos) */}
+          <Section
+            title="Banner do desafio (opcional)"
+            description="Imagem horizontal exibida no topo do desafio. Recomendado 1600×600px (proporção 8:3) em JPG ou PNG."
+          >
+            <UploadCard
+              label="Banner"
+              hint="JPG/PNG 1600×600px — aparece no topo da página do desafio."
+              image={bannerImg}
+              onChange={setBannerImg}
+              aspect="aspect-[8/3]"
+            />
+          </Section>
+
 
           {/* Missões */}
           <Section
@@ -1016,7 +1031,7 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
               {/* Identidade Visual */}
               <Section
                 title="Identidade visual da empresa"
-                description="Faça upload do logotipo e do banner do desafio. Recomendamos PNG/JPG de alta qualidade."
+                description="Faça upload do logotipo. O banner do desafio fica na seção acima."
               >
                 <div className="grid sm:grid-cols-2 gap-4">
                   <UploadCard
@@ -1025,13 +1040,6 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
                     image={logoImg}
                     onChange={setLogoImg}
                     aspect="aspect-square"
-                  />
-                  <UploadCard
-                    label="Banner personalizado"
-                    hint="JPG/PNG 1600×600px (proporção 8:3)"
-                    image={bannerImg}
-                    onChange={setBannerImg}
-                    aspect="aspect-[8/3]"
                   />
                 </div>
                 <Field label="Nome da empresa (aparece no regulamento)">

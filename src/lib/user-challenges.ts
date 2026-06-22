@@ -1,4 +1,5 @@
 import { USERS, type Prediction, type Category } from "@/lib/mock-data";
+import { detectMatchFromText } from "@/lib/world-cup-matches";
 
 const KEY = "ddp:user-challenges";
 
@@ -11,6 +12,7 @@ export type CreateChallengeInput = {
   subs: { id: string; question: string; options: string[] }[];
   prizeName?: string;
   prizeImg?: string | null;
+  bannerImg?: string | null;
 };
 
 function read(): Prediction[] {
@@ -41,6 +43,14 @@ export function saveUserChallenge(input: CreateChallengeInput): Prediction {
   // The first sub-category drives the visible options on the card.
   const first = input.subs[0];
   const optionLabels = first?.options.filter((o) => o.trim()) ?? ["Sim", "Não"];
+  const subPreds = input.subs
+    .filter((s) => s.question?.trim())
+    .map((s) => ({
+      id: s.id,
+      question: s.question,
+      options: s.options.filter((o) => o && o.trim()),
+    }));
+  const match = detectMatchFromText(input.name) ?? undefined;
   const prediction: Prediction = {
     id: input.id,
     title: input.name,
@@ -52,17 +62,21 @@ export function saveUserChallenge(input: CreateChallengeInput): Prediction {
     createdAt: new Date().toISOString(),
     closesAt: input.endsAt ? new Date(input.endsAt).toISOString() : new Date(Date.now() + 7 * 86400000).toISOString(),
     minTokens: 10,
+    entryFee: 10,
     options: optionLabels.map((label, i) => ({
       id: `o${i}`,
       label,
       pool: 0,
     })),
+    subPredictions: subPreds.length > 1 ? subPreds : undefined,
     bettors: 0,
     comments: 0,
     likes: 0,
     shares: 0,
     tags: ["meu-desafio", input.isOpen ? "aberto" : "privado"],
     hot: true,
+    imageUrl: input.bannerImg ?? input.prizeImg ?? undefined,
+    match,
   };
   const list = read();
   list.unshift(prediction);
