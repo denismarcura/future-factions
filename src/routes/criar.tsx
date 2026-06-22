@@ -1031,7 +1031,7 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
               {/* Identidade Visual */}
               <Section
                 title="Identidade visual da empresa"
-                description="Faça upload do logotipo e do banner do desafio. Recomendamos PNG/JPG de alta qualidade."
+                description="Faça upload do logotipo. O banner do desafio fica na seção acima."
               >
                 <div className="grid sm:grid-cols-2 gap-4">
                   <UploadCard
@@ -1040,13 +1040,6 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
                     image={logoImg}
                     onChange={setLogoImg}
                     aspect="aspect-square"
-                  />
-                  <UploadCard
-                    label="Banner personalizado"
-                    hint="JPG/PNG 1600×600px (proporção 8:3)"
-                    image={bannerImg}
-                    onChange={setBannerImg}
-                    aspect="aspect-[8/3]"
                   />
                 </div>
                 <Field label="Nome da empresa (aparece no regulamento)">
