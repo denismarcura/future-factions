@@ -262,3 +262,46 @@
     inset 0 0 0 1px color-mix(in oklab, var(--primary) 40%, transparent),
     0 0 20px color-mix(in oklab, var(--primary) 35%, transparent);
 }
+
+@utility btn-glass {
+  position: relative;
+  background: color-mix(in oklab, var(--card) 55%, transparent);
+  backdrop-filter: blur(14px) saturate(140%);
+  border: 1px solid color-mix(in oklab, var(--primary) 30%, transparent);
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklab, white 12%, transparent),
+    0 0 18px color-mix(in oklab, var(--primary) 25%, transparent);
+}
+
+@utility btn-neon {
+  animation: neon-pulse 2.6s ease-in-out infinite;
+}
+
+@utility float-soft {
+  animation: float-y 4s ease-in-out infinite;
+}
+
+@utility shine-on-hover {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+@utility shine-on-hover {
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      100deg,
+      transparent 30%,
+      color-mix(in oklab, white 35%, transparent) 50%,
+      transparent 70%
+    );
+    transform: translateX(-120%) skewX(-20deg);
+    pointer-events: none;
+    z-index: 1;
+  }
+  &:hover::after {
+    animation: shine-sweep 0.9s ease-out;
+  }
+}
