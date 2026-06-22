@@ -421,7 +421,7 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
             tiebreaker: tiebreaker || undefined,
             regulation: regulation || undefined,
             inviteRewardText: inviteRewardText || undefined,
-            missions: [missionData.instagram && `Seguir Instagram ${missionData.instagram}`].filter(Boolean) as string[],
+            missions: buildCorporateMissions(missionData, companyName || name),
             endsAt,
           },
         });
