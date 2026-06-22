@@ -1,16 +1,20 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
-  Clock, Users, Flame, Heart, MessageCircle, Share2, Coins, TrendingUp, ArrowLeft, Instagram, Youtube, Facebook, Check, ExternalLink, Loader2,
+  Clock, Users, Flame, Heart, MessageCircle, Share2, Coins, TrendingUp, ArrowLeft, Instagram, Youtube, Facebook, Check, ExternalLink, Loader2, ScrollText, ShieldCheck,
 } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell } from "@/components/layout/AppShell";
 import { formatTokens, getPrediction, PREDICTIONS, type Prediction, timeLeft } from "@/lib/mock-data";
 import { listMissions, listMyClaims, claimMission, type Mission, ACTION_LABEL } from "@/lib/missions";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Button } from "@/components/ui/button";
 
 import { useAuth } from "@/hooks/use-auth";
 import { hasParticipated, saveParticipation } from "@/lib/my-participations";
 import { getTokenBalance } from "@/lib/balance";
+
 
 const PLATFORM_ORDER = ["instagram", "youtube", "facebook", "tiktok"] as const;
 type SeqPlatform = typeof PLATFORM_ORDER[number];
@@ -77,6 +81,11 @@ function PredictionPage() {
   const [confirmed, setConfirmed] = useState(false);
   const [pendingExtra, setPendingExtra] = useState<{ platform: SeqPlatform; sponsor: string } | null>(null);
   const [balance, setBalance] = useState<number | null>(null);
+  const [regOpen, setRegOpen] = useState(false);
+  const [regAccepted, setRegAccepted] = useState<boolean | null>(null);
+  const [regChoice, setRegChoice] = useState<"accept" | "reject" | null>(null);
+  const pendingConfirmRef = useRef<null | (() => void)>(null);
+
 
   useEffect(() => {
     if (hasParticipated(p.id)) setConfirmed(true);
@@ -178,7 +187,7 @@ function PredictionPage() {
 
       {(() => {
 
-        const handleParticipate = () => {
+        const doConfirm = () => {
           if (p.subPredictions) {
             const filled = Object.keys(subAnswers).length;
             if (filled < p.subPredictions.length) {
@@ -220,6 +229,26 @@ function PredictionPage() {
             toast.success(`✅ Aposta de ${amount} TKN em "${sel.label}" confirmada!`);
           }
         };
+
+        const handleParticipate = () => {
+          // Extra rounds (after first confirmation) skip regulamento — already accepted
+          if (confirmed && pendingExtra) { doConfirm(); return; }
+          // Validate basics before opening regulamento
+          if (p.subPredictions) {
+            const filled = Object.keys(subAnswers).length;
+            if (filled < p.subPredictions.length) {
+              toast.error(`Preencha todos os ${p.subPredictions.length} palpites.`);
+              return;
+            }
+          }
+          if (!user) { toast.error("Faça login para participar."); return; }
+          if (regAccepted) { doConfirm(); return; }
+          // Open regulamento for first-time acceptance
+          pendingConfirmRef.current = doConfirm;
+          setRegChoice(null);
+          setRegOpen(true);
+        };
+
 
         return (
       <div className="space-y-6">
@@ -518,6 +547,86 @@ function PredictionPage() {
         );
       })()}
 
+      <Dialog open={regOpen} onOpenChange={setRegOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 font-display">
+              <ScrollText className="h-5 w-5 text-primary" />
+              Regulamento da Promoção
+            </DialogTitle>
+            <DialogDescription>
+              Antes de confirmar seu palpite em <strong>{p.title}</strong>, leia e
+              indique se aceita as regras desta promoção.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="max-h-72 overflow-y-auto rounded-lg border border-border/60 bg-background/40 p-4 text-sm leading-relaxed space-y-3">
+            <p><strong>1. Objeto.</strong> Esta promoção é um desafio de palpites
+            organizado em <em>{p.title}</em>, na categoria {p.category}, com
+            encerramento em {new Date(p.closesAt).toLocaleString("pt-BR")}.</p>
+            <p><strong>2. Participação.</strong> Para participar, o usuário deve
+            estar cadastrado, possuir saldo suficiente em tokens e enviar seu
+            palpite antes do encerramento.</p>
+            <p><strong>3. Prêmios.</strong> Os prêmios anunciados são de
+            responsabilidade do organizador do desafio. A plataforma Desafio dos
+            Palpites atua exclusivamente como intermediadora tecnológica.</p>
+            <p><strong>4. Apuração.</strong> O resultado é apurado conforme o
+            evento oficial. Em caso de empate em pontos, aplicam-se os critérios
+            de desempate definidos pelo organizador.</p>
+            <p><strong>5. Conduta.</strong> Fraudes, múltiplas contas ou
+            tentativas de manipulação resultam em desclassificação e perda dos
+            tokens utilizados.</p>
+            <p><strong>6. LGPD.</strong> Os dados pessoais são tratados conforme
+            a Política de Privacidade da plataforma.</p>
+            <p><strong>7. Aceite.</strong> Ao marcar “Aceito”, o participante
+            declara ter lido e concordado integralmente com este regulamento.</p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3 pt-2">
+            <label className={`flex items-start gap-2 rounded-lg border p-3 cursor-pointer transition ${regChoice === "accept" ? "border-emerald-500 bg-emerald-500/10" : "border-border/60 hover:border-emerald-500/40"}`}>
+              <Checkbox
+                checked={regChoice === "accept"}
+                onCheckedChange={(v) => setRegChoice(v ? "accept" : null)}
+                className="mt-0.5"
+              />
+              <span className="text-sm font-semibold">Aceito o regulamento</span>
+            </label>
+            <label className={`flex items-start gap-2 rounded-lg border p-3 cursor-pointer transition ${regChoice === "reject" ? "border-destructive bg-destructive/10" : "border-border/60 hover:border-destructive/40"}`}>
+              <Checkbox
+                checked={regChoice === "reject"}
+                onCheckedChange={(v) => setRegChoice(v ? "reject" : null)}
+                className="mt-0.5"
+              />
+              <span className="text-sm font-semibold">Não aceito</span>
+            </label>
+          </div>
+
+          <DialogFooter className="gap-2 sm:gap-2">
+            <Button variant="outline" onClick={() => setRegOpen(false)}>Cancelar</Button>
+            <Button
+              disabled={regChoice === null}
+              onClick={() => {
+                if (regChoice === "accept") {
+                  setRegAccepted(true);
+                  setRegOpen(false);
+                  const fn = pendingConfirmRef.current;
+                  pendingConfirmRef.current = null;
+                  if (fn) fn();
+                } else {
+                  setRegAccepted(false);
+                  setRegOpen(false);
+                  toast.error("Você precisa aceitar o regulamento para participar.");
+                }
+              }}
+              className="gap-2"
+            >
+              <ShieldCheck className="h-4 w-4" /> Confirmar escolha
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
     </AppShell>
   );
 }
+
