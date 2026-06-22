@@ -1,12 +1,14 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { useAuth } from "@/hooks/use-auth";
 import { prepareSignup } from "@/lib/signup.functions";
+import { savePendingAvatar } from "@/lib/avatar-upload";
 import {
   Loader2, Mail, Lock, User as UserIcon, Phone, AlertCircle, Instagram, ShieldCheck,
+  Camera, FileText, Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
 import logoAsset from "@/assets/logo-desafio.png.asset.json";
@@ -14,6 +16,29 @@ import logoAsset from "@/assets/logo-desafio.png.asset.json";
 export const Route = createFileRoute("/auth")({
   component: AuthPage,
 });
+
+function formatCPF(v: string) {
+  const d = v.replace(/\D/g, "").slice(0, 11);
+  return d
+    .replace(/(\d{3})(\d)/, "$1.$2")
+    .replace(/(\d{3})(\d)/, "$1.$2")
+    .replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+}
+
+function isValidCPF(v: string): boolean {
+  const c = v.replace(/\D/g, "");
+  if (c.length !== 11 || /^(\d)\1{10}$/.test(c)) return false;
+  let s = 0;
+  for (let i = 0; i < 9; i++) s += parseInt(c[i]) * (10 - i);
+  let d1 = 11 - (s % 11);
+  if (d1 >= 10) d1 = 0;
+  if (d1 !== parseInt(c[9])) return false;
+  s = 0;
+  for (let i = 0; i < 10; i++) s += parseInt(c[i]) * (11 - i);
+  let d2 = 11 - (s % 11);
+  if (d2 >= 10) d2 = 0;
+  return d2 === parseInt(c[10]);
+}
 
 function AuthPage() {
   const navigate = useNavigate();
@@ -25,6 +50,9 @@ function AuthPage() {
   const [name, setName] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
   const [instagram, setInstagram] = useState("");
+  const [cpf, setCpf] = useState("");
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [marketing, setMarketing] = useState(false);
   const [busy, setBusy] = useState(false);
