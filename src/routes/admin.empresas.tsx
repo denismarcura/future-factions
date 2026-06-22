@@ -251,19 +251,71 @@ function TextField({ label, value, onChange, ...rest }: { label: string; value: 
 
 function CompanyForm({ value, onSave, onCancel }: { value: Company; onSave: (c: Company) => void; onCancel: () => void }) {
   const [c, setC] = useState<Company>(value);
-  const set = (k: keyof Company) => (v: string) => setC({ ...c, [k]: v });
+  const [cepLoading, setCepLoading] = useState(false);
+  const set = (k: keyof Company) => (v: string) => setC((prev) => ({ ...prev, [k]: v }));
+
+  async function lookupCep(rawCep: string) {
+    const cep = rawCep.replace(/\D/g, "");
+    if (cep.length !== 8) return;
+    setCepLoading(true);
+    try {
+      const res = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+      const data = await res.json();
+      if (data.erro) { toast.error("CEP não encontrado. Verifique e tente novamente."); return; }
+      setC((prev) => ({
+        ...prev,
+        rua: data.logradouro || prev.rua,
+        bairro: data.bairro || prev.bairro,
+        cidade: data.localidade || prev.cidade,
+        estado: data.uf || prev.estado,
+      }));
+      toast.success("Endereço preenchido automaticamente");
+    } catch {
+      toast.error("Não foi possível consultar o CEP no momento");
+    } finally {
+      setCepLoading(false);
+    }
+  }
+
   return (
     <div className="glass-card rounded-2xl p-5 space-y-4 border border-primary/30">
       <div className="grid sm:grid-cols-2 gap-3">
         <TextField label="Razão social" value={c.razaoSocial} onChange={set("razaoSocial")} />
         <TextField label="Nome fantasia *" value={c.nomeFantasia} onChange={set("nomeFantasia")} />
         <TextField label="CNPJ" value={c.cnpj} onChange={set("cnpj")} />
-        <TextField label="Responsável" value={c.responsavel} onChange={set("responsavel")} />
-        <TextField label="E-mail" value={c.email} onChange={set("email")} type="email" />
+        <TextField label="Responsável *" value={c.responsavel} onChange={set("responsavel")} />
+        <TextField label="E-mail *" value={c.email} onChange={set("email")} type="email" />
         <TextField label="WhatsApp" value={c.whatsapp} onChange={set("whatsapp")} />
-        <TextField label="Cidade" value={c.cidade} onChange={set("cidade")} />
-        <TextField label="Estado" value={c.estado} onChange={set("estado")} maxLength={2} />
         <TextField label="Instagram" value={c.instagram} onChange={set("instagram")} placeholder="@empresa" />
+      </div>
+
+      <div className="pt-2 border-t border-border/40">
+        <h4 className="text-xs font-bold uppercase tracking-wider text-gold mb-3">Endereço</h4>
+        <div className="grid sm:grid-cols-2 gap-3">
+          <label className="block text-sm sm:col-span-1">
+            <span className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">CEP</span>
+            <div className="relative mt-1">
+              <input
+                value={c.cep}
+                onChange={(e) => { const v = e.target.value; set("cep")(v); if (v.replace(/\D/g, "").length === 8) lookupCep(v); }}
+                onBlur={(e) => lookupCep(e.target.value)}
+                maxLength={9}
+                placeholder="00000-000"
+                className="w-full h-10 px-3 rounded-lg bg-card border border-border/60 focus:border-primary outline-none text-sm"
+              />
+              {cepLoading && <Loader2 className="absolute right-3 top-3 h-4 w-4 animate-spin text-primary" />}
+            </div>
+          </label>
+          <TextField label="Rua" value={c.rua} onChange={set("rua")} />
+          <TextField label="Número" value={c.numero} onChange={set("numero")} placeholder="123" />
+          <TextField label="Complemento" value={c.complemento} onChange={set("complemento")} placeholder="Sala 1 / Bloco A" />
+          <TextField label="Bairro" value={c.bairro} onChange={set("bairro")} />
+          <TextField label="Cidade" value={c.cidade} onChange={set("cidade")} />
+          <TextField label="Estado" value={c.estado} onChange={set("estado")} maxLength={2} placeholder="UF" />
+        </div>
+      </div>
+
+      <div className="grid sm:grid-cols-2 gap-3">
         <label className="block text-sm">
           <span className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Plano</span>
           <select value={c.plano} onChange={(e) => setC({ ...c, plano: e.target.value as Company["plano"] })}
@@ -279,6 +331,7 @@ function CompanyForm({ value, onSave, onCancel }: { value: Company; onSave: (c: 
           </select>
         </label>
       </div>
+
       <div className="flex gap-2 justify-end">
         <button onClick={onCancel} className="h-10 px-4 rounded-full bg-card text-sm font-bold flex items-center gap-2"><X className="h-4 w-4" /> Cancelar</button>
         <button onClick={() => onSave(c)} className="h-10 px-4 rounded-full bg-gradient-brand text-primary-foreground text-sm font-bold flex items-center gap-2 shadow-glow"><Save className="h-4 w-4" /> Salvar</button>
