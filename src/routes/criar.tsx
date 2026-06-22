@@ -678,17 +678,15 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
             )}
           </Section>
 
-          {/* Sub-categorias */}
           <Section
-            title={`Sub-categorias de palpites (${subs.length}/${MAX_SUBS})`}
-            description={`Até ${MAX_SUBS} perguntas, cada uma com até ${MAX_OPTIONS} opções de resposta. Cada acerto vale ${REWARD_PER_HIT} tokens.`}
+            title={`Sub-categorias de palpites (${subs.length})`}
+            description={`Crie quantas perguntas quiser, cada uma com até ${MAX_OPTIONS} opções. Cada acerto vale ${REWARD_PER_HIT} tokens.`}
 
             action={
               <button
                 type="button"
                 onClick={addSub}
-                disabled={subs.length >= MAX_SUBS}
-                className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg bg-primary/15 text-primary border border-primary/30 text-sm font-semibold hover:bg-primary/20 disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg bg-primary/15 text-primary border border-primary/30 text-sm font-semibold hover:bg-primary/20"
               >
                 <Plus className="h-4 w-4" /> Nova sub-categoria
               </button>
@@ -700,36 +698,45 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
                 <Sparkles className="h-4 w-4 text-primary" />
                 <span className="text-sm font-bold">Gerar palpites com a IA</span>
               </div>
-              <div className="flex flex-wrap items-end gap-2">
+              <div className="grid gap-2 sm:grid-cols-[7rem_1fr_auto] items-end">
                 <label className="flex flex-col gap-1">
                   <span className="text-[11px] text-muted-foreground">Quantos palpites</span>
-                  <select
+                  <input
+                    type="number"
+                    min={1}
                     value={inlineAiCount}
-                    onChange={(e) => setInlineAiCount(Number(e.target.value))}
-                    className="input h-10 w-24"
-                  >
-                    {Array.from({ length: 10 }, (_, i) => i + 1).map(n => (
-                      <option key={n} value={n}>{n}</option>
-                    ))}
-                  </select>
+                    onChange={(e) => setInlineAiCount(Math.max(1, Number(e.target.value) || 1))}
+                    className="input h-10 w-full"
+                  />
+                </label>
+                <label className="flex flex-col gap-1">
+                  <span className="text-[11px] text-muted-foreground">Sobre o que devem ser os palpites?</span>
+                  <input
+                    type="text"
+                    value={inlineAiFocus}
+                    onChange={(e) => setInlineAiFocus(e.target.value)}
+                    placeholder='Ex.: "placar do jogo, primeiro gol, cartões…"'
+                    className="input h-10 w-full"
+                  />
                 </label>
                 <button
                   type="button"
                   onClick={handleInlineGenerate}
-                  disabled={inlineAiLoading || subs.length >= MAX_SUBS}
+                  disabled={inlineAiLoading}
                   className="inline-flex items-center gap-2 h-10 px-4 rounded-lg bg-primary text-primary-foreground text-sm font-bold hover:opacity-90 disabled:opacity-50"
                 >
                   {inlineAiLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4" />}
                   {inlineAiLoading ? "Gerando…" : "Gerar com IA"}
                 </button>
-                <span className="text-[11px] text-muted-foreground">
-                  Usa o tema, categoria e prêmio já preenchidos.
-                </span>
               </div>
+              <p className="mt-2 text-[11px] text-muted-foreground">
+                Usa o tema, categoria, prêmio e o foco que você descrever acima.
+              </p>
               {inlineAiError && (
                 <div className="mt-2 text-xs text-destructive">{inlineAiError}</div>
               )}
             </div>
+
 
             {hasBrazilMatch && (
               <div className="mb-4 rounded-xl border border-gold/40 bg-gold/10 p-3 flex items-start gap-2.5">
