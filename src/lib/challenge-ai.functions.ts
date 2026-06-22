@@ -53,6 +53,11 @@ Categoria: ${data.category || "Geral"}${data.subcategory ? `\nSub-categoria: ${d
 ${data.userSubs?.length ? `Palpites já criados pelo usuário (mantenha-os iguais):\n${userSubsText}\n` : ""}
 Gere no total ${data.count} palpites. ${remaining > 0 ? `Crie mais ${remaining} palpites complementares.` : "Use apenas os palpites do usuário."} Cada palpite deve ter pergunta curta e 2 ou 3 opções mutuamente exclusivas. Crie também um NOME curto (até 80 caracteres) e chamativo para o desafio.
 
+REGRAS IMPORTANTES para opções numéricas:
+- NUNCA use valores decimais (proibido: "2.5", "1.5", "0.5", "Mais de 2.5", "Menos de 2.5").
+- Para "total de gols", use SEMPRE números inteiros como opções (ex.: "1 gol", "2 gols", "3 gols", "4 ou mais"). Se for usar faixa, use inteiros: "0 a 1", "2 a 3", "4 ou mais".
+- Para qualquer pergunta de quantidade (gols, escanteios, cartões, pontos), use apenas inteiros.
+
 Retorne APENAS um JSON válido (sem markdown, sem comentários) no formato exato:
 {"name":"Nome curto","subs":[{"question":"Pergunta?","options":["A","B"]}, ...]}`;
 
