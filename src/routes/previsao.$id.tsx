@@ -7,7 +7,7 @@ import {
 import { toast } from "sonner";
 import { AppShell } from "@/components/layout/AppShell";
 import { formatTokens, getPrediction, PREDICTIONS, USERS, type Prediction, type Category, timeLeft } from "@/lib/mock-data";
-import { listMyClaims, claimMission, ACTION_LABEL } from "@/lib/missions";
+import { listMissions, listMyClaims, claimMission, type Mission, ACTION_LABEL } from "@/lib/missions";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
@@ -61,6 +61,7 @@ function corpToPrediction(c: CorpChallengeRecord): Prediction {
 
 const PLATFORM_ORDER = ["instagram", "youtube", "facebook", "tiktok"] as const;
 type SeqPlatform = typeof PLATFORM_ORDER[number];
+type PageMission = (Mission | CorporateMission) & { platform: SeqPlatform };
 
 const PLATFORM_THEME: Record<SeqPlatform, { label: string; gradient: string; color: string; Icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }> }> = {
   instagram: { label: "Instagram", gradient: "linear-gradient(135deg, #E1306C, #833AB4)", color: "#E1306C", Icon: Instagram },
@@ -176,7 +177,7 @@ function PredictionInner({ p }: { p: Prediction }) {
   const [selected, setSelected] = useState(p.options[0].id);
   const [amount, setAmount] = useState(p.entryFee ?? p.minTokens);
   const [subAnswers, setSubAnswers] = useState<Record<string, string>>({});
-  const [missionQueue, setMissionQueue] = useState<Mission[]>([]);
+  const [missionQueue, setMissionQueue] = useState<PageMission[]>([]);
   const [missionStep, setMissionStep] = useState(0);
   const [missionStatus, setMissionStatus] = useState<"idle" | "verifying" | "done">("idle");
   const [extraPalpites, setExtraPalpites] = useState<{ platform: SeqPlatform; sponsor: string; answers: Record<string, string> }[]>([]);
@@ -207,15 +208,18 @@ function PredictionInner({ p }: { p: Prediction }) {
   useEffect(() => {
     (async () => {
       try {
-        // Load all follow/subscribe missions ordered by platform: instagram → youtube → facebook → tiktok
-        const buckets = await Promise.all(
-          PLATFORM_ORDER.map((pl) =>
-            listMissions({ platform: pl, activeOnly: true })
-              .then((arr) => arr.filter((m) => m.action_type === "follow" || m.action_type === "subscribe"))
-              .catch(() => [] as Mission[]),
-          ),
-        );
-        const queue: Mission[] = buckets.flat();
+        const ownMissions = (p.corporateMissions ?? [])
+          .filter((m) => PLATFORM_ORDER.includes(m.platform as SeqPlatform) && m.link?.trim())
+          .map((m) => ({ ...m, platform: m.platform as SeqPlatform }));
+        const queue: PageMission[] = ownMissions.length
+          ? PLATFORM_ORDER.flatMap((pl) => ownMissions.filter((m) => m.platform === pl))
+          : (await Promise.all(
+              PLATFORM_ORDER.map((pl) =>
+                listMissions({ platform: pl, activeOnly: true })
+                  .then((arr) => arr.filter((m) => m.action_type === "follow" || m.action_type === "subscribe") as PageMission[])
+                  .catch(() => [] as PageMission[]),
+              ),
+            )).flat();
         setMissionQueue(queue);
 
         if (user && queue.length) {
@@ -224,7 +228,7 @@ function PredictionInner({ p }: { p: Prediction }) {
           let step = 0;
           for (const m of queue) {
             if (claims.some((c) => c.mission_id === m.id)) {
-              done.push({ platform: m.platform as SeqPlatform, sponsor: m.sponsor_name, answers: {} });
+              done.push({ platform: m.platform, sponsor: "sponsor_name" in m ? m.sponsor_name : m.sponsorName, answers: {} });
               step++;
             } else break;
           }
