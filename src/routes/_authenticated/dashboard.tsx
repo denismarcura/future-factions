@@ -426,6 +426,14 @@ function ProfileEditor({
   const [instagram, setInstagram] = useState("");
   const [cpf, setCpf] = useState("");
   const [avatar, setAvatar] = useState("");
+  const [cep, setCep] = useState("");
+  const [endereco, setEndereco] = useState("");
+  const [numero, setNumero] = useState("");
+  const [complemento, setComplemento] = useState("");
+  const [bairro, setBairro] = useState("");
+  const [cidade, setCidade] = useState("");
+  const [estado, setEstado] = useState("");
+  const [cepLoading, setCepLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
 
@@ -435,8 +443,37 @@ function ProfileEditor({
     setInstagram(profile?.instagram ?? "");
     setCpf(profile?.cpf ? formatCPFView(profile.cpf) : "");
     setAvatar(profile?.avatar_url ?? "");
+    setCep(profile?.cep ? formatCEPView(profile.cep) : "");
+    setEndereco(profile?.endereco ?? "");
+    setNumero(profile?.numero ?? "");
+    setComplemento(profile?.complemento ?? "");
+    setBairro(profile?.bairro ?? "");
+    setCidade(profile?.cidade ?? "");
+    setEstado(profile?.estado ?? "");
     if (isProfileIncomplete(profile)) setEditing(true);
   }, [profile]);
+
+  async function lookupCep(rawCep: string) {
+    const digits = rawCep.replace(/\D/g, "");
+    if (digits.length !== 8) return;
+    setCepLoading(true);
+    try {
+      const res = await fetch(`https://viacep.com.br/ws/${digits}/json/`);
+      const data = await res.json();
+      if (data?.erro) {
+        toast.error("CEP não encontrado");
+        return;
+      }
+      setEndereco(data.logradouro ?? "");
+      setBairro(data.bairro ?? "");
+      setCidade(data.localidade ?? "");
+      setEstado(data.uf ?? "");
+    } catch {
+      toast.error("Não foi possível buscar o CEP");
+    } finally {
+      setCepLoading(false);
+    }
+  }
 
   if (!profile) return null;
 
