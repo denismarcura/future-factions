@@ -60,6 +60,7 @@ function corpToPrediction(c: CorpChallengeRecord): Prediction {
 
 
 const PLATFORM_ORDER = ["instagram", "youtube", "facebook", "tiktok", "google", "twitter", "linkedin"] as const;
+const CATALOG_PLATFORM_ORDER = ["instagram", "youtube", "facebook", "tiktok"] as const;
 type SeqPlatform = typeof PLATFORM_ORDER[number];
 type PageMission = (Mission | CorporateMission) & { platform: SeqPlatform };
 
@@ -225,7 +226,7 @@ function PredictionInner({ p }: { p: Prediction }) {
         const queue: PageMission[] = ownMissions.length
           ? PLATFORM_ORDER.flatMap((pl) => ownMissions.filter((m) => m.platform === pl))
           : (await Promise.all(
-              PLATFORM_ORDER.map((pl) =>
+              CATALOG_PLATFORM_ORDER.map((pl) =>
                 listMissions({ platform: pl, activeOnly: true })
                   .then((arr) => arr.filter((m) => m.action_type === "follow" || m.action_type === "subscribe") as PageMission[])
                   .catch(() => [] as PageMission[]),
