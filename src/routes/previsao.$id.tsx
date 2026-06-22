@@ -104,8 +104,21 @@ function isCatalogMission(m: PageMission): m is Mission & { platform: SeqPlatfor
   return "sponsor_name" in m;
 }
 
-function getLocalMissionClaimKey(challengeId: string, missionId: string) {
-  return `ddp:corp-mission:${challengeId}:${missionId}`;
+function normalizeMissionIdentityPart(value: string) {
+  return value.trim().toLowerCase().replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "");
+}
+
+function getMissionIdentity(mission: Pick<PageMission, "platform" | "link" | "title">) {
+  const link = mission.link ? normalizeMissionIdentityPart(mission.link) : normalizeMissionIdentityPart(mission.title);
+  return `${mission.platform}:${link}`;
+}
+
+function getLocalMissionClaimKey(userId: string, mission: PageMission) {
+  return `ddp:mission-done:${userId}:${getMissionIdentity(mission)}`;
+}
+
+function getLocalMissionClaimKeys(userId: string, challengeId: string, mission: PageMission) {
+  return [getLocalMissionClaimKey(userId, mission), `ddp:corp-mission:${challengeId}:${mission.id}`];
 }
 
 const PLATFORM_THEME: Record<SeqPlatform, { label: string; gradient: string; color: string; Icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }> }> = {
