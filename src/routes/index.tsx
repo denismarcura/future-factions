@@ -83,64 +83,65 @@ function Feed() {
   return (
     <AppShell>
       {/* Hero banner — focada em conversão */}
-      <section className="relative overflow-hidden rounded-3xl border border-primary/30 glass-card p-6 sm:p-10 mb-8 text-center">
+      <section className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-primary/30 glass-card p-4 sm:p-10 mb-5 sm:mb-8 text-center">
         <div className="absolute -top-24 -right-20 h-80 w-80 rounded-full bg-primary/30 blur-3xl" />
         <div className="absolute -bottom-24 -left-10 h-72 w-72 rounded-full bg-gold/20 blur-3xl" />
 
         <div className="relative max-w-3xl mx-auto">
-          <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/15 text-primary text-xs font-bold border border-primary/30">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/15 text-primary text-[10px] sm:text-xs font-bold border border-primary/30">
             <Flame className="h-3 w-3" /> 100% GRATUITO · GANHE PRÊMIOS REAIS
           </span>
 
-          <h1 className="mt-5 font-display text-4xl sm:text-6xl lg:text-7xl font-black leading-[0.95]">
+          <h1 className="mt-3 sm:mt-5 font-display text-2xl sm:text-6xl lg:text-7xl font-black leading-[1] sm:leading-[0.95]">
             <span className="text-gradient-brand">Ganhe Tokens</span><br />
             <span className="text-gradient-gold">e Troque por Prêmios Reais</span>
           </h1>
 
-          <p className="mt-4 text-base sm:text-lg text-muted-foreground max-w-xl mx-auto">
-            Participe gratuitamente de desafios, acumule Tokens e troque por prêmios incríveis.
+          <p className="mt-2 sm:mt-4 text-xs sm:text-lg text-muted-foreground max-w-xl mx-auto">
+            Participe gratuitamente, acumule Tokens e troque por prêmios incríveis.
           </p>
 
           {/* Benefícios */}
-          <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-2xl mx-auto">
+          <div className="mt-4 sm:mt-6 grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 max-w-2xl mx-auto">
             {[
-              { icon: TrendingUp, text: "Mais de 100 desafios ativos" },
+              { icon: TrendingUp, text: "100+ desafios ativos" },
               { icon: Sparkles, text: "Totalmente gratuito" },
               { icon: Trophy, text: "Ranking nacional" },
-              { icon: Users, text: "Convide amigos e ganhe mais tokens" },
+              { icon: Users, text: "Convide e ganhe tokens" },
             ].map((item) => (
-              <div key={item.text} className="flex items-center gap-2 text-left rounded-xl bg-background/40 border border-border/60 px-3 py-2.5">
-                <item.icon className="h-4 w-4 text-primary shrink-0" />
-                <span className="text-xs font-bold text-foreground">{item.text}</span>
+              <div key={item.text} className="flex items-center gap-1.5 sm:gap-2 text-left rounded-lg sm:rounded-xl bg-background/40 border border-border/60 px-2 sm:px-3 py-1.5 sm:py-2.5">
+                <item.icon className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary shrink-0" />
+                <span className="text-[10px] sm:text-xs font-bold text-foreground leading-tight">{item.text}</span>
               </div>
             ))}
           </div>
 
           {/* Botão gigante */}
-          <div className="mt-8">
+          <div className="mt-5 sm:mt-8">
             <Link
               to="/desafios"
-              className="inline-flex items-center justify-center gap-2 h-14 sm:h-16 px-8 sm:px-10 rounded-full bg-gradient-brand text-primary-foreground text-lg sm:text-xl font-black uppercase tracking-wide shadow-glow hover:scale-[1.03] transition"
+              className="inline-flex items-center justify-center gap-2 h-12 sm:h-16 px-7 sm:px-10 rounded-full bg-gradient-brand text-primary-foreground text-base sm:text-xl font-black uppercase tracking-wide shadow-glow hover:scale-[1.03] transition"
             >
               COMEÇAR AGORA
             </Link>
           </div>
 
           {/* Stats */}
-          <div className="mt-8 grid grid-cols-3 gap-3 max-w-md mx-auto">
+          <div className="mt-5 sm:mt-8 grid grid-cols-3 gap-2 sm:gap-3 max-w-md mx-auto">
             {[
               { k: "+1.000", v: "Tokens grátis", icon: Coins },
               { k: "150+", v: "Desafios ativos", icon: TrendingUp },
               { k: "50+", v: "Prêmios reais", icon: Gift },
             ].map((s) => (
-              <div key={s.v} className="rounded-xl bg-background/40 border border-border/60 px-3 py-2.5">
-                <div className="font-display text-lg font-black text-gradient-brand">{s.k}</div>
-                <div className="text-[11px] uppercase tracking-wider text-muted-foreground">{s.v}</div>
+              <div key={s.v} className="rounded-lg sm:rounded-xl bg-background/40 border border-border/60 px-2 sm:px-3 py-1.5 sm:py-2.5">
+                <div className="font-display text-sm sm:text-lg font-black text-gradient-brand">{s.k}</div>
+                <div className="text-[9px] sm:text-[11px] uppercase tracking-wider text-muted-foreground leading-tight">{s.v}</div>
               </div>
             ))}
           </div>
         </div>
       </section>
+
 
       {/* Banners promocionais */}
       <section className="mb-8">
