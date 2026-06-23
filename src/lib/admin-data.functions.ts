@@ -20,6 +20,8 @@ export type AdminCorpChallenge = {
   title: string;
   companyName: string | null;
   prizeName: string | null;
+  category: string | null;
+  subcategory: string | null;
   status: string;
   participants: number;
   endsAt: string | null;
@@ -67,7 +69,7 @@ export const listAllCorpChallengesAdmin = createServerFn({ method: "GET" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data, error } = await supabaseAdmin
       .from("corporate_challenges")
-      .select("id, title, company_name, prize_name, status, participants, ends_at, created_at")
+      .select("id, title, company_name, prize_name, category, subcategory, status, participants, ends_at, created_at")
       .order("created_at", { ascending: false })
       .limit(500);
     if (error) throw new Error(error.message);
@@ -76,6 +78,8 @@ export const listAllCorpChallengesAdmin = createServerFn({ method: "GET" })
       title: r.title,
       companyName: r.company_name,
       prizeName: r.prize_name,
+      category: r.category,
+      subcategory: r.subcategory,
       status: r.status,
       participants: r.participants ?? 0,
       endsAt: r.ends_at,

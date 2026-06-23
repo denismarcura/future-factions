@@ -125,7 +125,7 @@ export const getAdminDashboard = createServerFn({ method: "GET" })
       sb.from("profiles").select("id", { count: "exact", head: true }),
       sb.from("profiles").select("created_at").gte("created_at", since30),
       sb.from("challenges").select("id, title, closes_at"),
-      sb.from("corporate_challenges").select("company_name, status"),
+      sb.from("corporate_challenges").select("company_name, status, ends_at"),
       sb.from("palpites").select("user_id, challenge_id, created_at").gte("created_at", since30),
       sb.from("palpites").select("id", { count: "exact", head: true }),
       sb.from("token_transactions").select("delta, created_at").gte("created_at", since30),
@@ -137,15 +137,19 @@ export const getAdminDashboard = createServerFn({ method: "GET" })
     const newUsers30d = signups.length;
 
     const challenges = challengesAll.data ?? [];
+    const corp = corpAll.data ?? [];
     const now = Date.now();
-    const activeChallenges = challenges.filter(
+    const activeReg = challenges.filter(
       (c) => !c.closes_at || new Date(c.closes_at).getTime() > now,
     ).length;
-    const closedChallenges = challenges.length - activeChallenges;
+    const activeCorp = corp.filter(
+      (c: any) => c.status === "ativo" && (!c.ends_at || new Date(c.ends_at).getTime() > now),
+    ).length;
+    const activeChallenges = activeReg + activeCorp;
+    const closedChallenges = (challenges.length - activeReg) + (corp.length - activeCorp);
 
-    const corp = corpAll.data ?? [];
     const companies = new Set(
-      corp.map((r) => (r.company_name ?? "").trim().toLowerCase()).filter(Boolean),
+      corp.map((r: any) => (r.company_name ?? "").trim().toLowerCase()).filter(Boolean),
     ).size;
 
     const palpRecent = (palpitesRecent.data ?? []).map((r) => ({
