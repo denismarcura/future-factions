@@ -157,7 +157,7 @@ function StatCard({ label, value, icon: Icon }: { label: string; value: string |
   );
 }
 
-function DashboardTab({ companies, challenges }: { companies: Company[]; challenges: CorpChallenge[] }) {
+function DashboardTab({ companies, challenges, dbChallenges }: { companies: Company[]; challenges: CorpChallenge[]; dbChallenges: AdminCorpChallenge[] }) {
   const fetchStats = useServerFn(getCorpStats);
   const [stats, setStats] = useState<CorpStats | null>(null);
   useEffect(() => {
