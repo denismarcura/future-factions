@@ -6,7 +6,7 @@ import {
   Users, KeyRound, Mail, LayoutDashboard, Shield, ListChecks, Sparkles, Target,
   Loader2, Lock, FolderTree, Image as ImageIcon, Building2, UserPlus, Gift,
   Sparkle, Store, Trophy, Bell, Coins, FileBarChart, ShieldAlert, ChevronLeft,
-  ChevronRight, Trophy as TrophyIcon, Menu, Instagram,
+  ChevronRight, Trophy as TrophyIcon, Menu, Instagram, Newspaper,
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { checkIsAdmin, claimAdminIfNone } from "@/lib/admin.functions";
@@ -42,6 +42,7 @@ const ADMIN_GROUPS: NavGroup[] = [
     label: "Conteúdo",
     items: [
       { to: "/admin/desafios", label: "Desafios", icon: ListChecks },
+      { to: "/admin/noticias", label: "Notícias", icon: Newspaper },
       { to: "/empresa/criar", label: "Cadastrar Desafio Empresa", icon: Building2 },
       { to: "/admin/premios", label: "Cadastrar Prêmios", icon: Gift },
       { to: "/admin/categorias", label: "Categorias", icon: FolderTree },
