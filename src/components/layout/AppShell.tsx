@@ -91,7 +91,7 @@ function TokenPill() {
   );
 }
 
-export function AppShell({ children }: { children: ReactNode }) {
+export function AppShell({ children, hidePrimarySidebar = false }: { children: ReactNode; hidePrimarySidebar?: boolean }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { user } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -257,37 +257,38 @@ export function AppShell({ children }: { children: ReactNode }) {
 
 
       <div className="max-w-7xl mx-auto px-4 pb-24 md:pb-12 md:flex md:gap-8 pt-6">
-        <aside className="hidden md:block w-60 shrink-0">
-          <nav className="sticky top-24 space-y-1">
-            {NAV.filter((n) => !n.adminOnly || (user?.email && ADMIN_EMAILS.includes(user.email.toLowerCase()))).map(({ to, label, icon: Icon }) => {
-              const active = to === "/" ? pathname === "/" : pathname.startsWith(to);
-              return (
-                <Link
-                  key={to}
-                  to={to}
-                  className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition ${
-                    active
-                      ? "bg-gradient-brand text-primary-foreground shadow-glow"
-                      : "text-muted-foreground hover:text-foreground hover:bg-card"
-                  }`}
-                >
-                  <Icon className="h-4 w-4" />
-                  {label}
-                </Link>
-              );
-            })}
-            <div className="mt-6 p-4 rounded-2xl glass-card">
-              <div className="flex items-center gap-2 text-xs uppercase tracking-wider text-gold font-bold">
-                <Flame className="h-4 w-4" /> Profeta da Copa
+        {!hidePrimarySidebar && (
+          <aside className="hidden md:block w-60 shrink-0">
+            <nav className="sticky top-24 space-y-1">
+              {NAV.filter((n) => !n.adminOnly || (user?.email && ADMIN_EMAILS.includes(user.email.toLowerCase()))).map(({ to, label, icon: Icon }) => {
+                const active = to === "/" ? pathname === "/" : pathname.startsWith(to);
+                return (
+                  <Link
+                    key={to}
+                    to={to}
+                    className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition ${
+                      active
+                        ? "bg-gradient-brand text-primary-foreground shadow-glow"
+                        : "text-muted-foreground hover:text-foreground hover:bg-card"
+                    }`}
+                  >
+                    <Icon className="h-4 w-4" />
+                    {label}
+                  </Link>
+                );
+              })}
+              <div className="mt-6 p-4 rounded-2xl glass-card">
+                <div className="flex items-center gap-2 text-xs uppercase tracking-wider text-gold font-bold">
+                  <Flame className="h-4 w-4" /> Profeta da Copa
+                </div>
+                <p className="text-xs text-muted-foreground mt-2">
+                  Acerte palpites improváveis e ganhe um selo dourado. Compartilhe com seus amigos.
+                </p>
               </div>
-              <p className="text-xs text-muted-foreground mt-2">
-                Acerte palpites improváveis e ganhe um selo dourado. Compartilhe com seus amigos.
-              </p>
-            </div>
-            <LiveUsersBadge />
-          </nav>
-
-        </aside>
+              <LiveUsersBadge />
+            </nav>
+          </aside>
+        )}
 
         <main className="flex-1 min-w-0">{children}</main>
       </div>

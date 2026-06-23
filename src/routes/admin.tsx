@@ -87,6 +87,7 @@ function AdminLayout() {
   const [claiming, setClaiming] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [showPrimary, setShowPrimary] = useState(false);
 
   useEffect(() => {
     if (loading) return;
@@ -113,7 +114,7 @@ function AdminLayout() {
 
   if (loading || status === "checking") {
     return (
-      <AppShell>
+      <AppShell hidePrimarySidebar>
         <div className="min-h-[40vh] grid place-items-center text-muted-foreground">
           <Loader2 className="h-6 w-6 animate-spin" />
         </div>
@@ -151,24 +152,33 @@ function AdminLayout() {
   const sidebarWidth = collapsed ? "w-[68px]" : "w-[248px]";
 
   return (
-    <AppShell>
-      <div className="lg:hidden mb-4 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="h-9 w-9 rounded-xl bg-gradient-brand grid place-items-center shadow-glow">
-            <Shield className="h-4 w-4 text-primary-foreground" />
-          </div>
-          <div>
-            <h1 className="text-lg font-display font-black leading-tight">Administrativo</h1>
-            <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Painel de controle</p>
-          </div>
-        </div>
+    <AppShell hidePrimarySidebar={!showPrimary}>
+      <div className="mb-4 flex items-center justify-between gap-2">
         <button
-          onClick={() => setMobileOpen(true)}
-          className="h-10 w-10 rounded-xl glass-card grid place-items-center"
-          aria-label="Abrir menu"
+          onClick={() => setShowPrimary((v) => !v)}
+          className="hidden md:inline-flex items-center gap-2 h-10 px-4 rounded-full glass-card border border-border/60 text-sm font-semibold hover:border-primary/60 transition"
         >
-          <Menu className="h-5 w-5" />
+          <Menu className="h-4 w-4" />
+          {showPrimary ? "Ocultar menu principal" : "Abrir menu principal"}
         </button>
+        <div className="lg:hidden flex items-center justify-between flex-1">
+          <div className="flex items-center gap-2">
+            <div className="h-9 w-9 rounded-xl bg-gradient-brand grid place-items-center shadow-glow">
+              <Shield className="h-4 w-4 text-primary-foreground" />
+            </div>
+            <div>
+              <h1 className="text-lg font-display font-black leading-tight">Administrativo</h1>
+              <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Painel de controle</p>
+            </div>
+          </div>
+          <button
+            onClick={() => setMobileOpen(true)}
+            className="h-10 w-10 rounded-xl glass-card grid place-items-center"
+            aria-label="Abrir menu admin"
+          >
+            <Menu className="h-5 w-5" />
+          </button>
+        </div>
       </div>
 
       <div className="flex gap-6">
