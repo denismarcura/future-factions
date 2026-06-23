@@ -294,6 +294,9 @@ export function AppShell({ children, hidePrimarySidebar = false }: { children: R
         <main className="flex-1 min-w-0">{children}</main>
       </div>
 
+      <Footer />
+
+
       <nav className="md:hidden fixed bottom-0 inset-x-0 z-40 backdrop-blur-xl bg-background/90 border-t border-border/60">
         <div className="grid grid-cols-5">
           {MOBILE_NAV.slice(0, 2).map(({ to, label, icon: Icon }) => {
