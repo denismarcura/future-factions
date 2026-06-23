@@ -18,6 +18,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { hasParticipated, saveParticipation } from "@/lib/my-participations";
 import { getTokenBalance } from "@/lib/balance";
 import { StarRating } from "@/components/StarRating";
+import { NextChallengeBanner } from "@/components/NextChallengeBanner";
 import { getRatings, rateChallenge, getMyRating } from "@/lib/ratings.functions";
 
 function corpToPrediction(c: CorpChallengeRecord): Prediction {
@@ -608,6 +609,10 @@ function PredictionInner({ p }: { p: Prediction }) {
             <span className="ml-auto text-xs inline-flex items-center gap-1.5"><TrendingUp className="h-3.5 w-3.5 text-primary" /> Volume: <span className="text-gold font-semibold">{formatTokens(totalPool)} TKN</span></span>
           </div>
         </article>
+
+        {isClosed && <NextChallengeBanner />}
+
+
 
 
         {/* Banner de missões sequenciais — abaixo do slider */}

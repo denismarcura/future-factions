@@ -17,6 +17,7 @@ import { saveUserChallenge } from "@/lib/user-challenges";
 import { improveTitle } from "@/lib/title-ai.functions";
 import { listCategories, listSubcategories, type ChallengeCategory, type ChallengeSubcategory } from "@/lib/challenge-categories";
 import { generateChallenge, improveDescription, generateWhatsAppInvite, generateTiebreaker, generateRegulation } from "@/lib/challenge-ai.functions";
+import { sendChallengePublishedEmail } from "@/lib/challenge-emails.functions";
 import { generatePrizeImage } from "@/lib/prize-image.functions";
 import { createCorpChallenge, type CorporateMission } from "@/lib/corp-challenges.functions";
 import { uploadCorpAsset, uploadCorpAssets } from "@/lib/corp-storage";
@@ -220,6 +221,7 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
   const generateTiebreakerFn = useServerFn(generateTiebreaker);
   const generateRegulationFn = useServerFn(generateRegulation);
   const createCorpChallengeFn = useServerFn(createCorpChallenge);
+  const sendPublishedEmailFn = useServerFn(sendChallengePublishedEmail);
   const [publishing, setPublishing] = useState(false);
 
   // Company-only assets & rules
@@ -490,6 +492,27 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
 
       setPublished({ id, name: name.trim() });
       window.scrollTo({ top: 0, behavior: "smooth" });
+      // Fire-and-forget: notifica o criador por e-mail com os dados do desafio publicado.
+      try {
+        const origin = typeof window !== "undefined" ? window.location.origin : "";
+        void sendPublishedEmailFn({
+          data: {
+            challengeId: id,
+            challengeName: name.trim(),
+            category: category || undefined,
+            endsAt: endsAt || undefined,
+            prizeName: prizeName.trim() || undefined,
+            visibility: isOpen ? "public" : "private",
+            subs: subs.map((s) => ({
+              question: s.question,
+              options: s.options.filter(Boolean),
+            })),
+            inviteLink: origin ? `${origin}/previsao/${id}` : undefined,
+          },
+        });
+      } catch {
+        // não bloqueia a publicação
+      }
       // Mantemos a tela de sucesso aberta para o usuário copiar o link de convite.
     } catch (err) {
       setErrors([
