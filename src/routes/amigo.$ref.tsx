@@ -83,7 +83,7 @@ function FriendProfile() {
               <div className="text-xs text-muted-foreground">{profile.cidade}{profile.cidade && profile.estado ? " / " : ""}{profile.estado}</div>
             )}
           </div>
-          <Link to="/auth" search={{ ref: profile.id.slice(0, 8) } as any} className="h-12 px-6 rounded-full bg-gradient-brand text-primary-foreground text-sm font-bold flex items-center gap-2 shadow-glow">
+          <Link to="/auth" search={{ ref: refCode, ...(highlightId ? { d: highlightId } : {}) } as any} className="h-12 px-6 rounded-full bg-gradient-brand text-primary-foreground text-sm font-bold flex items-center gap-2 shadow-glow">
             <UserPlus className="h-4 w-4" /> Cadastrar e ganhar 1.000 tokens
           </Link>
         </header>
