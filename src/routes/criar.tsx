@@ -183,6 +183,7 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
   const [generating, setGenerating] = useState(false);
   const [improvingTitle, setImprovingTitle] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
+  const [winnerType, setWinnerType] = useState<"points" | "all" | "">("");
   const [published, setPublished] = useState<null | { id: string; name: string }>(null);
   const [friends, setFriends] = useState<{ id: string; name: string; email: string }[]>([
     { id: uid(), name: "", email: "" },
