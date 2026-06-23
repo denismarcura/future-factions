@@ -1,8 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState, useRef } from "react";
-import { Trophy, Radio, Loader2, Upload, Save, Plus, Trash2, Image as ImageIcon } from "lucide-react";
+import { useState, useRef, useMemo } from "react";
+import { Trophy, Radio, Loader2, Upload, Save, Plus, Trash2, Image as ImageIcon, Search, Mail, X, Copy, Sparkles } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import {
   listWorldCupResults,
@@ -11,6 +11,7 @@ import {
   type WorldCupResultRow,
 } from "@/lib/world-cup-results.functions";
 import { uploadResultImage } from "@/lib/world-cup-results-client";
+import { generateResultEmail } from "@/lib/result-email.functions";
 
 export const Route = createFileRoute("/admin/resultado-jogos")({
   head: () => ({ meta: [{ title: "Resultado dos Jogos — Admin" }] }),
