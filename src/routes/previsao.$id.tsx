@@ -448,7 +448,7 @@ function PredictionInner({ p }: { p: Prediction }) {
         <article className="rounded-2xl bg-card border border-border/60 p-6">
           <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 text-xs sm:flex sm:flex-wrap">
             <span className="px-2 py-0.5 rounded-full bg-primary/15 text-primary font-semibold border border-primary/30">{p.category}</span>
-            <span className="inline-flex items-center gap-1 text-muted-foreground"><Clock className="h-3 w-3" /> {isClosed ? "Apostas encerradas" : `Encerra em ${timeLeft(p.closesAt)}`}</span>
+            <span className="inline-flex items-center gap-1 text-muted-foreground"><Clock className="h-3 w-3" /> {mounted ? (isClosed ? "Apostas encerradas" : `Encerra em ${timeLeft(p.closesAt)}`) : "Carregando..."}</span>
             <span className="inline-flex items-center gap-1 text-muted-foreground"><Users className="h-3 w-3" /> {p.bettors} apostadores</span>
           </div>
 
