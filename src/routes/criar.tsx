@@ -19,6 +19,7 @@ import { listCategories, listSubcategories, type ChallengeCategory, type Challen
 import { generateChallenge, improveDescription, generateWhatsAppInvite, generateTiebreaker, generateRegulation } from "@/lib/challenge-ai.functions";
 import { sendChallengePublishedEmail } from "@/lib/challenge-emails.functions";
 import { generatePrizeImage } from "@/lib/prize-image.functions";
+import { generateBannerFromPrize } from "@/lib/banner-from-prize.functions";
 import { createCorpChallenge, type CorporateMission } from "@/lib/corp-challenges.functions";
 import { uploadCorpAsset, uploadCorpAssets } from "@/lib/corp-storage";
 import logoAsset from "@/assets/logo-desafio.png.asset.json";
