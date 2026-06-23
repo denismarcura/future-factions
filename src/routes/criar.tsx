@@ -467,7 +467,7 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
         data: {
           id,
           title: name.trim(),
-          companyName: forCompany ? companyName.trim() || name.trim() : undefined,
+          companyName: forCompany ? companyName.trim() || undefined : undefined,
           category,
           subcategory: subcategory || undefined,
           description: subs

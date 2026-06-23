@@ -199,5 +199,8 @@ export const listLatestCorpChallenges = createServerFn({ method: "GET" })
       .order("created_at", { ascending: false })
       .limit(data.limit ?? 12);
     if (error) throw new Error(error.message);
-    return (rows ?? []).map((r) => rowToRecord(r as Row));
+    return (rows ?? [])
+      .map((r) => rowToRecord(r as Row))
+      .filter((r) => Boolean(r.companyName) || r.missions.length > 0)
+      .slice(0, data.limit ?? 12);
   });
