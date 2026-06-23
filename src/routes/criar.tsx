@@ -1117,14 +1117,46 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
 
             <div className="text-xs uppercase tracking-wider font-bold text-muted-foreground mb-2">Ou cadastre seu próprio prêmio físico</div>
 
+            {/* Prêmios cadastrados (admin) — múltiplos sorteios */}
+            <div className="rounded-xl border border-gold/40 bg-gold/5 p-4 mb-4">
+              <div className="flex items-start gap-3">
+                <Gift className="h-5 w-5 text-gold mt-0.5 shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <div className="font-bold text-sm">Sortear vários prêmios cadastrados</div>
+                  <div className="text-xs text-muted-foreground mb-2">
+                    Escolha de 1 a 10 prêmios já cadastrados pelo administrador e defina qual prêmio vai para cada posição (1º, 2º, 3º...).
+                  </div>
+                  {pickedPrizes.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mb-2">
+                      {prizeSlots.map((s) => {
+                        const p = pickedPrizes.find((x) => x.id === s.prizeId);
+                        return (
+                          <span key={s.position} className="inline-flex items-center gap-1.5 pl-2 pr-3 py-1 rounded-full bg-background/80 border border-gold/40 text-xs">
+                            <strong>{s.position}º</strong> {p?.name ?? "vazio"}
+                          </span>
+                        );
+                      })}
+                    </div>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => setPrizesPickerOpen(true)}
+                    className="inline-flex items-center gap-2 h-10 px-4 rounded-lg bg-gold/15 text-gold border border-gold/40 text-sm font-bold hover:bg-gold/25"
+                  >
+                    <Gift className="h-4 w-4" /> {pickedPrizes.length > 0 ? "Editar prêmios" : "Selecionar prêmios"}
+                  </button>
+                </div>
+              </div>
+            </div>
+
             <Field label="Prêmio do desafio (opcional)">
               <input value={prizeName} onChange={(e) => setPrizeName(e.target.value)} placeholder="Ex.: 1 Camiseta do Brasil, Caixa de Cerveja…" className="input" />
             </Field>
 
             <div className="grid sm:grid-cols-2 gap-4">
               <div>
-                <div className="text-xs uppercase tracking-wider font-bold text-muted-foreground mb-1.5">Imagem do prêmio (500x500)</div>
-                <div className="rounded-xl border border-dashed border-border/70 bg-background/40 p-4 aspect-square grid place-items-center overflow-hidden">
+                <div className="text-xs uppercase tracking-wider font-bold text-muted-foreground mb-1.5">Imagem do prêmio (proporção 4:5)</div>
+                <div className="rounded-xl border border-dashed border-border/70 bg-background/40 p-4 aspect-[4/5] grid place-items-center overflow-hidden">
                   {prizeImg ? (
                     <img src={prizeImg} alt="Prêmio" className="w-full h-full object-cover rounded-lg" />
                   ) : (
@@ -1135,6 +1167,7 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
                   )}
                 </div>
               </div>
+
 
               <div className="space-y-3">
                 <Field label="Gerar com IA">
