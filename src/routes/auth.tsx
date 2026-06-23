@@ -73,6 +73,13 @@ function AuthPage() {
     if (!loading && user) navigate({ to: "/dashboard" });
   }, [user, loading, navigate]);
 
+  useEffect(() => {
+    if (!search.d) return;
+    (fetchInvite as any)({ data: { id: search.d } })
+      .then((r: any) => { if (r) setInvite(r); })
+      .catch(() => {});
+  }, [search.d, fetchInvite]);
+
   async function handleGoogle() {
     setError(null);
     setBusy(true);
