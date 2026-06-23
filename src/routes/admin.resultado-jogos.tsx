@@ -143,7 +143,7 @@ function Page() {
   );
 }
 
-function ResultRow({ row, onChanged }: { row: WorldCupResultRow; onChanged: () => void }) {
+function ResultRow({ row, onChanged, onEmail }: { row: WorldCupResultRow; onChanged: () => void; onEmail: () => void }) {
   const [editing, setEditing] = useState(false);
   const delFn = useServerFn(deleteWorldCupResult);
   const del = useMutation({
