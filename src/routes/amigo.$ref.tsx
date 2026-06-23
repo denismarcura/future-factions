@@ -53,9 +53,11 @@ function FriendProfile() {
   const { profile, stats, createdOpen, createdClosed, participated, wins, corpOpportunities } = data;
   const name = profile.full_name || "Amigo";
 
+  const refCode = profile.id.slice(0, 8);
+  const dParam = highlightId ? `&d=${highlightId}` : "";
   const signupUrl = typeof window !== "undefined"
-    ? `${window.location.origin}/auth?ref=${profile.id.slice(0, 8)}`
-    : `/auth?ref=${profile.id.slice(0, 8)}`;
+    ? `${window.location.origin}/auth?ref=${refCode}${dParam}`
+    : `/auth?ref=${refCode}${dParam}`;
 
   function copyLink() {
     navigator.clipboard.writeText(signupUrl);
