@@ -1203,7 +1203,7 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
 
           {/* Banner personalizado (para todos) */}
           <Section
-            step={5}
+            step={6}
             title="Banner do desafio (opcional)"
             description="Imagem horizontal exibida no topo do desafio. Recomendado 1600×600px (proporção 8:3) em JPG ou PNG."
           >
@@ -1219,7 +1219,7 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
 
           {/* Missões */}
           <Section
-            step={6}
+            step={7}
             title="Cadastre as missões obrigatórias"
             description="Monte o passo a passo de missões. Cada missão concluída pelo usuário vale +50 tokens e +1 chance de palpite."
           >
