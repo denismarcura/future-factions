@@ -712,6 +712,7 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
           {/* Básico */}
           <div id="manual-section" />
           <Section
+            step={1}
             title="Informações do desafio"
             description="Criar manualmente — preencha os campos abaixo. Você pode misturar com a IA acima."
           >
