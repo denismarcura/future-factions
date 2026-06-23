@@ -87,6 +87,7 @@ import {
 import { Trophy, BarChart3 } from "lucide-react";
 import type { Prediction } from "@/lib/mock-data";
 import { uploadAvatar, takePendingAvatar } from "@/lib/avatar-upload";
+import { getPalpiteTokens, convertTknToPalpiteTokens, getPalpiteTokensSpentTkn, PALPITE_TOKEN_RATE } from "@/lib/palpite-tokens";
 import arte01 from "@/assets/dashboard-arte-01.png.asset.json";
 import arte02 from "@/assets/dashboard-arte-02.png.asset.json";
 import arte03 from "@/assets/dashboard-arte-03.png.asset.json";
@@ -198,12 +199,24 @@ function Dashboard() {
     () => participations.reduce((s, p) => s + (p.entryFee ?? 0), 0),
     [participations],
   );
+  const [palpiteTokens, setPalpiteTokens] = useState(0);
+  const [palpiteSpentTkn, setPalpiteSpentTkn] = useState(0);
+  useEffect(() => {
+    const sync = () => {
+      setPalpiteTokens(getPalpiteTokens());
+      setPalpiteSpentTkn(getPalpiteTokensSpentTkn());
+    };
+    sync();
+    window.addEventListener("ddp:palpite-tokens-updated", sync);
+    return () => window.removeEventListener("ddp:palpite-tokens-updated", sync);
+  }, []);
   const tokens = useMemo(
     () =>
       (profile?.welcome_bonus ?? 0) +
       claims.reduce((s, c) => s + (c.tokens_awarded ?? 0), 0) -
-      spentTokens,
-    [claims, profile?.welcome_bonus, spentTokens],
+      spentTokens -
+      palpiteSpentTkn,
+    [claims, profile?.welcome_bonus, spentTokens, palpiteSpentTkn],
   );
   const missionsDone = claims.length;
   const missionsTodo = missions.filter((m) => !claimedIds.has(m.id)).length;
@@ -279,11 +292,25 @@ function Dashboard() {
         {/* STATS */}
         <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
           <Stat icon={Coins} label="Tokens" value={formatTokens(tokens)} accent="text-gold" />
+          <Stat icon={Target} label="Tokens Palpite" value={String(palpiteTokens)} accent="text-primary" />
           <Stat icon={Target} label="Palpites feitos" value={String(participations.length)} />
-          <Stat icon={Target} label="Missões feitas" value={String(missionsDone)} />
           <Stat icon={ListChecks} label="Desafios criados" value={String(myChallenges.length)} />
           <Stat icon={Users} label="Amigos" value={String(friends.length)} />
         </div>
+
+        {/* TOKEN PALPITE EXCHANGE */}
+        <PalpiteTokenExchange
+          tokens={tokens}
+          palpiteTokens={palpiteTokens}
+          onConvert={(amount) => {
+            const credited = convertTknToPalpiteTokens(amount);
+            if (credited > 0) {
+              toast.success(`+${credited} Token${credited > 1 ? "s" : ""} Palpite creditado${credited > 1 ? "s" : ""}!`);
+            } else {
+              toast.error(`Você precisa de pelo menos ${PALPITE_TOKEN_RATE} TKN.`);
+            }
+          }}
+        />
 
         {/* QUICK ACTIONS */}
         <div className="grid sm:grid-cols-3 gap-4">
@@ -2148,6 +2175,67 @@ function MyParticipationsSection({
           <CarouselNext className="hidden sm:flex -right-3" />
         </Carousel>
       )}
+    </section>
+  );
+}
+
+/* ---------- Token Palpite exchange ---------- */
+
+function PalpiteTokenExchange({
+  tokens,
+  palpiteTokens,
+  onConvert,
+}: {
+  tokens: number;
+  palpiteTokens: number;
+  onConvert: (amount: number) => void;
+}) {
+  const [qty, setQty] = useState(1);
+  const cost = qty * PALPITE_TOKEN_RATE;
+  const max = Math.max(0, Math.floor(tokens / PALPITE_TOKEN_RATE));
+  const canConvert = qty > 0 && cost <= tokens;
+
+  return (
+    <section className="glass-card rounded-2xl p-5 border-2 border-primary/40 bg-primary/5">
+      <SectionTitle
+        icon={Target}
+        title="Trocar TKN por Tokens Palpite"
+        hint={`Use Tokens Palpite para apostar nos desafios. Conversão: ${PALPITE_TOKEN_RATE} TKN = 1 Token Palpite.`}
+      />
+      <div className="flex flex-wrap items-end gap-4">
+        <div>
+          <div className="text-xs uppercase tracking-wider text-muted-foreground mb-1">Saldo TKN</div>
+          <div className="font-display font-black text-2xl text-gold tabular-nums">{formatTokens(tokens)}</div>
+        </div>
+        <div>
+          <div className="text-xs uppercase tracking-wider text-muted-foreground mb-1">Tokens Palpite</div>
+          <div className="font-display font-black text-2xl text-primary tabular-nums">{palpiteTokens}</div>
+        </div>
+        <div className="ml-auto flex items-end gap-2">
+          <div>
+            <label className="text-xs uppercase tracking-wider text-muted-foreground block mb-1">Quantidade</label>
+            <input
+              type="number"
+              min={1}
+              max={Math.max(1, max)}
+              value={qty}
+              onChange={(e) => setQty(Math.max(1, Math.min(Number(e.target.value) || 1, Math.max(1, max))))}
+              className="h-10 w-24 px-3 rounded-xl bg-card border border-border/60 text-sm tabular-nums"
+            />
+          </div>
+          <button
+            onClick={() => onConvert(cost)}
+            disabled={!canConvert}
+            className="h-10 px-4 rounded-full bg-gradient-brand text-primary-foreground text-sm font-bold inline-flex items-center gap-2 shadow-glow disabled:opacity-50"
+          >
+            <Target className="h-4 w-4" /> Trocar por {qty} Token{qty > 1 ? "s" : ""} Palpite
+          </button>
+        </div>
+      </div>
+      <p className="text-[11px] text-muted-foreground mt-3">
+        Custo: <span className="text-gold font-bold">{formatTokens(cost)} TKN</span>
+        {!canConvert && tokens < PALPITE_TOKEN_RATE && " — saldo insuficiente"}
+      </p>
     </section>
   );
 }
