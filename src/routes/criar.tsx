@@ -1135,6 +1135,7 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
 
           {/* Missões */}
           <Section
+            step={6}
             title="Cadastre as missões obrigatórias"
             description="Monte o passo a passo de missões. Cada missão concluída pelo usuário vale +50 tokens e +1 chance de palpite."
           >
