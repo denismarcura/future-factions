@@ -1883,8 +1883,46 @@ function InvitePromoSection({
       <SectionTitle
         icon={Sparkles}
         title="Divulgue e convide"
-        hint="Textos prontos pra WhatsApp e e-mail + artes prontas para baixar e postar."
+        hint="Seu link de convite, textos prontos pra WhatsApp/e-mail, artes pra postar e recompensa especial pra vídeo no Instagram."
       />
+
+      {/* LINK DE CONVITE */}
+      <div className="rounded-xl bg-card border border-primary/40 p-4 space-y-2">
+        <div className="flex items-center gap-2">
+          <UserPlus className="h-4 w-4 text-primary" />
+          <div className="text-sm font-bold">Seu link de convite</div>
+        </div>
+        <div className="flex flex-col sm:flex-row gap-2">
+          <input
+            readOnly
+            value={link}
+            className="flex-1 h-10 px-3 rounded-lg bg-background border border-border/60 text-xs font-mono"
+            onFocus={(e) => e.currentTarget.select()}
+          />
+          <button
+            onClick={() => copy(link, "Link")}
+            className="h-10 px-4 rounded-full bg-background border border-border/60 text-xs font-bold inline-flex items-center justify-center gap-1.5"
+          >
+            <Copy className="h-3.5 w-3.5" /> Copiar link
+          </button>
+          <button
+            onClick={() =>
+              window.open(
+                `https://api.whatsapp.com/send?text=${encodeURIComponent(`🎯 Vem jogar comigo no Desafio dos Palpites — gratuito e com prêmios:\n${link}`)}`,
+                "_blank",
+                "noopener,noreferrer",
+              )
+            }
+            className="h-10 px-4 rounded-full bg-[#25D366] text-white text-xs font-bold inline-flex items-center justify-center gap-1.5"
+          >
+            <MessageCircle className="h-3.5 w-3.5" /> Enviar no WhatsApp
+          </button>
+        </div>
+        <p className="text-[11px] text-muted-foreground">
+          Cada amigo que se cadastrar pelo seu link te dá tokens extras.
+        </p>
+      </div>
+
 
       <div className="grid lg:grid-cols-2 gap-4">
         <div className="rounded-xl bg-card border border-border/60 p-4 space-y-2">
