@@ -389,7 +389,7 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
     });
     if (forCompany && !missionData.instagram.trim()) {
       errs.push("Cadastre o endereço do Instagram nas missões (obrigatório para empresas).");
-    }
+    if (!winnerType) errs.push("Escolha o critério de ganhador (maior pontuação ou acertar todas).");
     if (errs.length) {
       setErrors(errs);
       window.scrollTo({ top: 0, behavior: "smooth" });
