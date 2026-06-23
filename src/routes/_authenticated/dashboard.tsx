@@ -68,6 +68,7 @@ import { generateChallenges, type GeneratedChallenge } from "@/lib/generate-chal
 import { generateInvitePromoText } from "@/lib/invite-ai.functions";
 import { listParticipations, type MyParticipation } from "@/lib/my-participations";
 import { listMyPalpites, type MyPalpiteRow } from "@/lib/my-palpites.functions";
+import { submitInstagramVideo } from "@/lib/instagram-submissions.functions";
 import {
   Carousel,
   CarouselContent,
@@ -1775,6 +1776,28 @@ function InvitePromoSection({
   const [emailSubject, setEmailSubject] = useState("Vem jogar comigo no Desafio dos Palpites 🏆");
   const [aiBusy, setAiBusy] = useState<"whatsapp" | "email" | null>(null);
   const [igHandle, setIgHandle] = useState("");
+  const [igSending, setIgSending] = useState(false);
+  const [igSent, setIgSent] = useState(false);
+  const submitIg = useServerFn(submitInstagramVideo);
+
+  async function enviarInstagram() {
+    if (!igHandle.trim()) {
+      toast.error("Cole o link do seu vídeo no Instagram.");
+      return;
+    }
+    setIgSending(true);
+    try {
+      await submitIg({ data: { instagramUrl: igHandle.trim(), userName: inviterName } });
+      setIgSent(true);
+      setIgHandle("");
+      toast.success("Vídeo enviado! A administração vai validar e creditar suas recompensas.");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Não foi possível enviar.");
+    } finally {
+      setIgSending(false);
+    }
+  }
+
 
   const generateAi = useServerFn(generateInvitePromoText);
 
@@ -1860,8 +1883,46 @@ function InvitePromoSection({
       <SectionTitle
         icon={Sparkles}
         title="Divulgue e convide"
-        hint="Textos prontos pra WhatsApp e e-mail + artes prontas para baixar e postar."
+        hint="Seu link de convite, textos prontos pra WhatsApp/e-mail, artes pra postar e recompensa especial pra vídeo no Instagram."
       />
+
+      {/* LINK DE CONVITE */}
+      <div className="rounded-xl bg-card border border-primary/40 p-4 space-y-2">
+        <div className="flex items-center gap-2">
+          <UserPlus className="h-4 w-4 text-primary" />
+          <div className="text-sm font-bold">Seu link de convite</div>
+        </div>
+        <div className="flex flex-col sm:flex-row gap-2">
+          <input
+            readOnly
+            value={link}
+            className="flex-1 h-10 px-3 rounded-lg bg-background border border-border/60 text-xs font-mono"
+            onFocus={(e) => e.currentTarget.select()}
+          />
+          <button
+            onClick={() => copy(link, "Link")}
+            className="h-10 px-4 rounded-full bg-background border border-border/60 text-xs font-bold inline-flex items-center justify-center gap-1.5"
+          >
+            <Copy className="h-3.5 w-3.5" /> Copiar link
+          </button>
+          <button
+            onClick={() =>
+              window.open(
+                `https://api.whatsapp.com/send?text=${encodeURIComponent(`🎯 Vem jogar comigo no Desafio dos Palpites — gratuito e com prêmios:\n${link}`)}`,
+                "_blank",
+                "noopener,noreferrer",
+              )
+            }
+            className="h-10 px-4 rounded-full bg-[#25D366] text-white text-xs font-bold inline-flex items-center justify-center gap-1.5"
+          >
+            <MessageCircle className="h-3.5 w-3.5" /> Enviar no WhatsApp
+          </button>
+        </div>
+        <p className="text-[11px] text-muted-foreground">
+          Cada amigo que se cadastrar pelo seu link te dá tokens extras.
+        </p>
+      </div>
+
 
       <div className="grid lg:grid-cols-2 gap-4">
         <div className="rounded-xl bg-card border border-border/60 p-4 space-y-2">
@@ -2043,36 +2104,49 @@ function InvitePromoSection({
           ))}
         </div>
 
-        <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 space-y-2">
-          <label className="text-xs font-semibold flex items-center gap-1.5">
-            <Instagram className="h-3.5 w-3.5 text-primary" />
-            Após postar, coloque aqui seu Instagram para ganhar 5.000 tokens
-          </label>
-          <div className="flex gap-2">
+        <div className="rounded-lg border-2 border-primary/40 bg-gradient-to-br from-primary/10 to-gold/5 p-4 space-y-3">
+          <div className="flex items-start gap-3">
+            <div className="h-10 w-10 rounded-full bg-gradient-brand grid place-items-center text-primary-foreground shrink-0">
+              <Instagram className="h-5 w-5" />
+            </div>
+            <div className="flex-1">
+              <div className="text-sm font-display font-black">
+                Faça um vídeo para o Instagram e ganhe{" "}
+                <span className="text-gold">5.000 tokens</span> +{" "}
+                <span className="text-primary">4 Tokens Palpite</span>
+              </div>
+              <p className="text-[11px] text-muted-foreground mt-1">
+                Grave um Reel ou Story divulgando o Desafio dos Palpites, poste no seu Instagram
+                e cole o link abaixo. Nossa equipe valida e credita as recompensas.
+              </p>
+            </div>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-2">
             <input
               value={igHandle}
               onChange={(e) => setIgHandle(e.target.value)}
-              placeholder="@seuinstagram"
-              className="flex-1 h-9 px-3 rounded-md border border-border/60 bg-background text-xs"
+              placeholder="https://instagram.com/p/... ou /reel/..."
+              className="flex-1 h-10 px-3 rounded-md border border-border/60 bg-background text-xs"
             />
             <button
-              onClick={() => {
-                if (!igHandle.trim()) {
-                  toast.error("Informe seu @ do Instagram");
-                  return;
-                }
-                toast.success("Postagem registrada! +5.000 tokens em análise.");
-                setIgHandle("");
-              }}
-              className="h-9 px-3 rounded-md bg-gradient-brand text-primary-foreground text-xs font-bold inline-flex items-center gap-1.5"
+              onClick={enviarInstagram}
+              disabled={igSending}
+              className="h-10 px-4 rounded-full bg-gradient-brand text-primary-foreground text-xs font-bold inline-flex items-center justify-center gap-1.5 shadow-glow disabled:opacity-60"
             >
-              <Send className="h-3.5 w-3.5" /> Enviar
+              {igSending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
+              Enviar para análise
             </button>
           </div>
+          {igSent && (
+            <div className="text-[11px] text-primary font-semibold flex items-center gap-1.5">
+              <CheckCircle2 className="h-3.5 w-3.5" /> Recebido! Acompanhe o status no painel da administração.
+            </div>
+          )}
           <p className="text-[11px] text-muted-foreground">
-            * Você pode fazer postagens a cada 60 dias.
+            * Limite: 1 envio aprovado a cada 60 dias. Conteúdo precisa estar público no momento da validação.
           </p>
         </div>
+
       </div>
 
     </section>
