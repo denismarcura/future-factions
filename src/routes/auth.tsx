@@ -5,15 +5,22 @@ import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { useAuth } from "@/hooks/use-auth";
 import { prepareSignup } from "@/lib/signup.functions";
+import { getChallengeInvite } from "@/lib/friend-profile.functions";
 import { savePendingAvatar } from "@/lib/avatar-upload";
 import {
   Loader2, Mail, Lock, User as UserIcon, Phone, AlertCircle, Instagram, ShieldCheck,
-  Camera, FileText, Trash2,
+  Camera, FileText, Trash2, Trophy, Clock,
 } from "lucide-react";
 import { toast } from "sonner";
 import logoAsset from "@/assets/logo-desafio.png.asset.json";
 
+type AuthSearch = { d?: string; ref?: string };
+
 export const Route = createFileRoute("/auth")({
+  validateSearch: (s: Record<string, unknown>): AuthSearch => ({
+    d: typeof s.d === "string" ? s.d : undefined,
+    ref: typeof s.ref === "string" ? s.ref : undefined,
+  }),
   component: AuthPage,
 });
 
