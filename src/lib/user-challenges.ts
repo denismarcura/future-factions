@@ -78,7 +78,12 @@ export function saveUserChallenge(input: CreateChallengeInput): Prediction {
     comments: 0,
     likes: 0,
     shares: 0,
-    tags: ["meu-desafio", input.isOpen ? "aberto" : "privado"],
+    tags: [
+      "meu-desafio",
+      input.isOpen ? "aberto" : "privado",
+      input.reachMode === "open" ? "link-apenas" : "publico",
+      input.coverAllBrazil ? "brasil-todo" : (input.city || input.state ? `local:${[input.city, input.state].filter(Boolean).join("/")}` : "local-nao-definido"),
+    ],
     hot: true,
     imageUrl: input.bannerImg ?? input.prizeImg ?? undefined,
     corporateMissions: input.corporateMissions,
