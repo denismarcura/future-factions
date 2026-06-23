@@ -1425,13 +1425,23 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
 
 }
 
-function Section({ title, description, action, children }: { title: string; description?: string; action?: React.ReactNode; children: React.ReactNode }) {
+function Section({ title, description, action, children, step }: { title: string; description?: string; action?: React.ReactNode; children: React.ReactNode; step?: number }) {
   return (
     <section className="rounded-2xl glass-card p-5 space-y-4">
       <div className="flex items-start justify-between gap-3">
-        <div>
-          <h2 className="font-display text-lg font-bold">{title}</h2>
-          {description && <p className="text-sm text-muted-foreground mt-0.5">{description}</p>}
+        <div className="flex items-start gap-3 min-w-0">
+          {typeof step === "number" && (
+            <span
+              aria-hidden
+              className="shrink-0 mt-0.5 h-9 w-9 rounded-full bg-gradient-brand text-primary-foreground font-display font-black text-base grid place-items-center shadow-glow ring-2 ring-primary/30"
+            >
+              {step}
+            </span>
+          )}
+          <div className="min-w-0">
+            <h2 className="font-display text-lg font-bold">{title}</h2>
+            {description && <p className="text-sm text-muted-foreground mt-0.5">{description}</p>}
+          </div>
         </div>
         {action}
       </div>
