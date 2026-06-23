@@ -187,7 +187,12 @@ function ResultRow({ row, onChanged, onEmail }: { row: WorldCupResultRow; onChan
           Agendado
         </span>
       )}
-      <div className="flex gap-2">
+      <div className="flex gap-2 flex-wrap">
+        {row.status === "encerrado" && (
+          <button onClick={onEmail} className="h-9 px-3 rounded-lg bg-gradient-brand text-primary-foreground text-xs font-bold inline-flex items-center gap-1 shadow-glow">
+            <Mail className="h-3 w-3" /> Gerar e-mail
+          </button>
+        )}
         <button onClick={() => setEditing(true)} className="h-9 px-3 rounded-lg border border-border text-xs font-bold">
           Editar
         </button>
