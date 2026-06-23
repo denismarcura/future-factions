@@ -8,6 +8,7 @@ import {
 import { toast } from "sonner";
 import { generateCorporateChallenge } from "@/lib/corporate-challenge-ai.functions";
 import { getCorpStats, type CorpStats } from "@/lib/admin-stats.functions";
+import { listAllCorpChallengesAdmin, updateCorpChallengeStatus, deleteCorpChallenge, type AdminCorpChallenge } from "@/lib/admin-data.functions";
 import { Criar } from "@/routes/criar";
 
 export const Route = createFileRoute("/admin/empresas")({
