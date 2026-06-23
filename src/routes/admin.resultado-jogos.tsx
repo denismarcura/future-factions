@@ -99,6 +99,18 @@ function Page() {
         ))}
       </section>
 
+      <section className="mb-6">
+        <div className="relative">
+          <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Buscar por time ou data (AAAA-MM-DD)..."
+            className="w-full h-11 rounded-lg bg-card border border-border/60 pl-10 pr-3 text-sm"
+          />
+        </div>
+      </section>
+
       {showNew && (
         <div className="mb-6">
           <ResultForm onSaved={() => { setShowNew(false); invalidate(); }} onCancel={() => setShowNew(false)} />
@@ -109,6 +121,8 @@ function Page() {
         <div className="text-center py-12 text-muted-foreground">
           <Loader2 className="h-6 w-6 animate-spin mx-auto mb-2" /> Carregando...
         </div>
+      ) : dates.length === 0 ? (
+        <div className="text-center py-12 text-muted-foreground text-sm">Nenhum resultado encontrado.</div>
       ) : (
         <div className="space-y-6">
           {dates.map((d) => (
@@ -116,13 +130,15 @@ function Page() {
               <h2 className="font-display font-black text-lg mb-2">{fmtDateBR(d)}</h2>
               <div className="grid gap-3">
                 {grouped[d].map((r) => (
-                  <ResultRow key={r.id} row={r} onChanged={invalidate} />
+                  <ResultRow key={r.id} row={r} onChanged={invalidate} onEmail={() => setEmailFor(r)} />
                 ))}
               </div>
             </section>
           ))}
         </div>
       )}
+
+      {emailFor && <EmailModal row={emailFor} onClose={() => setEmailFor(null)} />}
     </AppShell>
   );
 }
