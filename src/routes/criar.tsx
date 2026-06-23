@@ -216,6 +216,7 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
   const improveDescriptionFn = useServerFn(improveDescription);
   const generateWhatsFn = useServerFn(generateWhatsAppInvite);
   const generatePrizeImageFn = useServerFn(generatePrizeImage);
+  const generateBannerFromPrizeFn = useServerFn(generateBannerFromPrize);
   const generateTiebreakerFn = useServerFn(generateTiebreaker);
   const generateRegulationFn = useServerFn(generateRegulation);
   const createCorpChallengeFn = useServerFn(createCorpChallenge);
