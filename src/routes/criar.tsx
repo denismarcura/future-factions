@@ -2180,6 +2180,7 @@ function PublishedSuccess({ name, id, onCreateAnother }: { name: string; id: str
   const [copied, setCopied] = useState(false);
   const PUBLIC_DOMAIN = "https://www.desafiodospalpites.com.br";
   const link = `${PUBLIC_DOMAIN}/previsao/${id}`;
+  const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(`Participe do meu desafio "${name}" no Desafio dos Palpites: ${link}`)}`;
   const copy = async () => {
     try {
       if (navigator.clipboard?.writeText) {
@@ -2218,6 +2219,9 @@ function PublishedSuccess({ name, id, onCreateAnother }: { name: string; id: str
           <ExternalLink className="h-4 w-4" /> Abrir
         </a>
       </div>
+      <a href={whatsappUrl} target="_blank" rel="noreferrer" className="mb-6 mx-auto inline-flex items-center gap-2 h-11 px-5 rounded-xl bg-gradient-brand text-primary-foreground font-display font-bold shadow-glow">
+        <MessageCircle className="h-4 w-4" /> Enviar link de indicação no WhatsApp
+      </a>
       <div className="flex flex-wrap gap-3 justify-center">
         <Link to="/desafios" className="h-11 px-5 rounded-xl bg-gradient-brand text-primary-foreground font-display font-bold inline-flex items-center shadow-glow">
           Ver desafios
