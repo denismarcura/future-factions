@@ -2338,6 +2338,9 @@ async function renderCreative(
 
 // ----- Event Quick Picker (next 48h) -----
 function EventQuickPicker({ category, onPick }: { category: string; onPick: (m: typeof WORLD_CUP_MATCHES[number]) => void }) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+  if (!mounted) return null;
   const isFootball = /futebol|copa|esporte/i.test(category);
   const now = Date.now();
   const horizon = now + 48 * 60 * 60 * 1000;
