@@ -421,6 +421,10 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
         prizeImg,
         bannerImg,
         corporateMissions,
+        reachMode,
+        coverAllBrazil,
+        city: coverAllBrazil ? undefined : campaignCity.trim() || undefined,
+        state: coverAllBrazil ? undefined : campaignState.trim() || undefined,
       });
 
       if (forCompany) {
