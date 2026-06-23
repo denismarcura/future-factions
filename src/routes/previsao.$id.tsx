@@ -368,8 +368,9 @@ function PredictionInner({ p }: { p: Prediction }) {
 
   const related = PREDICTIONS.filter((x) => x.id !== p.id && x.category === p.category).slice(0, 4);
 
-  const deadlineMs = new Date(p.closesAt).getTime() - Date.now();
+  const deadlineMs = mounted ? new Date(p.closesAt).getTime() - Date.now() : 1;
   const isClosed = deadlineMs <= 0;
+
 
   return (
     <AppShell>
