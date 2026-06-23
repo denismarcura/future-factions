@@ -119,18 +119,16 @@ export const getAdminDashboard = createServerFn({ method: "GET" })
       challengesAll,
       corpAll,
       palpitesRecent,
-      palpitesTotal,
+      palpitesTotalCount,
       tokensRecent,
-      tokensTotal,
     ] = await Promise.all([
       sb.from("profiles").select("id", { count: "exact", head: true }),
       sb.from("profiles").select("created_at").gte("created_at", since30),
       sb.from("challenges").select("id, title, closes_at"),
       sb.from("corporate_challenges").select("company_name, status"),
-      sb.from("palpites").select("user_id, created_at").gte("created_at", since30),
-      sb.from("palpites").select("challenge_id", { count: "exact", head: false }),
+      sb.from("palpites").select("user_id, challenge_id, created_at").gte("created_at", since30),
+      sb.from("palpites").select("id", { count: "exact", head: true }),
       sb.from("token_transactions").select("delta, created_at").gte("created_at", since30),
-      sb.from("token_transactions").select("delta"),
     ]);
 
     const users = profilesCount.count ?? 0;
