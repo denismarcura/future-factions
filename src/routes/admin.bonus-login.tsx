@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Gift, Flame, Coins, Calendar, CheckCircle2, RotateCcw, Trash2 } from "lucide-react";
+import { Gift, Flame, Coins, Calendar, CheckCircle2, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
 import {
   MAX_DAY,
