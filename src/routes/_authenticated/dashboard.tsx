@@ -1775,6 +1775,28 @@ function InvitePromoSection({
   const [emailSubject, setEmailSubject] = useState("Vem jogar comigo no Desafio dos Palpites 🏆");
   const [aiBusy, setAiBusy] = useState<"whatsapp" | "email" | null>(null);
   const [igHandle, setIgHandle] = useState("");
+  const [igSending, setIgSending] = useState(false);
+  const [igSent, setIgSent] = useState(false);
+  const submitIg = useServerFn(submitInstagramVideo);
+
+  async function enviarInstagram() {
+    if (!igHandle.trim()) {
+      toast.error("Cole o link do seu vídeo no Instagram.");
+      return;
+    }
+    setIgSending(true);
+    try {
+      await submitIg({ data: { instagramUrl: igHandle.trim(), userName: inviterName } });
+      setIgSent(true);
+      setIgHandle("");
+      toast.success("Vídeo enviado! A administração vai validar e creditar suas recompensas.");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Não foi possível enviar.");
+    } finally {
+      setIgSending(false);
+    }
+  }
+
 
   const generateAi = useServerFn(generateInvitePromoText);
 
