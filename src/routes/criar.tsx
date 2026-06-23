@@ -418,8 +418,11 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
       errs.push("Cadastre o endereço do Instagram nas missões (obrigatório para empresas).");
     }
     if (!winnerType) errs.push("Escolha o critério de ganhador (maior pontuação ou acertar todas).");
-    if (!coverAllBrazil && (!campaignCity.trim() || !campaignState.trim())) {
-      errs.push("Informe cidade e estado, ou marque a opção 'Brasil todo'.");
+    if (reachMode === "public" && !coverAllBrazil && selectedCities.length === 0) {
+      errs.push("Selecione ao menos uma cidade, ou marque 'Brasil todo'.");
+    }
+    if (!acceptDisclaimer) {
+      errs.push("Aceite o termo de que o Desafio dos Palpites não se responsabiliza pela entrega dos brindes.");
     }
     if (errs.length) {
       setErrors(errs);
@@ -444,8 +447,8 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
         corporateMissions,
         reachMode,
         coverAllBrazil,
-        city: coverAllBrazil ? undefined : campaignCity.trim() || undefined,
-        state: coverAllBrazil ? undefined : campaignState.trim() || undefined,
+        city: coverAllBrazil ? undefined : (selectedCities[0]?.nome ?? undefined),
+        state: coverAllBrazil ? undefined : (selectedCities[0]?.uf ?? undefined),
       });
 
       if (forCompany) {
