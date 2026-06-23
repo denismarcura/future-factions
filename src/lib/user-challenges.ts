@@ -14,6 +14,10 @@ export type CreateChallengeInput = {
   prizeImg?: string | null;
   bannerImg?: string | null;
   corporateMissions?: Prediction["corporateMissions"];
+  reachMode?: "public" | "open";
+  coverAllBrazil?: boolean;
+  city?: string;
+  state?: string;
 };
 
 function read(): Prediction[] {
