@@ -23,6 +23,9 @@ import { uploadCorpAsset, uploadCorpAssets } from "@/lib/corp-storage";
 import logoAsset from "@/assets/logo-desafio.png.asset.json";
 import { WORLD_CUP_MATCHES } from "@/lib/world-cup-matches";
 import { ArtsWizard } from "@/components/ArtsWizard";
+import { PrizesPicker, type PrizeSlot } from "@/components/PrizesPicker";
+import { CitiesAutocomplete, type SelectedCity } from "@/components/CitiesAutocomplete";
+import type { AdminPrize } from "@/lib/admin-prizes.functions";
 
 function getNextBrazilMatch() {
   const now = Date.now();
@@ -246,10 +249,20 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
 
   // Location & audience scope
   const [coverAllBrazil, setCoverAllBrazil] = useState(true);
+  const [selectedCities, setSelectedCities] = useState<SelectedCity[]>([]);
   const [campaignCity, setCampaignCity] = useState("");
   const [campaignState, setCampaignState] = useState("");
   // Reach mode: "public" (everyone sees in feed) or "open" (only via link)
   const [reachMode, setReachMode] = useState<"public" | "open">("public");
+  // Multi-prize picker
+  const [prizesPickerOpen, setPrizesPickerOpen] = useState(false);
+  const [prizeSlots, setPrizeSlots] = useState<PrizeSlot[]>([]);
+  const [pickedPrizes, setPickedPrizes] = useState<AdminPrize[]>([]);
+  // Acceptance
+  const [acceptDisclaimer, setAcceptDisclaimer] = useState(false);
+  const [authorizeMarketing, setAuthorizeMarketing] = useState(false);
+  const [closedInfoSeen, setClosedInfoSeen] = useState(false);
+  const [showClosedInfo, setShowClosedInfo] = useState(false);
 
 
 
