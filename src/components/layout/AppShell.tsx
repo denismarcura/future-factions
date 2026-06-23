@@ -91,7 +91,7 @@ function TokenPill() {
   );
 }
 
-export function AppShell({ children }: { children: ReactNode }) {
+export function AppShell({ children, hidePrimarySidebar = false }: { children: ReactNode; hidePrimarySidebar?: boolean }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { user } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
