@@ -833,6 +833,7 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
           </Section>
 
           <Section
+            step={2}
             title={`Sub-categorias de palpites (${subs.length})`}
             description={`Crie quantas perguntas quiser, cada uma com até ${MAX_OPTIONS} opções. Cada acerto vale ${REWARD_PER_HIT} tokens.`}
 
