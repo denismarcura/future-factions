@@ -1425,47 +1425,6 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
             </div>
           </Section>
 
-          {/* Localização da campanha */}
-          <Section
-            step={7}
-            title="Onde sua campanha vale"
-            description="Marque Brasil todo ou informe cidade e estado."
-          >
-            <label className="flex items-center gap-3 rounded-xl border border-border p-3 cursor-pointer hover:border-primary/50 transition">
-              <input
-                type="checkbox"
-                checked={coverAllBrazil}
-                onChange={(e) => setCoverAllBrazil(e.target.checked)}
-                className="h-5 w-5 accent-primary"
-              />
-              <div>
-                <div className="font-bold text-sm">Brasil todo</div>
-                <div className="text-xs text-muted-foreground">A campanha vale para qualquer cidade do país.</div>
-              </div>
-            </label>
-            {!coverAllBrazil && (
-              <div className="grid sm:grid-cols-[1fr_8rem] gap-3">
-                <Field label="Cidade">
-                  <input
-                    value={campaignCity}
-                    onChange={(e) => setCampaignCity(e.target.value)}
-                    placeholder="Ex.: São Paulo"
-                    className="input"
-                  />
-                </Field>
-                <Field label="Estado (UF)">
-                  <input
-                    value={campaignState}
-                    onChange={(e) => setCampaignState(e.target.value.toUpperCase().slice(0, 2))}
-                    placeholder="SP"
-                    maxLength={2}
-                    className="input uppercase"
-                  />
-                </Field>
-              </div>
-            )}
-          </Section>
-
           {/* Link de convite (preview) */}
           <Section
             step={8}
@@ -1488,11 +1447,10 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
             </p>
           </Section>
 
-          {/* Tipo de campanha (público/aberto pelo link) */}
+          {/* Divulgação: aberto/fechado + cidades + termos */}
           <Section
-            step={9}
-            title="A campanha será pública ou aberta?"
-            description="Escolha quem pode encontrar e participar do seu desafio."
+            title="Divulgação e responsabilidades"
+            description="Defina quem encontra seu desafio, em quais cidades ele vale e aceite os termos."
           >
             <div className="space-y-3">
               <label className={`flex items-start gap-3 rounded-xl border p-4 cursor-pointer transition ${reachMode === "public" ? "border-primary bg-primary/10" : "border-border hover:border-primary/50"}`}>
@@ -1504,27 +1462,79 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
                   className="mt-1 h-5 w-5 accent-primary"
                 />
                 <div>
-                  <div className="font-bold text-sm flex items-center gap-2"><Globe className="h-4 w-4 text-primary" /> Pública</div>
-                  <div className="text-xs text-muted-foreground">Aparece na home e no feed de desafios para todo mundo.</div>
+                  <div className="font-bold text-sm flex items-center gap-2"><Globe className="h-4 w-4 text-primary" /> Desafio Aberto (público)</div>
+                  <div className="text-xs text-muted-foreground">Aparece na home e no feed para todo mundo encontrar.</div>
                 </div>
               </label>
-              <label className={`flex items-start gap-3 rounded-xl border p-4 cursor-pointer transition ${reachMode === "open" ? "border-primary bg-primary/10" : "border-border hover:border-primary/50"}`}>
+              <label
+                className={`flex items-start gap-3 rounded-xl border p-4 cursor-pointer transition ${reachMode === "open" ? "border-primary bg-primary/10" : "border-border hover:border-primary/50"}`}
+                onClick={() => { if (reachMode !== "open") setShowClosedInfo(true); }}
+              >
                 <input
                   type="radio"
                   name="reach-mode"
                   checked={reachMode === "open"}
-                  onChange={() => setReachMode("open")}
+                  onChange={() => { setReachMode("open"); setShowClosedInfo(true); }}
                   className="mt-1 h-5 w-5 accent-primary"
                 />
                 <div>
-                  <div className="font-bold text-sm flex items-center gap-2"><Share2 className="h-4 w-4 text-primary" /> Aberta apenas pelo link</div>
+                  <div className="font-bold text-sm flex items-center gap-2"><Lock className="h-4 w-4 text-primary" /> Desafio Fechado (apenas pelo link)</div>
                   <div className="text-xs text-muted-foreground">Só quem receber o link de convite consegue participar.</div>
                 </div>
               </label>
             </div>
+
+            {reachMode === "public" && (
+              <>
+                <div className="mt-4 space-y-3">
+                  <label className="flex items-center gap-3 rounded-xl border border-border p-3 cursor-pointer hover:border-primary/50 transition">
+                    <input
+                      type="checkbox"
+                      checked={coverAllBrazil}
+                      onChange={(e) => { setCoverAllBrazil(e.target.checked); if (e.target.checked) setSelectedCities([]); }}
+                      className="h-5 w-5 accent-primary"
+                    />
+                    <div>
+                      <div className="font-bold text-sm">Brasil todo</div>
+                      <div className="text-xs text-muted-foreground">A campanha vale para qualquer cidade do país.</div>
+                    </div>
+                  </label>
+                  {!coverAllBrazil && (
+                    <div>
+                      <div className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-1">Aberto apenas para as cidades</div>
+                      <CitiesAutocomplete value={selectedCities} onChange={setSelectedCities} />
+                    </div>
+                  )}
+                </div>
+                <label className="mt-4 flex items-start gap-3 rounded-xl border border-primary/30 bg-primary/5 p-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={authorizeMarketing}
+                    onChange={(e) => setAuthorizeMarketing(e.target.checked)}
+                    className="mt-0.5 h-5 w-5 accent-primary"
+                  />
+                  <span className="text-sm">
+                    Autorizo o <strong>Desafio dos Palpites</strong> a divulgar meu desafio por e-mail marketing, Instagram e demais redes sociais.
+                  </span>
+                </label>
+              </>
+            )}
+
+            <label className="mt-4 flex items-start gap-3 rounded-xl border border-amber-500/40 bg-amber-500/5 p-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={acceptDisclaimer}
+                onChange={(e) => setAcceptDisclaimer(e.target.checked)}
+                className="mt-0.5 h-5 w-5 accent-primary"
+              />
+              <span className="text-sm">
+                Estou ciente de que <strong>O Desafio dos Palpites não se responsabiliza pela entrega dos brindes</strong> aqui cadastrados.
+              </span>
+            </label>
           </Section>
 
         </div>
+
 
 
 
