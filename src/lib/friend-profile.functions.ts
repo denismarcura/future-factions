@@ -110,3 +110,25 @@ export const getFriendProfile = createServerFn({ method: "GET" })
       corpOpportunities: corp ?? [],
     };
   });
+
+export const getChallengeInvite = createServerFn({ method: "GET" })
+  .inputValidator((i: unknown) => z.object({ id: z.string().min(4).max(64) }).parse(i))
+  .handler(async ({ data }) => {
+    const sb = publicClient();
+    const { data: ch } = await sb
+      .from("challenges")
+      .select("id, title, image_url, category, prize_pool, closes_at, owner_id")
+      .eq("id", data.id)
+      .maybeSingle();
+    if (!ch) return null;
+    let ownerName: string | null = null;
+    if (ch.owner_id) {
+      const { data: p } = await sb
+        .from("profiles")
+        .select("full_name")
+        .eq("id", ch.owner_id)
+        .maybeSingle();
+      ownerName = (p as any)?.full_name ?? null;
+    }
+    return { ...ch, owner_name: ownerName };
+  });

@@ -5,15 +5,22 @@ import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { useAuth } from "@/hooks/use-auth";
 import { prepareSignup } from "@/lib/signup.functions";
+import { getChallengeInvite } from "@/lib/friend-profile.functions";
 import { savePendingAvatar } from "@/lib/avatar-upload";
 import {
   Loader2, Mail, Lock, User as UserIcon, Phone, AlertCircle, Instagram, ShieldCheck,
-  Camera, FileText, Trash2,
+  Camera, FileText, Trash2, Trophy, Clock,
 } from "lucide-react";
 import { toast } from "sonner";
 import logoAsset from "@/assets/logo-desafio.png.asset.json";
 
+type AuthSearch = { d?: string; ref?: string };
+
 export const Route = createFileRoute("/auth")({
+  validateSearch: (s: Record<string, unknown>): AuthSearch => ({
+    d: typeof s.d === "string" ? s.d : undefined,
+    ref: typeof s.ref === "string" ? s.ref : undefined,
+  }),
   component: AuthPage,
 });
 
@@ -44,7 +51,10 @@ function AuthPage() {
   const navigate = useNavigate();
   const { user, loading } = useAuth();
   const prepare = useServerFn(prepareSignup);
-  const [mode, setMode] = useState<"login" | "signup">("login");
+  const fetchInvite = useServerFn(getChallengeInvite);
+  const search = Route.useSearch();
+  const [invite, setInvite] = useState<any>(null);
+  const [mode, setMode] = useState<"login" | "signup">(search.d || search.ref ? "signup" : "login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
@@ -62,6 +72,13 @@ function AuthPage() {
   useEffect(() => {
     if (!loading && user) navigate({ to: "/dashboard" });
   }, [user, loading, navigate]);
+
+  useEffect(() => {
+    if (!search.d) return;
+    (fetchInvite as any)({ data: { id: search.d } })
+      .then((r: any) => { if (r) setInvite(r); })
+      .catch(() => {});
+  }, [search.d, fetchInvite]);
 
   async function handleGoogle() {
     setError(null);
@@ -173,6 +190,34 @@ function AuthPage() {
             <span className="text-gradient-silver">PALPITES</span>
           </div>
         </Link>
+
+        {invite && (
+          <div className="glass-card rounded-2xl overflow-hidden border border-primary/40 mb-5 shadow-glow">
+            {invite.image_url && (
+              <img src={invite.image_url} alt={invite.title} className="w-full aspect-[8/3] object-cover" />
+            )}
+            <div className="p-4 space-y-1.5">
+              <div className="text-[10px] font-bold uppercase text-primary flex items-center gap-1">
+                <Trophy className="h-3 w-3" /> Você foi convidado para este desafio
+              </div>
+              <div className="font-display font-black text-base leading-tight">{invite.title}</div>
+              {invite.owner_name && (
+                <div className="text-xs text-muted-foreground">por {invite.owner_name}</div>
+              )}
+              <div className="flex flex-wrap gap-3 text-[11px] text-muted-foreground pt-1">
+                {invite.prize_pool && <span>🎁 {invite.prize_pool}</span>}
+                {invite.closes_at && (
+                  <span className="inline-flex items-center gap-1">
+                    <Clock className="h-3 w-3" /> Encerra {new Date(invite.closes_at).toLocaleDateString("pt-BR")}
+                  </span>
+                )}
+              </div>
+              <div className="text-xs text-primary font-semibold pt-2">
+                Cadastre-se para participar e ganhe 1.000 tokens de bônus.
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="glass-card rounded-2xl p-8 border border-border/60">
           <div className="flex gap-2 mb-6 p-1 rounded-full bg-card border border-border/60">
