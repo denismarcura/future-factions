@@ -20,6 +20,8 @@ export type AdminCorpChallenge = {
   title: string;
   companyName: string | null;
   prizeName: string | null;
+  category: string | null;
+  subcategory: string | null;
   status: string;
   participants: number;
   endsAt: string | null;
