@@ -292,11 +292,25 @@ function Dashboard() {
         {/* STATS */}
         <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
           <Stat icon={Coins} label="Tokens" value={formatTokens(tokens)} accent="text-gold" />
+          <Stat icon={Target} label="Tokens Palpite" value={String(palpiteTokens)} accent="text-primary" />
           <Stat icon={Target} label="Palpites feitos" value={String(participations.length)} />
-          <Stat icon={Target} label="Missões feitas" value={String(missionsDone)} />
           <Stat icon={ListChecks} label="Desafios criados" value={String(myChallenges.length)} />
           <Stat icon={Users} label="Amigos" value={String(friends.length)} />
         </div>
+
+        {/* TOKEN PALPITE EXCHANGE */}
+        <PalpiteTokenExchange
+          tokens={tokens}
+          palpiteTokens={palpiteTokens}
+          onConvert={(amount) => {
+            const credited = convertTknToPalpiteTokens(amount);
+            if (credited > 0) {
+              toast.success(`+${credited} Token${credited > 1 ? "s" : ""} Palpite creditado${credited > 1 ? "s" : ""}!`);
+            } else {
+              toast.error(`Você precisa de pelo menos ${PALPITE_TOKEN_RATE} TKN.`);
+            }
+          }}
+        />
 
         {/* QUICK ACTIONS */}
         <div className="grid sm:grid-cols-3 gap-4">
