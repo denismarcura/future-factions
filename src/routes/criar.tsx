@@ -1245,100 +1245,101 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
                 </div>
               </Section>
 
-              {/* Critérios de desempate */}
-              <Section
-                title="Critérios de desempate"
-                description="Altere e clique em Gerar novamente"
-                action={
-                  <button
-                    type="button"
-                    onClick={async () => {
-                      setTiebreakerLoading(true);
-                      try {
-                        const { text } = await generateTiebreakerFn({
-                          data: {
-                            base: tiebreaker.trim() || undefined,
-                            challengeName: name.trim() || undefined,
-                            category,
-                          },
-                        });
-                        setTiebreaker(text);
-                      } catch (err) {
-                        alert(err instanceof Error ? err.message : "Não foi possível gerar agora.");
-                      } finally {
-                        setTiebreakerLoading(false);
-                      }
-                    }}
-                    disabled={tiebreakerLoading}
-                    className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg bg-primary/15 text-primary border border-primary/30 text-sm font-semibold hover:bg-primary/20 disabled:opacity-50"
-                  >
-                    {tiebreakerLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4" />}
-                    {tiebreakerLoading ? "Gerando…" : "Gerar pela IA"}
-                  </button>
-                }
-              >
-                <textarea
-                  value={tiebreaker}
-                  onChange={(e) => setTiebreaker(e.target.value)}
-                  rows={5}
-                  placeholder="Ex.: 1) Maior número de acertos. 2) Quem palpitou primeiro. 3) Sorteio."
-                  className="input min-h-[120px] resize-y"
-                />
-              </Section>
-
-              {/* Regulamento */}
-              <Section
-                title="Regulamento da promoção"
-                description="Verifique o texto e aprove. Será exibido para o usuário antes de cada palpite, com aceite obrigatório."
-                action={
-                  <button
-                    type="button"
-                    onClick={async () => {
-                      if (!name.trim()) {
-                        alert("Informe o nome do desafio antes de gerar o regulamento.");
-                        return;
-                      }
-                      setRegulationLoading(true);
-                      try {
-                        const { text } = await generateRegulationFn({
-                          data: {
-                            companyName: companyName.trim() || undefined,
-                            challengeName: name.trim(),
-                            category,
-                            prizeName: prizeName.trim() || undefined,
-                            endsAt: endsAt || undefined,
-                            tiebreaker: tiebreaker.trim() || undefined,
-                          },
-                        });
-                        setRegulation(text);
-                      } catch (err) {
-                        alert(err instanceof Error ? err.message : "Não foi possível gerar agora.");
-                      } finally {
-                        setRegulationLoading(false);
-                      }
-                    }}
-                    disabled={regulationLoading}
-                    className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg bg-primary/15 text-primary border border-primary/30 text-sm font-semibold hover:bg-primary/20 disabled:opacity-50"
-                  >
-                    {regulationLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4" />}
-                    {regulationLoading ? "Gerando…" : "Gerar regulamento com IA"}
-                  </button>
-                }
-              >
-                <textarea
-                  value={regulation}
-                  onChange={(e) => setRegulation(e.target.value)}
-                  rows={12}
-                  placeholder="Clique em 'Gerar regulamento com IA' e revise o texto. Você pode editar livremente."
-                  className="input min-h-[280px] resize-y font-mono text-xs leading-relaxed"
-                />
-                <div className="flex items-start gap-2 text-xs text-muted-foreground rounded-lg bg-primary/5 border border-primary/20 p-3">
-                  <AlertCircle className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                  <span>Quando o usuário for fazer um palpite, este regulamento aparecerá em tela cheia com as opções <strong>Aceito</strong> ou <strong>Não aceito</strong>. Sem aceite, o palpite não é registrado.</span>
-                </div>
-              </Section>
             </>
           )}
+
+          {/* Critérios de desempate */}
+          <Section
+            title="Critérios de desempate"
+            description="Altere e clique em Gerar novamente"
+            action={
+              <button
+                type="button"
+                onClick={async () => {
+                  setTiebreakerLoading(true);
+                  try {
+                    const { text } = await generateTiebreakerFn({
+                      data: {
+                        base: tiebreaker.trim() || undefined,
+                        challengeName: name.trim() || undefined,
+                        category,
+                      },
+                    });
+                    setTiebreaker(text);
+                  } catch (err) {
+                    alert(err instanceof Error ? err.message : "Não foi possível gerar agora.");
+                  } finally {
+                    setTiebreakerLoading(false);
+                  }
+                }}
+                disabled={tiebreakerLoading}
+                className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg bg-primary/15 text-primary border border-primary/30 text-sm font-semibold hover:bg-primary/20 disabled:opacity-50"
+              >
+                {tiebreakerLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4" />}
+                {tiebreakerLoading ? "Gerando…" : "Gerar pela IA"}
+              </button>
+            }
+          >
+            <textarea
+              value={tiebreaker}
+              onChange={(e) => setTiebreaker(e.target.value)}
+              rows={5}
+              placeholder="Ex.: 1) Maior número de acertos. 2) Quem palpitou primeiro. 3) Sorteio."
+              className="input min-h-[120px] resize-y"
+            />
+          </Section>
+
+          {/* Regulamento */}
+          <Section
+            title="Regulamento da promoção"
+            description="Verifique o texto e aprove. Será exibido para o usuário antes de cada palpite, com aceite obrigatório."
+            action={
+              <button
+                type="button"
+                onClick={async () => {
+                  if (!name.trim()) {
+                    alert("Informe o nome do desafio antes de gerar o regulamento.");
+                    return;
+                  }
+                  setRegulationLoading(true);
+                  try {
+                    const { text } = await generateRegulationFn({
+                      data: {
+                        companyName: companyName.trim() || undefined,
+                        challengeName: name.trim(),
+                        category,
+                        prizeName: prizeName.trim() || undefined,
+                        endsAt: endsAt || undefined,
+                        tiebreaker: tiebreaker.trim() || undefined,
+                      },
+                    });
+                    setRegulation(text);
+                  } catch (err) {
+                    alert(err instanceof Error ? err.message : "Não foi possível gerar agora.");
+                  } finally {
+                    setRegulationLoading(false);
+                  }
+                }}
+                disabled={regulationLoading}
+                className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg bg-primary/15 text-primary border border-primary/30 text-sm font-semibold hover:bg-primary/20 disabled:opacity-50"
+              >
+                {regulationLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4" />}
+                {regulationLoading ? "Gerando…" : "Gerar regulamento com IA"}
+              </button>
+            }
+          >
+            <textarea
+              value={regulation}
+              onChange={(e) => setRegulation(e.target.value)}
+              rows={12}
+              placeholder="Clique em 'Gerar regulamento com IA' e revise o texto. Você pode editar livremente."
+              className="input min-h-[280px] resize-y font-mono text-xs leading-relaxed"
+            />
+            <div className="flex items-start gap-2 text-xs text-muted-foreground rounded-lg bg-primary/5 border border-primary/20 p-3">
+              <AlertCircle className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+              <span>Quando o usuário for fazer um palpite, este regulamento aparecerá em tela cheia com as opções <strong>Aceito</strong> ou <strong>Não aceito</strong>. Sem aceite, o palpite não é registrado.</span>
+            </div>
+          </Section>
 
           {/* Localização da campanha */}
           <Section
