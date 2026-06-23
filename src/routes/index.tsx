@@ -9,7 +9,8 @@ import { GoogleReviewsSlider } from "@/components/GoogleReviewsSlider";
 
 import { AppShell } from "@/components/layout/AppShell";
 import { PredictionCard } from "@/components/PredictionCard";
-import { CATEGORIES, PREDICTIONS } from "@/lib/mock-data";
+import { CATEGORIES, PREDICTIONS, type Prediction } from "@/lib/mock-data";
+import { getUserChallenges } from "@/lib/user-challenges";
 import { listActiveBanners, type Banner } from "@/lib/banners";
 import { aiSearchChallenges } from "@/lib/search-ai.functions";
 import logoAsset from "@/assets/logo-desafio.png.asset.json";
@@ -36,9 +37,14 @@ function Feed() {
   const [cat, setCat] = useState<string>("Todas");
   const [sort, setSort] = useState<Sort>("new");
   const [banners, setBanners] = useState<Banner[]>([]);
+  const [userChallenges, setUserChallenges] = useState<Prediction[]>([]);
 
   useEffect(() => {
     setBanners(listActiveBanners());
+    setUserChallenges(getUserChallenges());
+    const onUpdate = () => setUserChallenges(getUserChallenges());
+    window.addEventListener("ddp:user-challenges-updated", onUpdate);
+    return () => window.removeEventListener("ddp:user-challenges-updated", onUpdate);
   }, []);
 
   const closingSoon = useMemo(() => {
@@ -224,6 +230,31 @@ function Feed() {
         </div>
       </section>
 
+      {/* Desafios criados por pessoas */}
+      {userChallenges.filter((p) => !p.tags?.includes("link-apenas") && new Date(p.closesAt).getTime() > Date.now()).length > 0 && (
+        <section className="mb-8">
+          <div className="flex items-end justify-between mb-4">
+            <div>
+              <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-wider text-primary font-bold">
+                <Users className="h-3.5 w-3.5" /> Comunidade
+              </div>
+              <h2 className="font-display text-2xl sm:text-3xl font-black">Desafios criados por pessoas</h2>
+              <p className="text-sm text-muted-foreground">Desafios públicos criados por usuários da plataforma.</p>
+            </div>
+            <Link to="/criar" className="text-xs font-bold text-primary hover:underline shrink-0">
+              Criar o meu →
+            </Link>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {userChallenges
+              .filter((p) => !p.tags?.includes("link-apenas") && new Date(p.closesAt).getTime() > Date.now())
+              .slice(0, 6)
+              .map((p) => (
+                <PredictionCard key={p.id} prediction={p} hideOptions />
+              ))}
+          </div>
+        </section>
+      )}
 
 
       {/* Destaque: Desafios para Empresas */}

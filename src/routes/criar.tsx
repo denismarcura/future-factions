@@ -243,6 +243,14 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
   const [regulationLoading, setRegulationLoading] = useState(false);
   const [companyName, setCompanyName] = useState<string>("");
 
+  // Location & audience scope
+  const [coverAllBrazil, setCoverAllBrazil] = useState(true);
+  const [campaignCity, setCampaignCity] = useState("");
+  const [campaignState, setCampaignState] = useState("");
+  // Reach mode: "public" (everyone sees in feed) or "open" (only via link)
+  const [reachMode, setReachMode] = useState<"public" | "open">("public");
+
+
 
   // AI Challenge Generator state
   const [aiOpen, setAiOpen] = useState(false);
@@ -392,6 +400,9 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
       errs.push("Cadastre o endereço do Instagram nas missões (obrigatório para empresas).");
     }
     if (!winnerType) errs.push("Escolha o critério de ganhador (maior pontuação ou acertar todas).");
+    if (!coverAllBrazil && (!campaignCity.trim() || !campaignState.trim())) {
+      errs.push("Informe cidade e estado, ou marque a opção 'Brasil todo'.");
+    }
     if (errs.length) {
       setErrors(errs);
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -413,6 +424,10 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
         prizeImg,
         bannerImg,
         corporateMissions,
+        reachMode,
+        coverAllBrazil,
+        city: coverAllBrazil ? undefined : campaignCity.trim() || undefined,
+        state: coverAllBrazil ? undefined : campaignState.trim() || undefined,
       });
 
       if (forCompany) {
@@ -454,10 +469,7 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
 
       setPublished({ id, name: name.trim() });
       window.scrollTo({ top: 0, behavior: "smooth" });
-      // Redireciona para a lista de desafios encerrando em breve após sucesso.
-      setTimeout(() => {
-        navigate({ to: "/desafios", hash: "encerrando" });
-      }, 1800);
+      // Mantemos a tela de sucesso aberta para o usuário copiar o link de convite.
     } catch (err) {
       setErrors([
         err instanceof Error
@@ -700,6 +712,7 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
           {/* Básico */}
           <div id="manual-section" />
           <Section
+            step={1}
             title="Informações do desafio"
             description="Criar manualmente — preencha os campos abaixo. Você pode misturar com a IA acima."
           >
@@ -820,6 +833,7 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
           </Section>
 
           <Section
+            step={2}
             title={`Sub-categorias de palpites (${subs.length})`}
             description={`Crie quantas perguntas quiser, cada uma com até ${MAX_OPTIONS} opções. Cada acerto vale ${REWARD_PER_HIT} tokens.`}
 
@@ -960,6 +974,7 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
 
           {/* Ganhador */}
           <Section
+            step={3}
             title="Ganhador"
             description="Escolha como será definido o vencedor do desafio. Obrigatório selecionar uma opção."
           >
@@ -993,6 +1008,7 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
 
           {/* Prêmio */}
           <Section
+            step={4}
             title="Prêmio"
             description={`Automaticamente daremos ${AUTO_PRIZE.toLocaleString("pt-BR")} tokens para quem fizer a maior pontuação. Você pode somar seus próprios tokens, escolher um prêmio da nossa loja ou cadastrar um prêmio físico próprio.`}
           >
@@ -1103,6 +1119,7 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
 
           {/* Banner personalizado (para todos) */}
           <Section
+            step={5}
             title="Banner do desafio (opcional)"
             description="Imagem horizontal exibida no topo do desafio. Recomendado 1600×600px (proporção 8:3) em JPG ou PNG."
           >
@@ -1118,6 +1135,7 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
 
           {/* Missões */}
           <Section
+            step={6}
             title="Cadastre as missões obrigatórias"
             description="Monte o passo a passo de missões. Cada missão concluída pelo usuário vale +50 tokens e +1 chance de palpite."
           >
@@ -1322,7 +1340,107 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
             </>
           )}
 
+          {/* Localização da campanha */}
+          <Section
+            step={7}
+            title="Onde sua campanha vale"
+            description="Marque Brasil todo ou informe cidade e estado."
+          >
+            <label className="flex items-center gap-3 rounded-xl border border-border p-3 cursor-pointer hover:border-primary/50 transition">
+              <input
+                type="checkbox"
+                checked={coverAllBrazil}
+                onChange={(e) => setCoverAllBrazil(e.target.checked)}
+                className="h-5 w-5 accent-primary"
+              />
+              <div>
+                <div className="font-bold text-sm">Brasil todo</div>
+                <div className="text-xs text-muted-foreground">A campanha vale para qualquer cidade do país.</div>
+              </div>
+            </label>
+            {!coverAllBrazil && (
+              <div className="grid sm:grid-cols-[1fr_8rem] gap-3">
+                <Field label="Cidade">
+                  <input
+                    value={campaignCity}
+                    onChange={(e) => setCampaignCity(e.target.value)}
+                    placeholder="Ex.: São Paulo"
+                    className="input"
+                  />
+                </Field>
+                <Field label="Estado (UF)">
+                  <input
+                    value={campaignState}
+                    onChange={(e) => setCampaignState(e.target.value.toUpperCase().slice(0, 2))}
+                    placeholder="SP"
+                    maxLength={2}
+                    className="input uppercase"
+                  />
+                </Field>
+              </div>
+            )}
+          </Section>
+
+          {/* Link de convite (preview) */}
+          <Section
+            step={8}
+            title="Link para convidar seus amigos"
+            description="Este é o link que será gerado automaticamente quando você publicar. Compartilhe com seus amigos para chamarem para palpitar."
+          >
+            <div className="rounded-xl glass-card p-3 flex items-center gap-2">
+              <Share2 className="h-4 w-4 text-gold shrink-0" />
+              <input
+                readOnly
+                value="https://www.desafiodospalpites.com.br/previsao/[gerado-ao-publicar]"
+                className="flex-1 bg-transparent text-sm outline-none truncate text-muted-foreground"
+              />
+              <span className="text-[10px] uppercase tracking-wider font-bold text-primary bg-primary/10 border border-primary/30 rounded-full px-2 py-1">
+                Pré-visualização
+              </span>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Assim que o desafio for publicado, o link ficará ativo e você poderá copiar e enviar no WhatsApp, Instagram ou e-mail.
+            </p>
+          </Section>
+
+          {/* Tipo de campanha (público/aberto pelo link) */}
+          <Section
+            step={9}
+            title="A campanha será pública ou aberta?"
+            description="Escolha quem pode encontrar e participar do seu desafio."
+          >
+            <div className="space-y-3">
+              <label className={`flex items-start gap-3 rounded-xl border p-4 cursor-pointer transition ${reachMode === "public" ? "border-primary bg-primary/10" : "border-border hover:border-primary/50"}`}>
+                <input
+                  type="radio"
+                  name="reach-mode"
+                  checked={reachMode === "public"}
+                  onChange={() => setReachMode("public")}
+                  className="mt-1 h-5 w-5 accent-primary"
+                />
+                <div>
+                  <div className="font-bold text-sm flex items-center gap-2"><Globe className="h-4 w-4 text-primary" /> Pública</div>
+                  <div className="text-xs text-muted-foreground">Aparece na home e no feed de desafios para todo mundo.</div>
+                </div>
+              </label>
+              <label className={`flex items-start gap-3 rounded-xl border p-4 cursor-pointer transition ${reachMode === "open" ? "border-primary bg-primary/10" : "border-border hover:border-primary/50"}`}>
+                <input
+                  type="radio"
+                  name="reach-mode"
+                  checked={reachMode === "open"}
+                  onChange={() => setReachMode("open")}
+                  className="mt-1 h-5 w-5 accent-primary"
+                />
+                <div>
+                  <div className="font-bold text-sm flex items-center gap-2"><Share2 className="h-4 w-4 text-primary" /> Aberta apenas pelo link</div>
+                  <div className="text-xs text-muted-foreground">Só quem receber o link de convite consegue participar.</div>
+                </div>
+              </label>
+            </div>
+          </Section>
+
         </div>
+
 
 
         {/* Sidebar */}
@@ -1425,13 +1543,23 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
 
 }
 
-function Section({ title, description, action, children }: { title: string; description?: string; action?: React.ReactNode; children: React.ReactNode }) {
+function Section({ title, description, action, children, step }: { title: string; description?: string; action?: React.ReactNode; children: React.ReactNode; step?: number }) {
   return (
     <section className="rounded-2xl glass-card p-5 space-y-4">
       <div className="flex items-start justify-between gap-3">
-        <div>
-          <h2 className="font-display text-lg font-bold">{title}</h2>
-          {description && <p className="text-sm text-muted-foreground mt-0.5">{description}</p>}
+        <div className="flex items-start gap-3 min-w-0">
+          {typeof step === "number" && (
+            <span
+              aria-hidden
+              className="shrink-0 mt-0.5 h-9 w-9 rounded-full bg-gradient-brand text-primary-foreground font-display font-black text-base grid place-items-center shadow-glow ring-2 ring-primary/30"
+            >
+              {step}
+            </span>
+          )}
+          <div className="min-w-0">
+            <h2 className="font-display text-lg font-bold">{title}</h2>
+            {description && <p className="text-sm text-muted-foreground mt-0.5">{description}</p>}
+          </div>
         </div>
         {action}
       </div>
