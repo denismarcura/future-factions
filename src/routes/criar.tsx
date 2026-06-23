@@ -220,6 +220,7 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
   const generateTiebreakerFn = useServerFn(generateTiebreaker);
   const generateRegulationFn = useServerFn(generateRegulation);
   const createCorpChallengeFn = useServerFn(createCorpChallenge);
+  const sendPublishedEmailFn = useServerFn(sendChallengePublishedEmail);
   const [publishing, setPublishing] = useState(false);
 
   // Company-only assets & rules
