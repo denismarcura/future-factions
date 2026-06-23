@@ -348,3 +348,68 @@ function ResultForm({
     </div>
   );
 }
+
+function EmailModal({ row, onClose }: { row: WorldCupResultRow; onClose: () => void }) {
+  const genFn = useServerFn(generateResultEmail);
+  const [copied, setCopied] = useState(false);
+  const { data, isLoading, isError, refetch } = useQuery({
+    queryKey: ["result-email", row.id],
+    queryFn: () =>
+      genFn({
+        data: {
+          home_team: row.home_team,
+          away_team: row.away_team,
+          home_score: row.home_score,
+          away_score: row.away_score,
+          match_date: row.match_date,
+          image_url: row.image_url,
+        },
+      }),
+    staleTime: 0,
+  });
+
+  async function copyHtml() {
+    if (!data) return;
+    try {
+      await navigator.clipboard.writeText(data.html);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1800);
+    } catch {/* noop */}
+  }
+
+  return (
+    <div className="fixed inset-0 z-[100] bg-background/80 backdrop-blur-sm grid place-items-center p-4" onClick={onClose}>
+      <div className="w-full max-w-3xl max-h-[90vh] rounded-2xl glass-card border border-primary/40 overflow-hidden flex flex-col" onClick={(e) => e.stopPropagation()}>
+        <div className="p-4 flex items-center gap-3 border-b border-border/60">
+          <div className="h-9 w-9 rounded-lg bg-gradient-brand grid place-items-center text-primary-foreground">
+            <Sparkles className="h-4 w-4" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="text-xs text-muted-foreground uppercase tracking-wider">E-mail gerado por IA</div>
+            <div className="font-bold truncate">{data?.subject ?? `${row.home_team} ${row.home_score}x${row.away_score} ${row.away_team}`}</div>
+          </div>
+          <button onClick={() => refetch()} disabled={isLoading} className="h-9 px-3 rounded-lg border border-border text-xs font-bold inline-flex items-center gap-1 disabled:opacity-50">
+            {isLoading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3 w-3" />} Regenerar
+          </button>
+          <button onClick={copyHtml} disabled={!data} className="h-9 px-3 rounded-lg border border-border text-xs font-bold inline-flex items-center gap-1 disabled:opacity-50">
+            <Copy className="h-3 w-3" /> {copied ? "Copiado!" : "Copiar HTML"}
+          </button>
+          <button onClick={onClose} className="h-9 w-9 grid place-items-center rounded-lg border border-border">
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+        <div className="flex-1 overflow-auto bg-[#020617]">
+          {isLoading ? (
+            <div className="p-12 text-center text-muted-foreground">
+              <Loader2 className="h-6 w-6 animate-spin mx-auto mb-2" /> Gerando e-mail com IA...
+            </div>
+          ) : isError ? (
+            <div className="p-12 text-center text-destructive text-sm">Falha ao gerar e-mail. Tente novamente.</div>
+          ) : (
+            <iframe title="Pré-visualização do e-mail" srcDoc={data?.html ?? ""} className="w-full h-[70vh] border-0 bg-white" />
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
