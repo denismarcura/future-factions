@@ -469,10 +469,7 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
 
       setPublished({ id, name: name.trim() });
       window.scrollTo({ top: 0, behavior: "smooth" });
-      // Redireciona para a lista de desafios encerrando em breve após sucesso.
-      setTimeout(() => {
-        navigate({ to: "/desafios", hash: "encerrando" });
-      }, 1800);
+      // Mantemos a tela de sucesso aberta para o usuário copiar o link de convite.
     } catch (err) {
       setErrors([
         err instanceof Error
