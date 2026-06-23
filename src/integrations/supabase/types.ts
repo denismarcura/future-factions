@@ -610,6 +610,48 @@ export type Database = {
         }
         Relationships: []
       }
+      instagram_submissions: {
+        Row: {
+          created_at: string
+          id: string
+          instagram_url: string
+          notes: string | null
+          reviewed_at: string | null
+          reward_palpite_tokens: number
+          reward_tokens: number
+          status: string
+          user_email: string | null
+          user_id: string
+          user_name: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          instagram_url: string
+          notes?: string | null
+          reviewed_at?: string | null
+          reward_palpite_tokens?: number
+          reward_tokens?: number
+          status?: string
+          user_email?: string | null
+          user_id: string
+          user_name?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          instagram_url?: string
+          notes?: string | null
+          reviewed_at?: string | null
+          reward_palpite_tokens?: number
+          reward_tokens?: number
+          status?: string
+          user_email?: string | null
+          user_id?: string
+          user_name?: string | null
+        }
+        Relationships: []
+      }
       mission_claims: {
         Row: {
           context: string
