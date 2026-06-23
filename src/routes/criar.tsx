@@ -2178,16 +2178,47 @@ function MissionWizard({
 
 function PublishedSuccess({ name, id, onCreateAnother }: { name: string; id: string; onCreateAnother: () => void }) {
   const [copied, setCopied] = useState(false);
+  const [textCopied, setTextCopied] = useState(false);
   const PUBLIC_DOMAIN = "https://www.desafiodospalpites.com.br";
   const link = `${PUBLIC_DOMAIN}/previsao/${id}`;
-  const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(`Participe do meu desafio "${name}" no Desafio dos Palpites: ${link}`)}`;
-  const copy = async () => {
+
+  const inviteSubject = `🎯 Participe do meu desafio "${name}" — Desafio dos Palpites (100% GRATUITO)`;
+  const inviteBody = `Olá!
+
+Acabei de criar um desafio no Desafio dos Palpites e quero te convidar para participar:
+
+🏆 "${name}"
+👉 ${link}
+
+⚠️ ATENÇÃO: O DESAFIO DOS PALPITES É TOTALMENTE GRATUITO. Muitos prêmios são fornecidos por nossos patrocinadores!
+
+🎯 Existem vários tipos de Desafios:
+• Desafio dos Palpites (oficiais da plataforma)
+• Desafios criados por usuários
+• Desafios criados por empresas
+
+🪙 A plataforma usa 2 tipos de tokens:
+• Token Acumulativo — você ganha criando desafios, convidando amigos, fazendo missões e check-in diário
+• Token Palpite — usado para participar de determinados desafios; você ganha completando missões
+
+✅ Tarefas diárias:
+Fazendo todas as tarefas diárias você pode ganhar até 5.000 tokens de troca e até 10 tokens de palpites.
+
+🎁 Clique no meu link, cadastre-se e ganhe 1.000 tokens — mais 100 tokens quando criar seu primeiro desafio!
+${link}
+
+Te espero lá! 🚀`;
+
+  const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(inviteBody)}`;
+  const mailtoUrl = `mailto:?subject=${encodeURIComponent(inviteSubject)}&body=${encodeURIComponent(inviteBody)}`;
+
+  const writeToClipboard = async (value: string) => {
     try {
       if (navigator.clipboard?.writeText) {
-        await navigator.clipboard.writeText(link);
+        await navigator.clipboard.writeText(value);
       } else {
         const textarea = document.createElement("textarea");
-        textarea.value = link;
+        textarea.value = value;
         textarea.setAttribute("readonly", "");
         textarea.style.position = "fixed";
         textarea.style.opacity = "0";
@@ -2196,10 +2227,25 @@ function PublishedSuccess({ name, id, onCreateAnother }: { name: string; id: str
         document.execCommand("copy");
         document.body.removeChild(textarea);
       }
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  const copy = async () => {
+    if (await writeToClipboard(link)) {
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
-    } catch {}
+    }
   };
+  const copyText = async () => {
+    if (await writeToClipboard(inviteBody)) {
+      setTextCopied(true);
+      setTimeout(() => setTextCopied(false), 1500);
+    }
+  };
+
   return (
     <div className="max-w-2xl mx-auto text-center py-10">
       <div className="mx-auto h-20 w-20 rounded-full bg-primary/15 grid place-items-center mb-5 shadow-glow">
@@ -2209,7 +2255,8 @@ function PublishedSuccess({ name, id, onCreateAnother }: { name: string; id: str
       <p className="text-muted-foreground mb-6">
         <span className="text-foreground font-semibold">"{name}"</span> está no ar, com link de indicação ativo. 100 Tokens foram debitados da sua carteira.
       </p>
-      <div className="rounded-2xl glass-card p-4 flex items-center gap-2 mb-6">
+
+      <div className="rounded-2xl glass-card p-4 flex items-center gap-2 mb-4">
         <Share2 className="h-4 w-4 text-gold shrink-0" />
         <input readOnly value={link} className="flex-1 bg-transparent text-sm outline-none truncate" />
         <button onClick={copy} className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg bg-primary/15 text-primary border border-primary/30 text-sm font-semibold hover:bg-primary/20">
@@ -2219,9 +2266,49 @@ function PublishedSuccess({ name, id, onCreateAnother }: { name: string; id: str
           <ExternalLink className="h-4 w-4" /> Abrir
         </a>
       </div>
-      <a href={whatsappUrl} target="_blank" rel="noreferrer" className="mb-6 mx-auto inline-flex items-center gap-2 h-11 px-5 rounded-xl bg-gradient-brand text-primary-foreground font-display font-bold shadow-glow">
-        <MessageCircle className="h-4 w-4" /> Enviar link de indicação no WhatsApp
-      </a>
+
+      {/* Convide seus amigos */}
+      <div className="rounded-2xl border border-primary/30 bg-primary/5 p-5 mb-6 text-left">
+        <div className="flex items-center gap-2 mb-3">
+          <UserPlus className="h-5 w-5 text-primary" />
+          <div className="font-display font-black text-base">Convide seus amigos</div>
+        </div>
+        <p className="text-xs text-muted-foreground mb-4">
+          Texto pronto destacando que o Desafio dos Palpites é <strong className="text-foreground">100% gratuito</strong>, com vários tipos de desafios e prêmios dos patrocinadores. É só escolher o canal:
+        </p>
+
+        <div className="grid sm:grid-cols-2 gap-3 mb-4">
+          <a
+            href={mailtoUrl}
+            className="inline-flex items-center justify-center gap-2 h-11 px-4 rounded-xl bg-primary text-primary-foreground font-display font-bold shadow-glow hover:opacity-90"
+          >
+            <Mail className="h-4 w-4" /> Convidar por E-mail
+          </a>
+          <a
+            href={whatsappUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center justify-center gap-2 h-11 px-4 rounded-xl bg-gradient-brand text-primary-foreground font-display font-bold shadow-glow hover:opacity-90"
+          >
+            <MessageCircle className="h-4 w-4" /> Convidar por WhatsApp
+          </a>
+        </div>
+
+        <details className="rounded-lg border border-border/60 bg-background/40 p-3">
+          <summary className="cursor-pointer text-xs font-semibold text-muted-foreground flex items-center justify-between">
+            <span>Ver / editar o texto do convite</span>
+            <button
+              type="button"
+              onClick={(e) => { e.preventDefault(); void copyText(); }}
+              className="inline-flex items-center gap-1.5 h-7 px-2 rounded-md bg-primary/15 text-primary border border-primary/30 text-[11px] font-semibold hover:bg-primary/20"
+            >
+              <Copy className="h-3 w-3" /> {textCopied ? "Copiado" : "Copiar texto"}
+            </button>
+          </summary>
+          <pre className="mt-3 whitespace-pre-wrap text-xs text-muted-foreground leading-relaxed font-sans">{inviteBody}</pre>
+        </details>
+      </div>
+
       <div className="flex flex-wrap gap-3 justify-center">
         <Link to="/desafios" className="h-11 px-5 rounded-xl bg-gradient-brand text-primary-foreground font-display font-bold inline-flex items-center shadow-glow">
           Ver desafios
