@@ -44,7 +44,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { CATEGORIES, formatTokens, type Category } from "@/lib/mock-data";
-import { PRODUCTS } from "@/lib/mock-extra";
+import { PRODUCTS, COMPANY_CHALLENGES } from "@/lib/mock-extra";
 import {
   listMissions,
   listMyClaims,
@@ -313,7 +313,7 @@ function Dashboard() {
         />
 
         {/* QUICK ACTIONS */}
-        <div className="grid sm:grid-cols-3 gap-4">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <ActionCard
             to="/criar"
             icon={Plus}
@@ -327,10 +327,25 @@ function Dashboard() {
             desc="Veja desafios abertos"
           />
           <ActionCard to="/shop" icon={ShoppingBag} title="Trocar tokens" desc="Brindes na loja" />
+          <ActionCard
+            to="/admin/email-marketing"
+            icon={Mail}
+            title="Divulgação"
+            desc="E-mail marketing dos seus desafios"
+          />
         </div>
 
         {/* PROFILE EDITOR */}
         <ProfileEditor profile={profile} onSaved={setProfile} />
+
+        {/* MY CHALLENGES (primeiro: os que o usuário criou) */}
+        <MyChallengesSection items={myChallenges} />
+
+        {/* MY PARTICIPATIONS (depois: os que está participando) */}
+        <MyParticipationsSection items={participations} palpites={myPalpites} />
+
+        {/* COMPANY CHALLENGES (por último) */}
+        <CompanyChallengesSection />
 
         {/* TOKENS EXTRACT */}
         <TokensExtractSection
@@ -341,9 +356,6 @@ function Dashboard() {
           balance={tokens}
         />
 
-        {/* MY PARTICIPATIONS */}
-        <MyParticipationsSection items={participations} palpites={myPalpites} />
-
         {/* MISSIONS */}
         <MissionsSection
           missions={missions}
@@ -351,9 +363,6 @@ function Dashboard() {
           done={missionsDone}
           todo={missionsTodo}
         />
-
-        {/* MY CHALLENGES */}
-        <MyChallengesSection items={myChallenges} />
 
         {/* AI RECOMMENDATIONS */}
         <RecommendationsSection />
@@ -373,7 +382,6 @@ function Dashboard() {
           myChallenges={myChallenges}
         />
 
-        {/* SHOP PREVIEW */}
         <ShopPreviewSection tokens={tokens} />
       </div>
     </AppShell>
@@ -1074,11 +1082,14 @@ function TokensExtractSection({
 /* ---------- My challenges ---------- */
 
 function MyChallengesSection({ items }: { items: Prediction[] }) {
+  const now = Date.now();
+  const DAY = 86400000;
   return (
     <section className="glass-card rounded-2xl p-5 border border-border/60">
       <SectionTitle
         icon={ListChecks}
         title="Desafios que eu Criei"
+        hint="Os mais recentes aparecem primeiro."
         right={
           <Link
             to="/criar"
@@ -1100,25 +1111,152 @@ function MyChallengesSection({ items }: { items: Prediction[] }) {
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {[...items]
             .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-            .map((c) => (
-            <Link
-              key={c.id}
-              to="/previsao/$id"
-              params={{ id: c.id }}
-              className="p-4 rounded-xl bg-card border border-border/60 hover:border-primary/60 transition block"
-            >
-              <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                {c.category}
-              </div>
-              <div className="font-display font-bold mt-1 line-clamp-2">{c.title}</div>
-              <div className="text-[11px] text-muted-foreground mt-2">{c.bettors} apostadores</div>
-            </Link>
-          ))}
+            .map((c) => {
+              const closes = new Date(c.closesAt).getTime();
+              const ended = closes <= now;
+              const closingSoon = !ended && closes - now <= 2 * DAY;
+              return (
+                <div
+                  key={c.id}
+                  className={`p-4 rounded-xl bg-card border transition flex flex-col gap-2 ${
+                    ended
+                      ? "border-destructive/40"
+                      : closingSoon
+                        ? "border-gold/60 ring-1 ring-gold/30"
+                        : "border-border/60 hover:border-primary/60"
+                  }`}
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                      {c.category}
+                    </span>
+                    {ended ? (
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-destructive/15 text-destructive border border-destructive/30">
+                        Encerrado
+                      </span>
+                    ) : closingSoon ? (
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-gold/15 text-gold border border-gold/30 inline-flex items-center gap-1">
+                        <Clock className="h-3 w-3" /> Vencendo
+                      </span>
+                    ) : (
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/30">
+                        Aberto
+                      </span>
+                    )}
+                  </div>
+                  <Link
+                    to="/previsao/$id"
+                    params={{ id: c.id }}
+                    className="font-display font-bold line-clamp-2 hover:text-primary transition"
+                  >
+                    {c.title}
+                  </Link>
+                  <div className="text-[11px] text-muted-foreground flex items-center justify-between gap-2">
+                    <span>{c.bettors} apostadores</span>
+                    <span>
+                      {ended ? "Encerrou" : "Fecha"} em{" "}
+                      {new Date(c.closesAt).toLocaleDateString("pt-BR", {
+                        day: "2-digit",
+                        month: "2-digit",
+                      })}
+                    </span>
+                  </div>
+                  {!ended && (
+                    <Link
+                      to="/previsao/$id"
+                      params={{ id: c.id }}
+                      className="mt-1 inline-flex items-center justify-center gap-1.5 h-8 px-3 rounded-full bg-gradient-brand text-primary-foreground text-xs font-bold shadow-glow"
+                    >
+                      <Target className="h-3.5 w-3.5" /> Participar
+                    </Link>
+                  )}
+                </div>
+              );
+            })}
         </div>
       )}
     </section>
   );
 }
+
+/* ---------- Company challenges ---------- */
+
+function CompanyChallengesSection() {
+  const now = Date.now();
+  const DAY = 86400000;
+  const items = [...COMPANY_CHALLENGES]
+    .sort((a, b) => new Date(a.closesAt).getTime() - new Date(b.closesAt).getTime())
+    .slice(0, 9);
+  return (
+    <section className="glass-card rounded-2xl p-5 border border-border/60">
+      <SectionTitle
+        icon={Rocket}
+        title="Desafios de Empresas"
+        hint="Patrocinados — concorra a prêmios reais."
+        right={
+          <Link
+            to="/desafios-empresas"
+            className="text-xs font-bold text-primary hover:underline inline-flex items-center gap-1"
+          >
+            Ver todos <ExternalLink className="h-3 w-3" />
+          </Link>
+        }
+      />
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        {items.map((c) => {
+          const closes = new Date(c.closesAt).getTime();
+          const ended = closes <= now || c.status === "Fechado";
+          const closingSoon = !ended && closes - now <= 2 * DAY;
+          return (
+            <div
+              key={c.id}
+              className={`p-4 rounded-xl bg-card border transition flex flex-col gap-2 ${
+                ended
+                  ? "border-destructive/40"
+                  : closingSoon
+                    ? "border-gold/60 ring-1 ring-gold/30"
+                    : "border-border/60 hover:border-primary/60"
+              }`}
+            >
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-[10px] uppercase tracking-wider text-muted-foreground line-clamp-1">
+                  {c.company.name}
+                </span>
+                {ended ? (
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-destructive/15 text-destructive border border-destructive/30">
+                    Encerrado
+                  </span>
+                ) : closingSoon ? (
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-gold/15 text-gold border border-gold/30 inline-flex items-center gap-1">
+                    <Clock className="h-3 w-3" /> Vencendo
+                  </span>
+                ) : (
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/30">
+                    Aberto
+                  </span>
+                )}
+              </div>
+              <div className="font-display font-bold line-clamp-2">{c.title}</div>
+              <div className="text-[11px] text-muted-foreground flex items-center justify-between gap-2">
+                <span className="text-gold font-bold">🏆 {c.prize}</span>
+                <span>{c.participants} participando</span>
+              </div>
+              {!ended && (
+                <Link
+                  to="/desafios-empresas"
+                  className="mt-1 inline-flex items-center justify-center gap-1.5 h-8 px-3 rounded-full bg-gradient-brand text-primary-foreground text-xs font-bold shadow-glow"
+                >
+                  <Target className="h-3.5 w-3.5" /> Participar
+                </Link>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
 
 /* ---------- AI Recommendations ---------- */
 
