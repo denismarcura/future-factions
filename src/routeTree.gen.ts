@@ -38,6 +38,7 @@ import { Route as AdminRelatoriosRouteImport } from './routes/admin.relatorios'
 import { Route as AdminRegrasIaRouteImport } from './routes/admin.regras-ia'
 import { Route as AdminRaspadinhaRouteImport } from './routes/admin.raspadinha'
 import { Route as AdminRankingRouteImport } from './routes/admin.ranking'
+import { Route as AdminPremiosRouteImport } from './routes/admin.premios'
 import { Route as AdminNotificacoesRouteImport } from './routes/admin.notificacoes'
 import { Route as AdminMissoesRouteImport } from './routes/admin.missoes'
 import { Route as AdminLojaRouteImport } from './routes/admin.loja'
@@ -53,6 +54,7 @@ import { Route as AdminApuracaoCopaRouteImport } from './routes/admin.apuracao-c
 import { Route as AdminApisRouteImport } from './routes/admin.apis'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
+import { Route as ApiPublicHooksTop100SnapshotRouteImport } from './routes/api/public/hooks/top100-snapshot'
 import { Route as ApiPublicHooksApurarCopaRouteImport } from './routes/api/public/hooks/apurar-copa'
 
 const Top100Route = Top100RouteImport.update({
@@ -199,6 +201,11 @@ const AdminRankingRoute = AdminRankingRouteImport.update({
   path: '/ranking',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminPremiosRoute = AdminPremiosRouteImport.update({
+  id: '/premios',
+  path: '/premios',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminNotificacoesRoute = AdminNotificacoesRouteImport.update({
   id: '/notificacoes',
   path: '/notificacoes',
@@ -275,6 +282,12 @@ const LovableEmailQueueProcessRoute =
     path: '/lovable/email/queue/process',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksTop100SnapshotRoute =
+  ApiPublicHooksTop100SnapshotRouteImport.update({
+    id: '/api/public/hooks/top100-snapshot',
+    path: '/api/public/hooks/top100-snapshot',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksApurarCopaRoute =
   ApiPublicHooksApurarCopaRouteImport.update({
     id: '/api/public/hooks/apurar-copa',
@@ -314,6 +327,7 @@ export interface FileRoutesByFullPath {
   '/admin/loja': typeof AdminLojaRoute
   '/admin/missoes': typeof AdminMissoesRoute
   '/admin/notificacoes': typeof AdminNotificacoesRoute
+  '/admin/premios': typeof AdminPremiosRoute
   '/admin/ranking': typeof AdminRankingRoute
   '/admin/raspadinha': typeof AdminRaspadinhaRoute
   '/admin/regras-ia': typeof AdminRegrasIaRoute
@@ -326,6 +340,7 @@ export interface FileRoutesByFullPath {
   '/ranking/$challengeId': typeof RankingChallengeIdRoute
   '/admin/': typeof AdminIndexRoute
   '/api/public/hooks/apurar-copa': typeof ApiPublicHooksApurarCopaRoute
+  '/api/public/hooks/top100-snapshot': typeof ApiPublicHooksTop100SnapshotRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
 export interface FileRoutesByTo {
@@ -359,6 +374,7 @@ export interface FileRoutesByTo {
   '/admin/loja': typeof AdminLojaRoute
   '/admin/missoes': typeof AdminMissoesRoute
   '/admin/notificacoes': typeof AdminNotificacoesRoute
+  '/admin/premios': typeof AdminPremiosRoute
   '/admin/ranking': typeof AdminRankingRoute
   '/admin/raspadinha': typeof AdminRaspadinhaRoute
   '/admin/regras-ia': typeof AdminRegrasIaRoute
@@ -371,6 +387,7 @@ export interface FileRoutesByTo {
   '/ranking/$challengeId': typeof RankingChallengeIdRoute
   '/admin': typeof AdminIndexRoute
   '/api/public/hooks/apurar-copa': typeof ApiPublicHooksApurarCopaRoute
+  '/api/public/hooks/top100-snapshot': typeof ApiPublicHooksTop100SnapshotRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
 export interface FileRoutesById {
@@ -407,6 +424,7 @@ export interface FileRoutesById {
   '/admin/loja': typeof AdminLojaRoute
   '/admin/missoes': typeof AdminMissoesRoute
   '/admin/notificacoes': typeof AdminNotificacoesRoute
+  '/admin/premios': typeof AdminPremiosRoute
   '/admin/ranking': typeof AdminRankingRoute
   '/admin/raspadinha': typeof AdminRaspadinhaRoute
   '/admin/regras-ia': typeof AdminRegrasIaRoute
@@ -419,6 +437,7 @@ export interface FileRoutesById {
   '/ranking/$challengeId': typeof RankingChallengeIdRoute
   '/admin/': typeof AdminIndexRoute
   '/api/public/hooks/apurar-copa': typeof ApiPublicHooksApurarCopaRoute
+  '/api/public/hooks/top100-snapshot': typeof ApiPublicHooksTop100SnapshotRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
 export interface FileRouteTypes {
@@ -455,6 +474,7 @@ export interface FileRouteTypes {
     | '/admin/loja'
     | '/admin/missoes'
     | '/admin/notificacoes'
+    | '/admin/premios'
     | '/admin/ranking'
     | '/admin/raspadinha'
     | '/admin/regras-ia'
@@ -467,6 +487,7 @@ export interface FileRouteTypes {
     | '/ranking/$challengeId'
     | '/admin/'
     | '/api/public/hooks/apurar-copa'
+    | '/api/public/hooks/top100-snapshot'
     | '/lovable/email/queue/process'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -500,6 +521,7 @@ export interface FileRouteTypes {
     | '/admin/loja'
     | '/admin/missoes'
     | '/admin/notificacoes'
+    | '/admin/premios'
     | '/admin/ranking'
     | '/admin/raspadinha'
     | '/admin/regras-ia'
@@ -512,6 +534,7 @@ export interface FileRouteTypes {
     | '/ranking/$challengeId'
     | '/admin'
     | '/api/public/hooks/apurar-copa'
+    | '/api/public/hooks/top100-snapshot'
     | '/lovable/email/queue/process'
   id:
     | '__root__'
@@ -547,6 +570,7 @@ export interface FileRouteTypes {
     | '/admin/loja'
     | '/admin/missoes'
     | '/admin/notificacoes'
+    | '/admin/premios'
     | '/admin/ranking'
     | '/admin/raspadinha'
     | '/admin/regras-ia'
@@ -559,6 +583,7 @@ export interface FileRouteTypes {
     | '/ranking/$challengeId'
     | '/admin/'
     | '/api/public/hooks/apurar-copa'
+    | '/api/public/hooks/top100-snapshot'
     | '/lovable/email/queue/process'
   fileRoutesById: FileRoutesById
 }
@@ -584,6 +609,7 @@ export interface RootRouteChildren {
   EmpresaCriarRoute: typeof EmpresaCriarRoute
   PrevisaoIdRoute: typeof PrevisaoIdRoute
   ApiPublicHooksApurarCopaRoute: typeof ApiPublicHooksApurarCopaRoute
+  ApiPublicHooksTop100SnapshotRoute: typeof ApiPublicHooksTop100SnapshotRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
 }
 
@@ -792,6 +818,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminRankingRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/premios': {
+      id: '/admin/premios'
+      path: '/premios'
+      fullPath: '/admin/premios'
+      preLoaderRoute: typeof AdminPremiosRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/notificacoes': {
       id: '/admin/notificacoes'
       path: '/notificacoes'
@@ -897,6 +930,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LovableEmailQueueProcessRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/top100-snapshot': {
+      id: '/api/public/hooks/top100-snapshot'
+      path: '/api/public/hooks/top100-snapshot'
+      fullPath: '/api/public/hooks/top100-snapshot'
+      preLoaderRoute: typeof ApiPublicHooksTop100SnapshotRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/apurar-copa': {
       id: '/api/public/hooks/apurar-copa'
       path: '/api/public/hooks/apurar-copa'
@@ -932,6 +972,7 @@ interface AdminRouteChildren {
   AdminLojaRoute: typeof AdminLojaRoute
   AdminMissoesRoute: typeof AdminMissoesRoute
   AdminNotificacoesRoute: typeof AdminNotificacoesRoute
+  AdminPremiosRoute: typeof AdminPremiosRoute
   AdminRankingRoute: typeof AdminRankingRoute
   AdminRaspadinhaRoute: typeof AdminRaspadinhaRoute
   AdminRegrasIaRoute: typeof AdminRegrasIaRoute
@@ -956,6 +997,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminLojaRoute: AdminLojaRoute,
   AdminMissoesRoute: AdminMissoesRoute,
   AdminNotificacoesRoute: AdminNotificacoesRoute,
+  AdminPremiosRoute: AdminPremiosRoute,
   AdminRankingRoute: AdminRankingRoute,
   AdminRaspadinhaRoute: AdminRaspadinhaRoute,
   AdminRegrasIaRoute: AdminRegrasIaRoute,
@@ -1001,18 +1043,9 @@ const rootRouteChildren: RootRouteChildren = {
   EmpresaCriarRoute: EmpresaCriarRoute,
   PrevisaoIdRoute: PrevisaoIdRoute,
   ApiPublicHooksApurarCopaRoute: ApiPublicHooksApurarCopaRoute,
+  ApiPublicHooksTop100SnapshotRoute: ApiPublicHooksTop100SnapshotRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

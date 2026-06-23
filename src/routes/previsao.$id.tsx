@@ -17,6 +17,8 @@ import { detectMatchFromText } from "@/lib/world-cup-matches";
 import { useAuth } from "@/hooks/use-auth";
 import { hasParticipated, saveParticipation } from "@/lib/my-participations";
 import { getTokenBalance } from "@/lib/balance";
+import { StarRating } from "@/components/StarRating";
+import { getRatings, rateChallenge, getMyRating } from "@/lib/ratings.functions";
 
 function corpToPrediction(c: CorpChallengeRecord): Prediction {
   const first = c.subs[0];
@@ -479,6 +481,8 @@ function PredictionInner({ p }: { p: Prediction }) {
 
           <h1 className="mt-4 font-display text-2xl sm:text-3xl font-black leading-tight">{p.title}</h1>
           {!p.match && <p className="mt-2 text-muted-foreground">{p.description}</p>}
+          <ChallengeRatingBlock challengeId={p.id} />
+
 
           {p.prizeTiers && (
             <div className="mt-5 grid grid-cols-3 gap-3">
@@ -818,3 +822,59 @@ function PredictionInner({ p }: { p: Prediction }) {
   );
 }
 
+
+function ChallengeRatingBlock({ challengeId }: { challengeId: string }) {
+  const { user } = useAuth();
+  const fetchRatings = useServerFn(getRatings);
+  const fetchMine = useServerFn(getMyRating);
+  const rate = useServerFn(rateChallenge);
+  const [avg, setAvg] = useState(0);
+  const [count, setCount] = useState(0);
+  const [mine, setMine] = useState<number | null>(null);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    fetchRatings({ data: { ids: [challengeId] } })
+      .then((rows) => {
+        const r = rows[0];
+        if (r) { setAvg(r.avg); setCount(r.count); }
+      })
+      .catch(() => {});
+    if (user) {
+      fetchMine({ data: { challengeId } })
+        .then((r) => setMine(r.rating))
+        .catch(() => {});
+    }
+  }, [challengeId, user, fetchRatings, fetchMine]);
+
+  async function handleRate(v: number) {
+    if (!user) { toast.error("Faça login para avaliar"); return; }
+    setSaving(true);
+    try {
+      await rate({ data: { challengeId, rating: v } });
+      setMine(v);
+      // optimistic refresh
+      const rows = await fetchRatings({ data: { ids: [challengeId] } });
+      const r = rows[0];
+      if (r) { setAvg(r.avg); setCount(r.count); }
+      toast.success("Avaliação salva");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Erro ao avaliar");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div className="mt-3 flex items-center justify-between gap-3 rounded-xl border border-border/60 bg-background/40 p-3">
+      <div className="flex items-center gap-2 text-sm">
+        <StarRating value={avg} readOnly size={16} showValue count={count} />
+        <span className="text-xs text-muted-foreground">avaliação da comunidade</span>
+      </div>
+      <div className="flex items-center gap-2 text-xs">
+        <span className="text-muted-foreground">{mine ? "Sua nota:" : "Avalie:"}</span>
+        <StarRating value={mine ?? 0} onChange={handleRate} readOnly={saving} size={18} />
+      </div>
+    </div>
+  );
+}

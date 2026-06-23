@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_prizes: {
+        Row: {
+          active: boolean
+          created_at: string
+          description: string | null
+          estimated_value: number | null
+          id: string
+          image_url: string | null
+          name: string
+          stock: number
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          description?: string | null
+          estimated_value?: number | null
+          id?: string
+          image_url?: string | null
+          name: string
+          stock?: number
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          description?: string | null
+          estimated_value?: number | null
+          id?: string
+          image_url?: string | null
+          name?: string
+          stock?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       challenge_categories: {
         Row: {
           created_at: string
@@ -35,6 +71,33 @@ export type Database = {
           name?: string
           sort_order?: number
           updated_at?: string
+        }
+        Relationships: []
+      }
+      challenge_ratings: {
+        Row: {
+          challenge_id: string
+          created_at: string
+          id: string
+          rating: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          challenge_id: string
+          created_at?: string
+          id?: string
+          rating: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          challenge_id?: string
+          created_at?: string
+          id?: string
+          rating?: number
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -844,6 +907,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      top100_snapshots: {
+        Row: {
+          challenges_count: number
+          created_at: string
+          id: string
+          month_key: string
+          points: number
+          rank: number
+          total_participants: number
+          user_id: string
+        }
+        Insert: {
+          challenges_count?: number
+          created_at?: string
+          id?: string
+          month_key: string
+          points?: number
+          rank: number
+          total_participants?: number
+          user_id: string
+        }
+        Update: {
+          challenges_count?: number
+          created_at?: string
+          id?: string
+          month_key?: string
+          points?: number
+          rank?: number
+          total_participants?: number
+          user_id?: string
+        }
+        Relationships: []
       }
       user_roles: {
         Row: {

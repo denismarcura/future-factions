@@ -43,6 +43,7 @@ const ADMIN_GROUPS: NavGroup[] = [
     items: [
       { to: "/admin/desafios", label: "Desafios", icon: ListChecks },
       { to: "/empresa/criar", label: "Cadastrar Desafio Empresa", icon: Building2 },
+      { to: "/admin/premios", label: "Cadastrar Prêmios", icon: Gift },
       { to: "/admin/categorias", label: "Categorias", icon: FolderTree },
       { to: "/admin/banners", label: "Banners", icon: ImageIcon },
       { to: "/admin/resultado-jogos", label: "Resultado Jogos", icon: TrophyIcon },

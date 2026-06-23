@@ -23,6 +23,9 @@ import { uploadCorpAsset, uploadCorpAssets } from "@/lib/corp-storage";
 import logoAsset from "@/assets/logo-desafio.png.asset.json";
 import { WORLD_CUP_MATCHES } from "@/lib/world-cup-matches";
 import { ArtsWizard } from "@/components/ArtsWizard";
+import { PrizesPicker, type PrizeSlot } from "@/components/PrizesPicker";
+import { CitiesAutocomplete, type SelectedCity } from "@/components/CitiesAutocomplete";
+import type { AdminPrize } from "@/lib/admin-prizes.functions";
 
 function getNextBrazilMatch() {
   const now = Date.now();
@@ -246,10 +249,20 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
 
   // Location & audience scope
   const [coverAllBrazil, setCoverAllBrazil] = useState(true);
+  const [selectedCities, setSelectedCities] = useState<SelectedCity[]>([]);
   const [campaignCity, setCampaignCity] = useState("");
   const [campaignState, setCampaignState] = useState("");
   // Reach mode: "public" (everyone sees in feed) or "open" (only via link)
   const [reachMode, setReachMode] = useState<"public" | "open">("public");
+  // Multi-prize picker
+  const [prizesPickerOpen, setPrizesPickerOpen] = useState(false);
+  const [prizeSlots, setPrizeSlots] = useState<PrizeSlot[]>([]);
+  const [pickedPrizes, setPickedPrizes] = useState<AdminPrize[]>([]);
+  // Acceptance
+  const [acceptDisclaimer, setAcceptDisclaimer] = useState(false);
+  const [authorizeMarketing, setAuthorizeMarketing] = useState(false);
+  const [closedInfoSeen, setClosedInfoSeen] = useState(false);
+  const [showClosedInfo, setShowClosedInfo] = useState(false);
 
 
 
@@ -405,8 +418,11 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
       errs.push("Cadastre o endereço do Instagram nas missões (obrigatório para empresas).");
     }
     if (!winnerType) errs.push("Escolha o critério de ganhador (maior pontuação ou acertar todas).");
-    if (!coverAllBrazil && (!campaignCity.trim() || !campaignState.trim())) {
-      errs.push("Informe cidade e estado, ou marque a opção 'Brasil todo'.");
+    if (reachMode === "public" && !coverAllBrazil && selectedCities.length === 0) {
+      errs.push("Selecione ao menos uma cidade, ou marque 'Brasil todo'.");
+    }
+    if (!acceptDisclaimer) {
+      errs.push("Aceite o termo de que o Desafio dos Palpites não se responsabiliza pela entrega dos brindes.");
     }
     if (errs.length) {
       setErrors(errs);
@@ -431,8 +447,8 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
         corporateMissions,
         reachMode,
         coverAllBrazil,
-        city: coverAllBrazil ? undefined : campaignCity.trim() || undefined,
-        state: coverAllBrazil ? undefined : campaignState.trim() || undefined,
+        city: coverAllBrazil ? undefined : (selectedCities[0]?.nome ?? undefined),
+        state: coverAllBrazil ? undefined : (selectedCities[0]?.uf ?? undefined),
       });
 
       if (forCompany) {
@@ -1104,14 +1120,46 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
 
             <div className="text-xs uppercase tracking-wider font-bold text-muted-foreground mb-2">Ou cadastre seu próprio prêmio físico</div>
 
+            {/* Prêmios cadastrados (admin) — múltiplos sorteios */}
+            <div className="rounded-xl border border-gold/40 bg-gold/5 p-4 mb-4">
+              <div className="flex items-start gap-3">
+                <Gift className="h-5 w-5 text-gold mt-0.5 shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <div className="font-bold text-sm">Sortear vários prêmios cadastrados</div>
+                  <div className="text-xs text-muted-foreground mb-2">
+                    Escolha de 1 a 10 prêmios já cadastrados pelo administrador e defina qual prêmio vai para cada posição (1º, 2º, 3º...).
+                  </div>
+                  {pickedPrizes.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mb-2">
+                      {prizeSlots.map((s) => {
+                        const p = pickedPrizes.find((x) => x.id === s.prizeId);
+                        return (
+                          <span key={s.position} className="inline-flex items-center gap-1.5 pl-2 pr-3 py-1 rounded-full bg-background/80 border border-gold/40 text-xs">
+                            <strong>{s.position}º</strong> {p?.name ?? "vazio"}
+                          </span>
+                        );
+                      })}
+                    </div>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => setPrizesPickerOpen(true)}
+                    className="inline-flex items-center gap-2 h-10 px-4 rounded-lg bg-gold/15 text-gold border border-gold/40 text-sm font-bold hover:bg-gold/25"
+                  >
+                    <Gift className="h-4 w-4" /> {pickedPrizes.length > 0 ? "Editar prêmios" : "Selecionar prêmios"}
+                  </button>
+                </div>
+              </div>
+            </div>
+
             <Field label="Prêmio do desafio (opcional)">
               <input value={prizeName} onChange={(e) => setPrizeName(e.target.value)} placeholder="Ex.: 1 Camiseta do Brasil, Caixa de Cerveja…" className="input" />
             </Field>
 
             <div className="grid sm:grid-cols-2 gap-4">
               <div>
-                <div className="text-xs uppercase tracking-wider font-bold text-muted-foreground mb-1.5">Imagem do prêmio (500x500)</div>
-                <div className="rounded-xl border border-dashed border-border/70 bg-background/40 p-4 aspect-square grid place-items-center overflow-hidden">
+                <div className="text-xs uppercase tracking-wider font-bold text-muted-foreground mb-1.5">Imagem do prêmio (proporção 4:5)</div>
+                <div className="rounded-xl border border-dashed border-border/70 bg-background/40 p-4 aspect-[4/5] grid place-items-center overflow-hidden">
                   {prizeImg ? (
                     <img src={prizeImg} alt="Prêmio" className="w-full h-full object-cover rounded-lg" />
                   ) : (
@@ -1122,6 +1170,7 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
                   )}
                 </div>
               </div>
+
 
               <div className="space-y-3">
                 <Field label="Gerar com IA">
@@ -1157,7 +1206,7 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
 
           {/* Banner personalizado (para todos) */}
           <Section
-            step={5}
+            step={6}
             title="Banner do desafio (opcional)"
             description="Imagem horizontal exibida no topo do desafio. Recomendado 1600×600px (proporção 8:3) em JPG ou PNG."
           >
@@ -1173,7 +1222,7 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
 
           {/* Missões */}
           <Section
-            step={6}
+            step={7}
             title="Cadastre as missões obrigatórias"
             description="Monte o passo a passo de missões. Cada missão concluída pelo usuário vale +50 tokens e +1 chance de palpite."
           >
@@ -1379,47 +1428,6 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
             </div>
           </Section>
 
-          {/* Localização da campanha */}
-          <Section
-            step={7}
-            title="Onde sua campanha vale"
-            description="Marque Brasil todo ou informe cidade e estado."
-          >
-            <label className="flex items-center gap-3 rounded-xl border border-border p-3 cursor-pointer hover:border-primary/50 transition">
-              <input
-                type="checkbox"
-                checked={coverAllBrazil}
-                onChange={(e) => setCoverAllBrazil(e.target.checked)}
-                className="h-5 w-5 accent-primary"
-              />
-              <div>
-                <div className="font-bold text-sm">Brasil todo</div>
-                <div className="text-xs text-muted-foreground">A campanha vale para qualquer cidade do país.</div>
-              </div>
-            </label>
-            {!coverAllBrazil && (
-              <div className="grid sm:grid-cols-[1fr_8rem] gap-3">
-                <Field label="Cidade">
-                  <input
-                    value={campaignCity}
-                    onChange={(e) => setCampaignCity(e.target.value)}
-                    placeholder="Ex.: São Paulo"
-                    className="input"
-                  />
-                </Field>
-                <Field label="Estado (UF)">
-                  <input
-                    value={campaignState}
-                    onChange={(e) => setCampaignState(e.target.value.toUpperCase().slice(0, 2))}
-                    placeholder="SP"
-                    maxLength={2}
-                    className="input uppercase"
-                  />
-                </Field>
-              </div>
-            )}
-          </Section>
-
           {/* Link de convite (preview) */}
           <Section
             step={8}
@@ -1442,11 +1450,10 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
             </p>
           </Section>
 
-          {/* Tipo de campanha (público/aberto pelo link) */}
+          {/* Divulgação: aberto/fechado + cidades + termos */}
           <Section
-            step={9}
-            title="A campanha será pública ou aberta?"
-            description="Escolha quem pode encontrar e participar do seu desafio."
+            title="Divulgação e responsabilidades"
+            description="Defina quem encontra seu desafio, em quais cidades ele vale e aceite os termos."
           >
             <div className="space-y-3">
               <label className={`flex items-start gap-3 rounded-xl border p-4 cursor-pointer transition ${reachMode === "public" ? "border-primary bg-primary/10" : "border-border hover:border-primary/50"}`}>
@@ -1458,27 +1465,79 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
                   className="mt-1 h-5 w-5 accent-primary"
                 />
                 <div>
-                  <div className="font-bold text-sm flex items-center gap-2"><Globe className="h-4 w-4 text-primary" /> Pública</div>
-                  <div className="text-xs text-muted-foreground">Aparece na home e no feed de desafios para todo mundo.</div>
+                  <div className="font-bold text-sm flex items-center gap-2"><Globe className="h-4 w-4 text-primary" /> Desafio Aberto (público)</div>
+                  <div className="text-xs text-muted-foreground">Aparece na home e no feed para todo mundo encontrar.</div>
                 </div>
               </label>
-              <label className={`flex items-start gap-3 rounded-xl border p-4 cursor-pointer transition ${reachMode === "open" ? "border-primary bg-primary/10" : "border-border hover:border-primary/50"}`}>
+              <label
+                className={`flex items-start gap-3 rounded-xl border p-4 cursor-pointer transition ${reachMode === "open" ? "border-primary bg-primary/10" : "border-border hover:border-primary/50"}`}
+                onClick={() => { if (reachMode !== "open") setShowClosedInfo(true); }}
+              >
                 <input
                   type="radio"
                   name="reach-mode"
                   checked={reachMode === "open"}
-                  onChange={() => setReachMode("open")}
+                  onChange={() => { setReachMode("open"); setShowClosedInfo(true); }}
                   className="mt-1 h-5 w-5 accent-primary"
                 />
                 <div>
-                  <div className="font-bold text-sm flex items-center gap-2"><Share2 className="h-4 w-4 text-primary" /> Aberta apenas pelo link</div>
+                  <div className="font-bold text-sm flex items-center gap-2"><Lock className="h-4 w-4 text-primary" /> Desafio Fechado (apenas pelo link)</div>
                   <div className="text-xs text-muted-foreground">Só quem receber o link de convite consegue participar.</div>
                 </div>
               </label>
             </div>
+
+            {reachMode === "public" && (
+              <>
+                <div className="mt-4 space-y-3">
+                  <label className="flex items-center gap-3 rounded-xl border border-border p-3 cursor-pointer hover:border-primary/50 transition">
+                    <input
+                      type="checkbox"
+                      checked={coverAllBrazil}
+                      onChange={(e) => { setCoverAllBrazil(e.target.checked); if (e.target.checked) setSelectedCities([]); }}
+                      className="h-5 w-5 accent-primary"
+                    />
+                    <div>
+                      <div className="font-bold text-sm">Brasil todo</div>
+                      <div className="text-xs text-muted-foreground">A campanha vale para qualquer cidade do país.</div>
+                    </div>
+                  </label>
+                  {!coverAllBrazil && (
+                    <div>
+                      <div className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-1">Aberto apenas para as cidades</div>
+                      <CitiesAutocomplete value={selectedCities} onChange={setSelectedCities} />
+                    </div>
+                  )}
+                </div>
+                <label className="mt-4 flex items-start gap-3 rounded-xl border border-primary/30 bg-primary/5 p-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={authorizeMarketing}
+                    onChange={(e) => setAuthorizeMarketing(e.target.checked)}
+                    className="mt-0.5 h-5 w-5 accent-primary"
+                  />
+                  <span className="text-sm">
+                    Autorizo o <strong>Desafio dos Palpites</strong> a divulgar meu desafio por e-mail marketing, Instagram e demais redes sociais.
+                  </span>
+                </label>
+              </>
+            )}
+
+            <label className="mt-4 flex items-start gap-3 rounded-xl border border-amber-500/40 bg-amber-500/5 p-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={acceptDisclaimer}
+                onChange={(e) => setAcceptDisclaimer(e.target.checked)}
+                className="mt-0.5 h-5 w-5 accent-primary"
+              />
+              <span className="text-sm">
+                Estou ciente de que <strong>O Desafio dos Palpites não se responsabiliza pela entrega dos brindes</strong> aqui cadastrados.
+              </span>
+            </label>
           </Section>
 
         </div>
+
 
 
 
@@ -1587,6 +1646,43 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
             if (result.story) setInstagramArts((prev) => [...prev, result.story!]);
           }}
         />
+      )}
+      <PrizesPicker
+        open={prizesPickerOpen}
+        initialSlots={prizeSlots}
+        onClose={() => setPrizesPickerOpen(false)}
+        onConfirm={(slots, prizes) => {
+          setPrizeSlots(slots);
+          setPickedPrizes(slots.map((s) => prizes.find((p) => p.id === s.prizeId)!).filter(Boolean));
+          // bind first prize as the main prize image (4:5) if user has none
+          const firstPrize = prizes.find((p) => p.id === slots[0]?.prizeId);
+          if (firstPrize?.image_url && !prizeImg) setPrizeImg(firstPrize.image_url);
+          if (firstPrize?.name && !prizeName) setPrizeName(firstPrize.name);
+          setPrizesPickerOpen(false);
+        }}
+      />
+      {showClosedInfo && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" onClick={() => { setShowClosedInfo(false); setClosedInfoSeen(true); }} />
+          <div className="relative max-w-md glass-card rounded-2xl p-6 border border-amber-500/40">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="h-6 w-6 text-amber-500 shrink-0 mt-0.5" />
+              <div>
+                <h3 className="font-display font-black text-lg">Desafio Fechado</h3>
+                <p className="text-sm text-muted-foreground mt-2">
+                  Você escolheu manter o desafio <strong>apenas pelo link</strong>. Isso significa que <strong>você é responsável por divulgar o convite</strong> aos seus amigos, parentes e contatos. O Desafio dos Palpites não exibirá esse desafio publicamente.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => { setShowClosedInfo(false); setClosedInfoSeen(true); }}
+                  className="mt-4 h-10 px-5 rounded-full bg-gradient-brand text-primary-foreground font-bold text-sm shadow-glow"
+                >
+                  Entendi
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </>
   );
