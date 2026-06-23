@@ -9,6 +9,7 @@ import {
   Linkedin, Twitter, Star, Heart, Check, ExternalLink,
 } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
+import { useAuth } from "@/hooks/use-auth";
 import { CATEGORIES, CURRENT_USER, formatTokens } from "@/lib/mock-data";
 import { PRODUCTS } from "@/lib/mock-extra";
 
