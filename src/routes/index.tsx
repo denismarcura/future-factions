@@ -230,6 +230,31 @@ function Feed() {
         </div>
       </section>
 
+      {/* Desafios criados por pessoas */}
+      {userChallenges.filter((p) => !p.tags?.includes("link-apenas") && new Date(p.closesAt).getTime() > Date.now()).length > 0 && (
+        <section className="mb-8">
+          <div className="flex items-end justify-between mb-4">
+            <div>
+              <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-wider text-primary font-bold">
+                <Users className="h-3.5 w-3.5" /> Comunidade
+              </div>
+              <h2 className="font-display text-2xl sm:text-3xl font-black">Desafios criados por pessoas</h2>
+              <p className="text-sm text-muted-foreground">Desafios públicos criados por usuários da plataforma.</p>
+            </div>
+            <Link to="/criar" className="text-xs font-bold text-primary hover:underline shrink-0">
+              Criar o meu →
+            </Link>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {userChallenges
+              .filter((p) => !p.tags?.includes("link-apenas") && new Date(p.closesAt).getTime() > Date.now())
+              .slice(0, 6)
+              .map((p) => (
+                <PredictionCard key={p.id} prediction={p} hideOptions />
+              ))}
+          </div>
+        </section>
+      )}
 
 
       {/* Destaque: Desafios para Empresas */}
