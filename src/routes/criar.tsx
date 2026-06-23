@@ -172,14 +172,10 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
     extras: {},
     bonusChance: false,
   });
-  const [subs, setSubs] = useState<SubCat[]>(() => {
-    const next = getNextBrazilMatch();
-    const adv = next.home === "Brasil" ? next.away : next.home;
-    return [
-      { id: uid(), question: `Quem ganha o jogo Brasil x ${adv}?`, options: ["Brasil", "Empate", adv] },
-      { id: uid(), question: "Neymar vai jogar?", options: ["Sim", "Não"] },
-    ];
-  });
+  const [subs, setSubs] = useState<SubCat[]>(() => [
+    { id: uid(), question: "", options: ["", ""] },
+  ]);
+
   const [prizeImg, setPrizeImg] = useState<string | null>(null);
   
   const [shopPrizeId, setShopPrizeId] = useState<string | null>(null);
@@ -1027,11 +1023,18 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
             }
           >
             {/* Gerar palpites com IA — inline */}
-            <div className="mb-4 rounded-xl border border-primary/30 bg-primary/5 p-3">
+            <div className="mb-4 rounded-xl border-2 border-primary/40 bg-primary/10 p-4">
               <div className="flex items-center gap-2 mb-2">
-                <Sparkles className="h-4 w-4 text-primary" />
-                <span className="text-sm font-bold">Gerar palpites com a IA</span>
+                <Sparkles className="h-5 w-5 text-primary" />
+                <span className="text-sm font-display font-black">
+                  Gerar palpites com IA a partir do título do desafio
+                </span>
               </div>
+              <p className="text-xs text-muted-foreground mb-3">
+                A IA lê o título <span className="text-foreground font-semibold">"{name.trim() || "—"}"</span>{" "}
+                e cria palpites diretamente relacionados ao tema (jogadores, times, datas, etc.).
+                {!name.trim() && " Escreva o nome do desafio acima antes de gerar."}
+              </p>
               <div className="grid gap-2 sm:grid-cols-[7rem_1fr_auto] items-end">
                 <label className="flex flex-col gap-1">
                   <span className="text-[11px] text-muted-foreground">Quantos palpites</span>
@@ -1044,32 +1047,30 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
                   />
                 </label>
                 <label className="flex flex-col gap-1">
-                  <span className="text-[11px] text-muted-foreground">Sobre o que devem ser os palpites?</span>
+                  <span className="text-[11px] text-muted-foreground">Foco extra (opcional)</span>
                   <input
                     type="text"
                     value={inlineAiFocus}
                     onChange={(e) => setInlineAiFocus(e.target.value)}
-                    placeholder='Ex.: "placar do jogo, primeiro gol, cartões…"'
+                    placeholder='Ex.: "times sul-americanos, posição na tabela…"'
                     className="input h-10 w-full"
                   />
                 </label>
                 <button
                   type="button"
                   onClick={handleInlineGenerate}
-                  disabled={inlineAiLoading}
-                  className="inline-flex items-center gap-2 h-10 px-4 rounded-lg bg-primary text-primary-foreground text-sm font-bold hover:opacity-90 disabled:opacity-50"
+                  disabled={inlineAiLoading || !name.trim()}
+                  className="inline-flex items-center gap-2 h-10 px-4 rounded-lg bg-gradient-brand text-primary-foreground text-sm font-bold hover:opacity-90 disabled:opacity-50 shadow-glow"
                 >
                   {inlineAiLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4" />}
                   {inlineAiLoading ? "Gerando…" : "Gerar com IA"}
                 </button>
               </div>
-              <p className="mt-2 text-[11px] text-muted-foreground">
-                Usa o tema, categoria, prêmio e o foco que você descrever acima.
-              </p>
               {inlineAiError && (
                 <div className="mt-2 text-xs text-destructive">{inlineAiError}</div>
               )}
             </div>
+
 
 
             {hasBrazilMatch && (
