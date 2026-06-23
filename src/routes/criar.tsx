@@ -644,6 +644,7 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
         <PublishedSuccess
           name={published.name}
           id={published.id}
+          ownerId={CURRENT_USER?.id ?? ""}
           onCreateAnother={() => {
             setPublished(null);
             setName("");
