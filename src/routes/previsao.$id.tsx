@@ -822,3 +822,59 @@ function PredictionInner({ p }: { p: Prediction }) {
   );
 }
 
+
+function ChallengeRatingBlock({ challengeId }: { challengeId: string }) {
+  const { user } = useAuth();
+  const fetchRatings = useServerFn(getRatings);
+  const fetchMine = useServerFn(getMyRating);
+  const rate = useServerFn(rateChallenge);
+  const [avg, setAvg] = useState(0);
+  const [count, setCount] = useState(0);
+  const [mine, setMine] = useState<number | null>(null);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    fetchRatings({ data: { ids: [challengeId] } })
+      .then((rows) => {
+        const r = rows[0];
+        if (r) { setAvg(r.avg); setCount(r.count); }
+      })
+      .catch(() => {});
+    if (user) {
+      fetchMine({ data: { challengeId } })
+        .then((r) => setMine(r.rating))
+        .catch(() => {});
+    }
+  }, [challengeId, user, fetchRatings, fetchMine]);
+
+  async function handleRate(v: number) {
+    if (!user) { toast.error("Faça login para avaliar"); return; }
+    setSaving(true);
+    try {
+      await rate({ data: { challengeId, rating: v } });
+      setMine(v);
+      // optimistic refresh
+      const rows = await fetchRatings({ data: { ids: [challengeId] } });
+      const r = rows[0];
+      if (r) { setAvg(r.avg); setCount(r.count); }
+      toast.success("Avaliação salva");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Erro ao avaliar");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div className="mt-3 flex items-center justify-between gap-3 rounded-xl border border-border/60 bg-background/40 p-3">
+      <div className="flex items-center gap-2 text-sm">
+        <StarRating value={avg} readOnly size={16} showValue count={count} />
+        <span className="text-xs text-muted-foreground">avaliação da comunidade</span>
+      </div>
+      <div className="flex items-center gap-2 text-xs">
+        <span className="text-muted-foreground">{mine ? "Sua nota:" : "Avalie:"}</span>
+        <StarRating value={mine ?? 0} onChange={handleRate} readOnly={saving} size={18} />
+      </div>
+    </div>
+  );
+}
