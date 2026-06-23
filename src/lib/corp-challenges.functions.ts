@@ -197,7 +197,7 @@ export const listLatestCorpChallenges = createServerFn({ method: "GET" })
       .select("*")
       .eq("status", "ativo")
       .order("created_at", { ascending: false })
-      .limit(data.limit ?? 12);
+      .limit(50);
     if (error) throw new Error(error.message);
     return (rows ?? [])
       .map((r) => rowToRecord(r as Row))
