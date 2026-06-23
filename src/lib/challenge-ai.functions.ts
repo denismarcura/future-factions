@@ -29,12 +29,40 @@ export type GeneratedChallengeResult = {
 export const generateChallenge = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => Input.parse(input))
-  .handler(async ({ data }): Promise<GeneratedChallengeResult> => {
+  .handler(async ({ data, context }): Promise<GeneratedChallengeResult> => {
     const key = process.env.LOVABLE_API_KEY;
     if (!key) throw new Error("Missing LOVABLE_API_KEY");
 
     const { createLovableAiGatewayProvider } = await import("./ai-gateway.server");
     const gateway = createLovableAiGatewayProvider(key);
+
+    // Carrega a base de times/jogos cadastrados para ancorar a IA
+    let teamsContext = "";
+    try {
+      const { data: matches } = await context.supabase
+        .from("world_cup_results")
+        .select("home_team, away_team, match_date, status")
+        .order("match_date", { ascending: true })
+        .limit(200);
+      if (matches && matches.length) {
+        const teamSet = new Set<string>();
+        matches.forEach((m: { home_team: string; away_team: string }) => {
+          if (m.home_team) teamSet.add(m.home_team);
+          if (m.away_team) teamSet.add(m.away_team);
+        });
+        const teams = Array.from(teamSet).sort();
+        const upcoming = matches
+          .filter((m: { status: string }) => m.status !== "encerrado")
+          .slice(0, 30)
+          .map(
+            (m: { home_team: string; away_team: string; match_date: string }) =>
+              `${m.home_team} x ${m.away_team} (${m.match_date})`,
+          );
+        teamsContext = `\n\nBASE DE TIMES CADASTRADOS NA PLATAFORMA (use APENAS estes nomes — não invente times nem jogadores de times fora desta lista):\n${teams.join(", ")}\n${upcoming.length ? `\nJOGOS CADASTRADOS (use estes confrontos como referência ao criar perguntas):\n${upcoming.join("\n")}\n` : ""}`;
+      }
+    } catch {
+      // segue sem contexto extra se a consulta falhar
+    }
 
     const userSubsText = (data.userSubs ?? [])
       .map((s, i) => {
