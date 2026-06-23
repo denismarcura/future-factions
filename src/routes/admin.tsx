@@ -87,6 +87,7 @@ function AdminLayout() {
   const [claiming, setClaiming] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [showPrimary, setShowPrimary] = useState(false);
 
   useEffect(() => {
     if (loading) return;
