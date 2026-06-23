@@ -128,7 +128,7 @@ function DesafiosPage() {
     const pool = [...userChallenges, ...PREDICTIONS].filter((p) => !isClosed(p));
     return pool
       .sort((a, b) => new Date(a.closesAt).getTime() - new Date(b.closesAt).getTime())
-      .slice(0, 6);
+      .slice(0, 24);
   }, [userChallenges]);
 
   return (
