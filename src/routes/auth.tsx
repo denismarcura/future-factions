@@ -191,6 +191,34 @@ function AuthPage() {
           </div>
         </Link>
 
+        {invite && (
+          <div className="glass-card rounded-2xl overflow-hidden border border-primary/40 mb-5 shadow-glow">
+            {invite.image_url && (
+              <img src={invite.image_url} alt={invite.title} className="w-full aspect-[8/3] object-cover" />
+            )}
+            <div className="p-4 space-y-1.5">
+              <div className="text-[10px] font-bold uppercase text-primary flex items-center gap-1">
+                <Trophy className="h-3 w-3" /> Você foi convidado para este desafio
+              </div>
+              <div className="font-display font-black text-base leading-tight">{invite.title}</div>
+              {invite.owner_name && (
+                <div className="text-xs text-muted-foreground">por {invite.owner_name}</div>
+              )}
+              <div className="flex flex-wrap gap-3 text-[11px] text-muted-foreground pt-1">
+                {invite.prize_pool && <span>🎁 {invite.prize_pool}</span>}
+                {invite.closes_at && (
+                  <span className="inline-flex items-center gap-1">
+                    <Clock className="h-3 w-3" /> Encerra {new Date(invite.closes_at).toLocaleDateString("pt-BR")}
+                  </span>
+                )}
+              </div>
+              <div className="text-xs text-primary font-semibold pt-2">
+                Cadastre-se para participar e ganhe 1.000 tokens de bônus.
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="glass-card rounded-2xl p-8 border border-border/60">
           <div className="flex gap-2 mb-6 p-1 rounded-full bg-card border border-border/60">
             {(["login", "signup"] as const).map((m) => (
