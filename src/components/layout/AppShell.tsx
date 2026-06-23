@@ -341,6 +341,8 @@ export function AppShell({ children, hidePrimarySidebar = false }: { children: R
           })}
         </div>
       </nav>
+
+      <ClosingSoonAlert />
     </div>
   );
 }
