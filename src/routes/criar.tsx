@@ -22,6 +22,7 @@ import { createCorpChallenge, type CorporateMission } from "@/lib/corp-challenge
 import { uploadCorpAsset, uploadCorpAssets } from "@/lib/corp-storage";
 import logoAsset from "@/assets/logo-desafio.png.asset.json";
 import { WORLD_CUP_MATCHES } from "@/lib/world-cup-matches";
+import { ArtsWizard } from "@/components/ArtsWizard";
 
 function getNextBrazilMatch() {
   const now = Date.now();
@@ -259,6 +260,10 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
   const [aiUseExistingSubs, setAiUseExistingSubs] = useState(true);
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState<string | null>(null);
+
+  // Auto-generated arts wizard
+  const [autoArts, setAutoArts] = useState(false);
+  const [artsWizardOpen, setArtsWizardOpen] = useState(false);
 
   // Inline AI generator (inside Sub-categorias section)
   const [inlineAiCount, setInlineAiCount] = useState(3);
@@ -709,8 +714,41 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
             )}
           </div>
 
+          {/* Auto-arts toggle */}
+          <div className="rounded-xl border border-gold/40 bg-gradient-to-br from-gold/10 via-card to-card p-4">
+            <label className="flex items-start gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={autoArts}
+                onChange={(e) => {
+                  setAutoArts(e.target.checked);
+                  if (e.target.checked) setArtsWizardOpen(true);
+                }}
+                className="h-5 w-5 accent-gold mt-0.5"
+              />
+              <div className="flex-1">
+                <div className="font-display font-black text-base flex items-center gap-2">
+                  <Sparkles className="h-5 w-5 text-gold" /> Criar Artes do Desafio Automaticamente
+                </div>
+                <div className="text-xs text-muted-foreground mt-1">
+                  Gera 3 artes profissionais (feed, banner e story) em menos de 30 segundos com IA. Sem Canva, sem designer.
+                </div>
+                {autoArts && (
+                  <button
+                    type="button"
+                    onClick={() => setArtsWizardOpen(true)}
+                    className="mt-3 inline-flex items-center gap-1.5 h-9 px-3 rounded-lg bg-gold text-gold-foreground text-sm font-bold"
+                  >
+                    <Wand2 className="h-4 w-4" /> Abrir assistente de artes
+                  </button>
+                )}
+              </div>
+            </label>
+          </div>
+
           {/* Básico */}
           <div id="manual-section" />
+
           <Section
             step={1}
             title="Informações do desafio"
@@ -1535,6 +1573,20 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
             </div>
           </div>
         </div>
+      )}
+      {artsWizardOpen && (
+        <ArtsWizard
+          initialName={name}
+          initialPrize={prizeName}
+          initialDeadline={endsAt}
+          sponsorName={companyName}
+          onClose={() => setArtsWizardOpen(false)}
+          onApply={(result) => {
+            if (result.feed) setPrizeImg(result.feed);
+            if (result.banner) setBannerImg(result.banner);
+            if (result.story) setInstagramArts((prev) => [...prev, result.story!]);
+          }}
+        />
       )}
     </>
   );
