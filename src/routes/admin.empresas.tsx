@@ -8,6 +8,7 @@ import {
 import { toast } from "sonner";
 import { generateCorporateChallenge } from "@/lib/corporate-challenge-ai.functions";
 import { getCorpStats, type CorpStats } from "@/lib/admin-stats.functions";
+import { listAllCorpChallengesAdmin, updateCorpChallengeStatus, deleteCorpChallenge, type AdminCorpChallenge } from "@/lib/admin-data.functions";
 import { Criar } from "@/routes/criar";
 
 export const Route = createFileRoute("/admin/empresas")({
@@ -87,17 +88,29 @@ function AdminEmpresasPage() {
   const [tab, setTab] = useState<TabId>("dashboard");
   const [companies, setCompanies] = useState<Company[]>([]);
   const [challenges, setChallenges] = useState<CorpChallenge[]>([]);
+  const [dbChallenges, setDbChallenges] = useState<AdminCorpChallenge[]>([]);
+  const [dbLoading, setDbLoading] = useState(true);
+  const fetchAll = useServerFn(listAllCorpChallengesAdmin);
 
   useEffect(() => {
     setCompanies(load<Company[]>(LS_COMPANIES, []));
     setChallenges(load<CorpChallenge[]>(LS_CHALLENGES, []));
   }, []);
 
+  const reloadDb = () => {
+    setDbLoading(true);
+    fetchAll()
+      .then((r) => { setDbChallenges(r); })
+      .catch(() => { /* silent */ })
+      .finally(() => setDbLoading(false));
+  };
+  useEffect(() => { reloadDb(); }, [fetchAll]);
+
   const updateCompanies = (list: Company[]) => { setCompanies(list); save(LS_COMPANIES, list); };
   const updateChallenges = (list: CorpChallenge[]) => { setChallenges(list); save(LS_CHALLENGES, list); };
 
-  const ativos = useMemo(() => challenges.filter((c) => c.status === "ativo"), [challenges]);
-  const encerrados = useMemo(() => challenges.filter((c) => c.status === "encerrado"), [challenges]);
+  const ativosDb = useMemo(() => dbChallenges.filter((c) => c.status === "ativo"), [dbChallenges]);
+  const encerradosDb = useMemo(() => dbChallenges.filter((c) => c.status !== "ativo"), [dbChallenges]);
 
   return (
     <div className="space-y-6">
@@ -122,13 +135,13 @@ function AdminEmpresasPage() {
         ))}
       </div>
 
-      {tab === "dashboard" && <DashboardTab companies={companies} challenges={challenges} />}
+      {tab === "dashboard" && <DashboardTab companies={companies} challenges={challenges} dbChallenges={dbChallenges} />}
       {tab === "empresas" && <EmpresasTab companies={companies} onChange={updateCompanies} />}
       {tab === "novo" && <Criar forCompany bare />}
-      {tab === "ativos" && <ChallengesListTab list={ativos} companies={companies} onChange={updateChallenges} all={challenges} emptyText="Nenhum desafio ativo." />}
-      {tab === "encerrados" && <ChallengesListTab list={encerrados} companies={companies} onChange={updateChallenges} all={challenges} emptyText="Nenhum desafio encerrado." />}
-      {tab === "premiacoes" && <PremiacoesTab list={challenges} />}
-      {tab === "relatorios" && <RelatoriosTab companies={companies} challenges={challenges} />}
+      {tab === "ativos" && <DbChallengesTab list={ativosDb} loading={dbLoading} onChanged={reloadDb} emptyText="Nenhum desafio ativo no banco." />}
+      {tab === "encerrados" && <DbChallengesTab list={encerradosDb} loading={dbLoading} onChanged={reloadDb} emptyText="Nenhum desafio encerrado." />}
+      {tab === "premiacoes" && <PremiacoesDbTab list={dbChallenges} />}
+      {tab === "relatorios" && <RelatoriosTab companies={companies} challenges={challenges} dbChallenges={dbChallenges} />}
       {tab === "config" && <ConfigTab />}
     </div>
   );
@@ -144,7 +157,7 @@ function StatCard({ label, value, icon: Icon }: { label: string; value: string |
   );
 }
 
-function DashboardTab({ companies, challenges }: { companies: Company[]; challenges: CorpChallenge[] }) {
+function DashboardTab({ companies, challenges, dbChallenges }: { companies: Company[]; challenges: CorpChallenge[]; dbChallenges: AdminCorpChallenge[] }) {
   const fetchStats = useServerFn(getCorpStats);
   const [stats, setStats] = useState<CorpStats | null>(null);
   useEffect(() => {
@@ -156,10 +169,11 @@ function DashboardTab({ companies, challenges }: { companies: Company[]; challen
   }, [fetchStats]);
 
   const localParticipants = challenges.reduce((s, c) => s + (c.participants || 0), 0);
+  const dbParticipants = dbChallenges.reduce((s, c) => s + (c.participants || 0), 0);
   const companiesCount = Math.max(stats?.companies ?? 0, companies.length);
-  const activeCount = Math.max(stats?.activeChallenges ?? 0, challenges.filter((c) => c.status === "ativo").length);
-  const closedCount = Math.max(stats?.closedChallenges ?? 0, challenges.filter((c) => c.status === "encerrado").length);
-  const totalParticipants = Math.max(stats?.totalParticipants ?? 0, localParticipants);
+  const activeCount = Math.max(stats?.activeChallenges ?? 0, dbChallenges.filter((c) => c.status === "ativo").length, challenges.filter((c) => c.status === "ativo").length);
+  const closedCount = Math.max(stats?.closedChallenges ?? 0, dbChallenges.filter((c) => c.status !== "ativo").length, challenges.filter((c) => c.status === "encerrado").length);
+  const totalParticipants = Math.max(stats?.totalParticipants ?? 0, localParticipants + dbParticipants);
 
   return (
     <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -559,18 +573,92 @@ function PremiacoesTab({ list }: { list: CorpChallenge[] }) {
   );
 }
 
-function RelatoriosTab({ companies, challenges }: { companies: Company[]; challenges: CorpChallenge[] }) {
+function RelatoriosTab({ companies, challenges, dbChallenges }: { companies: Company[]; challenges: CorpChallenge[]; dbChallenges: AdminCorpChallenge[] }) {
+  const totalDb = dbChallenges.length;
   return (
     <div className="glass-card rounded-2xl p-5 space-y-3">
       <h3 className="font-display font-bold">Relatório resumido</h3>
       <ul className="text-sm space-y-1">
-        <li>Total de empresas: <b>{companies.length}</b></li>
-        <li>Desafios ativos: <b>{challenges.filter((c) => c.status === "ativo").length}</b></li>
-        <li>Desafios encerrados: <b>{challenges.filter((c) => c.status === "encerrado").length}</b></li>
-        <li>Premiações distribuídas: <b>{challenges.filter((c) => c.status === "encerrado").reduce((s, c) => s + c.winners, 0)}</b></li>
-        <li>Participações estimadas: <b>{challenges.reduce((s, c) => s + (c.participants || 0), 0)}</b></li>
+        <li>Total de empresas (locais): <b>{companies.length}</b></li>
+        <li>Desafios no banco: <b>{totalDb}</b></li>
+        <li>Desafios ativos (banco): <b>{dbChallenges.filter((c) => c.status === "ativo").length}</b></li>
+        <li>Desafios encerrados (banco): <b>{dbChallenges.filter((c) => c.status !== "ativo").length}</b></li>
+        <li>Participações (banco): <b>{dbChallenges.reduce((s, c) => s + (c.participants || 0), 0)}</b></li>
+        <li>Desafios locais (rascunho): <b>{challenges.length}</b></li>
       </ul>
-      <p className="text-xs text-muted-foreground">Relatórios detalhados (CSV/PDF) serão liberados quando os dados forem persistidos no banco.</p>
+    </div>
+  );
+}
+
+function DbChallengesTab({ list, loading, onChanged, emptyText }: { list: AdminCorpChallenge[]; loading: boolean; onChanged: () => void; emptyText: string }) {
+  const updateStatus = useServerFn(updateCorpChallengeStatus);
+  const removeFn = useServerFn(deleteCorpChallenge);
+  const [busy, setBusy] = useState<string | null>(null);
+
+  async function toggle(c: AdminCorpChallenge) {
+    setBusy(c.id);
+    try {
+      await updateStatus({ data: { id: c.id, status: c.status === "ativo" ? "encerrado" : "ativo" } });
+      toast.success(c.status === "ativo" ? "Desafio encerrado" : "Desafio reativado");
+      onChanged();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Falha");
+    } finally { setBusy(null); }
+  }
+  async function remove(c: AdminCorpChallenge) {
+    if (!confirm(`Excluir "${c.title}"? Esta ação não pode ser desfeita.`)) return;
+    setBusy(c.id);
+    try {
+      await removeFn({ data: { id: c.id } });
+      toast.success("Desafio excluído");
+      onChanged();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Falha");
+    } finally { setBusy(null); }
+  }
+
+  if (loading) return <div className="glass-card rounded-2xl p-10 text-center text-muted-foreground text-sm flex items-center justify-center gap-2"><Loader2 className="h-4 w-4 animate-spin" /> Carregando…</div>;
+  if (list.length === 0) return <div className="glass-card rounded-2xl p-10 text-center text-muted-foreground text-sm">{emptyText}</div>;
+  return (
+    <div className="grid gap-3">
+      {list.map((c) => (
+        <div key={c.id} className="glass-card rounded-2xl p-4">
+          <div className="flex justify-between items-start gap-3">
+            <div className="min-w-0">
+              <div className="font-bold truncate">{c.title}</div>
+              <div className="text-xs text-muted-foreground">{c.companyName ?? "—"} · {c.participants} participações · criado {new Date(c.createdAt).toLocaleDateString("pt-BR")}</div>
+              {c.prizeName && <div className="text-xs mt-1">🏆 {c.prizeName}</div>}
+              {c.endsAt && <div className="text-[11px] text-muted-foreground mt-1">Encerra: {new Date(c.endsAt).toLocaleString("pt-BR")}</div>}
+            </div>
+            <div className="flex gap-2 shrink-0">
+              <a href={`/previsao/${c.id}`} target="_blank" rel="noreferrer" className="h-9 px-3 rounded-lg bg-card text-xs font-bold hover:bg-primary/15 grid place-items-center">Abrir</a>
+              <button disabled={busy === c.id} onClick={() => toggle(c)} className="h-9 px-3 rounded-lg bg-card text-xs font-bold hover:bg-primary/15 disabled:opacity-60">
+                {c.status === "ativo" ? "Encerrar" : "Reativar"}
+              </button>
+              <button disabled={busy === c.id} onClick={() => remove(c)} className="h-9 w-9 rounded-lg bg-card grid place-items-center hover:bg-destructive/15 text-destructive disabled:opacity-60"><Trash2 className="h-4 w-4" /></button>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function PremiacoesDbTab({ list }: { list: AdminCorpChallenge[] }) {
+  const items = list.filter((c) => c.prizeName);
+  if (!items.length) return <div className="glass-card rounded-2xl p-10 text-center text-muted-foreground text-sm">Nenhuma premiação cadastrada.</div>;
+  return (
+    <div className="grid sm:grid-cols-2 gap-3">
+      {items.map((c) => (
+        <div key={c.id} className="glass-card rounded-2xl p-4">
+          <div className="flex items-center gap-2 mb-2">
+            <Trophy className="h-5 w-5 text-primary" />
+            <div className="font-bold">{c.prizeName}</div>
+          </div>
+          <div className="text-xs text-muted-foreground">{c.title}</div>
+          <div className="text-xs mt-1">{c.companyName ?? "—"} · status: {c.status}</div>
+        </div>
+      ))}
     </div>
   );
 }
