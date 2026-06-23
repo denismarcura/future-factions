@@ -44,7 +44,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { CATEGORIES, formatTokens, type Category } from "@/lib/mock-data";
-import { PRODUCTS } from "@/lib/mock-extra";
+import { PRODUCTS, COMPANY_CHALLENGES } from "@/lib/mock-extra";
 import {
   listMissions,
   listMyClaims,
