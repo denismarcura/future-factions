@@ -644,7 +644,6 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
         <PublishedSuccess
           name={published.name}
           id={published.id}
-          ownerId={CURRENT_USER?.id ?? ""}
           onCreateAnother={() => {
             setPublished(null);
             setName("");
@@ -2179,10 +2178,15 @@ function MissionWizard({
 
 
 function PublishedSuccess({ name, id, onCreateAnother }: { name: string; id: string; onCreateAnother: () => void }) {
+  const { user } = useAuth();
   const [copied, setCopied] = useState(false);
   const [textCopied, setTextCopied] = useState(false);
   const PUBLIC_DOMAIN = "https://www.desafiodospalpites.com.br";
-  const link = `${PUBLIC_DOMAIN}/previsao/${id}`;
+  const refCode = (user?.id ?? "").slice(0, 8);
+  // Link de convite: leva para a área pública do amigo (com destaque do desafio criado).
+  const link = refCode
+    ? `${PUBLIC_DOMAIN}/amigo/${refCode}?d=${id}`
+    : `${PUBLIC_DOMAIN}/previsao/${id}`;
 
   const inviteSubject = `🎯 Participe do meu desafio "${name}" — Desafio dos Palpites (100% GRATUITO)`;
   const inviteBody = `Olá!
