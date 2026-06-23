@@ -51,7 +51,10 @@ function AuthPage() {
   const navigate = useNavigate();
   const { user, loading } = useAuth();
   const prepare = useServerFn(prepareSignup);
-  const [mode, setMode] = useState<"login" | "signup">("login");
+  const fetchInvite = useServerFn(getChallengeInvite);
+  const search = Route.useSearch();
+  const [invite, setInvite] = useState<any>(null);
+  const [mode, setMode] = useState<"login" | "signup">(search.d || search.ref ? "signup" : "login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
