@@ -37,9 +37,14 @@ function Feed() {
   const [cat, setCat] = useState<string>("Todas");
   const [sort, setSort] = useState<Sort>("new");
   const [banners, setBanners] = useState<Banner[]>([]);
+  const [userChallenges, setUserChallenges] = useState<Prediction[]>([]);
 
   useEffect(() => {
     setBanners(listActiveBanners());
+    setUserChallenges(getUserChallenges());
+    const onUpdate = () => setUserChallenges(getUserChallenges());
+    window.addEventListener("ddp:user-challenges-updated", onUpdate);
+    return () => window.removeEventListener("ddp:user-challenges-updated", onUpdate);
   }, []);
 
   const closingSoon = useMemo(() => {
