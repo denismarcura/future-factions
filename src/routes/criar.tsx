@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import {
@@ -185,6 +185,7 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
   const [errors, setErrors] = useState<string[]>([]);
   const [winnerType, setWinnerType] = useState<"points" | "all" | "">("");
   const [published, setPublished] = useState<null | { id: string; name: string }>(null);
+  const navigate = useNavigate();
   const [friends, setFriends] = useState<{ id: string; name: string; email: string }[]>([
     { id: uid(), name: "", email: "" },
   ]);
@@ -453,6 +454,10 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
 
       setPublished({ id, name: name.trim() });
       window.scrollTo({ top: 0, behavior: "smooth" });
+      // Redireciona para a lista de desafios encerrando em breve após sucesso.
+      setTimeout(() => {
+        navigate({ to: "/desafios", hash: "encerrando" });
+      }, 1800);
     } catch (err) {
       setErrors([
         err instanceof Error
