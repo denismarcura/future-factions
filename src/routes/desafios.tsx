@@ -31,7 +31,14 @@ function DesafiosPage() {
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState<string | null>(null);
   const [expiringLimit, setExpiringLimit] = useState(6);
+  const [nowTs, setNowTs] = useState<number | null>(null);
   const runAiSearch = useServerFn(aiSearchChallenges);
+
+  useEffect(() => {
+    setNowTs(Date.now());
+    const t = setInterval(() => setNowTs(Date.now()), 60_000);
+    return () => clearInterval(t);
+  }, []);
 
   useEffect(() => {
     const sync = () => setUserChallenges(getUserChallenges());
