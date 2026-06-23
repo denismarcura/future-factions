@@ -64,6 +64,7 @@ const ADMIN_GROUPS: NavGroup[] = [
     label: "Comunicação",
     items: [
       { to: "/admin/email-marketing", label: "E-mail Marketing", icon: Mail },
+      { to: "/admin/instagram-videos", label: "Vídeos Instagram", icon: Instagram },
       { to: "/admin/notificacoes", label: "Notificações", icon: Bell },
     ],
   },
