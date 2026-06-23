@@ -953,6 +953,39 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
 
 
 
+          {/* Ganhador */}
+          <Section
+            title="Ganhador"
+            description="Escolha como será definido o vencedor do desafio. Obrigatório selecionar uma opção."
+          >
+            <div className="space-y-3">
+              <label className={`flex items-start gap-3 rounded-xl border p-4 cursor-pointer transition ${winnerType === "points" ? "border-primary bg-primary/10" : "border-border hover:border-primary/50"}`}>
+                <input
+                  type="checkbox"
+                  checked={winnerType === "points"}
+                  onChange={() => setWinnerType("points")}
+                  className="mt-1 h-5 w-5 accent-primary"
+                />
+                <div>
+                  <div className="font-bold text-sm">Que mais fizer pontos</div>
+                  <div className="text-xs text-muted-foreground">Ganha quem somar a maior pontuação total nos palpites.</div>
+                </div>
+              </label>
+              <label className={`flex items-start gap-3 rounded-xl border p-4 cursor-pointer transition ${winnerType === "all" ? "border-primary bg-primary/10" : "border-border hover:border-primary/50"}`}>
+                <input
+                  type="checkbox"
+                  checked={winnerType === "all"}
+                  onChange={() => setWinnerType("all")}
+                  className="mt-1 h-5 w-5 accent-primary"
+                />
+                <div>
+                  <div className="font-bold text-sm">Ganhador que acertar todas</div>
+                  <div className="text-xs text-muted-foreground">Só leva o prêmio quem acertar 100% dos palpites do desafio.</div>
+                </div>
+              </label>
+            </div>
+          </Section>
+
           {/* Prêmio */}
           <Section
             title="Prêmio"
