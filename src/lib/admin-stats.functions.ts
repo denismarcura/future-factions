@@ -155,12 +155,13 @@ export const getAdminDashboard = createServerFn({ method: "GET" })
     const dau = new Set(palpRecent.filter((r) => r.d >= since1).map((r) => r.user_id)).size;
     const wau = new Set(palpRecent.filter((r) => r.d >= since7).map((r) => r.user_id)).size;
     const mau = new Set(palpRecent.map((r) => r.user_id)).size;
-    const totalPredictions = palpitesTotal.count ?? 0;
+    const totalPredictions = palpitesTotalCount.count ?? 0;
 
-    // top challenges
+    // top challenges (baseado nos últimos 30 dias — evita scan da tabela inteira)
     const palpByChallenge = new Map<string, number>();
-    for (const r of palpitesTotal.data ?? []) {
+    for (const r of palpitesRecent.data ?? []) {
       const k = r.challenge_id as string;
+      if (!k) continue;
       palpByChallenge.set(k, (palpByChallenge.get(k) ?? 0) + 1);
     }
     const topChallenges = challenges
@@ -179,15 +180,11 @@ export const getAdminDashboard = createServerFn({ method: "GET" })
       .sort((a, b) => b.challenges - a.challenges)
       .slice(0, 5);
 
-    const tokensDistributed = (tokensTotal.data ?? []).reduce(
-      (s, r) => s + Math.max(0, (r.delta as number) ?? 0),
-      0,
-    );
-
     const tokensRecentRows = (tokensRecent.data ?? []).map((r) => ({
       d: r.created_at as string,
       v: Math.max(0, (r.delta as number) ?? 0),
     }));
+    const tokensDistributed = tokensRecentRows.reduce((s, r) => s + r.v, 0);
 
     return {
       kpis: {
