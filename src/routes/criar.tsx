@@ -1574,6 +1574,20 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
           </div>
         </div>
       )}
+      {artsWizardOpen && (
+        <ArtsWizard
+          initialName={name}
+          initialPrize={prizeName}
+          initialDeadline={endsAt}
+          sponsorName={companyName}
+          onClose={() => setArtsWizardOpen(false)}
+          onApply={(result) => {
+            if (result.feed) setPrizeImg(result.feed);
+            if (result.banner) setBannerImg(result.banner);
+            if (result.story) setInstagramArts((prev) => [...prev, result.story!]);
+          }}
+        />
+      )}
     </>
   );
 
