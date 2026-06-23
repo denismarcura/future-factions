@@ -226,6 +226,7 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
   // Company-only assets & rules
   const [logoImg, setLogoImg] = useState<string | null>(null);
   const [bannerImg, setBannerImg] = useState<string | null>(null);
+  const [generatingBanner, setGeneratingBanner] = useState(false);
   const [instagramArts, setInstagramArts] = useState<string[]>([]);
   const [inviteRewardText, setInviteRewardText] = useState<string>(
     "Convide seus amigos para participar do desafio e ganhe mais créditos para fazer palpites! Os créditos serão validados somente quando seu amigo se cadastrar e fizer o palpite dele.",
