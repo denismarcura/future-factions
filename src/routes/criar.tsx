@@ -243,6 +243,14 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
   const [regulationLoading, setRegulationLoading] = useState(false);
   const [companyName, setCompanyName] = useState<string>("");
 
+  // Location & audience scope
+  const [coverAllBrazil, setCoverAllBrazil] = useState(true);
+  const [campaignCity, setCampaignCity] = useState("");
+  const [campaignState, setCampaignState] = useState("");
+  // Reach mode: "public" (everyone sees in feed) or "open" (only via link)
+  const [reachMode, setReachMode] = useState<"public" | "open">("public");
+
+
 
   // AI Challenge Generator state
   const [aiOpen, setAiOpen] = useState(false);
