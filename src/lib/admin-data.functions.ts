@@ -41,7 +41,7 @@ export const listAdminProfiles = createServerFn({ method: "GET" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data, error } = await supabaseAdmin
       .from("profiles")
-      .select("id, full_name, email, whatsapp, instagram, signup_city, provider, status, welcome_bonus, created_at")
+      .select("id, full_name, email, whatsapp, instagram, cidade, estado, signup_city, provider, status, welcome_bonus, created_at")
       .order("created_at", { ascending: false })
       .limit(500);
     if (error) throw new Error(error.message);
@@ -51,8 +51,8 @@ export const listAdminProfiles = createServerFn({ method: "GET" })
       email: r.email,
       whatsapp: r.whatsapp,
       instagram: r.instagram,
-      city: r.signup_city,
-      state: null,
+      city: r.cidade ?? r.signup_city,
+      state: r.estado,
       provider: r.provider,
       status: r.status,
       welcomeBonus: r.welcome_bonus,
