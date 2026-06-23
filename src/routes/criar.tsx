@@ -183,6 +183,7 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
   const [generating, setGenerating] = useState(false);
   const [improvingTitle, setImprovingTitle] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
+  const [winnerType, setWinnerType] = useState<"points" | "all" | "">("");
   const [published, setPublished] = useState<null | { id: string; name: string }>(null);
   const [friends, setFriends] = useState<{ id: string; name: string; email: string }[]>([
     { id: uid(), name: "", email: "" },
@@ -389,6 +390,7 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
     if (forCompany && !missionData.instagram.trim()) {
       errs.push("Cadastre o endereço do Instagram nas missões (obrigatório para empresas).");
     }
+    if (!winnerType) errs.push("Escolha o critério de ganhador (maior pontuação ou acertar todas).");
     if (errs.length) {
       setErrors(errs);
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -950,6 +952,39 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
           </Section>
 
 
+
+          {/* Ganhador */}
+          <Section
+            title="Ganhador"
+            description="Escolha como será definido o vencedor do desafio. Obrigatório selecionar uma opção."
+          >
+            <div className="space-y-3">
+              <label className={`flex items-start gap-3 rounded-xl border p-4 cursor-pointer transition ${winnerType === "points" ? "border-primary bg-primary/10" : "border-border hover:border-primary/50"}`}>
+                <input
+                  type="checkbox"
+                  checked={winnerType === "points"}
+                  onChange={() => setWinnerType("points")}
+                  className="mt-1 h-5 w-5 accent-primary"
+                />
+                <div>
+                  <div className="font-bold text-sm">Que mais fizer pontos</div>
+                  <div className="text-xs text-muted-foreground">Ganha quem somar a maior pontuação total nos palpites.</div>
+                </div>
+              </label>
+              <label className={`flex items-start gap-3 rounded-xl border p-4 cursor-pointer transition ${winnerType === "all" ? "border-primary bg-primary/10" : "border-border hover:border-primary/50"}`}>
+                <input
+                  type="checkbox"
+                  checked={winnerType === "all"}
+                  onChange={() => setWinnerType("all")}
+                  className="mt-1 h-5 w-5 accent-primary"
+                />
+                <div>
+                  <div className="font-bold text-sm">Ganhador que acertar todas</div>
+                  <div className="text-xs text-muted-foreground">Só leva o prêmio quem acertar 100% dos palpites do desafio.</div>
+                </div>
+              </label>
+            </div>
+          </Section>
 
           {/* Prêmio */}
           <Section
