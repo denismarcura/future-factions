@@ -6,16 +6,13 @@ import {
 import { AppShell } from "@/components/layout/AppShell";
 import { getFriendProfile } from "@/lib/friend-profile.functions";
 import { toast } from "sonner";
-import { useSearch } from "@tanstack/react-router";
-import { zodValidator, fallback } from "@tanstack/zod-adapter";
-import { z } from "zod";
 
-const searchSchema = z.object({
-  d: fallback(z.string().optional(), undefined),
-});
+type SearchParams = { d?: string };
 
 export const Route = createFileRoute("/amigo/$ref")({
-  validateSearch: zodValidator(searchSchema),
+  validateSearch: (s: Record<string, unknown>): SearchParams => ({
+    d: typeof s.d === "string" ? s.d : undefined,
+  }),
   loader: async ({ params }) => {
     const fn = getFriendProfile as any;
     const data = await fn({ data: { ref: params.ref } });
@@ -51,7 +48,7 @@ export const Route = createFileRoute("/amigo/$ref")({
 
 function FriendProfile() {
   const data = Route.useLoaderData() as any;
-  const search = useSearch({ from: "/amigo/$ref" });
+  const search = Route.useSearch();
   const highlightId = search.d;
   const { profile, stats, createdOpen, createdClosed, participated, wins, corpOpportunities } = data;
   const name = profile.full_name || "Amigo";
