@@ -252,6 +252,10 @@ function PredictionInner({ p }: { p: Prediction }) {
   const [regAccepted, setRegAccepted] = useState<boolean | null>(null);
   const [regChoice, setRegChoice] = useState<"accept" | "reject" | null>(null);
   const pendingConfirmRef = useRef<null | (() => void)>(null);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+
+
 
 
   useEffect(() => {
