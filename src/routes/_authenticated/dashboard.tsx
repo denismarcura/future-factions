@@ -67,6 +67,24 @@ import { getUserChallenges, saveUserChallenge } from "@/lib/user-challenges";
 import { generateChallenges, type GeneratedChallenge } from "@/lib/generate-challenges.functions";
 import { generateInvitePromoText } from "@/lib/invite-ai.functions";
 import { listParticipations, type MyParticipation } from "@/lib/my-participations";
+import { listMyPalpites, type MyPalpiteRow } from "@/lib/my-palpites.functions";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
+import {
+  Bar,
+  BarChart,
+  Cell,
+  ResponsiveContainer,
+  Tooltip as RechartsTooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
+import { Trophy, BarChart3 } from "lucide-react";
 import type { Prediction } from "@/lib/mock-data";
 import { uploadAvatar, takePendingAvatar } from "@/lib/avatar-upload";
 import arte01 from "@/assets/dashboard-arte-01.png.asset.json";
