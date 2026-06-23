@@ -87,6 +87,7 @@ import {
 import { Trophy, BarChart3 } from "lucide-react";
 import type { Prediction } from "@/lib/mock-data";
 import { uploadAvatar, takePendingAvatar } from "@/lib/avatar-upload";
+import { getPalpiteTokens, convertTknToPalpiteTokens, getPalpiteTokensSpentTkn, PALPITE_TOKEN_RATE } from "@/lib/palpite-tokens";
 import arte01 from "@/assets/dashboard-arte-01.png.asset.json";
 import arte02 from "@/assets/dashboard-arte-02.png.asset.json";
 import arte03 from "@/assets/dashboard-arte-03.png.asset.json";
