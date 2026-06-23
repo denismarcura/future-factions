@@ -139,6 +139,15 @@ function DesafiosPage() {
       .slice(0, 24);
   }, [userChallenges]);
 
+  // Próximos jogos da Copa do Mundo 2026
+  const upcomingMatches = useMemo(() => {
+    const ref = nowTs ?? new Date("2026-06-20T00:00:00-03:00").getTime();
+    return WORLD_CUP_MATCHES
+      .filter((m) => new Date(m.kickoff).getTime() > ref)
+      .sort((a, b) => new Date(a.kickoff).getTime() - new Date(b.kickoff).getTime())
+      .slice(0, 8);
+  }, [nowTs]);
+
   return (
     <AppShell>
       <header className="mb-6">
