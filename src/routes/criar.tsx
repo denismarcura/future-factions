@@ -1295,7 +1295,54 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
               onChange={setBannerImg}
               aspect="aspect-[8/3]"
             />
+            <div className="mt-3 rounded-xl border border-primary/30 bg-primary/5 p-4 space-y-3">
+              <div className="flex items-start gap-3">
+                <ImageIcon className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+                <div className="text-sm">
+                  <div className="font-bold">Gerar banner com a imagem do brinde</div>
+                  <div className="text-xs text-muted-foreground">
+                    A IA usa a <strong>imagem do prêmio cadastrada</strong> como referência e cria um banner promocional 8:3 com o produto em destaque.
+                  </div>
+                </div>
+              </div>
+              <button
+                type="button"
+                disabled={!prizeImg || generatingBanner}
+                onClick={async () => {
+                  if (!prizeImg) return;
+                  try {
+                    setGeneratingBanner(true);
+                    const { dataUrl } = await generateBannerFromPrizeFn({
+                      data: {
+                        prizeImageDataUrl: prizeImg,
+                        title: name.trim(),
+                        prize: prizeName.trim(),
+                        deadline: endsAt
+                          ? new Date(endsAt).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })
+                          : "",
+                        sponsorName: companyName.trim(),
+                      },
+                    });
+                    setBannerImg(dataUrl);
+                  } catch (err) {
+                    alert(err instanceof Error ? err.message : "Falha ao gerar banner.");
+                  } finally {
+                    setGeneratingBanner(false);
+                  }
+                }}
+                className="w-full h-11 rounded-lg bg-gradient-brand text-primary-foreground font-display font-bold inline-flex items-center justify-center gap-2 shadow-glow disabled:opacity-60"
+              >
+                {generatingBanner ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4" />}
+                {generatingBanner ? "Gerando banner..." : "Criar banner com imagem do brinde"}
+              </button>
+              {!prizeImg && (
+                <p className="text-xs text-muted-foreground">
+                  Cadastre primeiro a <strong>imagem do prêmio</strong> na seção acima para usar como referência.
+                </p>
+              )}
+            </div>
           </Section>
+
 
 
           {/* Missões */}
