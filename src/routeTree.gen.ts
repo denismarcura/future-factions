@@ -42,6 +42,7 @@ import { Route as AdminPremiosRouteImport } from './routes/admin.premios'
 import { Route as AdminNotificacoesRouteImport } from './routes/admin.notificacoes'
 import { Route as AdminMissoesRouteImport } from './routes/admin.missoes'
 import { Route as AdminLojaRouteImport } from './routes/admin.loja'
+import { Route as AdminInstagramVideosRouteImport } from './routes/admin.instagram-videos'
 import { Route as AdminEmpresasRouteImport } from './routes/admin.empresas'
 import { Route as AdminEmailMarketingRouteImport } from './routes/admin.email-marketing'
 import { Route as AdminDesafiosRouteImport } from './routes/admin.desafios'
@@ -221,6 +222,11 @@ const AdminLojaRoute = AdminLojaRouteImport.update({
   path: '/loja',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminInstagramVideosRoute = AdminInstagramVideosRouteImport.update({
+  id: '/instagram-videos',
+  path: '/instagram-videos',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminEmpresasRoute = AdminEmpresasRouteImport.update({
   id: '/empresas',
   path: '/empresas',
@@ -324,6 +330,7 @@ export interface FileRoutesByFullPath {
   '/admin/desafios': typeof AdminDesafiosRoute
   '/admin/email-marketing': typeof AdminEmailMarketingRoute
   '/admin/empresas': typeof AdminEmpresasRoute
+  '/admin/instagram-videos': typeof AdminInstagramVideosRoute
   '/admin/loja': typeof AdminLojaRoute
   '/admin/missoes': typeof AdminMissoesRoute
   '/admin/notificacoes': typeof AdminNotificacoesRoute
@@ -371,6 +378,7 @@ export interface FileRoutesByTo {
   '/admin/desafios': typeof AdminDesafiosRoute
   '/admin/email-marketing': typeof AdminEmailMarketingRoute
   '/admin/empresas': typeof AdminEmpresasRoute
+  '/admin/instagram-videos': typeof AdminInstagramVideosRoute
   '/admin/loja': typeof AdminLojaRoute
   '/admin/missoes': typeof AdminMissoesRoute
   '/admin/notificacoes': typeof AdminNotificacoesRoute
@@ -421,6 +429,7 @@ export interface FileRoutesById {
   '/admin/desafios': typeof AdminDesafiosRoute
   '/admin/email-marketing': typeof AdminEmailMarketingRoute
   '/admin/empresas': typeof AdminEmpresasRoute
+  '/admin/instagram-videos': typeof AdminInstagramVideosRoute
   '/admin/loja': typeof AdminLojaRoute
   '/admin/missoes': typeof AdminMissoesRoute
   '/admin/notificacoes': typeof AdminNotificacoesRoute
@@ -471,6 +480,7 @@ export interface FileRouteTypes {
     | '/admin/desafios'
     | '/admin/email-marketing'
     | '/admin/empresas'
+    | '/admin/instagram-videos'
     | '/admin/loja'
     | '/admin/missoes'
     | '/admin/notificacoes'
@@ -518,6 +528,7 @@ export interface FileRouteTypes {
     | '/admin/desafios'
     | '/admin/email-marketing'
     | '/admin/empresas'
+    | '/admin/instagram-videos'
     | '/admin/loja'
     | '/admin/missoes'
     | '/admin/notificacoes'
@@ -567,6 +578,7 @@ export interface FileRouteTypes {
     | '/admin/desafios'
     | '/admin/email-marketing'
     | '/admin/empresas'
+    | '/admin/instagram-videos'
     | '/admin/loja'
     | '/admin/missoes'
     | '/admin/notificacoes'
@@ -846,6 +858,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminLojaRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/instagram-videos': {
+      id: '/admin/instagram-videos'
+      path: '/instagram-videos'
+      fullPath: '/admin/instagram-videos'
+      preLoaderRoute: typeof AdminInstagramVideosRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/empresas': {
       id: '/admin/empresas'
       path: '/empresas'
@@ -969,6 +988,7 @@ interface AdminRouteChildren {
   AdminDesafiosRoute: typeof AdminDesafiosRoute
   AdminEmailMarketingRoute: typeof AdminEmailMarketingRoute
   AdminEmpresasRoute: typeof AdminEmpresasRoute
+  AdminInstagramVideosRoute: typeof AdminInstagramVideosRoute
   AdminLojaRoute: typeof AdminLojaRoute
   AdminMissoesRoute: typeof AdminMissoesRoute
   AdminNotificacoesRoute: typeof AdminNotificacoesRoute
@@ -994,6 +1014,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminDesafiosRoute: AdminDesafiosRoute,
   AdminEmailMarketingRoute: AdminEmailMarketingRoute,
   AdminEmpresasRoute: AdminEmpresasRoute,
+  AdminInstagramVideosRoute: AdminInstagramVideosRoute,
   AdminLojaRoute: AdminLojaRoute,
   AdminMissoesRoute: AdminMissoesRoute,
   AdminNotificacoesRoute: AdminNotificacoesRoute,
