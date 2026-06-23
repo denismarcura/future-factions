@@ -1,8 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState, useRef } from "react";
-import { Trophy, Radio, Loader2, Upload, Save, Plus, Trash2, Image as ImageIcon } from "lucide-react";
+import { useState, useRef, useMemo } from "react";
+import { Trophy, Radio, Loader2, Upload, Save, Plus, Trash2, Image as ImageIcon, Search, Mail, X, Copy, Sparkles } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import {
   listWorldCupResults,
@@ -11,6 +11,7 @@ import {
   type WorldCupResultRow,
 } from "@/lib/world-cup-results.functions";
 import { uploadResultImage } from "@/lib/world-cup-results-client";
+import { generateResultEmail } from "@/lib/result-email.functions";
 
 export const Route = createFileRoute("/admin/resultado-jogos")({
   head: () => ({ meta: [{ title: "Resultado dos Jogos — Admin" }] }),
@@ -30,7 +31,21 @@ function Page() {
     queryFn: () => listFn(),
   });
 
-  const grouped = rows.reduce<Record<string, WorldCupResultRow[]>>((acc, r) => {
+  const [query, setQuery] = useState("");
+  const [emailFor, setEmailFor] = useState<WorldCupResultRow | null>(null);
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return rows;
+    return rows.filter(
+      (r) =>
+        r.home_team.toLowerCase().includes(q) ||
+        r.away_team.toLowerCase().includes(q) ||
+        r.match_date.includes(q),
+    );
+  }, [rows, query]);
+
+  const grouped = filtered.reduce<Record<string, WorldCupResultRow[]>>((acc, r) => {
     (acc[r.match_date] = acc[r.match_date] || []).push(r);
     return acc;
   }, {});
@@ -84,6 +99,18 @@ function Page() {
         ))}
       </section>
 
+      <section className="mb-6">
+        <div className="relative">
+          <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Buscar por time ou data (AAAA-MM-DD)..."
+            className="w-full h-11 rounded-lg bg-card border border-border/60 pl-10 pr-3 text-sm"
+          />
+        </div>
+      </section>
+
       {showNew && (
         <div className="mb-6">
           <ResultForm onSaved={() => { setShowNew(false); invalidate(); }} onCancel={() => setShowNew(false)} />
@@ -94,6 +121,8 @@ function Page() {
         <div className="text-center py-12 text-muted-foreground">
           <Loader2 className="h-6 w-6 animate-spin mx-auto mb-2" /> Carregando...
         </div>
+      ) : dates.length === 0 ? (
+        <div className="text-center py-12 text-muted-foreground text-sm">Nenhum resultado encontrado.</div>
       ) : (
         <div className="space-y-6">
           {dates.map((d) => (
@@ -101,18 +130,20 @@ function Page() {
               <h2 className="font-display font-black text-lg mb-2">{fmtDateBR(d)}</h2>
               <div className="grid gap-3">
                 {grouped[d].map((r) => (
-                  <ResultRow key={r.id} row={r} onChanged={invalidate} />
+                  <ResultRow key={r.id} row={r} onChanged={invalidate} onEmail={() => setEmailFor(r)} />
                 ))}
               </div>
             </section>
           ))}
         </div>
       )}
+
+      {emailFor && <EmailModal row={emailFor} onClose={() => setEmailFor(null)} />}
     </AppShell>
   );
 }
 
-function ResultRow({ row, onChanged }: { row: WorldCupResultRow; onChanged: () => void }) {
+function ResultRow({ row, onChanged, onEmail }: { row: WorldCupResultRow; onChanged: () => void; onEmail: () => void }) {
   const [editing, setEditing] = useState(false);
   const delFn = useServerFn(deleteWorldCupResult);
   const del = useMutation({
@@ -156,7 +187,12 @@ function ResultRow({ row, onChanged }: { row: WorldCupResultRow; onChanged: () =
           Agendado
         </span>
       )}
-      <div className="flex gap-2">
+      <div className="flex gap-2 flex-wrap">
+        {row.status === "encerrado" && (
+          <button onClick={onEmail} className="h-9 px-3 rounded-lg bg-gradient-brand text-primary-foreground text-xs font-bold inline-flex items-center gap-1 shadow-glow">
+            <Mail className="h-3 w-3" /> Gerar e-mail
+          </button>
+        )}
         <button onClick={() => setEditing(true)} className="h-9 px-3 rounded-lg border border-border text-xs font-bold">
           Editar
         </button>
@@ -308,6 +344,71 @@ function ResultForm({
         <button onClick={onCancel} className="h-10 px-4 rounded-lg border border-border text-sm font-semibold">
           Cancelar
         </button>
+      </div>
+    </div>
+  );
+}
+
+function EmailModal({ row, onClose }: { row: WorldCupResultRow; onClose: () => void }) {
+  const genFn = useServerFn(generateResultEmail);
+  const [copied, setCopied] = useState(false);
+  const { data, isLoading, isError, refetch } = useQuery({
+    queryKey: ["result-email", row.id],
+    queryFn: () =>
+      genFn({
+        data: {
+          home_team: row.home_team,
+          away_team: row.away_team,
+          home_score: row.home_score,
+          away_score: row.away_score,
+          match_date: row.match_date,
+          image_url: row.image_url,
+        },
+      }),
+    staleTime: 0,
+  });
+
+  async function copyHtml() {
+    if (!data) return;
+    try {
+      await navigator.clipboard.writeText(data.html);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1800);
+    } catch {/* noop */}
+  }
+
+  return (
+    <div className="fixed inset-0 z-[100] bg-background/80 backdrop-blur-sm grid place-items-center p-4" onClick={onClose}>
+      <div className="w-full max-w-3xl max-h-[90vh] rounded-2xl glass-card border border-primary/40 overflow-hidden flex flex-col" onClick={(e) => e.stopPropagation()}>
+        <div className="p-4 flex items-center gap-3 border-b border-border/60">
+          <div className="h-9 w-9 rounded-lg bg-gradient-brand grid place-items-center text-primary-foreground">
+            <Sparkles className="h-4 w-4" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="text-xs text-muted-foreground uppercase tracking-wider">E-mail gerado por IA</div>
+            <div className="font-bold truncate">{data?.subject ?? `${row.home_team} ${row.home_score}x${row.away_score} ${row.away_team}`}</div>
+          </div>
+          <button onClick={() => refetch()} disabled={isLoading} className="h-9 px-3 rounded-lg border border-border text-xs font-bold inline-flex items-center gap-1 disabled:opacity-50">
+            {isLoading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3 w-3" />} Regenerar
+          </button>
+          <button onClick={copyHtml} disabled={!data} className="h-9 px-3 rounded-lg border border-border text-xs font-bold inline-flex items-center gap-1 disabled:opacity-50">
+            <Copy className="h-3 w-3" /> {copied ? "Copiado!" : "Copiar HTML"}
+          </button>
+          <button onClick={onClose} className="h-9 w-9 grid place-items-center rounded-lg border border-border">
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+        <div className="flex-1 overflow-auto bg-[#020617]">
+          {isLoading ? (
+            <div className="p-12 text-center text-muted-foreground">
+              <Loader2 className="h-6 w-6 animate-spin mx-auto mb-2" /> Gerando e-mail com IA...
+            </div>
+          ) : isError ? (
+            <div className="p-12 text-center text-destructive text-sm">Falha ao gerar e-mail. Tente novamente.</div>
+          ) : (
+            <iframe title="Pré-visualização do e-mail" srcDoc={data?.html ?? ""} className="w-full h-[70vh] border-0 bg-white" />
+          )}
+        </div>
       </div>
     </div>
   );
