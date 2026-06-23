@@ -974,6 +974,7 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
 
           {/* Ganhador */}
           <Section
+            step={3}
             title="Ganhador"
             description="Escolha como será definido o vencedor do desafio. Obrigatório selecionar uma opção."
           >
