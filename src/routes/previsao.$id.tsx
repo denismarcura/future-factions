@@ -52,7 +52,7 @@ function corpToPrediction(c: CorpChallengeRecord): Prediction {
     comments: 0,
     likes: 0,
     shares: 0,
-    tags: ["empresa", "ativo"],
+    tags: c.companyName || c.missions.length ? ["empresa", "ativo"] : ["meu-desafio", "ativo"],
     hot: true,
     imageUrl: c.bannerUrl ?? c.logoUrl ?? undefined,
     corporateMissions: normalizeCorporateMissions(c),

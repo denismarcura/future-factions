@@ -6,7 +6,7 @@ import {
   Gift, Coins, Instagram, Facebook, Youtube, Music2, Globe, Lock,
   CheckCircle2, Share2, Copy, AlertCircle, UserPlus, Mail, Users, Loader2,
   PencilLine, MessageCircle, Download, ImageIcon, ShoppingBag, X,
-  Linkedin, Twitter, Star, Heart, Check,
+  Linkedin, Twitter, Star, Heart, Check, ExternalLink,
 } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { CATEGORIES, CURRENT_USER, formatTokens } from "@/lib/mock-data";
@@ -437,22 +437,9 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
     const id = uid();
     const corporateMissions = forCompany ? buildCorporateMissions(missionData, companyName || name) : undefined;
     try {
-      saveUserChallenge({
-        id,
-        name: name.trim(),
-        category: category as never,
-        endsAt,
-        isOpen,
-        subs,
-        prizeName: prizeName.trim() || undefined,
-        prizeImg,
-        bannerImg,
-        corporateMissions,
-        reachMode,
-        coverAllBrazil,
-        city: coverAllBrazil ? undefined : (selectedCities[0]?.nome ?? undefined),
-        state: coverAllBrazil ? undefined : (selectedCities[0]?.uf ?? undefined),
-      });
+      let persistedLogoUrl: string | null = null;
+      let persistedBannerUrl: string | null = null;
+      let persistedArtsUrls: string[] = [];
 
       if (forCompany) {
         // Upload assets to Storage, then persist the challenge to the database
@@ -462,33 +449,62 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
           uploadCorpAsset(id, "banner", bannerImg),
           uploadCorpAssets(id, instagramArts),
         ]);
+        persistedLogoUrl = logoUrl;
+        persistedBannerUrl = bannerUrl;
+        persistedArtsUrls = artsUrls;
+      } else {
+        // Desafios comuns também precisam ser salvos no backend; antes ficavam
+        // só no navegador do criador, então o link de indicação abria “não encontrado”.
+        const [bannerUrl, prizeUrl] = await Promise.all([
+          uploadCorpAsset(id, "banner", bannerImg),
+          uploadCorpAsset(id, "premio", prizeImg),
+        ]);
+        persistedLogoUrl = prizeUrl;
+        persistedBannerUrl = bannerUrl;
+      }
 
-        await createCorpChallengeFn({
-          data: {
-            id,
-            title: name.trim(),
-            companyName: companyName.trim() || undefined,
-            category,
-            subcategory: subcategory || undefined,
-            description: subs
-              .map((s, i) => `${i + 1}. ${s.question} — ${s.options.filter(Boolean).join(" / ")}`)
-              .join("  •  "),
-            subs,
-            prizeName: prizeName.trim() || undefined,
-            logoUrl: logoUrl ?? undefined,
-            bannerUrl: bannerUrl ?? undefined,
-            instagramArts: artsUrls,
-            tiebreaker: tiebreaker || undefined,
-            regulation: regulation || undefined,
-            inviteRewardText: inviteRewardText || undefined,
-            missions: corporateMissions,
-            endsAt,
-          },
-        });
+      await createCorpChallengeFn({
+        data: {
+          id,
+          title: name.trim(),
+          companyName: forCompany ? companyName.trim() || undefined : undefined,
+          category,
+          subcategory: subcategory || undefined,
+          description: subs
+            .map((s, i) => `${i + 1}. ${s.question} — ${s.options.filter(Boolean).join(" / ")}`)
+            .join("  •  "),
+          subs,
+          prizeName: prizeName.trim() || undefined,
+          logoUrl: persistedLogoUrl ?? undefined,
+          bannerUrl: persistedBannerUrl ?? undefined,
+          instagramArts: persistedArtsUrls,
+          tiebreaker: tiebreaker || undefined,
+          regulation: regulation || undefined,
+          inviteRewardText: inviteRewardText || undefined,
+          missions: corporateMissions,
+          endsAt,
+        },
+      });
 
-        if (typeof window !== "undefined") {
-          window.dispatchEvent(new Event("ddp:corp-challenges-updated"));
-        }
+      saveUserChallenge({
+        id,
+        name: name.trim(),
+        category: category as never,
+        endsAt,
+        isOpen,
+        subs,
+        prizeName: prizeName.trim() || undefined,
+        prizeImg: persistedLogoUrl ?? prizeImg,
+        bannerImg: persistedBannerUrl ?? bannerImg,
+        corporateMissions,
+        reachMode,
+        coverAllBrazil,
+        city: coverAllBrazil ? undefined : (selectedCities[0]?.nome ?? undefined),
+        state: coverAllBrazil ? undefined : (selectedCities[0]?.uf ?? undefined),
+      });
+
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new Event("ddp:corp-challenges-updated"));
       }
 
       setPublished({ id, name: name.trim() });
@@ -518,8 +534,8 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
     } catch (err) {
       setErrors([
         err instanceof Error
-          ? `Não foi possível publicar: ${err.message}`
-          : "Não foi possível publicar o desafio.",
+          ? `Não foi possível publicar e ativar o link: ${err.message}. Nenhum token foi debitado.`
+          : "Não foi possível publicar e ativar o link. Nenhum token foi debitado.",
       ]);
       window.scrollTo({ top: 0, behavior: "smooth" });
     } finally {
@@ -2164,8 +2180,25 @@ function PublishedSuccess({ name, id, onCreateAnother }: { name: string; id: str
   const [copied, setCopied] = useState(false);
   const PUBLIC_DOMAIN = "https://www.desafiodospalpites.com.br";
   const link = `${PUBLIC_DOMAIN}/previsao/${id}`;
+  const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(`Participe do meu desafio "${name}" no Desafio dos Palpites: ${link}`)}`;
   const copy = async () => {
-    try { await navigator.clipboard.writeText(link); setCopied(true); setTimeout(() => setCopied(false), 1500); } catch {}
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(link);
+      } else {
+        const textarea = document.createElement("textarea");
+        textarea.value = link;
+        textarea.setAttribute("readonly", "");
+        textarea.style.position = "fixed";
+        textarea.style.opacity = "0";
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textarea);
+      }
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {}
   };
   return (
     <div className="max-w-2xl mx-auto text-center py-10">
@@ -2174,7 +2207,7 @@ function PublishedSuccess({ name, id, onCreateAnother }: { name: string; id: str
       </div>
       <h1 className="font-display text-3xl font-black mb-2">Desafio publicado!</h1>
       <p className="text-muted-foreground mb-6">
-        <span className="text-foreground font-semibold">"{name}"</span> está no ar. 100 Tokens foram debitados da sua carteira.
+        <span className="text-foreground font-semibold">"{name}"</span> está no ar, com link de indicação ativo. 100 Tokens foram debitados da sua carteira.
       </p>
       <div className="rounded-2xl glass-card p-4 flex items-center gap-2 mb-6">
         <Share2 className="h-4 w-4 text-gold shrink-0" />
@@ -2182,7 +2215,13 @@ function PublishedSuccess({ name, id, onCreateAnother }: { name: string; id: str
         <button onClick={copy} className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg bg-primary/15 text-primary border border-primary/30 text-sm font-semibold hover:bg-primary/20">
           <Copy className="h-4 w-4" /> {copied ? "Copiado" : "Copiar"}
         </button>
+        <a href={link} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg bg-gold/15 text-gold border border-gold/30 text-sm font-semibold hover:bg-gold/20">
+          <ExternalLink className="h-4 w-4" /> Abrir
+        </a>
       </div>
+      <a href={whatsappUrl} target="_blank" rel="noreferrer" className="mb-6 mx-auto inline-flex items-center gap-2 h-11 px-5 rounded-xl bg-gradient-brand text-primary-foreground font-display font-bold shadow-glow">
+        <MessageCircle className="h-4 w-4" /> Enviar link de indicação no WhatsApp
+      </a>
       <div className="flex flex-wrap gap-3 justify-center">
         <Link to="/desafios" className="h-11 px-5 rounded-xl bg-gradient-brand text-primary-foreground font-display font-bold inline-flex items-center shadow-glow">
           Ver desafios
