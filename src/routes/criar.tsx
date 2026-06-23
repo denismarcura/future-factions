@@ -2190,7 +2190,7 @@ function PublishedSuccess({ name, id, onCreateAnother }: { name: string; id: str
       </div>
       <h1 className="font-display text-3xl font-black mb-2">Desafio publicado!</h1>
       <p className="text-muted-foreground mb-6">
-        <span className="text-foreground font-semibold">"{name}"</span> está no ar. 100 Tokens foram debitados da sua carteira.
+        <span className="text-foreground font-semibold">"{name}"</span> está no ar, com link de indicação ativo. 100 Tokens foram debitados da sua carteira.
       </p>
       <div className="rounded-2xl glass-card p-4 flex items-center gap-2 mb-6">
         <Share2 className="h-4 w-4 text-gold shrink-0" />
