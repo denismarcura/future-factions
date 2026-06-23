@@ -437,22 +437,9 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
     const id = uid();
     const corporateMissions = forCompany ? buildCorporateMissions(missionData, companyName || name) : undefined;
     try {
-      saveUserChallenge({
-        id,
-        name: name.trim(),
-        category: category as never,
-        endsAt,
-        isOpen,
-        subs,
-        prizeName: prizeName.trim() || undefined,
-        prizeImg,
-        bannerImg,
-        corporateMissions,
-        reachMode,
-        coverAllBrazil,
-        city: coverAllBrazil ? undefined : (selectedCities[0]?.nome ?? undefined),
-        state: coverAllBrazil ? undefined : (selectedCities[0]?.uf ?? undefined),
-      });
+      let persistedLogoUrl: string | null = null;
+      let persistedBannerUrl: string | null = null;
+      let persistedArtsUrls: string[] = [];
 
       if (forCompany) {
         // Upload assets to Storage, then persist the challenge to the database
@@ -462,33 +449,62 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
           uploadCorpAsset(id, "banner", bannerImg),
           uploadCorpAssets(id, instagramArts),
         ]);
+        persistedLogoUrl = logoUrl;
+        persistedBannerUrl = bannerUrl;
+        persistedArtsUrls = artsUrls;
+      } else {
+        // Desafios comuns também precisam ser salvos no backend; antes ficavam
+        // só no navegador do criador, então o link de indicação abria “não encontrado”.
+        const [bannerUrl, prizeUrl] = await Promise.all([
+          uploadCorpAsset(id, "banner", bannerImg),
+          uploadCorpAsset(id, "premio", prizeImg),
+        ]);
+        persistedLogoUrl = prizeUrl;
+        persistedBannerUrl = bannerUrl;
+      }
 
-        await createCorpChallengeFn({
-          data: {
-            id,
-            title: name.trim(),
-            companyName: companyName.trim() || undefined,
-            category,
-            subcategory: subcategory || undefined,
-            description: subs
-              .map((s, i) => `${i + 1}. ${s.question} — ${s.options.filter(Boolean).join(" / ")}`)
-              .join("  •  "),
-            subs,
-            prizeName: prizeName.trim() || undefined,
-            logoUrl: logoUrl ?? undefined,
-            bannerUrl: bannerUrl ?? undefined,
-            instagramArts: artsUrls,
-            tiebreaker: tiebreaker || undefined,
-            regulation: regulation || undefined,
-            inviteRewardText: inviteRewardText || undefined,
-            missions: corporateMissions,
-            endsAt,
-          },
-        });
+      await createCorpChallengeFn({
+        data: {
+          id,
+          title: name.trim(),
+          companyName: forCompany ? companyName.trim() || undefined : undefined,
+          category,
+          subcategory: subcategory || undefined,
+          description: subs
+            .map((s, i) => `${i + 1}. ${s.question} — ${s.options.filter(Boolean).join(" / ")}`)
+            .join("  •  "),
+          subs,
+          prizeName: prizeName.trim() || undefined,
+          logoUrl: persistedLogoUrl ?? undefined,
+          bannerUrl: persistedBannerUrl ?? undefined,
+          instagramArts: persistedArtsUrls,
+          tiebreaker: tiebreaker || undefined,
+          regulation: regulation || undefined,
+          inviteRewardText: inviteRewardText || undefined,
+          missions: corporateMissions,
+          endsAt,
+        },
+      });
 
-        if (typeof window !== "undefined") {
-          window.dispatchEvent(new Event("ddp:corp-challenges-updated"));
-        }
+      saveUserChallenge({
+        id,
+        name: name.trim(),
+        category: category as never,
+        endsAt,
+        isOpen,
+        subs,
+        prizeName: prizeName.trim() || undefined,
+        prizeImg: persistedLogoUrl ?? prizeImg,
+        bannerImg: persistedBannerUrl ?? bannerImg,
+        corporateMissions,
+        reachMode,
+        coverAllBrazil,
+        city: coverAllBrazil ? undefined : (selectedCities[0]?.nome ?? undefined),
+        state: coverAllBrazil ? undefined : (selectedCities[0]?.uf ?? undefined),
+      });
+
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new Event("ddp:corp-challenges-updated"));
       }
 
       setPublished({ id, name: name.trim() });
@@ -518,8 +534,8 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
     } catch (err) {
       setErrors([
         err instanceof Error
-          ? `Não foi possível publicar: ${err.message}`
-          : "Não foi possível publicar o desafio.",
+          ? `Não foi possível publicar e ativar o link: ${err.message}. Nenhum token foi debitado.`
+          : "Não foi possível publicar e ativar o link. Nenhum token foi debitado.",
       ]);
       window.scrollTo({ top: 0, behavior: "smooth" });
     } finally {
