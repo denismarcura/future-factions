@@ -88,17 +88,29 @@ function AdminEmpresasPage() {
   const [tab, setTab] = useState<TabId>("dashboard");
   const [companies, setCompanies] = useState<Company[]>([]);
   const [challenges, setChallenges] = useState<CorpChallenge[]>([]);
+  const [dbChallenges, setDbChallenges] = useState<AdminCorpChallenge[]>([]);
+  const [dbLoading, setDbLoading] = useState(true);
+  const fetchAll = useServerFn(listAllCorpChallengesAdmin);
 
   useEffect(() => {
     setCompanies(load<Company[]>(LS_COMPANIES, []));
     setChallenges(load<CorpChallenge[]>(LS_CHALLENGES, []));
   }, []);
 
+  const reloadDb = () => {
+    setDbLoading(true);
+    fetchAll()
+      .then((r) => { setDbChallenges(r); })
+      .catch(() => { /* silent */ })
+      .finally(() => setDbLoading(false));
+  };
+  useEffect(() => { reloadDb(); }, [fetchAll]);
+
   const updateCompanies = (list: Company[]) => { setCompanies(list); save(LS_COMPANIES, list); };
   const updateChallenges = (list: CorpChallenge[]) => { setChallenges(list); save(LS_CHALLENGES, list); };
 
-  const ativos = useMemo(() => challenges.filter((c) => c.status === "ativo"), [challenges]);
-  const encerrados = useMemo(() => challenges.filter((c) => c.status === "encerrado"), [challenges]);
+  const ativosDb = useMemo(() => dbChallenges.filter((c) => c.status === "ativo"), [dbChallenges]);
+  const encerradosDb = useMemo(() => dbChallenges.filter((c) => c.status !== "ativo"), [dbChallenges]);
 
   return (
     <div className="space-y-6">
@@ -123,13 +135,13 @@ function AdminEmpresasPage() {
         ))}
       </div>
 
-      {tab === "dashboard" && <DashboardTab companies={companies} challenges={challenges} />}
+      {tab === "dashboard" && <DashboardTab companies={companies} challenges={challenges} dbChallenges={dbChallenges} />}
       {tab === "empresas" && <EmpresasTab companies={companies} onChange={updateCompanies} />}
       {tab === "novo" && <Criar forCompany bare />}
-      {tab === "ativos" && <ChallengesListTab list={ativos} companies={companies} onChange={updateChallenges} all={challenges} emptyText="Nenhum desafio ativo." />}
-      {tab === "encerrados" && <ChallengesListTab list={encerrados} companies={companies} onChange={updateChallenges} all={challenges} emptyText="Nenhum desafio encerrado." />}
-      {tab === "premiacoes" && <PremiacoesTab list={challenges} />}
-      {tab === "relatorios" && <RelatoriosTab companies={companies} challenges={challenges} />}
+      {tab === "ativos" && <DbChallengesTab list={ativosDb} loading={dbLoading} onChanged={reloadDb} emptyText="Nenhum desafio ativo no banco." />}
+      {tab === "encerrados" && <DbChallengesTab list={encerradosDb} loading={dbLoading} onChanged={reloadDb} emptyText="Nenhum desafio encerrado." />}
+      {tab === "premiacoes" && <PremiacoesDbTab list={dbChallenges} />}
+      {tab === "relatorios" && <RelatoriosTab companies={companies} challenges={challenges} dbChallenges={dbChallenges} />}
       {tab === "config" && <ConfigTab />}
     </div>
   );
