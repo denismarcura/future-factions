@@ -220,7 +220,7 @@ function DesafiosPage() {
       {tab !== "empresas" && (
         <>
           {/* Encerrando em breve */}
-          <section className="mb-8">
+          <section id="encerrando" className="mb-8 scroll-mt-24">
             <div className="flex items-center justify-between mb-3">
               <h2 className="font-display text-lg font-bold flex items-center gap-2">
                 <Timer className="h-5 w-5 text-destructive" /> Encerrando em breve
