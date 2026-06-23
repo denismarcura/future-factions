@@ -1,71 +1,80 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
-import { USERS, CURRENT_USER } from "@/lib/mock-data";
-import { Search, Download, TrendingUp, TrendingDown, Users as UsersIcon } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { Search, Download, Users as UsersIcon, Loader2 } from "lucide-react";
+import { listAdminProfiles, type AdminProfile } from "@/lib/admin-data.functions";
 
 export const Route = createFileRoute("/admin/cadastros")({
   component: Cadastros,
 });
 
-type SortKey = "recent" | "tokens" | "invites" | "challenges" | "missions";
+type SortKey = "recent" | "name" | "city";
 
 const SORTS: { key: SortKey; label: string }[] = [
   { key: "recent", label: "Mais recentes" },
-  { key: "tokens", label: "Mais pontos" },
-  { key: "invites", label: "Mais convites" },
-  { key: "challenges", label: "Mais desafios criados" },
-  { key: "missions", label: "Mais missões" },
+  { key: "name", label: "Nome" },
+  { key: "city", label: "Cidade" },
 ];
 
 function Cadastros() {
   const [q, setQ] = useState("");
   const [sort, setSort] = useState<SortKey>("recent");
+  const [rows, setRows] = useState<AdminProfile[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const fetchProfiles = useServerFn(listAdminProfiles);
 
-  const all = useMemo(() => {
-    return USERS.map((u, i) => {
-      const referrer = i === 0 ? CURRENT_USER.username : USERS[(i - 1) % USERS.length].username;
-      const acc = u.acertos + u.erros > 0 ? (u.acertos / (u.acertos + u.erros)) * 100 : 0;
-      const joinedDate = new Date(2025, (i * 3) % 12, ((i * 7) % 27) + 1, (i * 13) % 24, (i * 7) % 60);
-      // deterministic pseudo-stats
-      const invites = ((i * 17) % 47) + (i % 5);
-      const challenges = ((i * 11) % 23) + (i % 3);
-      const missions = ((i * 29) % 60) + (i % 7);
-      return {
-        ...u,
-        referrer,
-        email: `${u.username.toLowerCase().replace(/\s+/g, ".")}@desafiodospalpites.com.br`,
-        joinedDate,
-        joinedAt: joinedDate.toLocaleDateString("pt-BR"),
-        accuracy: acc,
-        invites,
-        challenges,
-        missions,
-      };
-    }).sort((a, b) => b.joinedDate.getTime() - a.joinedDate.getTime());
-  }, []);
+  useEffect(() => {
+    let cancelled = false;
+    fetchProfiles()
+      .then((data) => { if (!cancelled) { setRows(data); setLoading(false); } })
+      .catch((e) => { if (!cancelled) { setError(e instanceof Error ? e.message : "Falha"); setLoading(false); } });
+    return () => { cancelled = true; };
+  }, [fetchProfiles]);
 
   const sorted = useMemo(() => {
-    const arr = [...all];
+    const arr = [...rows];
     switch (sort) {
-      case "tokens":
-        return arr.sort((a, b) => b.tokens - a.tokens);
-      case "invites":
-        return arr.sort((a, b) => b.invites - a.invites);
-      case "challenges":
-        return arr.sort((a, b) => b.challenges - a.challenges);
-      case "missions":
-        return arr.sort((a, b) => b.missions - a.missions);
+      case "name":
+        return arr.sort((a, b) => (a.fullName ?? "").localeCompare(b.fullName ?? ""));
+      case "city":
+        return arr.sort((a, b) => (a.city ?? "").localeCompare(b.city ?? ""));
       default:
-        return arr;
+        return arr.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
     }
-  }, [all, sort]);
+  }, [rows, sort]);
 
-  const filtered = sorted.filter(
-    (u) =>
-      u.username.toLowerCase().includes(q.toLowerCase()) ||
-      u.email.toLowerCase().includes(q.toLowerCase()) ||
-      u.city.toLowerCase().includes(q.toLowerCase())
-  );
+  const filtered = sorted.filter((u) => {
+    const term = q.toLowerCase();
+    return (
+      (u.fullName ?? "").toLowerCase().includes(term) ||
+      (u.email ?? "").toLowerCase().includes(term) ||
+      (u.city ?? "").toLowerCase().includes(term) ||
+      (u.whatsapp ?? "").includes(term)
+    );
+  });
+
+  function exportCsv() {
+    const header = ["Nome", "E-mail", "WhatsApp", "Instagram", "Cidade", "Estado", "Provider", "Status", "Cadastro"];
+    const lines = [header.join(";")].concat(
+      filtered.map((u) => [
+        u.fullName ?? "",
+        u.email ?? "",
+        u.whatsapp ?? "",
+        u.instagram ?? "",
+        u.city ?? "",
+        u.state ?? "",
+        u.provider ?? "",
+        u.status ?? "",
+        new Date(u.createdAt).toLocaleString("pt-BR"),
+      ].map((v) => `"${String(v).replace(/"/g, '""')}"`).join(";"))
+    );
+    const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = `usuarios-${new Date().toISOString().slice(0,10)}.csv`; a.click();
+    URL.revokeObjectURL(url);
+  }
 
   return (
     <div className="space-y-6">
@@ -75,7 +84,7 @@ function Cadastros() {
           <h2 className="text-xl font-display font-bold">
             Cadastros{" "}
             <span className="text-muted-foreground font-normal text-sm">
-              ({filtered.length} de {all.length})
+              ({filtered.length} de {rows.length})
             </span>
           </h2>
         </div>
@@ -85,11 +94,11 @@ function Cadastros() {
             <input
               value={q}
               onChange={(e) => setQ(e.target.value)}
-              placeholder="Buscar por nome, e-mail, cidade…"
+              placeholder="Buscar por nome, e-mail, cidade, whatsapp…"
               className="h-10 pl-9 pr-4 rounded-full bg-card border border-border/60 text-sm w-72 focus:outline-none focus:ring-2 focus:ring-primary/60"
             />
           </div>
-          <button className="h-10 px-4 rounded-full bg-card border border-border/60 hover:border-primary/60 text-sm font-semibold flex items-center gap-2">
+          <button onClick={exportCsv} className="h-10 px-4 rounded-full bg-card border border-border/60 hover:border-primary/60 text-sm font-semibold flex items-center gap-2">
             <Download className="h-4 w-4" /> Exportar CSV
           </button>
         </div>
@@ -112,69 +121,54 @@ function Cadastros() {
       </div>
 
       <div className="glass-card rounded-2xl overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="bg-card/60 text-xs uppercase tracking-wider text-muted-foreground">
-              <tr>
-                <th className="text-left p-3 font-semibold">Usuário</th>
-                <th className="text-left p-3 font-semibold">E-mail</th>
-                <th className="text-left p-3 font-semibold">Cidade</th>
-                <th className="text-left p-3 font-semibold">Indicado por</th>
-                <th className="text-left p-3 font-semibold">Cadastro</th>
-                <th className="text-right p-3 font-semibold">Tokens</th>
-                <th className="text-right p-3 font-semibold">Convites</th>
-                <th className="text-right p-3 font-semibold">Desafios</th>
-                <th className="text-right p-3 font-semibold">Missões</th>
-                <th className="text-right p-3 font-semibold">Acertos</th>
-                <th className="text-right p-3 font-semibold">Erros</th>
-                <th className="text-right p-3 font-semibold">Acerto %</th>
-                <th className="text-left p-3 font-semibold">Nível</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((u) => (
-                <tr key={u.id} className="border-t border-border/40 hover:bg-card/40">
-                  <td className="p-3">
-                    <div className="flex items-center gap-2">
-                      <img src={u.avatar} alt="" className="h-8 w-8 rounded-full" />
-                      <span className="font-semibold">{u.username}</span>
-                    </div>
-                  </td>
-                  <td className="p-3 text-muted-foreground">{u.email}</td>
-                  <td className="p-3 text-muted-foreground">
-                    {u.city}/{u.state}
-                  </td>
-                  <td className="p-3 text-muted-foreground">{u.referrer}</td>
-                  <td className="p-3 text-muted-foreground">{u.joinedAt}</td>
-                  <td className="p-3 text-right tabular-nums font-semibold text-gold">
-                    {u.tokens.toLocaleString("pt-BR")}
-                  </td>
-                  <td className="p-3 text-right tabular-nums">{u.invites}</td>
-                  <td className="p-3 text-right tabular-nums">{u.challenges}</td>
-                  <td className="p-3 text-right tabular-nums">{u.missions}</td>
-                  <td className="p-3 text-right tabular-nums">
-                    <span className="inline-flex items-center gap-1 text-primary">
-                      <TrendingUp className="h-3 w-3" /> {u.acertos}
-                    </span>
-                  </td>
-                  <td className="p-3 text-right tabular-nums">
-                    <span className="inline-flex items-center gap-1 text-destructive/80">
-                      <TrendingDown className="h-3 w-3" /> {u.erros}
-                    </span>
-                  </td>
-                  <td className="p-3 text-right tabular-nums font-semibold">
-                    {u.accuracy.toFixed(1)}%
-                  </td>
-                  <td className="p-3">
-                    <span className="px-2 py-0.5 rounded-full bg-primary/15 text-primary text-xs font-semibold border border-primary/30">
-                      {u.level}
-                    </span>
-                  </td>
+        {loading ? (
+          <div className="p-10 text-center text-muted-foreground text-sm flex items-center justify-center gap-2">
+            <Loader2 className="h-4 w-4 animate-spin" /> Carregando cadastros…
+          </div>
+        ) : error ? (
+          <div className="p-10 text-center text-destructive text-sm">{error}</div>
+        ) : filtered.length === 0 ? (
+          <div className="p-10 text-center text-muted-foreground text-sm">Nenhum usuário encontrado.</div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-card/60 text-xs uppercase tracking-wider text-muted-foreground">
+                <tr>
+                  <th className="text-left p-3 font-semibold">Nome</th>
+                  <th className="text-left p-3 font-semibold">E-mail</th>
+                  <th className="text-left p-3 font-semibold">WhatsApp</th>
+                  <th className="text-left p-3 font-semibold">Instagram</th>
+                  <th className="text-left p-3 font-semibold">Cidade/UF</th>
+                  <th className="text-left p-3 font-semibold">Provider</th>
+                  <th className="text-left p-3 font-semibold">Status</th>
+                  <th className="text-right p-3 font-semibold">Bônus</th>
+                  <th className="text-left p-3 font-semibold">Cadastro</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {filtered.map((u) => (
+                  <tr key={u.id} className="border-t border-border/40 hover:bg-card/40">
+                    <td className="p-3 font-semibold">{u.fullName || "—"}</td>
+                    <td className="p-3 text-muted-foreground">{u.email || "—"}</td>
+                    <td className="p-3 text-muted-foreground">{u.whatsapp || "—"}</td>
+                    <td className="p-3 text-muted-foreground">{u.instagram || "—"}</td>
+                    <td className="p-3 text-muted-foreground">{u.city || "—"}{u.state ? `/${u.state}` : ""}</td>
+                    <td className="p-3 text-muted-foreground">{u.provider || "—"}</td>
+                    <td className="p-3">
+                      <span className="px-2 py-0.5 rounded-full bg-primary/15 text-primary text-xs font-semibold border border-primary/30">
+                        {u.status || "active"}
+                      </span>
+                    </td>
+                    <td className="p-3 text-right tabular-nums font-semibold text-gold">
+                      {(u.welcomeBonus ?? 0).toLocaleString("pt-BR")}
+                    </td>
+                    <td className="p-3 text-muted-foreground">{new Date(u.createdAt).toLocaleString("pt-BR")}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );
