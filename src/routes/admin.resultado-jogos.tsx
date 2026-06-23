@@ -31,7 +31,21 @@ function Page() {
     queryFn: () => listFn(),
   });
 
-  const grouped = rows.reduce<Record<string, WorldCupResultRow[]>>((acc, r) => {
+  const [query, setQuery] = useState("");
+  const [emailFor, setEmailFor] = useState<WorldCupResultRow | null>(null);
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return rows;
+    return rows.filter(
+      (r) =>
+        r.home_team.toLowerCase().includes(q) ||
+        r.away_team.toLowerCase().includes(q) ||
+        r.match_date.includes(q),
+    );
+  }, [rows, query]);
+
+  const grouped = filtered.reduce<Record<string, WorldCupResultRow[]>>((acc, r) => {
     (acc[r.match_date] = acc[r.match_date] || []).push(r);
     return acc;
   }, {});
