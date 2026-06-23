@@ -152,20 +152,8 @@ function Feed() {
       </section>
 
 
-      {/* Banners promocionais */}
-      <section className="mb-8">
-        <Link
-          to="/desafios"
-          className="group block overflow-hidden rounded-2xl border border-border/60 hover:border-primary/60 hover:shadow-glow transition"
-        >
-          <img
-            src={bannerNaoGaste.url}
-            alt="Não gaste R$ 1 real em palpites"
-            className="w-full h-auto object-cover group-hover:scale-[1.02] transition duration-500"
-            loading="lazy"
-          />
-        </Link>
-      </section>
+      {/* Reviews do Google */}
+      <GoogleReviewsSlider />
 
       {/* Banners cadastrados no admin */}
       {banners.length > 0 && (
