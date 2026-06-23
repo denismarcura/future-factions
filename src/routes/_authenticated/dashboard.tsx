@@ -199,12 +199,24 @@ function Dashboard() {
     () => participations.reduce((s, p) => s + (p.entryFee ?? 0), 0),
     [participations],
   );
+  const [palpiteTokens, setPalpiteTokens] = useState(0);
+  const [palpiteSpentTkn, setPalpiteSpentTkn] = useState(0);
+  useEffect(() => {
+    const sync = () => {
+      setPalpiteTokens(getPalpiteTokens());
+      setPalpiteSpentTkn(getPalpiteTokensSpentTkn());
+    };
+    sync();
+    window.addEventListener("ddp:palpite-tokens-updated", sync);
+    return () => window.removeEventListener("ddp:palpite-tokens-updated", sync);
+  }, []);
   const tokens = useMemo(
     () =>
       (profile?.welcome_bonus ?? 0) +
       claims.reduce((s, c) => s + (c.tokens_awarded ?? 0), 0) -
-      spentTokens,
-    [claims, profile?.welcome_bonus, spentTokens],
+      spentTokens -
+      palpiteSpentTkn,
+    [claims, profile?.welcome_bonus, spentTokens, palpiteSpentTkn],
   );
   const missionsDone = claims.length;
   const missionsTodo = missions.filter((m) => !claimedIds.has(m.id)).length;
