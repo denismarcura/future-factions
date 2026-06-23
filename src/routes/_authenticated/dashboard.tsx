@@ -135,6 +135,8 @@ function Dashboard() {
   const [friends, setFriends] = useState<Friend[]>([]);
   const [myChallenges, setMyChallenges] = useState<Prediction[]>([]);
   const [participations, setParticipations] = useState<MyParticipation[]>([]);
+  const [myPalpites, setMyPalpites] = useState<MyPalpiteRow[]>([]);
+  const listMyPalpitesFn = useServerFn(listMyPalpites);
 
   useEffect(() => {
     (async () => {
