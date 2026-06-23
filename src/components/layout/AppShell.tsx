@@ -29,6 +29,7 @@ import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/s
 import logoAsset from "@/assets/logo-desafio.png.asset.json";
 import { LiveUsersBadge } from "@/components/LiveUsersBadge";
 import { Footer } from "@/components/layout/Footer";
+import { ClosingSoonAlert } from "@/components/ClosingSoonAlert";
 
 
 const ADMIN_EMAILS = ["denismarcura@gmail.com", "antoinio.salvador@gmail.com"];
@@ -340,6 +341,8 @@ export function AppShell({ children, hidePrimarySidebar = false }: { children: R
           })}
         </div>
       </nav>
+
+      <ClosingSoonAlert />
     </div>
   );
 }
