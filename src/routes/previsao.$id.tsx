@@ -18,6 +18,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { hasParticipated, saveParticipation } from "@/lib/my-participations";
 import { getTokenBalance } from "@/lib/balance";
 import { StarRating } from "@/components/StarRating";
+import { NextChallengeBanner } from "@/components/NextChallengeBanner";
 import { getRatings, rateChallenge, getMyRating } from "@/lib/ratings.functions";
 
 function corpToPrediction(c: CorpChallengeRecord): Prediction {
