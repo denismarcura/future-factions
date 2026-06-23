@@ -2,18 +2,17 @@ import { useEffect, useState } from "react";
 import { Users } from "lucide-react";
 
 export function LiveUsersBadge() {
-  const [count, setCount] = useState(1247);
+  const [count, setCount] = useState(15847);
 
   useEffect(() => {
     const id = setInterval(() => {
       setCount((c) => {
-        // simulate fluctuation: mostly small +/- moves, occasional spikes
         const r = Math.random();
         let delta: number;
-        if (r < 0.05) delta = Math.floor(Math.random() * 40) + 10; // spike up
-        else if (r < 0.1) delta = -(Math.floor(Math.random() * 30) + 5); // drop
-        else delta = Math.floor(Math.random() * 11) - 5; // -5..+5
-        const next = Math.max(820, Math.min(2400, c + delta));
+        if (r < 0.05) delta = Math.floor(Math.random() * 200) + 50; // spike up
+        else if (r < 0.1) delta = -(Math.floor(Math.random() * 150) + 20); // drop
+        else delta = Math.floor(Math.random() * 61) - 30; // -30..+30
+        const next = Math.max(15200, Math.min(22000, c + delta));
         return next;
       });
     }, 1400);
