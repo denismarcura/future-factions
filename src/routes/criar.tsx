@@ -492,6 +492,27 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
 
       setPublished({ id, name: name.trim() });
       window.scrollTo({ top: 0, behavior: "smooth" });
+      // Fire-and-forget: notifica o criador por e-mail com os dados do desafio publicado.
+      try {
+        const origin = typeof window !== "undefined" ? window.location.origin : "";
+        void sendPublishedEmailFn({
+          data: {
+            challengeId: id,
+            challengeName: name.trim(),
+            category: category || undefined,
+            endsAt: endsAt || undefined,
+            prizeName: prizeName.trim() || undefined,
+            visibility: isOpen ? "public" : "private",
+            subs: subs.map((s) => ({
+              question: s.question,
+              options: s.options.filter(Boolean),
+            })),
+            inviteLink: origin ? `${origin}/previsao/${id}` : undefined,
+          },
+        });
+      } catch {
+        // não bloqueia a publicação
+      }
       // Mantemos a tela de sucesso aberta para o usuário copiar o link de convite.
     } catch (err) {
       setErrors([
