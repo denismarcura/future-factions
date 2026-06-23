@@ -1008,6 +1008,7 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
 
           {/* Prêmio */}
           <Section
+            step={4}
             title="Prêmio"
             description={`Automaticamente daremos ${AUTO_PRIZE.toLocaleString("pt-BR")} tokens para quem fizer a maior pontuação. Você pode somar seus próprios tokens, escolher um prêmio da nossa loja ou cadastrar um prêmio físico próprio.`}
           >
