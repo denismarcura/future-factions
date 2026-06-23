@@ -17,6 +17,7 @@ import { saveUserChallenge } from "@/lib/user-challenges";
 import { improveTitle } from "@/lib/title-ai.functions";
 import { listCategories, listSubcategories, type ChallengeCategory, type ChallengeSubcategory } from "@/lib/challenge-categories";
 import { generateChallenge, improveDescription, generateWhatsAppInvite, generateTiebreaker, generateRegulation } from "@/lib/challenge-ai.functions";
+import { sendChallengePublishedEmail } from "@/lib/challenge-emails.functions";
 import { generatePrizeImage } from "@/lib/prize-image.functions";
 import { createCorpChallenge, type CorporateMission } from "@/lib/corp-challenges.functions";
 import { uploadCorpAsset, uploadCorpAssets } from "@/lib/corp-storage";
