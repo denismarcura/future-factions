@@ -313,7 +313,7 @@ function Dashboard() {
         />
 
         {/* QUICK ACTIONS */}
-        <div className="grid sm:grid-cols-3 gap-4">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <ActionCard
             to="/criar"
             icon={Plus}
@@ -327,10 +327,25 @@ function Dashboard() {
             desc="Veja desafios abertos"
           />
           <ActionCard to="/shop" icon={ShoppingBag} title="Trocar tokens" desc="Brindes na loja" />
+          <ActionCard
+            to="/admin/email-marketing"
+            icon={Mail}
+            title="Divulgação"
+            desc="E-mail marketing dos seus desafios"
+          />
         </div>
 
         {/* PROFILE EDITOR */}
         <ProfileEditor profile={profile} onSaved={setProfile} />
+
+        {/* MY CHALLENGES (primeiro: os que o usuário criou) */}
+        <MyChallengesSection items={myChallenges} />
+
+        {/* MY PARTICIPATIONS (depois: os que está participando) */}
+        <MyParticipationsSection items={participations} palpites={myPalpites} />
+
+        {/* COMPANY CHALLENGES (por último) */}
+        <CompanyChallengesSection />
 
         {/* TOKENS EXTRACT */}
         <TokensExtractSection
@@ -341,9 +356,6 @@ function Dashboard() {
           balance={tokens}
         />
 
-        {/* MY PARTICIPATIONS */}
-        <MyParticipationsSection items={participations} palpites={myPalpites} />
-
         {/* MISSIONS */}
         <MissionsSection
           missions={missions}
@@ -351,9 +363,6 @@ function Dashboard() {
           done={missionsDone}
           todo={missionsTodo}
         />
-
-        {/* MY CHALLENGES */}
-        <MyChallengesSection items={myChallenges} />
 
         {/* AI RECOMMENDATIONS */}
         <RecommendationsSection />
@@ -373,7 +382,6 @@ function Dashboard() {
           myChallenges={myChallenges}
         />
 
-        {/* SHOP PREVIEW */}
         <ShopPreviewSection tokens={tokens} />
       </div>
     </AppShell>
