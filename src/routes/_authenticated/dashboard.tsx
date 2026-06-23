@@ -152,6 +152,7 @@ function Dashboard() {
       setProfile(prof as Profile | null);
       setMissions(ms);
       setClaims(cl);
+      listMyPalpitesFn().then(setMyPalpites).catch(() => setMyPalpites([]));
     })();
     setFriends(listFriends());
     setMyChallenges(getUserChallenges());
