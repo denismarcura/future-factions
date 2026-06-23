@@ -82,16 +82,22 @@ export const generateChallenge = createServerFn({ method: "POST" })
 
 Tema: ${data.theme}
 Categoria: ${data.category || "Geral"}${data.subcategory ? `\nSub-categoria: ${data.subcategory}` : ""}${data.prizeName ? `\nPrêmio: ${data.prizeName}` : ""}${data.endsAt ? `\nEncerra em: ${data.endsAt}` : ""}
-Seed de variação (use para garantir respostas diferentes): ${variationSeed}
+Seed de variação (use para garantir respostas diferentes): ${variationSeed}${teamsContext}
 
 ${data.userSubs?.length ? `Palpites já criados pelo usuário (mantenha-os iguais, NÃO REPITA nem crie versões parecidas):\n${userSubsText}\n` : ""}${existingQuestions.length ? `\nPROIBIDO repetir ou parafrasear qualquer das perguntas acima. Crie perguntas COMPLETAMENTE diferentes em assunto e formato.\n` : ""}
 Gere no total ${data.count} palpites. ${remaining > 0 ? `Crie mais ${remaining} palpites NOVOS e diferentes dos anteriores.` : "Use apenas os palpites do usuário."} Varie os ângulos: resultado, placar, primeiro/último gol, jogador destaque, número de cartões, escanteios, gol em qual tempo, autor do gol, defesa do goleiro, fase seguinte, etc. Cada palpite deve ter pergunta curta e de 2 até 10 opções mutuamente exclusivas. Crie também um NOME curto (até 80 caracteres) e chamativo.
 
+REGRA CRÍTICA — USE APENAS TIMES/JOGOS CADASTRADOS:
+- Se houver "BASE DE TIMES CADASTRADOS" acima, TODAS as perguntas e opções que citem times/seleções devem usar EXCLUSIVAMENTE nomes dessa lista. NUNCA mencione um time que não esteja na base.
+- Se houver "JOGOS CADASTRADOS", baseie as perguntas APENAS nesses confrontos e datas. NÃO invente jogos (ex.: nada de "Brasil x Escócia" se esse confronto não estiver listado).
+- Para perguntas de jogador, use apenas jogadores reais dos times presentes na base.
+- Se o tema não casar com nenhum time/jogo da base, evite perguntas específicas de confronto e prefira perguntas gerais (ex.: "Qual seleção será o lanterna?" com opções entre os times cadastrados).
+
 REGRA CRÍTICA — RESPOSTAS REAIS E CONTEXTUAIS:
-- Quando a pergunta envolver NOME DE JOGADOR (ex.: "Quem faz o primeiro gol?", "Quem é o craque da partida?", "Quem dá a assistência?"), gere SEMPRE opções com jogadores reais: pegue os 3 principais artilheiros/atacantes/destaques de CADA time mencionado no tema (total ≥ 6 nomes) e adicione "Nenhum" no final. NUNCA responda Sim/Não para perguntas de jogador.
-- Quando envolver TIME/SELEÇÃO (ex.: "Quem vence?"), opções devem ser os times reais do confronto + "Empate" quando fizer sentido.
-- Quando envolver HORÁRIO/ESTÁDIO/FASE, gere a resposta oficial conhecida com base no título e data limite (ex.: horário em Brasília, nome do estádio, fase da competição).
-- Quando envolver "quem avança", opções devem ser os dois times do confronto.
+- Quando a pergunta envolver NOME DE JOGADOR (ex.: "Quem faz o primeiro gol?", "Quem é o craque da partida?", "Quem dá a assistência?"), gere SEMPRE opções com jogadores reais dos times presentes na base (3 destaques por time, total ≥ 6 nomes) e adicione "Nenhum" no final. NUNCA responda Sim/Não para perguntas de jogador.
+- Quando envolver TIME/SELEÇÃO (ex.: "Quem vence?"), opções devem ser os times reais do confronto cadastrado + "Empate" quando fizer sentido.
+- Quando envolver HORÁRIO/ESTÁDIO/FASE, gere a resposta oficial conhecida com base no título e data limite.
+- Quando envolver "quem avança", opções devem ser os dois times do confronto cadastrado.
 - Para "número de gols/cartões/escanteios", use inteiros (ver abaixo).
 
 REGRAS para opções numéricas:
