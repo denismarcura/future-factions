@@ -6,7 +6,7 @@ import {
   Gift, Coins, Instagram, Facebook, Youtube, Music2, Globe, Lock,
   CheckCircle2, Share2, Copy, AlertCircle, UserPlus, Mail, Users, Loader2,
   PencilLine, MessageCircle, Download, ImageIcon, ShoppingBag, X,
-  Linkedin, Twitter, Star, Heart, Check,
+  Linkedin, Twitter, Star, Heart, Check, ExternalLink,
 } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { CATEGORIES, CURRENT_USER, formatTokens } from "@/lib/mock-data";
@@ -2181,7 +2181,23 @@ function PublishedSuccess({ name, id, onCreateAnother }: { name: string; id: str
   const PUBLIC_DOMAIN = "https://www.desafiodospalpites.com.br";
   const link = `${PUBLIC_DOMAIN}/previsao/${id}`;
   const copy = async () => {
-    try { await navigator.clipboard.writeText(link); setCopied(true); setTimeout(() => setCopied(false), 1500); } catch {}
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(link);
+      } else {
+        const textarea = document.createElement("textarea");
+        textarea.value = link;
+        textarea.setAttribute("readonly", "");
+        textarea.style.position = "fixed";
+        textarea.style.opacity = "0";
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textarea);
+      }
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {}
   };
   return (
     <div className="max-w-2xl mx-auto text-center py-10">
@@ -2198,6 +2214,9 @@ function PublishedSuccess({ name, id, onCreateAnother }: { name: string; id: str
         <button onClick={copy} className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg bg-primary/15 text-primary border border-primary/30 text-sm font-semibold hover:bg-primary/20">
           <Copy className="h-4 w-4" /> {copied ? "Copiado" : "Copiar"}
         </button>
+        <a href={link} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg bg-gold/15 text-gold border border-gold/30 text-sm font-semibold hover:bg-gold/20">
+          <ExternalLink className="h-4 w-4" /> Abrir
+        </a>
       </div>
       <div className="flex flex-wrap gap-3 justify-center">
         <Link to="/desafios" className="h-11 px-5 rounded-xl bg-gradient-brand text-primary-foreground font-display font-bold inline-flex items-center shadow-glow">
