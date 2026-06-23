@@ -26,6 +26,7 @@ import { WORLD_CUP_MATCHES } from "@/lib/world-cup-matches";
 import { ArtsWizard } from "@/components/ArtsWizard";
 import { PrizesPicker, type PrizeSlot } from "@/components/PrizesPicker";
 import { CitiesAutocomplete, type SelectedCity } from "@/components/CitiesAutocomplete";
+import { CitiesScopePicker } from "@/components/CitiesScopePicker";
 import type { AdminPrize } from "@/lib/admin-prizes.functions";
 
 function getNextBrazilMatch() {
