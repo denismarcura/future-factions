@@ -315,7 +315,7 @@ function Dashboard() {
         />
 
         {/* MY PARTICIPATIONS */}
-        <MyParticipationsSection items={participations} />
+        <MyParticipationsSection items={participations} palpites={myPalpites} />
 
         {/* MISSIONS */}
         <MissionsSection
