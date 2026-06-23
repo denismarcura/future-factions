@@ -1340,7 +1340,107 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
             </>
           )}
 
+          {/* Localização da campanha */}
+          <Section
+            step={7}
+            title="Onde sua campanha vale"
+            description="Marque Brasil todo ou informe cidade e estado."
+          >
+            <label className="flex items-center gap-3 rounded-xl border border-border p-3 cursor-pointer hover:border-primary/50 transition">
+              <input
+                type="checkbox"
+                checked={coverAllBrazil}
+                onChange={(e) => setCoverAllBrazil(e.target.checked)}
+                className="h-5 w-5 accent-primary"
+              />
+              <div>
+                <div className="font-bold text-sm">Brasil todo</div>
+                <div className="text-xs text-muted-foreground">A campanha vale para qualquer cidade do país.</div>
+              </div>
+            </label>
+            {!coverAllBrazil && (
+              <div className="grid sm:grid-cols-[1fr_8rem] gap-3">
+                <Field label="Cidade">
+                  <input
+                    value={campaignCity}
+                    onChange={(e) => setCampaignCity(e.target.value)}
+                    placeholder="Ex.: São Paulo"
+                    className="input"
+                  />
+                </Field>
+                <Field label="Estado (UF)">
+                  <input
+                    value={campaignState}
+                    onChange={(e) => setCampaignState(e.target.value.toUpperCase().slice(0, 2))}
+                    placeholder="SP"
+                    maxLength={2}
+                    className="input uppercase"
+                  />
+                </Field>
+              </div>
+            )}
+          </Section>
+
+          {/* Link de convite (preview) */}
+          <Section
+            step={8}
+            title="Link para convidar seus amigos"
+            description="Este é o link que será gerado automaticamente quando você publicar. Compartilhe com seus amigos para chamarem para palpitar."
+          >
+            <div className="rounded-xl glass-card p-3 flex items-center gap-2">
+              <Share2 className="h-4 w-4 text-gold shrink-0" />
+              <input
+                readOnly
+                value="https://www.desafiodospalpites.com.br/previsao/[gerado-ao-publicar]"
+                className="flex-1 bg-transparent text-sm outline-none truncate text-muted-foreground"
+              />
+              <span className="text-[10px] uppercase tracking-wider font-bold text-primary bg-primary/10 border border-primary/30 rounded-full px-2 py-1">
+                Pré-visualização
+              </span>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Assim que o desafio for publicado, o link ficará ativo e você poderá copiar e enviar no WhatsApp, Instagram ou e-mail.
+            </p>
+          </Section>
+
+          {/* Tipo de campanha (público/aberto pelo link) */}
+          <Section
+            step={9}
+            title="A campanha será pública ou aberta?"
+            description="Escolha quem pode encontrar e participar do seu desafio."
+          >
+            <div className="space-y-3">
+              <label className={`flex items-start gap-3 rounded-xl border p-4 cursor-pointer transition ${reachMode === "public" ? "border-primary bg-primary/10" : "border-border hover:border-primary/50"}`}>
+                <input
+                  type="radio"
+                  name="reach-mode"
+                  checked={reachMode === "public"}
+                  onChange={() => setReachMode("public")}
+                  className="mt-1 h-5 w-5 accent-primary"
+                />
+                <div>
+                  <div className="font-bold text-sm flex items-center gap-2"><Globe className="h-4 w-4 text-primary" /> Pública</div>
+                  <div className="text-xs text-muted-foreground">Aparece na home e no feed de desafios para todo mundo.</div>
+                </div>
+              </label>
+              <label className={`flex items-start gap-3 rounded-xl border p-4 cursor-pointer transition ${reachMode === "open" ? "border-primary bg-primary/10" : "border-border hover:border-primary/50"}`}>
+                <input
+                  type="radio"
+                  name="reach-mode"
+                  checked={reachMode === "open"}
+                  onChange={() => setReachMode("open")}
+                  className="mt-1 h-5 w-5 accent-primary"
+                />
+                <div>
+                  <div className="font-bold text-sm flex items-center gap-2"><Share2 className="h-4 w-4 text-primary" /> Aberta apenas pelo link</div>
+                  <div className="text-xs text-muted-foreground">Só quem receber o link de convite consegue participar.</div>
+                </div>
+              </label>
+            </div>
+          </Section>
+
         </div>
+
 
 
         {/* Sidebar */}
