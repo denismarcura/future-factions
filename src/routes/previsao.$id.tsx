@@ -17,6 +17,8 @@ import { detectMatchFromText } from "@/lib/world-cup-matches";
 import { useAuth } from "@/hooks/use-auth";
 import { hasParticipated, saveParticipation } from "@/lib/my-participations";
 import { getTokenBalance } from "@/lib/balance";
+import { StarRating } from "@/components/StarRating";
+import { getRatings, rateChallenge, getMyRating } from "@/lib/ratings.functions";
 
 function corpToPrediction(c: CorpChallengeRecord): Prediction {
   const first = c.subs[0];
@@ -479,6 +481,8 @@ function PredictionInner({ p }: { p: Prediction }) {
 
           <h1 className="mt-4 font-display text-2xl sm:text-3xl font-black leading-tight">{p.title}</h1>
           {!p.match && <p className="mt-2 text-muted-foreground">{p.description}</p>}
+          <ChallengeRatingBlock challengeId={p.id} />
+
 
           {p.prizeTiers && (
             <div className="mt-5 grid grid-cols-3 gap-3">
