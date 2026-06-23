@@ -68,6 +68,7 @@ import { generateChallenges, type GeneratedChallenge } from "@/lib/generate-chal
 import { generateInvitePromoText } from "@/lib/invite-ai.functions";
 import { listParticipations, type MyParticipation } from "@/lib/my-participations";
 import { listMyPalpites, type MyPalpiteRow } from "@/lib/my-palpites.functions";
+import { submitInstagramVideo } from "@/lib/instagram-submissions.functions";
 import {
   Carousel,
   CarouselContent,
