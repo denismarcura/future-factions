@@ -48,15 +48,12 @@ export function HeaderSearch({ className = "" }: { className?: string }) {
 
     if (out.length < 8) {
       for (const u of USERS) {
-        const name = (u as { name?: string }).name ?? "";
-        const handle = (u as { handle?: string }).handle ?? "";
-        if (!name && !handle) continue;
-        if (norm(name).includes(n) || norm(handle).includes(n)) {
+        if (norm(u.username).includes(n) || norm(u.city).includes(n)) {
           out.push({
             kind: "user",
-            id: (u as { id: string }).id,
-            title: name || handle,
-            subtitle: handle ? `@${handle}` : "Palpiteiro",
+            id: u.id,
+            title: `@${u.username}`,
+            subtitle: `${u.city}/${u.state} · ${u.level}`,
           });
           if (out.length >= 10) break;
         }
