@@ -9,7 +9,8 @@ import { GoogleReviewsSlider } from "@/components/GoogleReviewsSlider";
 
 import { AppShell } from "@/components/layout/AppShell";
 import { PredictionCard } from "@/components/PredictionCard";
-import { CATEGORIES, PREDICTIONS } from "@/lib/mock-data";
+import { CATEGORIES, PREDICTIONS, type Prediction } from "@/lib/mock-data";
+import { getUserChallenges } from "@/lib/user-challenges";
 import { listActiveBanners, type Banner } from "@/lib/banners";
 import { aiSearchChallenges } from "@/lib/search-ai.functions";
 import logoAsset from "@/assets/logo-desafio.png.asset.json";
