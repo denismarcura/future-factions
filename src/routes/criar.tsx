@@ -26,6 +26,7 @@ import { WORLD_CUP_MATCHES } from "@/lib/world-cup-matches";
 import { ArtsWizard } from "@/components/ArtsWizard";
 import { PrizesPicker, type PrizeSlot } from "@/components/PrizesPicker";
 import { CitiesAutocomplete, type SelectedCity } from "@/components/CitiesAutocomplete";
+import { CitiesScopePicker } from "@/components/CitiesScopePicker";
 import type { AdminPrize } from "@/lib/admin-prizes.functions";
 
 function getNextBrazilMatch() {
@@ -1527,8 +1528,8 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
                   </label>
                   {!coverAllBrazil && (
                     <div>
-                      <div className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-1">Aberto apenas para as cidades</div>
-                      <CitiesAutocomplete value={selectedCities} onChange={setSelectedCities} />
+                      <div className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-1">Aberto apenas para as cidades selecionadas</div>
+                      <CitiesScopePicker value={selectedCities} onChange={setSelectedCities} />
                     </div>
                   )}
                 </div>
