@@ -458,9 +458,8 @@ export const reviewInstagramShare = createServerFn({ method: "POST" })
     if (data.approve && share) {
       await context.supabase.from("token_transactions").insert({
         user_id: share.user_id,
-        amount: tokens,
-        type: "bonus",
-        description: `Compartilhamento de notícia no Instagram`,
+        delta: tokens,
+        reason: "Compartilhamento de notícia no Instagram",
       });
     }
     return { ok: true };
