@@ -33,6 +33,7 @@ import { Route as RankingChallengeIdRouteImport } from './routes/ranking.$challe
 import { Route as PrevisaoIdRouteImport } from './routes/previsao.$id'
 import { Route as NoticiasSlugRouteImport } from './routes/noticias.$slug'
 import { Route as EmpresaCriarRouteImport } from './routes/empresa.criar'
+import { Route as AmigoRefRouteImport } from './routes/amigo.$ref'
 import { Route as AdminTokensConfigRouteImport } from './routes/admin.tokens-config'
 import { Route as AdminSegurancaRouteImport } from './routes/admin.seguranca'
 import { Route as AdminResultadoJogosRouteImport } from './routes/admin.resultado-jogos'
@@ -178,6 +179,11 @@ const NoticiasSlugRoute = NoticiasSlugRouteImport.update({
 const EmpresaCriarRoute = EmpresaCriarRouteImport.update({
   id: '/empresa/criar',
   path: '/empresa/criar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AmigoRefRoute = AmigoRefRouteImport.update({
+  id: '/amigo/$ref',
+  path: '/amigo/$ref',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminTokensConfigRoute = AdminTokensConfigRouteImport.update({
@@ -362,6 +368,7 @@ export interface FileRoutesByFullPath {
   '/admin/resultado-jogos': typeof AdminResultadoJogosRoute
   '/admin/seguranca': typeof AdminSegurancaRoute
   '/admin/tokens-config': typeof AdminTokensConfigRoute
+  '/amigo/$ref': typeof AmigoRefRoute
   '/empresa/criar': typeof EmpresaCriarRoute
   '/noticias/$slug': typeof NoticiasSlugRoute
   '/previsao/$id': typeof PrevisaoIdRoute
@@ -413,6 +420,7 @@ export interface FileRoutesByTo {
   '/admin/resultado-jogos': typeof AdminResultadoJogosRoute
   '/admin/seguranca': typeof AdminSegurancaRoute
   '/admin/tokens-config': typeof AdminTokensConfigRoute
+  '/amigo/$ref': typeof AmigoRefRoute
   '/empresa/criar': typeof EmpresaCriarRoute
   '/noticias/$slug': typeof NoticiasSlugRoute
   '/previsao/$id': typeof PrevisaoIdRoute
@@ -467,6 +475,7 @@ export interface FileRoutesById {
   '/admin/resultado-jogos': typeof AdminResultadoJogosRoute
   '/admin/seguranca': typeof AdminSegurancaRoute
   '/admin/tokens-config': typeof AdminTokensConfigRoute
+  '/amigo/$ref': typeof AmigoRefRoute
   '/empresa/criar': typeof EmpresaCriarRoute
   '/noticias/$slug': typeof NoticiasSlugRoute
   '/previsao/$id': typeof PrevisaoIdRoute
@@ -521,6 +530,7 @@ export interface FileRouteTypes {
     | '/admin/resultado-jogos'
     | '/admin/seguranca'
     | '/admin/tokens-config'
+    | '/amigo/$ref'
     | '/empresa/criar'
     | '/noticias/$slug'
     | '/previsao/$id'
@@ -572,6 +582,7 @@ export interface FileRouteTypes {
     | '/admin/resultado-jogos'
     | '/admin/seguranca'
     | '/admin/tokens-config'
+    | '/amigo/$ref'
     | '/empresa/criar'
     | '/noticias/$slug'
     | '/previsao/$id'
@@ -625,6 +636,7 @@ export interface FileRouteTypes {
     | '/admin/resultado-jogos'
     | '/admin/seguranca'
     | '/admin/tokens-config'
+    | '/amigo/$ref'
     | '/empresa/criar'
     | '/noticias/$slug'
     | '/previsao/$id'
@@ -655,6 +667,7 @@ export interface RootRouteChildren {
   ShopRoute: typeof ShopRoute
   TermosRoute: typeof TermosRoute
   Top100Route: typeof Top100Route
+  AmigoRefRoute: typeof AmigoRefRoute
   EmpresaCriarRoute: typeof EmpresaCriarRoute
   PrevisaoIdRoute: typeof PrevisaoIdRoute
   ApiPublicHooksApurarCopaRoute: typeof ApiPublicHooksApurarCopaRoute
@@ -830,6 +843,13 @@ declare module '@tanstack/react-router' {
       path: '/empresa/criar'
       fullPath: '/empresa/criar'
       preLoaderRoute: typeof EmpresaCriarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/amigo/$ref': {
+      id: '/amigo/$ref'
+      path: '/amigo/$ref'
+      fullPath: '/amigo/$ref'
+      preLoaderRoute: typeof AmigoRefRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/tokens-config': {
@@ -1134,6 +1154,7 @@ const rootRouteChildren: RootRouteChildren = {
   ShopRoute: ShopRoute,
   TermosRoute: TermosRoute,
   Top100Route: Top100Route,
+  AmigoRefRoute: AmigoRefRoute,
   EmpresaCriarRoute: EmpresaCriarRoute,
   PrevisaoIdRoute: PrevisaoIdRoute,
   ApiPublicHooksApurarCopaRoute: ApiPublicHooksApurarCopaRoute,
