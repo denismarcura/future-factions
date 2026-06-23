@@ -5,7 +5,7 @@ import { Flame, Sparkles, TrendingUp, Clock, ShoppingBag, Trophy, Coins, Gift, U
 import imgCampeao from "@/assets/dd-campeao.jpg";
 import imgMalucos from "@/assets/pm-soccer.jpg";
 import imgAlien from "@/assets/cat-alienigenas.jpg";
-import bannerNaoGaste from "@/assets/banner-nao-gaste.png.asset.json";
+import { GoogleReviewsSlider } from "@/components/GoogleReviewsSlider";
 
 import { AppShell } from "@/components/layout/AppShell";
 import { PredictionCard } from "@/components/PredictionCard";
@@ -152,20 +152,8 @@ function Feed() {
       </section>
 
 
-      {/* Banners promocionais */}
-      <section className="mb-8">
-        <Link
-          to="/desafios"
-          className="group block overflow-hidden rounded-2xl border border-border/60 hover:border-primary/60 hover:shadow-glow transition"
-        >
-          <img
-            src={bannerNaoGaste.url}
-            alt="Não gaste R$ 1 real em palpites"
-            className="w-full h-auto object-cover group-hover:scale-[1.02] transition duration-500"
-            loading="lazy"
-          />
-        </Link>
-      </section>
+      {/* Reviews do Google */}
+      <GoogleReviewsSlider />
 
       {/* Banners cadastrados no admin */}
       {banners.length > 0 && (
