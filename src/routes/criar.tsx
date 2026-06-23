@@ -876,11 +876,37 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
             {/* Selecione um Evento */}
             <EventQuickPicker
               category={category}
-              onPick={(m) => {
-                const adv = m.home === "Brasil" ? m.away : m.home === "Brasil" ? m.home : m.away;
-                setName(`${m.home} x ${m.away} — Quem leva?`);
+              onPick={async (m) => {
+                const matchTitle = `${m.home} x ${m.away}`;
+                setName(`${matchTitle} — Quem leva?`);
                 setEndsAt(kickoffToLocalDateTime(m.kickoff));
-                void adv;
+                // Limpa palpites antigos e gera 3 novos para ESTE jogo
+                setSubs([{ id: uid(), question: `Quem ganha ${matchTitle}?`, options: [m.home, "Empate", m.away] }]);
+                setInlineAiLoading(true);
+                setInlineAiError(null);
+                try {
+                  const kickoffDate = new Date(m.kickoff);
+                  const result = await generateChallengeFn({
+                    data: {
+                      theme: `Jogo da Copa do Mundo 2026: ${matchTitle} (Grupo ${m.group}), com início em ${kickoffDate.toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" })} (horário de Brasília). Gere palpites ESPECÍFICOS sobre esta partida — use jogadores reais de ${m.home} e ${m.away}, não fale de outros times.`,
+                      category,
+                      subcategory: subcategory || undefined,
+                      userSubs: [{ question: `Quem ganha ${matchTitle}?`, options: [m.home, "Empate", m.away] }],
+                      count: 4, // 1 já existente + 3 novos
+                      prizeName: prizeName.trim() || undefined,
+                      endsAt: kickoffToLocalDateTime(m.kickoff),
+                    },
+                  });
+                  const fresh = result.subs
+                    .filter((s) => s.question.trim().toLowerCase() !== `quem ganha ${matchTitle}?`.toLowerCase())
+                    .slice(0, 3)
+                    .map((s) => ({ id: uid(), question: s.question, options: s.options.slice(0, MAX_OPTIONS) }));
+                  setSubs((prev) => [...prev, ...fresh]);
+                } catch (err) {
+                  setInlineAiError(err instanceof Error ? err.message : "Não foi possível gerar palpites para este jogo.");
+                } finally {
+                  setInlineAiLoading(false);
+                }
               }}
             />
             <div className="grid sm:grid-cols-2 gap-4">
