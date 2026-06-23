@@ -16,6 +16,7 @@ import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as RankingRouteImport } from './routes/ranking'
 import { Route as PerfilRouteImport } from './routes/perfil'
 import { Route as PalpiteIaRouteImport } from './routes/palpite-ia'
+import { Route as NoticiasRouteImport } from './routes/noticias'
 import { Route as MissoesRouteImport } from './routes/missoes'
 import { Route as FaqRouteImport } from './routes/faq'
 import { Route as EmpresasRouteImport } from './routes/empresas'
@@ -30,6 +31,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as RankingChallengeIdRouteImport } from './routes/ranking.$challengeId'
 import { Route as PrevisaoIdRouteImport } from './routes/previsao.$id'
+import { Route as NoticiasSlugRouteImport } from './routes/noticias.$slug'
 import { Route as EmpresaCriarRouteImport } from './routes/empresa.criar'
 import { Route as AdminTokensConfigRouteImport } from './routes/admin.tokens-config'
 import { Route as AdminSegurancaRouteImport } from './routes/admin.seguranca'
@@ -40,6 +42,7 @@ import { Route as AdminRaspadinhaRouteImport } from './routes/admin.raspadinha'
 import { Route as AdminRankingRouteImport } from './routes/admin.ranking'
 import { Route as AdminPremiosRouteImport } from './routes/admin.premios'
 import { Route as AdminNotificacoesRouteImport } from './routes/admin.notificacoes'
+import { Route as AdminNoticiasRouteImport } from './routes/admin.noticias'
 import { Route as AdminMissoesRouteImport } from './routes/admin.missoes'
 import { Route as AdminLojaRouteImport } from './routes/admin.loja'
 import { Route as AdminInstagramVideosRouteImport } from './routes/admin.instagram-videos'
@@ -91,6 +94,11 @@ const PerfilRoute = PerfilRouteImport.update({
 const PalpiteIaRoute = PalpiteIaRouteImport.update({
   id: '/palpite-ia',
   path: '/palpite-ia',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NoticiasRoute = NoticiasRouteImport.update({
+  id: '/noticias',
+  path: '/noticias',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MissoesRoute = MissoesRouteImport.update({
@@ -162,6 +170,11 @@ const PrevisaoIdRoute = PrevisaoIdRouteImport.update({
   path: '/previsao/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const NoticiasSlugRoute = NoticiasSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => NoticiasRoute,
+} as any)
 const EmpresaCriarRoute = EmpresaCriarRouteImport.update({
   id: '/empresa/criar',
   path: '/empresa/criar',
@@ -210,6 +223,11 @@ const AdminPremiosRoute = AdminPremiosRouteImport.update({
 const AdminNotificacoesRoute = AdminNotificacoesRouteImport.update({
   id: '/notificacoes',
   path: '/notificacoes',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminNoticiasRoute = AdminNoticiasRouteImport.update({
+  id: '/noticias',
+  path: '/noticias',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminMissoesRoute = AdminMissoesRouteImport.update({
@@ -312,6 +330,7 @@ export interface FileRoutesByFullPath {
   '/empresas': typeof EmpresasRoute
   '/faq': typeof FaqRoute
   '/missoes': typeof MissoesRoute
+  '/noticias': typeof NoticiasRouteWithChildren
   '/palpite-ia': typeof PalpiteIaRoute
   '/perfil': typeof PerfilRoute
   '/ranking': typeof RankingRouteWithChildren
@@ -333,6 +352,7 @@ export interface FileRoutesByFullPath {
   '/admin/instagram-videos': typeof AdminInstagramVideosRoute
   '/admin/loja': typeof AdminLojaRoute
   '/admin/missoes': typeof AdminMissoesRoute
+  '/admin/noticias': typeof AdminNoticiasRoute
   '/admin/notificacoes': typeof AdminNotificacoesRoute
   '/admin/premios': typeof AdminPremiosRoute
   '/admin/ranking': typeof AdminRankingRoute
@@ -343,6 +363,7 @@ export interface FileRoutesByFullPath {
   '/admin/seguranca': typeof AdminSegurancaRoute
   '/admin/tokens-config': typeof AdminTokensConfigRoute
   '/empresa/criar': typeof EmpresaCriarRoute
+  '/noticias/$slug': typeof NoticiasSlugRoute
   '/previsao/$id': typeof PrevisaoIdRoute
   '/ranking/$challengeId': typeof RankingChallengeIdRoute
   '/admin/': typeof AdminIndexRoute
@@ -360,6 +381,7 @@ export interface FileRoutesByTo {
   '/empresas': typeof EmpresasRoute
   '/faq': typeof FaqRoute
   '/missoes': typeof MissoesRoute
+  '/noticias': typeof NoticiasRouteWithChildren
   '/palpite-ia': typeof PalpiteIaRoute
   '/perfil': typeof PerfilRoute
   '/ranking': typeof RankingRouteWithChildren
@@ -381,6 +403,7 @@ export interface FileRoutesByTo {
   '/admin/instagram-videos': typeof AdminInstagramVideosRoute
   '/admin/loja': typeof AdminLojaRoute
   '/admin/missoes': typeof AdminMissoesRoute
+  '/admin/noticias': typeof AdminNoticiasRoute
   '/admin/notificacoes': typeof AdminNotificacoesRoute
   '/admin/premios': typeof AdminPremiosRoute
   '/admin/ranking': typeof AdminRankingRoute
@@ -391,6 +414,7 @@ export interface FileRoutesByTo {
   '/admin/seguranca': typeof AdminSegurancaRoute
   '/admin/tokens-config': typeof AdminTokensConfigRoute
   '/empresa/criar': typeof EmpresaCriarRoute
+  '/noticias/$slug': typeof NoticiasSlugRoute
   '/previsao/$id': typeof PrevisaoIdRoute
   '/ranking/$challengeId': typeof RankingChallengeIdRoute
   '/admin': typeof AdminIndexRoute
@@ -411,6 +435,7 @@ export interface FileRoutesById {
   '/empresas': typeof EmpresasRoute
   '/faq': typeof FaqRoute
   '/missoes': typeof MissoesRoute
+  '/noticias': typeof NoticiasRouteWithChildren
   '/palpite-ia': typeof PalpiteIaRoute
   '/perfil': typeof PerfilRoute
   '/ranking': typeof RankingRouteWithChildren
@@ -432,6 +457,7 @@ export interface FileRoutesById {
   '/admin/instagram-videos': typeof AdminInstagramVideosRoute
   '/admin/loja': typeof AdminLojaRoute
   '/admin/missoes': typeof AdminMissoesRoute
+  '/admin/noticias': typeof AdminNoticiasRoute
   '/admin/notificacoes': typeof AdminNotificacoesRoute
   '/admin/premios': typeof AdminPremiosRoute
   '/admin/ranking': typeof AdminRankingRoute
@@ -442,6 +468,7 @@ export interface FileRoutesById {
   '/admin/seguranca': typeof AdminSegurancaRoute
   '/admin/tokens-config': typeof AdminTokensConfigRoute
   '/empresa/criar': typeof EmpresaCriarRoute
+  '/noticias/$slug': typeof NoticiasSlugRoute
   '/previsao/$id': typeof PrevisaoIdRoute
   '/ranking/$challengeId': typeof RankingChallengeIdRoute
   '/admin/': typeof AdminIndexRoute
@@ -462,6 +489,7 @@ export interface FileRouteTypes {
     | '/empresas'
     | '/faq'
     | '/missoes'
+    | '/noticias'
     | '/palpite-ia'
     | '/perfil'
     | '/ranking'
@@ -483,6 +511,7 @@ export interface FileRouteTypes {
     | '/admin/instagram-videos'
     | '/admin/loja'
     | '/admin/missoes'
+    | '/admin/noticias'
     | '/admin/notificacoes'
     | '/admin/premios'
     | '/admin/ranking'
@@ -493,6 +522,7 @@ export interface FileRouteTypes {
     | '/admin/seguranca'
     | '/admin/tokens-config'
     | '/empresa/criar'
+    | '/noticias/$slug'
     | '/previsao/$id'
     | '/ranking/$challengeId'
     | '/admin/'
@@ -510,6 +540,7 @@ export interface FileRouteTypes {
     | '/empresas'
     | '/faq'
     | '/missoes'
+    | '/noticias'
     | '/palpite-ia'
     | '/perfil'
     | '/ranking'
@@ -531,6 +562,7 @@ export interface FileRouteTypes {
     | '/admin/instagram-videos'
     | '/admin/loja'
     | '/admin/missoes'
+    | '/admin/noticias'
     | '/admin/notificacoes'
     | '/admin/premios'
     | '/admin/ranking'
@@ -541,6 +573,7 @@ export interface FileRouteTypes {
     | '/admin/seguranca'
     | '/admin/tokens-config'
     | '/empresa/criar'
+    | '/noticias/$slug'
     | '/previsao/$id'
     | '/ranking/$challengeId'
     | '/admin'
@@ -560,6 +593,7 @@ export interface FileRouteTypes {
     | '/empresas'
     | '/faq'
     | '/missoes'
+    | '/noticias'
     | '/palpite-ia'
     | '/perfil'
     | '/ranking'
@@ -581,6 +615,7 @@ export interface FileRouteTypes {
     | '/admin/instagram-videos'
     | '/admin/loja'
     | '/admin/missoes'
+    | '/admin/noticias'
     | '/admin/notificacoes'
     | '/admin/premios'
     | '/admin/ranking'
@@ -591,6 +626,7 @@ export interface FileRouteTypes {
     | '/admin/seguranca'
     | '/admin/tokens-config'
     | '/empresa/criar'
+    | '/noticias/$slug'
     | '/previsao/$id'
     | '/ranking/$challengeId'
     | '/admin/'
@@ -611,6 +647,7 @@ export interface RootRouteChildren {
   EmpresasRoute: typeof EmpresasRoute
   FaqRoute: typeof FaqRoute
   MissoesRoute: typeof MissoesRoute
+  NoticiasRoute: typeof NoticiasRouteWithChildren
   PalpiteIaRoute: typeof PalpiteIaRoute
   PerfilRoute: typeof PerfilRoute
   RankingRoute: typeof RankingRouteWithChildren
@@ -674,6 +711,13 @@ declare module '@tanstack/react-router' {
       path: '/palpite-ia'
       fullPath: '/palpite-ia'
       preLoaderRoute: typeof PalpiteIaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/noticias': {
+      id: '/noticias'
+      path: '/noticias'
+      fullPath: '/noticias'
+      preLoaderRoute: typeof NoticiasRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/missoes': {
@@ -774,6 +818,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PrevisaoIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/noticias/$slug': {
+      id: '/noticias/$slug'
+      path: '/$slug'
+      fullPath: '/noticias/$slug'
+      preLoaderRoute: typeof NoticiasSlugRouteImport
+      parentRoute: typeof NoticiasRoute
+    }
     '/empresa/criar': {
       id: '/empresa/criar'
       path: '/empresa/criar'
@@ -842,6 +893,13 @@ declare module '@tanstack/react-router' {
       path: '/notificacoes'
       fullPath: '/admin/notificacoes'
       preLoaderRoute: typeof AdminNotificacoesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/noticias': {
+      id: '/admin/noticias'
+      path: '/noticias'
+      fullPath: '/admin/noticias'
+      preLoaderRoute: typeof AdminNoticiasRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/missoes': {
@@ -991,6 +1049,7 @@ interface AdminRouteChildren {
   AdminInstagramVideosRoute: typeof AdminInstagramVideosRoute
   AdminLojaRoute: typeof AdminLojaRoute
   AdminMissoesRoute: typeof AdminMissoesRoute
+  AdminNoticiasRoute: typeof AdminNoticiasRoute
   AdminNotificacoesRoute: typeof AdminNotificacoesRoute
   AdminPremiosRoute: typeof AdminPremiosRoute
   AdminRankingRoute: typeof AdminRankingRoute
@@ -1017,6 +1076,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminInstagramVideosRoute: AdminInstagramVideosRoute,
   AdminLojaRoute: AdminLojaRoute,
   AdminMissoesRoute: AdminMissoesRoute,
+  AdminNoticiasRoute: AdminNoticiasRoute,
   AdminNotificacoesRoute: AdminNotificacoesRoute,
   AdminPremiosRoute: AdminPremiosRoute,
   AdminRankingRoute: AdminRankingRoute,
@@ -1030,6 +1090,18 @@ const AdminRouteChildren: AdminRouteChildren = {
 }
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
+interface NoticiasRouteChildren {
+  NoticiasSlugRoute: typeof NoticiasSlugRoute
+}
+
+const NoticiasRouteChildren: NoticiasRouteChildren = {
+  NoticiasSlugRoute: NoticiasSlugRoute,
+}
+
+const NoticiasRouteWithChildren = NoticiasRoute._addFileChildren(
+  NoticiasRouteChildren,
+)
 
 interface RankingRouteChildren {
   RankingChallengeIdRoute: typeof RankingChallengeIdRoute
@@ -1054,6 +1126,7 @@ const rootRouteChildren: RootRouteChildren = {
   EmpresasRoute: EmpresasRoute,
   FaqRoute: FaqRoute,
   MissoesRoute: MissoesRoute,
+  NoticiasRoute: NoticiasRouteWithChildren,
   PalpiteIaRoute: PalpiteIaRoute,
   PerfilRoute: PerfilRoute,
   RankingRoute: RankingRouteWithChildren,
