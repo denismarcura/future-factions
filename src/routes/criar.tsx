@@ -794,9 +794,15 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
             title="Informações do desafio"
             description="Criar manualmente — preencha os campos abaixo. Você pode misturar com a IA acima."
           >
-            <Field
-              label="Nome do desafio"
-              action={
+            {/* Nome do desafio — destacado */}
+            <div className="relative rounded-2xl border-2 border-primary/40 bg-gradient-to-br from-primary/10 via-background to-gold/10 p-5 shadow-lg ring-1 ring-primary/20">
+              <div className="flex items-center justify-between flex-wrap gap-2 mb-3">
+                <div className="flex items-center gap-2">
+                  <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-black">01</span>
+                  <label className="text-base sm:text-lg font-black uppercase tracking-wide text-foreground">
+                    Nome do desafio
+                  </label>
+                </div>
                 <button
                   type="button"
                   onClick={async () => {
@@ -812,18 +818,36 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
                     }
                   }}
                   disabled={improvingTitle || !name.trim()}
-                  className="inline-flex items-center gap-1 text-xs font-bold text-primary hover:text-primary/80 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                  className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg bg-gradient-to-r from-primary to-gold text-primary-foreground text-xs font-bold shadow disabled:opacity-50 disabled:cursor-not-allowed transition hover:opacity-90"
                 >
                   {improvingTitle ? (
-                    <><Loader2 className="h-3 w-3 animate-spin" /> Melhorando…</>
+                    <><Loader2 className="h-3.5 w-3.5 animate-spin" /> Melhorando…</>
                   ) : (
-                    <><Sparkles className="h-3 w-3" /> Melhorar o título</>
+                    <><Sparkles className="h-3.5 w-3.5" /> Melhorar título com IA</>
                   )}
                 </button>
-              }
-            >
-              <input value={name} onChange={(e) => setName(e.target.value)} placeholder={`Ex.: Brasil x ${(() => { const n = getNextBrazilMatch(); return n.home === "Brasil" ? n.away : n.home; })()} — Quem leva?`} className="input" />
-            </Field>
+              </div>
+              <input
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder={`Ex.: Brasil x ${(() => { const n = getNextBrazilMatch(); return n.home === "Brasil" ? n.away : n.home; })()} — Quem leva?`}
+                className="w-full h-14 px-4 rounded-xl border-2 border-primary/30 bg-background text-lg sm:text-xl font-bold focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30 transition"
+              />
+              <p className="mt-2 text-xs text-muted-foreground">
+                Seja claro e direto — o nome aparece em destaque no feed e nos convites.
+              </p>
+            </div>
+
+            {/* Selecione um Evento */}
+            <EventQuickPicker
+              category={category}
+              onPick={(m) => {
+                const adv = m.home === "Brasil" ? m.away : m.home === "Brasil" ? m.home : m.away;
+                setName(`${m.home} x ${m.away} — Quem leva?`);
+                setEndsAt(kickoffToLocalDateTime(m.kickoff));
+                void adv;
+              }}
+            />
             <div className="grid sm:grid-cols-2 gap-4">
               <Field label="Categoria">
                 <select value={category} onChange={(e) => setCategory(e.target.value)} className="input" disabled={loadingCats}>
