@@ -261,6 +261,10 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState<string | null>(null);
 
+  // Auto-generated arts wizard
+  const [autoArts, setAutoArts] = useState(false);
+  const [artsWizardOpen, setArtsWizardOpen] = useState(false);
+
   // Inline AI generator (inside Sub-categorias section)
   const [inlineAiCount, setInlineAiCount] = useState(3);
   const [inlineAiFocus, setInlineAiFocus] = useState("");
