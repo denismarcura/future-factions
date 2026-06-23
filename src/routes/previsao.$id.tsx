@@ -609,6 +609,10 @@ function PredictionInner({ p }: { p: Prediction }) {
           </div>
         </article>
 
+        {isClosed && <NextChallengeBanner />}
+
+
+
 
         {/* Banner de missões sequenciais — abaixo do slider */}
         {p.subPredictions && (() => {
