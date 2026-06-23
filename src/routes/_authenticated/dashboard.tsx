@@ -1071,7 +1071,9 @@ function MyChallengesSection({ items }: { items: Prediction[] }) {
         </Empty>
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          {items.slice(0, 6).map((c) => (
+          {[...items]
+            .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+            .map((c) => (
             <Link
               key={c.id}
               to="/previsao/$id"
