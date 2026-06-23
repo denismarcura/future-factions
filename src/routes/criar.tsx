@@ -22,6 +22,7 @@ import { createCorpChallenge, type CorporateMission } from "@/lib/corp-challenge
 import { uploadCorpAsset, uploadCorpAssets } from "@/lib/corp-storage";
 import logoAsset from "@/assets/logo-desafio.png.asset.json";
 import { WORLD_CUP_MATCHES } from "@/lib/world-cup-matches";
+import { ArtsWizard } from "@/components/ArtsWizard";
 
 function getNextBrazilMatch() {
   const now = Date.now();
