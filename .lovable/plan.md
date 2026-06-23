@@ -1,135 +1,110 @@
-## Reestruturação do Administrativo — Plano em Fases
 
-Mantém tudo que já existe funcionando. Reorganiza o menu lateral em grupos, expande o Dashboard com KPIs/gráficos reais e adiciona novas seções em etapas.
+## Visão geral
+Reorganizar `criar.tsx` em uma sequência guiada (01-08) com auto-avanço, popup de seleção de prêmios, autocomplete de cidades IBGE, e adicionar sistema de avaliação 5 estrelas + ranking Top 100 mensal (dia 10).
 
----
+## Etapas do formulário (criar.tsx)
 
-### Fase 1 — Reorganização do menu + Dashboard real (esta entrega)
+Reordenar a UI em 8 cards numerados. Cada card é colapsado quando o anterior não foi preenchido; ao validar o passo atual, expande automaticamente o próximo (scroll suave).
 
-**Sidebar agrupado** em `src/routes/admin.tsx`, recolhível (já é) e responsivo:
-
-```text
-PAINEL
-  └── Dashboard
-
-OPERAÇÃO
-  ├── Cadastros (usuários)
-  ├── Empresas
-  └── Convites                       ← novo (placeholder)
-
-CONTEÚDO
-  ├── Desafios
-  ├── Categorias
-  ├── Banners
-  └── Resultado dos Jogos
-
-GAMIFICAÇÃO
-  ├── Missões
-  ├── Bônus de Login                 ← NOVO funcional nesta fase
-  ├── Raspadinha                     ← novo (placeholder)
-  ├── Loja de Prêmios                ← novo (placeholder)
-  └── Ranking                        ← novo (placeholder)
-
-COMUNICAÇÃO
-  ├── E-mail Marketing
-  └── Notificações                   ← novo (placeholder)
-
-SISTEMA
-  ├── Regras IA
-  ├── APIs
-  ├── Configurações de Tokens        ← novo (placeholder)
-  ├── Relatórios                     ← novo (placeholder)
-  └── Segurança / Logs               ← novo (placeholder)
+```
+01 Nome do Desafio        → ao digitar 4+ chars + blur, expande 02
+02 Categoria + Fim        → ao escolher, expande 03
+03 Palpites (subcategorias + IA) → ao ter 1+, expande 04
+04 Ganhador (regras de acerto)   → ao confirmar, expande 05
+05 Prêmios físicos        → botão "Selecionar prêmios" abre popup
+06 Banner do desafio      → upload 1600x600 (mantém)
+07 Missões                → passo a passo, 50 tokens + 1 chance cada
+08 Link de divulgação     → preview do share URL + visibilidade
 ```
 
-Placeholders são páginas reais com cabeçalho, descrição do que virá e botão "Em breve" — não quebram navegação. Cada uma vira funcional nas fases seguintes.
+## Passo 05 — Popup de prêmios
 
-**Dashboard (`/admin`) — KPIs e gráficos reais consultando o banco:**
+Novo modal `<PrizesPicker>`:
+- Pergunta "Quantos prêmios sortear?" (1 a 10)
+- Lista os prêmios cadastrados em `admin_prizes` (carregada via server fn pública read-only)
+- Para cada slot (1º, 2º, ..., Nº lugar) usuário escolhe um prêmio
+- O upload "Prêmio do desafio (opcional)" existente continua, mas a área de imagem muda para proporção 4:5
 
-KPIs (cards):
-- Usuários cadastrados (total)
-- Empresas cadastradas (total)
-- Desafios ativos / encerrados
-- Participações totais (palpites)
-- Tokens distribuídos (soma de `token_transactions`)
-- Usuários ativos hoje / semana / mês (DAU/WAU/MAU baseado em `palpites.created_at`)
-- Novos cadastros (7d / 30d)
+O cadastro antigo de prêmio único do desafio continua existindo (alterada apenas a proporção do crop/preview para 4:5).
 
-Listas Top:
-- Top 5 desafios (por nº de palpites)
-- Top 5 empresas (por nº de desafios)
+## Passo 08 — Visibilidade + cidades
 
-Gráficos (recharts, já instalado):
-- Crescimento de usuários (linha, 30 dias)
-- Participações por dia (área, 30 dias)
-- Tokens distribuídos por dia (barra, 30 dias)
-- Cadastros por dia (linha, 30 dias)
+Abaixo do preview do link:
+- Radio: **Aberto** | **Fechado (apenas amigos)**
+- Se Aberto: radio extra
+  - "Brasil todo" 
+  - "Apenas cidades selecionadas" → autocomplete IBGE (`https://servicodados.ibge.gov.br/api/v1/localidades/municipios`), busca após 3 chars, chips de cidades selecionadas
+  - Checkbox: "Autorizo divulgação por e-mail marketing, Instagram e redes sociais"
+- Se Fechado: popup informativo "Você é responsável pela divulgação do link"
+- Em ambos: checkbox obrigatório "O Desafio dos Palpites não se responsabiliza pela entrega dos brindes aqui cadastrados"
 
-Tudo via um único server function `getAdminDashboard` (`src/lib/admin-stats.functions.ts` já existe — vou estender) com `requireSupabaseAuth` + checagem de role admin.
+## Card na home
 
----
+Toda criação gera um card exibido em uma nova seção na home: **"Criados pela comunidade"** (filtrando só os públicos). Já existe uma seção parecida, será renomeada e ajustada para mostrar avaliação média (★ x.x).
 
-### Fase 2 — Bônus de Login (30 dias) — funcional
+## Sistema de votação 5 estrelas
 
-**Banco** (migração):
-- `daily_login_rewards` (config por dia 1–30: tokens, é marco/sim-não)
-- `user_login_streak` (user_id, current_streak, longest_streak, last_claim_date, total_claimed)
-- `daily_login_claims` (histórico: user_id, day_number, tokens, claimed_at)
+Nova tabela `challenge_ratings` (user_id + challenge_id, rating 1-5). No card e na página do desafio: componente `<StarRating>`. Servidor calcula média via view ou agregação.
 
-**Admin** (`/admin/bonus-login`):
-- Tabela editável dia 1 → 30 com tokens de cada dia
-- Regras: reinício após X dias sem claim (configurável)
-- KPIs: usuários ativos hoje, sequência média, top streaks
-- Histórico paginado
+## Top 100 mensal (dia 10)
 
-**Cliente** (a discutir em outra rodada — esta fase entrega só o admin + a base de dados + server fn `claimDailyBonus` pronta).
+- Nova tabela `top100_snapshots` (month, user_id, challenges_count, total_participants, points, rank)
+- pg_cron rodando dia 10 às 03:00 chama `/api/public/hooks/top100-snapshot`
+- Fórmula de tokens por desafio criado:
+  - 10 participantes: 4 tokens
+  - 20: 10 tokens
+  - 50: 20 tokens
+  - 100: 50 tokens
+  - 100+: 500 tokens
+- Apenas participantes **cadastrados** contam
+- Página `/top100` reescrita mostrando ranking do mês corrente + último snapshot fechado
+- 1º lugar recebe destaque "Ganhador do mês" + chamada para prêmios
 
----
+## Cadastro admin de prêmios
 
-### Fases seguintes (resumo, não entregues agora)
+Nova rota `/admin/premios`:
+- Tabela `admin_prizes`: nome, descrição, imagem (4:5), valor estimado, estoque, ativo
+- Tabela `admin_prize_assignments`: liga prêmio a desafio + posição (1º/2º/...)
+- CRUD completo
+- Item no menu admin: "Conteúdo > Cadastrar Prêmios"
 
-- **Fase 3 — Ranking Semanal/Mensal** (critérios, premiação, medalhas, histórico)
-- **Fase 4 — Raspadinha** (probabilidades, prêmios, limite diário)
-- **Fase 5 — Loja de Prêmios** (produtos, estoque, resgates, aprovação)
-- **Fase 6 — Convites & Notificações** (visualização + envio segmentado/agendado)
-- **Fase 7 — Configurações de Tokens** (parametrização: cadastro, convite, acerto, missão, raspadinha, login)
-- **Fase 8 — Relatórios** (exportação Excel/CSV/PDF)
-- **Fase 9 — Segurança / Logs** (audit trail: login, alterações, tokens, aprovações, exclusões, IP)
-- **Fase 10 — Permissões** (papéis admin/moderador/suporte — hoje só existe `admin`)
+## Migrations
 
-Cada uma será planejada e aprovada individualmente.
+```sql
+CREATE TABLE public.admin_prizes (...);
+CREATE TABLE public.admin_prize_assignments (...);
+CREATE TABLE public.challenge_ratings (...);
+CREATE TABLE public.top100_snapshots (...);
+-- GRANTs, RLS, policies para cada uma
+-- pg_cron job dia 10
+```
 
----
+## Arquivos afetados
 
-### Detalhes técnicos da Fase 1
+**Novos**
+- `src/components/PrizesPicker.tsx` — modal seleção
+- `src/components/CitiesAutocomplete.tsx` — IBGE
+- `src/components/StarRating.tsx`
+- `src/components/StepCard.tsx` — wrapper numerado com colapso/auto-expand
+- `src/lib/admin-prizes.functions.ts`
+- `src/lib/ratings.functions.ts`
+- `src/lib/top100.functions.ts`
+- `src/lib/cities-ibge.ts` (helper client fetch + debounce)
+- `src/routes/admin.premios.tsx`
+- `src/routes/api/public/hooks/top100-snapshot.ts`
 
-**Arquivos alterados/criados:**
-- `src/routes/admin.tsx` — sidebar agrupado por categoria com headers (`OPERAÇÃO`, `CONTEÚDO`, etc.), mantendo `collapsible` e responsividade mobile já existentes.
-- `src/routes/admin.index.tsx` — substituir conteúdo atual por dashboard com KPIs + gráficos (recharts).
-- `src/lib/admin-stats.functions.ts` — estender com `getAdminDashboard()` que retorna `{ kpis, topChallenges, topCompanies, series: { users, predictions, tokens, signups } }`.
-- Novas rotas placeholder (página simples com título + "Em breve"):
-  - `src/routes/admin.convites.tsx`
-  - `src/routes/admin.bonus-login.tsx` *(funcional na Fase 2; placeholder agora)*
-  - `src/routes/admin.raspadinha.tsx`
-  - `src/routes/admin.loja.tsx`
-  - `src/routes/admin.ranking.tsx`
-  - `src/routes/admin.notificacoes.tsx`
-  - `src/routes/admin.tokens-config.tsx`
-  - `src/routes/admin.relatorios.tsx`
-  - `src/routes/admin.seguranca.tsx`
+**Editados**
+- `src/routes/criar.tsx` — reestruturação completa em 8 steps
+- `src/lib/user-challenges.ts` — novos campos (prizes[], cities[], openness, accepted_disclaimer)
+- `src/routes/index.tsx` — seção "Criados pela comunidade" com avaliação
+- `src/routes/top100.tsx` — ranking real do snapshot
+- `src/routes/admin.tsx` — link "Cadastrar Prêmios" no menu Conteúdo
+- `src/routes/previsao.$id.tsx` — exibir estrelas + permitir votar
 
-**Sem mudanças** em: conteúdo das telas Cadastros, Desafios, Empresas, Categorias, Banners, Missões, Regras IA, APIs, E-mail Marketing, Resultado Jogos, Apuração Copa.
+## Detalhes técnicos
 
-**Segurança:** todas as queries do dashboard rodam em server function com `requireSupabaseAuth` + `has_role(userId, 'admin')`. Sem mudanças em RLS.
-
-**Visual:** mantém identidade atual do admin (verde/prata/dourado, logo do Desafio dos Palpites já presentes no `AppShell`).
-
----
-
-### O que NÃO está nesta fase
-
-- Bloquear/banir/resetar senha/ajustar tokens na tela de Cadastros (você escolheu manter as telas existentes como estão)
-- Aprovar/rejeitar empresas (idem)
-- Qualquer feature das Fases 2–10
-
-Aprova essa Fase 1 para eu implementar?
+- Auto-avanço: cada step expõe `onComplete()`; o pai mantém `currentStep` e usa `scrollIntoView({behavior:"smooth"})` no próximo card
+- Persistência local em rascunho (localStorage) para não perder progresso ao recarregar
+- O popup de prêmios usa Dialog do shadcn, lista vem de server fn pública (com RLS `anon SELECT WHERE ativo=true`)
+- Autocomplete IBGE: cache em memória da lista completa (~5500 itens, JSON ~400KB) buscada 1x e filtrada localmente após o primeiro fetch
+- Tokens por participantes calculados na server fn de snapshot, não no cliente
