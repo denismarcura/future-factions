@@ -67,6 +67,24 @@ import { getUserChallenges, saveUserChallenge } from "@/lib/user-challenges";
 import { generateChallenges, type GeneratedChallenge } from "@/lib/generate-challenges.functions";
 import { generateInvitePromoText } from "@/lib/invite-ai.functions";
 import { listParticipations, type MyParticipation } from "@/lib/my-participations";
+import { listMyPalpites, type MyPalpiteRow } from "@/lib/my-palpites.functions";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
+import {
+  Bar,
+  BarChart,
+  Cell,
+  ResponsiveContainer,
+  Tooltip as RechartsTooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
+import { Trophy, BarChart3 } from "lucide-react";
 import type { Prediction } from "@/lib/mock-data";
 import { uploadAvatar, takePendingAvatar } from "@/lib/avatar-upload";
 import arte01 from "@/assets/dashboard-arte-01.png.asset.json";
@@ -117,6 +135,8 @@ function Dashboard() {
   const [friends, setFriends] = useState<Friend[]>([]);
   const [myChallenges, setMyChallenges] = useState<Prediction[]>([]);
   const [participations, setParticipations] = useState<MyParticipation[]>([]);
+  const [myPalpites, setMyPalpites] = useState<MyPalpiteRow[]>([]);
+  const listMyPalpitesFn = useServerFn(listMyPalpites);
 
   useEffect(() => {
     (async () => {
@@ -132,6 +152,7 @@ function Dashboard() {
       setProfile(prof as Profile | null);
       setMissions(ms);
       setClaims(cl);
+      listMyPalpitesFn().then(setMyPalpites).catch(() => setMyPalpites([]));
     })();
     setFriends(listFriends());
     setMyChallenges(getUserChallenges());
@@ -294,7 +315,7 @@ function Dashboard() {
         />
 
         {/* MY PARTICIPATIONS */}
-        <MyParticipationsSection items={participations} />
+        <MyParticipationsSection items={participations} palpites={myPalpites} />
 
         {/* MISSIONS */}
         <MissionsSection
@@ -1893,13 +1914,58 @@ function InvitePromoSection({
 
 /* ---------- My Participations ---------- */
 
-function MyParticipationsSection({ items }: { items: MyParticipation[] }) {
+function MyParticipationsSection({
+  items,
+  palpites,
+}: {
+  items: MyParticipation[];
+  palpites: MyPalpiteRow[];
+}) {
+  // Merge local participations with palpites from the database (the DB is the
+  // source of truth for is_correct/evaluated_at; the local list ensures the
+  // UI works imediatamente após apostar, antes da apuração).
+  const palpitesByChallenge = useMemo(() => {
+    const map = new Map<string, MyPalpiteRow[]>();
+    for (const p of palpites) {
+      const arr = map.get(p.challenge_id) ?? [];
+      arr.push(p);
+      map.set(p.challenge_id, arr);
+    }
+    return map;
+  }, [palpites]);
+
+  const merged = useMemo(() => {
+    const list = items.map((it) => {
+      const rows = palpitesByChallenge.get(it.id) ?? [];
+      const evaluated = rows.filter((r) => r.is_correct !== null);
+      const hits = evaluated.filter((r) => r.is_correct === true).length;
+      const total = evaluated.length || Object.keys(it.answers).length || (it.optionLabel ? 1 : 0);
+      const isEvaluated = evaluated.length > 0;
+      return { ...it, hits, total, isEvaluated };
+    });
+    return list;
+  }, [items, palpitesByChallenge]);
+
+  const finished = merged.filter((m) => m.isEvaluated);
+  const totalHits = finished.reduce((s, m) => s + m.hits, 0);
+  const totalEvaluated = finished.reduce((s, m) => s + m.total, 0);
+  const accuracy = totalEvaluated > 0 ? Math.round((totalHits / totalEvaluated) * 100) : 0;
+
+  const chartData = finished
+    .slice(-10)
+    .reverse()
+    .map((m) => ({
+      name: m.title.length > 14 ? m.title.slice(0, 12) + "…" : m.title,
+      acertos: m.hits,
+      total: m.total,
+    }));
+
   return (
     <section className="glass-card rounded-2xl p-5 border border-border/60">
       <SectionTitle
         icon={Target}
         title="Meus palpites e resultados"
-        hint="Acompanhe os desafios em que você participou e veja os resultados quando saírem."
+        hint="Deslize para ver tudo. Toque em um desafio para abrir."
         right={
           <Link
             to="/desafios"
@@ -1909,7 +1975,98 @@ function MyParticipationsSection({ items }: { items: MyParticipation[] }) {
           </Link>
         }
       />
-      {items.length === 0 ? (
+
+      {/* Resumo de acertos */}
+      <div className="grid sm:grid-cols-3 gap-3 mb-4">
+        <div className="rounded-xl border border-gold/30 bg-gold/5 p-4">
+          <div className="flex items-center gap-2 text-gold">
+            <Trophy className="h-5 w-5" />
+            <span className="text-xs uppercase tracking-wider font-bold">Total de acertos</span>
+          </div>
+          <div className="font-display font-black text-3xl mt-1 text-gold tabular-nums">
+            {totalHits}
+          </div>
+          <div className="text-[11px] text-muted-foreground">
+            em {totalEvaluated} palpites apurados
+          </div>
+        </div>
+        <div className="rounded-xl border border-primary/30 bg-primary/5 p-4">
+          <div className="flex items-center gap-2 text-primary">
+            <BarChart3 className="h-5 w-5" />
+            <span className="text-xs uppercase tracking-wider font-bold">Aproveitamento</span>
+          </div>
+          <div className="font-display font-black text-3xl mt-1 text-primary tabular-nums">
+            {accuracy}%
+          </div>
+          <div className="text-[11px] text-muted-foreground">
+            de acerto nos desafios finalizados
+          </div>
+        </div>
+        <div className="rounded-xl border border-border/60 bg-card p-4">
+          <div className="flex items-center gap-2">
+            <ListChecks className="h-5 w-5 text-primary" />
+            <span className="text-xs uppercase tracking-wider font-bold">Desafios apurados</span>
+          </div>
+          <div className="font-display font-black text-3xl mt-1 tabular-nums">
+            {finished.length}
+          </div>
+          <div className="text-[11px] text-muted-foreground">
+            de {merged.length} participações
+          </div>
+        </div>
+      </div>
+
+      {/* Gráfico de acertos por desafio */}
+      {chartData.length > 0 && (
+        <div className="rounded-xl border border-border/60 bg-card p-4 mb-4">
+          <div className="text-xs uppercase tracking-wider text-muted-foreground font-bold mb-2">
+            Acertos por desafio (últimos {chartData.length})
+          </div>
+          <div style={{ width: "100%", height: 200 }}>
+            <ResponsiveContainer>
+              <BarChart data={chartData} margin={{ top: 8, right: 8, left: -20, bottom: 0 }}>
+                <XAxis
+                  dataKey="name"
+                  stroke="hsl(var(--muted-foreground))"
+                  fontSize={10}
+                  tickLine={false}
+                  axisLine={false}
+                />
+                <YAxis
+                  allowDecimals={false}
+                  stroke="hsl(var(--muted-foreground))"
+                  fontSize={10}
+                  tickLine={false}
+                  axisLine={false}
+                />
+                <RechartsTooltip
+                  contentStyle={{
+                    background: "hsl(var(--card))",
+                    border: "1px solid hsl(var(--border))",
+                    borderRadius: 8,
+                    fontSize: 12,
+                  }}
+                  formatter={(value: number, _name, props) => [
+                    `${value} / ${props.payload.total}`,
+                    "Acertos",
+                  ]}
+                />
+                <Bar dataKey="acertos" radius={[6, 6, 0, 0]}>
+                  {chartData.map((d, i) => (
+                    <Cell
+                      key={i}
+                      fill={d.acertos === d.total ? "hsl(var(--gold))" : "hsl(var(--primary))"}
+                    />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      )}
+
+      {/* Slider de palpites */}
+      {merged.length === 0 ? (
         <Empty>
           Você ainda não fez nenhum palpite.{" "}
           <Link to="/desafios" className="text-primary underline">
@@ -1918,63 +2075,76 @@ function MyParticipationsSection({ items }: { items: MyParticipation[] }) {
           .
         </Empty>
       ) : (
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          {items.map((p) => {
-            const closedAt = new Date(p.closesAt).getTime();
-            const now = Date.now();
-            const ended = closedAt <= now;
-            const answersCount = Object.keys(p.answers).length;
-            return (
-              <Link
-                key={p.id}
-                to="/previsao/$id"
-                params={{ id: p.id }}
-                className="p-4 rounded-xl bg-card border border-border/60 hover:border-primary/60 transition flex flex-col"
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                    {p.category}
-                  </span>
-                  <span
-                    className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                      ended
-                        ? "bg-gold/15 text-gold border border-gold/30"
-                        : "bg-primary/15 text-primary border border-primary/30"
-                    }`}
+        <Carousel opts={{ align: "start", dragFree: true }} className="w-full">
+          <CarouselContent className="-ml-3">
+            {merged.map((p) => {
+              const closedAt = new Date(p.closesAt).getTime();
+              const ended = closedAt <= Date.now();
+              const answersCount = Object.keys(p.answers).length;
+              return (
+                <CarouselItem
+                  key={p.id}
+                  className="pl-3 basis-[85%] sm:basis-1/2 lg:basis-1/3"
+                >
+                  <Link
+                    to="/previsao/$id"
+                    params={{ id: p.id }}
+                    className="block h-full p-4 rounded-xl bg-card border border-border/60 hover:border-primary/60 transition"
                   >
-                    {ended ? "Resultado em breve" : "Aguardando jogo"}
-                  </span>
-                </div>
-                <div className="font-display font-bold mt-2 line-clamp-2">{p.title}</div>
-                <div className="mt-3 text-[11px] text-muted-foreground space-y-0.5">
-                  {p.optionLabel ? (
-                    <div>
-                      Sua escolha:{" "}
-                      <span className="text-foreground font-semibold">{p.optionLabel}</span>
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                        {p.category}
+                      </span>
+                      {p.isEvaluated ? (
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-gold/15 text-gold border border-gold/30">
+                          {p.hits}/{p.total} acertos
+                        </span>
+                      ) : (
+                        <span
+                          className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                            ended
+                              ? "bg-primary/15 text-primary border border-primary/30"
+                              : "bg-primary/10 text-primary border border-primary/30"
+                          }`}
+                        >
+                          {ended ? "Resultado em breve" : "Aguardando jogo"}
+                        </span>
+                      )}
                     </div>
-                  ) : (
-                    <div>{answersCount} palpites enviados</div>
-                  )}
-                  {p.entryFee > 0 && (
-                    <div>
-                      Entrada: <span className="text-gold font-bold">{p.entryFee} TKN</span>
+                    <div className="font-display font-bold mt-2 line-clamp-2">{p.title}</div>
+                    <div className="mt-3 text-[11px] text-muted-foreground space-y-0.5">
+                      {p.optionLabel ? (
+                        <div>
+                          Sua escolha:{" "}
+                          <span className="text-foreground font-semibold">{p.optionLabel}</span>
+                        </div>
+                      ) : (
+                        <div>{answersCount} palpites enviados</div>
+                      )}
+                      {p.entryFee > 0 && (
+                        <div>
+                          Entrada: <span className="text-gold font-bold">{p.entryFee} TKN</span>
+                        </div>
+                      )}
+                      <div>
+                        Participou em{" "}
+                        {new Date(p.participatedAt).toLocaleString("pt-BR", {
+                          day: "2-digit",
+                          month: "2-digit",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          timeZone: "America/Sao_Paulo",
+                        })}
+                      </div>
                     </div>
-                  )}
-                  <div>
-                    Participou em{" "}
-                    {new Date(p.participatedAt).toLocaleString("pt-BR", {
-                      day: "2-digit",
-                      month: "2-digit",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                      timeZone: "America/Sao_Paulo",
-                    })}
-                  </div>
-                </div>
-              </Link>
-            );
-          })}
-        </div>
+                  </Link>
+                </CarouselItem>
+              );
+            })}
+          </CarouselContent>
+          <CarouselPrevious className="hidden sm:flex -left-3" />
+          <CarouselNext className="hidden sm:flex -right-3" />
+        </Carousel>
       )}
     </section>
   );
