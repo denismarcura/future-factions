@@ -114,7 +114,7 @@ function AdminLayout() {
 
   if (loading || status === "checking") {
     return (
-      <AppShell>
+      <AppShell hidePrimarySidebar>
         <div className="min-h-[40vh] grid place-items-center text-muted-foreground">
           <Loader2 className="h-6 w-6 animate-spin" />
         </div>
