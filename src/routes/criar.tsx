@@ -2300,3 +2300,71 @@ async function renderCreative(
 
   return canvas.toDataURL("image/png");
 }
+
+// ----- Event Quick Picker (next 48h) -----
+function EventQuickPicker({ category, onPick }: { category: string; onPick: (m: typeof WORLD_CUP_MATCHES[number]) => void }) {
+  const isFootball = /futebol|copa|esporte/i.test(category);
+  const now = Date.now();
+  const horizon = now + 48 * 60 * 60 * 1000;
+  const in48h = WORLD_CUP_MATCHES
+    .filter(m => {
+      const t = new Date(m.kickoff).getTime();
+      return t >= now && t <= horizon;
+    })
+    .sort((a, b) => new Date(a.kickoff).getTime() - new Date(b.kickoff).getTime());
+  const fallback = WORLD_CUP_MATCHES
+    .filter(m => new Date(m.kickoff).getTime() >= now)
+    .sort((a, b) => new Date(a.kickoff).getTime() - new Date(b.kickoff).getTime())
+    .slice(0, 6);
+  const list = in48h.length ? in48h : fallback;
+  const labelHeader = in48h.length ? "Eventos terminando em até 48h" : "Próximos eventos";
+
+  if (!isFootball || list.length === 0) {
+    return (
+      <div className="rounded-xl border border-dashed border-border bg-card/40 p-4">
+        <div className="flex items-center gap-2 mb-1">
+          <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-muted text-foreground text-[10px] font-black">02</span>
+          <span className="text-sm font-bold">Selecione um Evento</span>
+        </div>
+        <p className="text-xs text-muted-foreground">
+          Nenhum evento próximo para a categoria <b>{category}</b>. Você pode preencher o nome do desafio livremente acima.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="rounded-xl border border-primary/20 bg-card p-4">
+      <div className="flex items-center justify-between flex-wrap gap-2 mb-3">
+        <div className="flex items-center gap-2">
+          <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground text-[10px] font-black">02</span>
+          <span className="text-sm font-bold">Selecione um Evento</span>
+          <span className="text-xs text-muted-foreground">({category})</span>
+        </div>
+        <span className="text-[11px] font-semibold uppercase tracking-wide text-primary">{labelHeader}</span>
+      </div>
+      <div className="grid sm:grid-cols-2 gap-2">
+        {list.map((m) => {
+          const d = new Date(m.kickoff);
+          const pad = (n: number) => String(n).padStart(2, "0");
+          const when = `${pad(d.getDate())}/${pad(d.getMonth() + 1)} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+          return (
+            <button
+              key={m.id}
+              type="button"
+              onClick={() => onPick(m)}
+              className="group flex items-center justify-between gap-3 rounded-lg border border-border bg-background hover:border-primary hover:bg-primary/5 px-3 py-2 text-left transition"
+            >
+              <div className="flex items-center gap-2 min-w-0">
+                <img src={`https://flagcdn.com/24x18/${m.homeCode}.png`} alt="" className="h-3 w-4 object-cover rounded-sm" />
+                <span className="text-sm font-bold truncate">{m.home} x {m.away}</span>
+                <img src={`https://flagcdn.com/24x18/${m.awayCode}.png`} alt="" className="h-3 w-4 object-cover rounded-sm" />
+              </div>
+              <span className="text-[11px] font-bold text-muted-foreground group-hover:text-primary whitespace-nowrap">{when}</span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
