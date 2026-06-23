@@ -43,24 +43,35 @@ export const generateChallenge = createServerFn({ method: "POST" })
       })
       .join("\n");
 
-    const remaining = Math.max(0, data.count - (data.userSubs?.length ?? 0));
+    const existingQuestions = (data.userSubs ?? [])
+      .map((s) => s.question.trim())
+      .filter(Boolean);
 
-    const prompt = `Você é um gerador de desafios de palpites em português do Brasil.
+    const remaining = Math.max(0, data.count - (data.userSubs?.length ?? 0));
+    const variationSeed = Math.random().toString(36).slice(2, 10);
+
+    const prompt = `Você é um gerador de desafios de palpites em português do Brasil. Use seu conhecimento real sobre o tema (times, jogadores, datas, fases, estádios) para gerar respostas concretas e variadas.
 
 Tema: ${data.theme}
 Categoria: ${data.category || "Geral"}${data.subcategory ? `\nSub-categoria: ${data.subcategory}` : ""}${data.prizeName ? `\nPrêmio: ${data.prizeName}` : ""}${data.endsAt ? `\nEncerra em: ${data.endsAt}` : ""}
+Seed de variação (use para garantir respostas diferentes): ${variationSeed}
 
-${data.userSubs?.length ? `Palpites já criados pelo usuário (mantenha-os iguais):\n${userSubsText}\n` : ""}
-Gere no total ${data.count} palpites. ${remaining > 0 ? `Crie mais ${remaining} palpites complementares.` : "Use apenas os palpites do usuário."} Cada palpite deve ter pergunta curta e de 2 até 10 opções mutuamente exclusivas. Use quantas opções forem necessárias para cobrir todas as alternativas mencionadas no tema (se o usuário listar 8 seleções, gere 8 opções; se listar 10, gere 10). Crie também um NOME curto (até 80 caracteres) e chamativo para o desafio.
+${data.userSubs?.length ? `Palpites já criados pelo usuário (mantenha-os iguais, NÃO REPITA nem crie versões parecidas):\n${userSubsText}\n` : ""}${existingQuestions.length ? `\nPROIBIDO repetir ou parafrasear qualquer das perguntas acima. Crie perguntas COMPLETAMENTE diferentes em assunto e formato.\n` : ""}
+Gere no total ${data.count} palpites. ${remaining > 0 ? `Crie mais ${remaining} palpites NOVOS e diferentes dos anteriores.` : "Use apenas os palpites do usuário."} Varie os ângulos: resultado, placar, primeiro/último gol, jogador destaque, número de cartões, escanteios, gol em qual tempo, autor do gol, defesa do goleiro, fase seguinte, etc. Cada palpite deve ter pergunta curta e de 2 até 10 opções mutuamente exclusivas. Crie também um NOME curto (até 80 caracteres) e chamativo.
 
-REGRAS IMPORTANTES para opções numéricas:
+REGRA CRÍTICA — RESPOSTAS REAIS E CONTEXTUAIS:
+- Quando a pergunta envolver NOME DE JOGADOR (ex.: "Quem faz o primeiro gol?", "Quem é o craque da partida?", "Quem dá a assistência?"), gere SEMPRE opções com jogadores reais: pegue os 3 principais artilheiros/atacantes/destaques de CADA time mencionado no tema (total ≥ 6 nomes) e adicione "Nenhum" no final. NUNCA responda Sim/Não para perguntas de jogador.
+- Quando envolver TIME/SELEÇÃO (ex.: "Quem vence?"), opções devem ser os times reais do confronto + "Empate" quando fizer sentido.
+- Quando envolver HORÁRIO/ESTÁDIO/FASE, gere a resposta oficial conhecida com base no título e data limite (ex.: horário em Brasília, nome do estádio, fase da competição).
+- Quando envolver "quem avança", opções devem ser os dois times do confronto.
+- Para "número de gols/cartões/escanteios", use inteiros (ver abaixo).
+
+REGRAS para opções numéricas:
 - NUNCA use valores decimais (proibido: "2.5", "1.5", "0.5", "Mais de 2.5", "Menos de 2.5").
-- Para "total de gols", use SEMPRE números inteiros como opções (ex.: "1 gol", "2 gols", "3 gols", "4 ou mais"). Se for usar faixa, use inteiros: "0 a 1", "2 a 3", "4 ou mais".
-- Para qualquer pergunta de quantidade (gols, escanteios, cartões, pontos), use apenas inteiros.
+- Para "total de gols", use SEMPRE números inteiros (ex.: "1 gol", "2 gols", "3 gols", "4 ou mais"). Faixas também inteiras: "0 a 1", "2 a 3", "4 ou mais".
 
 REGRAS para seleções/países:
-- Sempre que uma opção for um país ou seleção nacional, prefixe com o emoji da bandeira correspondente seguido de um espaço (ex.: "🇧🇷 Brasil", "🇭🇷 Croácia", "🇭🇹 Haiti", "🇶🇦 Catar", "🇨🇼 Curaçao", "🇹🇷 Turquia", "🇮🇶 Iraque", "🇧🇦 Bósnia e Herzegovina", "🇵🇦 Panamá", "🇳🇿 Nova Zelândia", "🇦🇹 Áustria", "🇹🇳 Tunísia", "🇯🇲 Jamaica", "🇦🇪 Emirados Árabes Unidos", "🇹🇹 Trinidad e Tobago", "🇺🇿 Uzbequistão", "🇿🇦 África do Sul").
-- Use o emoji oficial da bandeira (Regional Indicator Symbols) — nunca substitua por texto entre colchetes.
+- Sempre que uma opção for um país ou seleção nacional, prefixe com o emoji da bandeira correspondente seguido de um espaço (ex.: "🇧🇷 Brasil", "🇭🇷 Croácia", "🏴󠁧󠁢󠁳󠁣󠁴󠁿 Escócia", "🇶🇦 Catar"). Use o emoji oficial — nunca texto entre colchetes.
 
 Retorne APENAS um JSON válido (sem markdown, sem comentários) no formato exato:
 {"name":"Nome curto","subs":[{"question":"Pergunta?","options":["A","B"]}, ...]}`;
@@ -68,6 +79,7 @@ Retorne APENAS um JSON válido (sem markdown, sem comentários) no formato exato
     const { text } = await generateText({
       model: gateway("google/gemini-3-flash-preview"),
       prompt,
+      temperature: 1.1,
     });
 
     const cleaned = text.replace(/```json\s*|\s*```/g, "").trim();
