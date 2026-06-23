@@ -654,105 +654,140 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
 
       <form className="grid lg:grid-cols-[1fr_360px] gap-6" onSubmit={handleSubmit}>
         <div className="space-y-5">
-          {/* Gerador IA */}
-          <div className="rounded-xl border border-primary/40 bg-gradient-to-br from-primary/10 via-card to-card overflow-hidden">
-            <button
-              type="button"
-              onClick={() => setAiOpen((v) => !v)}
-              className="w-full flex items-center justify-between gap-3 p-4 text-left"
-            >
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-lg bg-primary/20 grid place-items-center text-primary">
-                  <Wand2 className="h-5 w-5" />
+          {/* Botão grande — Criar com IA (abre popup) */}
+          <button
+            type="button"
+            onClick={() => setAiOpen(true)}
+            className="w-full group relative overflow-hidden rounded-2xl border-2 border-primary/50 bg-gradient-to-r from-primary via-primary/90 to-gold p-5 text-left shadow-glow hover:shadow-xl transition"
+          >
+            <div className="flex items-center gap-4">
+              <div className="h-14 w-14 rounded-xl bg-white/20 backdrop-blur grid place-items-center text-white shrink-0">
+                <Wand2 className="h-7 w-7" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="font-display font-black text-lg sm:text-xl uppercase tracking-wide text-white drop-shadow">
+                  Criar seu desafio com a ajuda da IA
                 </div>
-                <div>
-                  <div className="font-display font-black text-base">Gere seu desafio com a IA</div>
-                  <div className="text-xs text-muted-foreground">
-                    Conte o tema, cadastre alguns palpites (opcional) ou peça para a IA criar tudo.
-                  </div>
+                <div className="text-sm text-white/90 mt-0.5">
+                  Conte o tema e a IA gera nome, palpites e opções — você só ajusta o que quiser.
                 </div>
               </div>
-              <span className={`text-primary text-sm font-bold transition ${aiOpen ? "rotate-180" : ""}`}>▾</span>
-            </button>
+              <span className="hidden sm:inline-flex items-center gap-1 h-10 px-4 rounded-lg bg-white text-primary font-black text-sm shrink-0">
+                <Sparkles className="h-4 w-4" /> Abrir
+              </span>
+            </div>
+          </button>
 
-            {aiOpen && (
-              <div className="px-4 pb-4 space-y-3 border-t border-primary/20 pt-4">
-                <Field label="Tema do desafio">
-                  <textarea
-                    value={aiTheme}
-                    onChange={(e) => setAiTheme(e.target.value)}
-                    rows={3}
-                    placeholder="Ex.: Final da Copa do Mundo 2026 — Brasil x Argentina, polêmicas de arbitragem e gols."
-                    className="input min-h-[80px] resize-y"
-                  />
-                </Field>
-
-                <div className="grid sm:grid-cols-2 gap-3">
-                  <Field label="Quantidade total de palpites">
-                    <select
-                      value={aiCount}
-                      onChange={(e) => setAiCount(Number(e.target.value))}
-                      className="input"
-                    >
-                      {[1, 2, 3, 4, 5].map((n) => (
-                        <option key={n} value={n}>{n} palpite{n > 1 ? "s" : ""}</option>
-                      ))}
-                    </select>
-                  </Field>
-                  <Field label="Aproveitar palpites já cadastrados">
-                    <label className="flex items-center gap-2 h-11 px-3 rounded-lg border border-border bg-card cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={aiUseExistingSubs}
-                        onChange={(e) => setAiUseExistingSubs(e.target.checked)}
-                        className="h-4 w-4 accent-primary"
-                      />
-                      <span className="text-sm">Manter meus palpites e completar o restante</span>
-                    </label>
-                  </Field>
-                </div>
-
-                <p className="text-xs text-muted-foreground">
-                  A IA usará categoria, sub-categoria, prêmio e data já preenchidos como contexto. Você pode editar tudo depois.
-                </p>
-
-                {aiError && (
-                  <div className="text-sm text-destructive flex items-center gap-2">
-                    <AlertCircle className="h-4 w-4" /> {aiError}
+          {/* Popup — Gerador IA */}
+          {aiOpen && (
+            <div
+              className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm grid place-items-center p-4 animate-in fade-in"
+              onClick={() => setAiOpen(false)}
+            >
+              <div
+                className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl border border-primary/40 bg-card shadow-2xl"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="flex items-center justify-between gap-3 p-5 border-b border-border sticky top-0 bg-card z-10">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-lg bg-primary/20 grid place-items-center text-primary">
+                      <Wand2 className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <div className="font-display font-black text-base">Gere seu desafio com a IA</div>
+                      <div className="text-xs text-muted-foreground">
+                        Conte o tema, cadastre alguns palpites (opcional) ou peça para a IA criar tudo.
+                      </div>
+                    </div>
                   </div>
-                )}
-
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    type="button"
-                    onClick={handleGenerateChallenge}
-                    disabled={aiLoading || !aiTheme.trim()}
-                    className="inline-flex items-center gap-2 h-11 px-4 rounded-lg bg-gradient-brand text-primary-foreground font-bold shadow-glow disabled:opacity-50"
-                  >
-                    {aiLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-                    {aiLoading ? "Gerando…" : "Gerar desafio com IA"}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setAiOpen(false);
-                      document.getElementById("manual-section")?.scrollIntoView({ behavior: "smooth", block: "start" });
-                    }}
-                    className="h-11 px-4 rounded-lg border border-primary/40 bg-primary/10 text-primary text-sm font-bold inline-flex items-center gap-1.5"
-                  >
-                    <PencilLine className="h-4 w-4" /> Criar manualmente
-                  </button>
                   <button
                     type="button"
                     onClick={() => setAiOpen(false)}
-                    className="h-11 px-4 rounded-lg border border-border text-sm font-semibold"
+                    className="h-9 w-9 rounded-lg border border-border grid place-items-center hover:bg-muted"
+                    aria-label="Fechar"
                   >
-                    Fechar
+                    <X className="h-4 w-4" />
                   </button>
                 </div>
+
+                <div className="p-5 space-y-3">
+                  <Field label="Tema do desafio">
+                    <textarea
+                      value={aiTheme}
+                      onChange={(e) => setAiTheme(e.target.value)}
+                      rows={3}
+                      placeholder="Ex.: Final da Copa do Mundo 2026 — Brasil x Argentina, polêmicas de arbitragem e gols."
+                      className="input min-h-[80px] resize-y"
+                    />
+                  </Field>
+
+                  <div className="grid sm:grid-cols-2 gap-3">
+                    <Field label="Quantidade total de palpites">
+                      <select
+                        value={aiCount}
+                        onChange={(e) => setAiCount(Number(e.target.value))}
+                        className="input"
+                      >
+                        {[1, 2, 3, 4, 5].map((n) => (
+                          <option key={n} value={n}>{n} palpite{n > 1 ? "s" : ""}</option>
+                        ))}
+                      </select>
+                    </Field>
+                    <Field label="Aproveitar palpites já cadastrados">
+                      <label className="flex items-center gap-2 h-11 px-3 rounded-lg border border-border bg-card cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={aiUseExistingSubs}
+                          onChange={(e) => setAiUseExistingSubs(e.target.checked)}
+                          className="h-4 w-4 accent-primary"
+                        />
+                        <span className="text-sm">Manter meus palpites e completar o restante</span>
+                      </label>
+                    </Field>
+                  </div>
+
+                  <p className="text-xs text-muted-foreground">
+                    A IA usará categoria, sub-categoria, prêmio e data já preenchidos como contexto. Você pode editar tudo depois.
+                  </p>
+
+                  {aiError && (
+                    <div className="text-sm text-destructive flex items-center gap-2">
+                      <AlertCircle className="h-4 w-4" /> {aiError}
+                    </div>
+                  )}
+
+                  <div className="flex flex-wrap gap-2 pt-2">
+                    <button
+                      type="button"
+                      onClick={async () => { await handleGenerateChallenge(); if (!aiError) setAiOpen(false); }}
+                      disabled={aiLoading || !aiTheme.trim()}
+                      className="inline-flex items-center gap-2 h-11 px-4 rounded-lg bg-gradient-brand text-primary-foreground font-bold shadow-glow disabled:opacity-50"
+                    >
+                      {aiLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+                      {aiLoading ? "Gerando…" : "Gerar desafio com IA"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setAiOpen(false);
+                        document.getElementById("manual-section")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                      }}
+                      className="h-11 px-4 rounded-lg border border-primary/40 bg-primary/10 text-primary text-sm font-bold inline-flex items-center gap-1.5"
+                    >
+                      <PencilLine className="h-4 w-4" /> Criar manualmente
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setAiOpen(false)}
+                      className="h-11 px-4 rounded-lg border border-border text-sm font-semibold"
+                    >
+                      Fechar
+                    </button>
+                  </div>
+                </div>
               </div>
-            )}
-          </div>
+            </div>
+          )}
 
           {/* Auto-arts toggle */}
           <div className="rounded-xl border border-gold/40 bg-gradient-to-br from-gold/10 via-card to-card p-4">
