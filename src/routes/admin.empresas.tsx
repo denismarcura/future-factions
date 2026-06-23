@@ -169,10 +169,11 @@ function DashboardTab({ companies, challenges, dbChallenges }: { companies: Comp
   }, [fetchStats]);
 
   const localParticipants = challenges.reduce((s, c) => s + (c.participants || 0), 0);
+  const dbParticipants = dbChallenges.reduce((s, c) => s + (c.participants || 0), 0);
   const companiesCount = Math.max(stats?.companies ?? 0, companies.length);
-  const activeCount = Math.max(stats?.activeChallenges ?? 0, challenges.filter((c) => c.status === "ativo").length);
-  const closedCount = Math.max(stats?.closedChallenges ?? 0, challenges.filter((c) => c.status === "encerrado").length);
-  const totalParticipants = Math.max(stats?.totalParticipants ?? 0, localParticipants);
+  const activeCount = Math.max(stats?.activeChallenges ?? 0, dbChallenges.filter((c) => c.status === "ativo").length, challenges.filter((c) => c.status === "ativo").length);
+  const closedCount = Math.max(stats?.closedChallenges ?? 0, dbChallenges.filter((c) => c.status !== "ativo").length, challenges.filter((c) => c.status === "encerrado").length);
+  const totalParticipants = Math.max(stats?.totalParticipants ?? 0, localParticipants + dbParticipants);
 
   return (
     <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
