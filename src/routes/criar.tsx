@@ -270,7 +270,7 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
 
 
   // AI Challenge Generator state
-  const [aiOpen, setAiOpen] = useState(false);
+  const [aiOpen, setAiOpen] = useState(true);
   const [aiTheme, setAiTheme] = useState("");
   const [aiCount, setAiCount] = useState(5);
   const [aiUseExistingSubs, setAiUseExistingSubs] = useState(true);
