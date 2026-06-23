@@ -400,6 +400,9 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
       errs.push("Cadastre o endereço do Instagram nas missões (obrigatório para empresas).");
     }
     if (!winnerType) errs.push("Escolha o critério de ganhador (maior pontuação ou acertar todas).");
+    if (!coverAllBrazil && (!campaignCity.trim() || !campaignState.trim())) {
+      errs.push("Informe cidade e estado, ou marque a opção 'Brasil todo'.");
+    }
     if (errs.length) {
       setErrors(errs);
       window.scrollTo({ top: 0, behavior: "smooth" });
