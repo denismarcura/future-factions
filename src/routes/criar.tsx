@@ -1647,6 +1647,43 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
           }}
         />
       )}
+      <PrizesPicker
+        open={prizesPickerOpen}
+        initialSlots={prizeSlots}
+        onClose={() => setPrizesPickerOpen(false)}
+        onConfirm={(slots, prizes) => {
+          setPrizeSlots(slots);
+          setPickedPrizes(slots.map((s) => prizes.find((p) => p.id === s.prizeId)!).filter(Boolean));
+          // bind first prize as the main prize image (4:5) if user has none
+          const firstPrize = prizes.find((p) => p.id === slots[0]?.prizeId);
+          if (firstPrize?.image_url && !prizeImg) setPrizeImg(firstPrize.image_url);
+          if (firstPrize?.name && !prizeName) setPrizeName(firstPrize.name);
+          setPrizesPickerOpen(false);
+        }}
+      />
+      {showClosedInfo && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" onClick={() => { setShowClosedInfo(false); setClosedInfoSeen(true); }} />
+          <div className="relative max-w-md glass-card rounded-2xl p-6 border border-amber-500/40">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="h-6 w-6 text-amber-500 shrink-0 mt-0.5" />
+              <div>
+                <h3 className="font-display font-black text-lg">Desafio Fechado</h3>
+                <p className="text-sm text-muted-foreground mt-2">
+                  Você escolheu manter o desafio <strong>apenas pelo link</strong>. Isso significa que <strong>você é responsável por divulgar o convite</strong> aos seus amigos, parentes e contatos. O Desafio dos Palpites não exibirá esse desafio publicamente.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => { setShowClosedInfo(false); setClosedInfoSeen(true); }}
+                  className="mt-4 h-10 px-5 rounded-full bg-gradient-brand text-primary-foreground font-bold text-sm shadow-glow"
+                >
+                  Entendi
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 
