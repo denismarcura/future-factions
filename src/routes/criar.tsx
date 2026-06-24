@@ -445,8 +445,14 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
       if (!s.question.trim()) errs.push(`Pergunta vazia no palpite #${i + 1}.`);
       if (s.options.filter(o => o.trim()).length < 2) errs.push(`Palpite #${i + 1} precisa de pelo menos 2 opções preenchidas.`);
     });
-    if (forCompany && !missionData.instagram.trim()) {
-      errs.push("Cadastre o endereço do Instagram nas missões (obrigatório para empresas).");
+    if (forCompany) {
+      if (!missionData.instagram.trim()) {
+        errs.push("Cadastre o endereço do Instagram nas missões (obrigatório para empresas).");
+      } else {
+        const { valid, invalid } = parseInstagramHandles(missionData.instagram);
+        if (invalid.length) errs.push(`Perfil(s) de Instagram inválido(s): ${invalid.join(", ")}`);
+        if (!valid.length) errs.push("Informe ao menos um perfil de Instagram válido (ex.: @seuperfil).");
+      }
     }
     if (!winnerType) errs.push("Escolha o critério de ganhador (maior pontuação ou acertar todas).");
     if (reachMode === "public" && !coverAllBrazil && selectedCities.length === 0) {
