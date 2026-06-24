@@ -31,6 +31,7 @@ import { LiveUsersBadge } from "@/components/LiveUsersBadge";
 import { Footer } from "@/components/layout/Footer";
 import { ClosingSoonAlert } from "@/components/ClosingSoonAlert";
 import { HeaderSearch } from "@/components/HeaderSearch";
+import { GoogleReviewsSlider } from "@/components/GoogleReviewsSlider";
 
 
 const ADMIN_EMAILS = ["denismarcura@gmail.com", "antoinio.salvador@gmail.com"];
@@ -289,6 +290,10 @@ export function AppShell({ children, hidePrimarySidebar = false }: { children: R
         )}
 
         <main className="flex-1 min-w-0">{children}</main>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4">
+        <GoogleReviewsSlider />
       </div>
 
       <Footer />

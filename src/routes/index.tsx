@@ -158,8 +158,6 @@ function Feed() {
       </section>
 
 
-      {/* Reviews do Google */}
-      <GoogleReviewsSlider />
 
       {/* Banners cadastrados no admin */}
       {banners.length > 0 && (
