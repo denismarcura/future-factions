@@ -426,7 +426,9 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
         errs.push("Cadastre o endereço do Instagram nas missões (obrigatório para empresas).");
       } else {
         const { valid, invalid } = parseInstagramHandles(missionData.instagram);
-        if (invalid.length) errs.push(`Perfil(s) de Instagram inválido(s): ${invalid.join(", ")}`);
+        for (const item of invalid) {
+          errs.push(`Instagram "${item.token}": ${item.message}.`);
+        }
         if (!valid.length) errs.push("Informe ao menos um perfil de Instagram válido (ex.: @seuperfil).");
       }
     }
@@ -2068,7 +2070,13 @@ function MissionWizard({
                       </div>
                     )}
                     {invalid.length > 0 && (
-                      <div className="text-[11px] text-destructive">Inválido(s): {invalid.join(", ")}</div>
+                      <ul className="text-[11px] text-destructive space-y-0.5 mt-1">
+                        {invalid.map((item, i) => (
+                          <li key={`${item.token}-${i}`}>
+                            <span className="font-mono">{item.token}</span> — {item.message}
+                          </li>
+                        ))}
+                      </ul>
                     )}
                   </div>
                 );
