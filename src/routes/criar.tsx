@@ -1269,7 +1269,7 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
           {/* Banner personalizado (para todos) */}
           <Section
             step={6}
-            title="Banner do desafio (opcional)"
+            title="Banner"
             description="Imagem horizontal exibida no topo do desafio. Recomendado 1600×600px (proporção 8:3) em JPG ou PNG."
           >
             <UploadCard
