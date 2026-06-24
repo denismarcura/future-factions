@@ -9,6 +9,7 @@ export type AdminPrize = {
   description: string | null;
   image_url: string | null;
   estimated_value: number | null;
+  cost_tokens: number;
   stock: number;
   active: boolean;
   created_at: string;
