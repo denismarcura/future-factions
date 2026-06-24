@@ -156,15 +156,23 @@ function AdminPremios() {
                     className="w-full h-11 px-3 rounded-xl glass-card border border-border/60 text-sm"
                   />
                 </Field>
-                <Field label="Estoque">
+                <Field label="Valor em tokens">
                   <input
                     type="number"
-                    value={editing.stock ?? 0}
-                    onChange={(e) => setEditing({ ...editing, stock: Number(e.target.value) })}
+                    value={editing.cost_tokens ?? 0}
+                    onChange={(e) => setEditing({ ...editing, cost_tokens: Number(e.target.value) })}
                     className="w-full h-11 px-3 rounded-xl glass-card border border-border/60 text-sm"
                   />
                 </Field>
               </div>
+              <Field label="Estoque">
+                <input
+                  type="number"
+                  value={editing.stock ?? 0}
+                  onChange={(e) => setEditing({ ...editing, stock: Number(e.target.value) })}
+                  className="w-full h-11 px-3 rounded-xl glass-card border border-border/60 text-sm"
+                />
+              </Field>
               <Field label="Imagem (proporção 4:5)">
                 <div className="flex items-start gap-3">
                   <div className="w-20 aspect-[4/5] rounded-lg bg-muted/40 overflow-hidden shrink-0">
