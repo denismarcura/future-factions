@@ -76,18 +76,44 @@ const BRAZIL_BONUS = 10000;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
 
+// Instagram username rules: 1-30 chars, letters, numbers, '.', '_'
+const IG_USERNAME_RE = /^[A-Za-z0-9._]{1,30}$/;
+
+export function parseInstagramHandles(raw: string): { valid: { handle: string; url: string }[]; invalid: string[] } {
+  const tokens = raw.split(/[\s,;]+/).map((s) => s.trim()).filter(Boolean);
+  const seen = new Set<string>();
+  const valid: { handle: string; url: string }[] = [];
+  const invalid: string[] = [];
+  for (const token of tokens) {
+    let handle = token;
+    // Extract from URL if present
+    const urlMatch = token.match(/instagram\.com\/+([^/?#]+)/i);
+    if (urlMatch) handle = urlMatch[1];
+    handle = handle.replace(/^@+/, "").replace(/\/+$/, "").trim();
+    if (!handle || !IG_USERNAME_RE.test(handle) || /^(p|reel|reels|explore|stories|tv)$/i.test(handle)) {
+      invalid.push(token);
+      continue;
+    }
+    const key = handle.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    valid.push({ handle, url: `https://www.instagram.com/${handle}/` });
+  }
+  return { valid, invalid };
+}
+
 function buildCorporateMissions(data: MissionData, sponsorName: string): CorporateMission[] {
   const sponsor = sponsorName.trim() || "Empresa";
   const missions: CorporateMission[] = [];
-  const instagramHandles = data.instagram.split(/[\n,;]+/).map(s => s.trim()).filter(Boolean);
-  instagramHandles.forEach((link, index) => {
+  const { valid: instagramHandles } = parseInstagramHandles(data.instagram);
+  instagramHandles.forEach(({ handle, url }, index) => {
     missions.push({
       id: uid(),
       sponsorName: sponsor,
       platform: "instagram",
       actionType: "follow",
-      title: instagramHandles.length > 1 ? `Seguir perfil ${index + 1} de ${sponsor}` : `Seguir ${sponsor}`,
-      link,
+      title: instagramHandles.length > 1 ? `Seguir @${handle}` : `Seguir ${sponsor}`,
+      link: url,
       tokens: 50,
     });
   });
