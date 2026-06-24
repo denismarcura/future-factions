@@ -76,18 +76,44 @@ const BRAZIL_BONUS = 10000;
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
 
+// Instagram username rules: 1-30 chars, letters, numbers, '.', '_'
+const IG_USERNAME_RE = /^[A-Za-z0-9._]{1,30}$/;
+
+export function parseInstagramHandles(raw: string): { valid: { handle: string; url: string }[]; invalid: string[] } {
+  const tokens = raw.split(/[\s,;]+/).map((s) => s.trim()).filter(Boolean);
+  const seen = new Set<string>();
+  const valid: { handle: string; url: string }[] = [];
+  const invalid: string[] = [];
+  for (const token of tokens) {
+    let handle = token;
+    // Extract from URL if present
+    const urlMatch = token.match(/instagram\.com\/+([^/?#]+)/i);
+    if (urlMatch) handle = urlMatch[1];
+    handle = handle.replace(/^@+/, "").replace(/\/+$/, "").trim();
+    if (!handle || !IG_USERNAME_RE.test(handle) || /^(p|reel|reels|explore|stories|tv)$/i.test(handle)) {
+      invalid.push(token);
+      continue;
+    }
+    const key = handle.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    valid.push({ handle, url: `https://www.instagram.com/${handle}/` });
+  }
+  return { valid, invalid };
+}
+
 function buildCorporateMissions(data: MissionData, sponsorName: string): CorporateMission[] {
   const sponsor = sponsorName.trim() || "Empresa";
   const missions: CorporateMission[] = [];
-  const instagramHandles = data.instagram.split(/[\n,;]+/).map(s => s.trim()).filter(Boolean);
-  instagramHandles.forEach((link, index) => {
+  const { valid: instagramHandles } = parseInstagramHandles(data.instagram);
+  instagramHandles.forEach(({ handle, url }, index) => {
     missions.push({
       id: uid(),
       sponsorName: sponsor,
       platform: "instagram",
       actionType: "follow",
-      title: instagramHandles.length > 1 ? `Seguir perfil ${index + 1} de ${sponsor}` : `Seguir ${sponsor}`,
-      link,
+      title: instagramHandles.length > 1 ? `Seguir @${handle}` : `Seguir ${sponsor}`,
+      link: url,
       tokens: 50,
     });
   });
@@ -419,8 +445,14 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
       if (!s.question.trim()) errs.push(`Pergunta vazia no palpite #${i + 1}.`);
       if (s.options.filter(o => o.trim()).length < 2) errs.push(`Palpite #${i + 1} precisa de pelo menos 2 opções preenchidas.`);
     });
-    if (forCompany && !missionData.instagram.trim()) {
-      errs.push("Cadastre o endereço do Instagram nas missões (obrigatório para empresas).");
+    if (forCompany) {
+      if (!missionData.instagram.trim()) {
+        errs.push("Cadastre o endereço do Instagram nas missões (obrigatório para empresas).");
+      } else {
+        const { valid, invalid } = parseInstagramHandles(missionData.instagram);
+        if (invalid.length) errs.push(`Perfil(s) de Instagram inválido(s): ${invalid.join(", ")}`);
+        if (!valid.length) errs.push("Informe ao menos um perfil de Instagram válido (ex.: @seuperfil).");
+      }
     }
     if (!winnerType) errs.push("Escolha o critério de ganhador (maior pontuação ou acertar todas).");
     if (reachMode === "public" && !coverAllBrazil && selectedCities.length === 0) {
@@ -2047,7 +2079,24 @@ function MissionWizard({
                 className="input min-h-[100px] resize-y"
                 autoFocus
               />
-              <p className="text-[11px] text-muted-foreground">Pode adicionar vários perfis — um por linha, ou separados por vírgula (,) ou ponto-e-vírgula (;).</p>
+              <p className="text-[11px] text-muted-foreground">Pode adicionar vários perfis — um por linha, ou separados por vírgula (,), ponto-e-vírgula (;) ou espaço. Aceita @usuario ou URL completa. Duplicados são removidos automaticamente.</p>
+              {data.instagram.trim() && (() => {
+                const { valid, invalid } = parseInstagramHandles(data.instagram);
+                return (
+                  <div className="space-y-1">
+                    {valid.length > 0 && (
+                      <div className="flex flex-wrap gap-1">
+                        {valid.map((v) => (
+                          <span key={v.handle} className="inline-flex items-center gap-1 rounded-full bg-primary/10 text-primary px-2 py-0.5 text-[11px]">@{v.handle}</span>
+                        ))}
+                      </div>
+                    )}
+                    {invalid.length > 0 && (
+                      <div className="text-[11px] text-destructive">Inválido(s): {invalid.join(", ")}</div>
+                    )}
+                  </div>
+                );
+              })()}
             </div>
           )}
 
