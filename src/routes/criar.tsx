@@ -188,7 +188,8 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
   const [generating, setGenerating] = useState(false);
   const [improvingTitle, setImprovingTitle] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
-  const [winnerType, setWinnerType] = useState<"points" | "all" | "">("");
+  const [winnerType, setWinnerType] = useState<"points" | "all" | "">("points");
+  const [helpKey, setHelpKey] = useState<string | null>(null);
   const [published, setPublished] = useState<null | { id: string; name: string }>(null);
   const navigate = useNavigate();
   const [friends, setFriends] = useState<{ id: string; name: string; email: string }[]>([
