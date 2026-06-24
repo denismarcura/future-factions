@@ -2006,16 +2006,17 @@ function MissionWizard({
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <span className="h-8 w-8 grid place-items-center rounded-md bg-primary/15 text-primary"><Instagram className="h-4 w-4" /></span>
-                <div className="font-semibold text-sm">Qual é o endereço do seu Instagram?</div>
+                <div className="font-semibold text-sm">Quais perfis do Instagram?</div>
               </div>
-              <input
+              <textarea
                 value={data.instagram}
                 onChange={(e) => setData((p) => ({ ...p, instagram: e.target.value }))}
-                placeholder="https://www.instagram.com/casadinapoli/"
-                className="input"
+                placeholder={"https://www.instagram.com/casadinapoli/\nhttps://www.instagram.com/outro-perfil/\nou separe com vírgula (,) ou ponto-e-vírgula (;)"}
+                rows={4}
+                className="input min-h-[100px] resize-y"
                 autoFocus
               />
-              <p className="text-[11px] text-muted-foreground">Cole o endereço completo do perfil (com https://).</p>
+              <p className="text-[11px] text-muted-foreground">Pode adicionar vários perfis — um por linha, ou separados por vírgula (,) ou ponto-e-vírgula (;).</p>
             </div>
           )}
 
