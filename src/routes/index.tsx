@@ -5,7 +5,7 @@ import { Flame, Sparkles, TrendingUp, Clock, ShoppingBag, Trophy, Coins, Gift, U
 import imgCampeao from "@/assets/dd-campeao.jpg";
 import imgMalucos from "@/assets/pm-soccer.jpg";
 import imgAlien from "@/assets/cat-alienigenas.jpg";
-import { GoogleReviewsSlider } from "@/components/GoogleReviewsSlider";
+
 
 import { AppShell } from "@/components/layout/AppShell";
 import { PredictionCard } from "@/components/PredictionCard";
@@ -158,8 +158,6 @@ function Feed() {
       </section>
 
 
-      {/* Reviews do Google */}
-      <GoogleReviewsSlider />
 
       {/* Banners cadastrados no admin */}
       {banners.length > 0 && (
