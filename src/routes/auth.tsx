@@ -68,10 +68,27 @@ function AuthPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
+  const challengeRedirect = search.d && typeof window !== "undefined"
+    ? `${window.location.origin}/previsao/${search.d}${search.ref ? `?ref=${encodeURIComponent(search.ref)}` : ""}`
+    : typeof window !== "undefined"
+      ? `${window.location.origin}/dashboard`
+      : "/dashboard";
+
+  function goAfterAuth() {
+    if (search.d) {
+      navigate({
+        to: "/previsao/$id",
+        params: { id: search.d },
+        search: (search.ref ? { ref: search.ref } : {}) as any,
+      });
+      return;
+    }
+    navigate({ to: "/dashboard" });
+  }
 
   useEffect(() => {
-    if (!loading && user) navigate({ to: "/dashboard" });
-  }, [user, loading, navigate]);
+    if (!loading && user) goAfterAuth();
+  }, [user, loading, search.d, search.ref]);
 
   useEffect(() => {
     if (!search.d) return;
@@ -85,11 +102,11 @@ function AuthPage() {
     setBusy(true);
     try {
       const result = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: window.location.origin,
+        redirect_uri: challengeRedirect,
       });
       if (result.redirected) return;
       if (result.error) throw result.error;
-      navigate({ to: "/dashboard" });
+      goAfterAuth();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Erro ao entrar com Google");
       setBusy(false);
@@ -142,7 +159,7 @@ function AuthPage() {
           email,
           password,
           options: {
-            emailRedirectTo: window.location.origin + "/dashboard",
+            emailRedirectTo: challengeRedirect,
             data: {
               full_name: name,
               whatsapp,
@@ -172,7 +189,7 @@ function AuthPage() {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
       toast.success("Bem-vindo de volta!");
-      navigate({ to: "/dashboard" });
+      goAfterAuth();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Erro");
     } finally {
