@@ -59,8 +59,10 @@ export function EarnMorePointsCTA({ challenge }: { challenge?: ChallengeCtx } = 
       </p>
 
       <div className="grid sm:grid-cols-2 gap-2.5">
-        <Link
-          to="/missoes"
+        <a
+          href="/missoes"
+          target="_blank"
+          rel="noreferrer"
           className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border/60 hover:border-primary/60 transition"
         >
           <Target className="h-5 w-5 text-primary shrink-0" />
@@ -68,7 +70,7 @@ export function EarnMorePointsCTA({ challenge }: { challenge?: ChallengeCtx } = 
             <div className="font-display font-bold text-sm">Siga as missões</div>
             <div className="text-[11px] text-muted-foreground">Curta, siga e inscreva para ganhar TKN</div>
           </div>
-        </Link>
+        </a>
 
         <a
           href={mailto}
