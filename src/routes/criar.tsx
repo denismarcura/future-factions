@@ -2587,4 +2587,3 @@ function EventQuickPicker({ category, onPick }: { category: string; onPick: (m: 
   );
 }
 
-}
