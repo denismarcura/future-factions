@@ -1,11 +1,12 @@
-import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Coins, Target, Mail, MessageCircle, Copy, Check } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { whatsappLink } from "@/lib/friends";
 
-export function EarnMorePointsCTA() {
+type ChallengeCtx = { id: string; title: string; image?: string };
+
+export function EarnMorePointsCTA({ challenge }: { challenge?: ChallengeCtx } = {}) {
   const [userId, setUserId] = useState<string>("");
   const [copied, setCopied] = useState(false);
 
@@ -14,19 +15,30 @@ export function EarnMorePointsCTA() {
   }, []);
 
   const origin = typeof window !== "undefined" ? window.location.origin : "";
-  const inviteUrl = userId ? `${origin}/auth?ref=${userId}` : `${origin}/auth`;
+  const ref8 = userId ? userId.slice(0, 8) : "";
+  const inviteUrl = challenge && ref8
+    ? `${origin}/amigo/${ref8}?d=${challenge.id}`
+    : userId
+      ? `${origin}/auth?ref=${userId}`
+      : `${origin}/auth`;
   const code = userId ? userId.slice(0, 8).toUpperCase() : "";
 
-  const waMsg = `🎯 Vem palpitar comigo no Desafio dos Palpites! 100% grátis, só tokens. Use meu link e ganhe tokens de boas-vindas: ${inviteUrl}`;
-  const emailSubject = "Vem palpitar comigo no Desafio dos Palpites";
-  const emailBody = `Oi! Tô participando do Desafio dos Palpites — 100% grátis, só tokens.\n\nUsa meu link pra ganhar tokens de boas-vindas:\n${inviteUrl}\n\nQualquer dúvida me chama.`;
+  const waMsg = challenge
+    ? `🎯 Vem palpitar comigo no desafio "${challenge.title}"! 100% grátis, só tokens. Use meu link e ganhe tokens de boas-vindas: ${inviteUrl}`
+    : `🎯 Vem palpitar comigo no Desafio dos Palpites! 100% grátis, só tokens. Use meu link e ganhe tokens de boas-vindas: ${inviteUrl}`;
+  const emailSubject = challenge
+    ? `Vem palpitar comigo no desafio "${challenge.title}"`
+    : "Vem palpitar comigo no Desafio dos Palpites";
+  const emailBody = challenge
+    ? `Oi! Tô participando do desafio "${challenge.title}" no Desafio dos Palpites — 100% grátis, só tokens.\n\nUsa meu link pra entrar comigo e ganhar tokens de boas-vindas:\n${inviteUrl}\n\nQualquer dúvida me chama.`
+    : `Oi! Tô participando do Desafio dos Palpites — 100% grátis, só tokens.\n\nUsa meu link pra ganhar tokens de boas-vindas:\n${inviteUrl}\n\nQualquer dúvida me chama.`;
   const mailto = `mailto:?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
 
   async function copyLink() {
     try {
       await navigator.clipboard.writeText(`${waMsg}`);
       setCopied(true);
-      toast.success("Link de indicação copiado! Cole no seu WhatsApp.");
+      toast.success(challenge ? "Link do desafio copiado! Cole no seu WhatsApp." : "Link de indicação copiado! Cole no seu WhatsApp.");
       setTimeout(() => setCopied(false), 2000);
     } catch {
       toast.error("Não foi possível copiar. Copie manualmente.");
