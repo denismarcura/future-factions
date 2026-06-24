@@ -1770,6 +1770,37 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
           setPrizesPickerOpen(false);
         }}
       />
+      {helpKey && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" onClick={() => setHelpKey(null)} />
+          <div className="relative max-w-md glass-card rounded-2xl p-6 border border-primary/40">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="h-6 w-6 text-primary shrink-0 mt-0.5" />
+              <div>
+                <h3 className="font-display font-black text-lg">
+                  {helpKey === "palpites" && "Seus Palpites"}
+                  {helpKey === "ganhador" && "Como o ganhador é definido"}
+                </h3>
+                <div className="text-sm text-muted-foreground mt-2 space-y-2">
+                  {helpKey === "palpites" && (
+                    <p>Aqui você pode <strong>apagar</strong> palpites, <strong>editar</strong> as opções, <strong>gerar novos com IA</strong> a partir do título do desafio, ou <strong>criar novos manualmente</strong> clicando em "Novo palpite".</p>
+                  )}
+                  {helpKey === "ganhador" && (
+                    <>
+                      <p>Você pode definir o vencedor de duas formas:</p>
+                      <p><strong>1) Quem fizer mais pontos:</strong> são somados pontos dos palpites certos, pontos de amigos que se cadastraram e criaram uma campanha, pontos de missões e pontos de check-in.</p>
+                      <p><strong>2) Quem acertar todas:</strong> só leva o prêmio quem acertar 100% dos palpites do desafio.</p>
+                    </>
+                  )}
+                </div>
+                <button type="button" onClick={() => setHelpKey(null)} className="mt-4 h-10 px-5 rounded-full bg-gradient-brand text-primary-foreground font-bold text-sm shadow-glow">
+                  Entendi
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       {showClosedInfo && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" onClick={() => { setShowClosedInfo(false); setClosedInfoSeen(true); }} />
