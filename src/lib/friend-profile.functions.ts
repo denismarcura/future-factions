@@ -57,13 +57,15 @@ export const getFriendProfile = createServerFn({ method: "GET" })
       participated = cs ?? [];
     }
 
-    // Completed results (where user won)
-    const { data: wins } = await sb
+    // Completed results (where user won) — winners table is no longer anon-readable
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: wins } = await supabaseAdmin
       .from("challenge_winners")
       .select("id, challenge_id, tokens, status, created_at, challenges(title, image_url, category)")
       .eq("user_id", userId)
       .order("created_at", { ascending: false })
       .limit(20);
+
 
     // Tokens earned (positive deltas)
     const { data: txs } = await sb
