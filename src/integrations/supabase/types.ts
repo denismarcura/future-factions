@@ -17,6 +17,7 @@ export type Database = {
       admin_prizes: {
         Row: {
           active: boolean
+          cost_tokens: number
           created_at: string
           description: string | null
           estimated_value: number | null
@@ -28,6 +29,7 @@ export type Database = {
         }
         Insert: {
           active?: boolean
+          cost_tokens?: number
           created_at?: string
           description?: string | null
           estimated_value?: number | null
@@ -39,6 +41,7 @@ export type Database = {
         }
         Update: {
           active?: boolean
+          cost_tokens?: number
           created_at?: string
           description?: string | null
           estimated_value?: number | null
@@ -985,6 +988,65 @@ export type Database = {
             columns: ["challenge_id"]
             isOneToOne: false
             referencedRelation: "challenges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      prize_redemptions: {
+        Row: {
+          admin_notes: string | null
+          ai_fraud_report: Json | null
+          ai_fraud_score: number | null
+          cost_tokens: number
+          created_at: string
+          id: string
+          prize_id: string
+          prize_name: string
+          request_ip: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          ai_fraud_report?: Json | null
+          ai_fraud_score?: number | null
+          cost_tokens: number
+          created_at?: string
+          id?: string
+          prize_id: string
+          prize_name: string
+          request_ip?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_notes?: string | null
+          ai_fraud_report?: Json | null
+          ai_fraud_score?: number | null
+          cost_tokens?: number
+          created_at?: string
+          id?: string
+          prize_id?: string
+          prize_name?: string
+          request_ip?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prize_redemptions_prize_id_fkey"
+            columns: ["prize_id"]
+            isOneToOne: false
+            referencedRelation: "admin_prizes"
             referencedColumns: ["id"]
           },
         ]

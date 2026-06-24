@@ -34,6 +34,7 @@ import { Route as PrevisaoIdRouteImport } from './routes/previsao.$id'
 import { Route as NoticiasSlugRouteImport } from './routes/noticias.$slug'
 import { Route as EmpresaCriarRouteImport } from './routes/empresa.criar'
 import { Route as AmigoRefRouteImport } from './routes/amigo.$ref'
+import { Route as AdminTrocasRouteImport } from './routes/admin.trocas'
 import { Route as AdminTokensConfigRouteImport } from './routes/admin.tokens-config'
 import { Route as AdminSegurancaRouteImport } from './routes/admin.seguranca'
 import { Route as AdminResultadoJogosRouteImport } from './routes/admin.resultado-jogos'
@@ -185,6 +186,11 @@ const AmigoRefRoute = AmigoRefRouteImport.update({
   id: '/amigo/$ref',
   path: '/amigo/$ref',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AdminTrocasRoute = AdminTrocasRouteImport.update({
+  id: '/trocas',
+  path: '/trocas',
+  getParentRoute: () => AdminRoute,
 } as any)
 const AdminTokensConfigRoute = AdminTokensConfigRouteImport.update({
   id: '/tokens-config',
@@ -368,6 +374,7 @@ export interface FileRoutesByFullPath {
   '/admin/resultado-jogos': typeof AdminResultadoJogosRoute
   '/admin/seguranca': typeof AdminSegurancaRoute
   '/admin/tokens-config': typeof AdminTokensConfigRoute
+  '/admin/trocas': typeof AdminTrocasRoute
   '/amigo/$ref': typeof AmigoRefRoute
   '/empresa/criar': typeof EmpresaCriarRoute
   '/noticias/$slug': typeof NoticiasSlugRoute
@@ -420,6 +427,7 @@ export interface FileRoutesByTo {
   '/admin/resultado-jogos': typeof AdminResultadoJogosRoute
   '/admin/seguranca': typeof AdminSegurancaRoute
   '/admin/tokens-config': typeof AdminTokensConfigRoute
+  '/admin/trocas': typeof AdminTrocasRoute
   '/amigo/$ref': typeof AmigoRefRoute
   '/empresa/criar': typeof EmpresaCriarRoute
   '/noticias/$slug': typeof NoticiasSlugRoute
@@ -475,6 +483,7 @@ export interface FileRoutesById {
   '/admin/resultado-jogos': typeof AdminResultadoJogosRoute
   '/admin/seguranca': typeof AdminSegurancaRoute
   '/admin/tokens-config': typeof AdminTokensConfigRoute
+  '/admin/trocas': typeof AdminTrocasRoute
   '/amigo/$ref': typeof AmigoRefRoute
   '/empresa/criar': typeof EmpresaCriarRoute
   '/noticias/$slug': typeof NoticiasSlugRoute
@@ -530,6 +539,7 @@ export interface FileRouteTypes {
     | '/admin/resultado-jogos'
     | '/admin/seguranca'
     | '/admin/tokens-config'
+    | '/admin/trocas'
     | '/amigo/$ref'
     | '/empresa/criar'
     | '/noticias/$slug'
@@ -582,6 +592,7 @@ export interface FileRouteTypes {
     | '/admin/resultado-jogos'
     | '/admin/seguranca'
     | '/admin/tokens-config'
+    | '/admin/trocas'
     | '/amigo/$ref'
     | '/empresa/criar'
     | '/noticias/$slug'
@@ -636,6 +647,7 @@ export interface FileRouteTypes {
     | '/admin/resultado-jogos'
     | '/admin/seguranca'
     | '/admin/tokens-config'
+    | '/admin/trocas'
     | '/amigo/$ref'
     | '/empresa/criar'
     | '/noticias/$slug'
@@ -851,6 +863,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/amigo/$ref'
       preLoaderRoute: typeof AmigoRefRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/admin/trocas': {
+      id: '/admin/trocas'
+      path: '/trocas'
+      fullPath: '/admin/trocas'
+      preLoaderRoute: typeof AdminTrocasRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/admin/tokens-config': {
       id: '/admin/tokens-config'
@@ -1079,6 +1098,7 @@ interface AdminRouteChildren {
   AdminResultadoJogosRoute: typeof AdminResultadoJogosRoute
   AdminSegurancaRoute: typeof AdminSegurancaRoute
   AdminTokensConfigRoute: typeof AdminTokensConfigRoute
+  AdminTrocasRoute: typeof AdminTrocasRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
@@ -1106,6 +1126,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminResultadoJogosRoute: AdminResultadoJogosRoute,
   AdminSegurancaRoute: AdminSegurancaRoute,
   AdminTokensConfigRoute: AdminTokensConfigRoute,
+  AdminTrocasRoute: AdminTrocasRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
 

@@ -9,6 +9,7 @@ export type AdminPrize = {
   description: string | null;
   image_url: string | null;
   estimated_value: number | null;
+  cost_tokens: number;
   stock: number;
   active: boolean;
   created_at: string;
@@ -63,6 +64,7 @@ export const upsertPrize = createServerFn({ method: "POST" })
       description: data.description ?? null,
       image_url: data.image_url ?? null,
       estimated_value: data.estimated_value ?? null,
+      cost_tokens: data.cost_tokens ?? 0,
       stock: data.stock ?? 0,
       active: data.active ?? true,
     };
