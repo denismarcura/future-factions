@@ -79,18 +79,18 @@ function uid() { return Math.random().toString(36).slice(2, 9); }
 function buildCorporateMissions(data: MissionData, sponsorName: string): CorporateMission[] {
   const sponsor = sponsorName.trim() || "Empresa";
   const missions: CorporateMission[] = [];
-  const instagram = data.instagram.trim();
-  if (instagram) {
+  const instagramHandles = data.instagram.split(/[\n,;]+/).map(s => s.trim()).filter(Boolean);
+  instagramHandles.forEach((link, index) => {
     missions.push({
       id: uid(),
       sponsorName: sponsor,
       platform: "instagram",
       actionType: "follow",
-      title: `Seguir ${sponsor}`,
-      link: instagram,
+      title: instagramHandles.length > 1 ? `Seguir perfil ${index + 1} de ${sponsor}` : `Seguir ${sponsor}`,
+      link,
       tokens: 50,
     });
-  }
+  });
   data.likeLinks.map((l) => l.trim()).filter(Boolean).forEach((link, index) => {
     missions.push({
       id: uid(),
@@ -188,7 +188,8 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
   const [generating, setGenerating] = useState(false);
   const [improvingTitle, setImprovingTitle] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
-  const [winnerType, setWinnerType] = useState<"points" | "all" | "">("");
+  const [winnerType, setWinnerType] = useState<"points" | "all" | "">("points");
+  const [helpKey, setHelpKey] = useState<string | null>(null);
   const [published, setPublished] = useState<null | { id: string; name: string }>(null);
   const navigate = useNavigate();
   const [friends, setFriends] = useState<{ id: string; name: string; email: string }[]>([
@@ -263,8 +264,8 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
   const [prizeSlots, setPrizeSlots] = useState<PrizeSlot[]>([]);
   const [pickedPrizes, setPickedPrizes] = useState<AdminPrize[]>([]);
   // Acceptance
-  const [acceptDisclaimer, setAcceptDisclaimer] = useState(false);
-  const [authorizeMarketing, setAuthorizeMarketing] = useState(false);
+  const [acceptDisclaimer, setAcceptDisclaimer] = useState(true);
+  const [authorizeMarketing, setAuthorizeMarketing] = useState(true);
   const [closedInfoSeen, setClosedInfoSeen] = useState(false);
   const [showClosedInfo, setShowClosedInfo] = useState(false);
 
@@ -1014,17 +1015,22 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
 
           <Section
             step={2}
-            title={`Sub-categorias de palpites (${subs.length})`}
+            title={`Seus Palpites (${subs.length})`}
             description={`Crie quantas perguntas quiser, cada uma com até ${MAX_OPTIONS} opções. Cada acerto vale ${REWARD_PER_HIT} tokens.`}
 
             action={
-              <button
-                type="button"
-                onClick={addSub}
-                className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg bg-primary/15 text-primary border border-primary/30 text-sm font-semibold hover:bg-primary/20"
-              >
-                <Plus className="h-4 w-4" /> Nova sub-categoria
-              </button>
+              <div className="flex items-center gap-2">
+                <button type="button" onClick={() => setHelpKey("palpites")} className="h-9 w-9 rounded-lg border border-border grid place-items-center text-muted-foreground hover:text-primary hover:border-primary/40" aria-label="Ajuda">
+                  <AlertCircle className="h-4 w-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={addSub}
+                  className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg bg-primary/15 text-primary border border-primary/30 text-sm font-semibold hover:bg-primary/20"
+                >
+                  <Plus className="h-4 w-4" /> Novo palpite
+                </button>
+              </div>
             }
           >
             {/* Gerar palpites com IA — inline */}
@@ -1162,6 +1168,11 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
             step={3}
             title="Ganhador"
             description="Escolha como será definido o vencedor do desafio. Obrigatório selecionar uma opção."
+            action={
+              <button type="button" onClick={() => setHelpKey("ganhador")} className="h-9 w-9 rounded-lg border border-border grid place-items-center text-muted-foreground hover:text-primary hover:border-primary/40" aria-label="Ajuda">
+                <AlertCircle className="h-4 w-4" />
+              </button>
+            }
           >
             <div className="space-y-3">
               <label className={`flex items-start gap-3 rounded-xl border p-4 cursor-pointer transition ${winnerType === "points" ? "border-primary bg-primary/10" : "border-border hover:border-primary/50"}`}>
@@ -1195,52 +1206,31 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
           <Section
             step={4}
             title="Prêmio"
-            description={`Automaticamente daremos ${AUTO_PRIZE.toLocaleString("pt-BR")} tokens para quem fizer a maior pontuação. Você pode somar seus próprios tokens, escolher um prêmio da nossa loja ou cadastrar um prêmio físico próprio.`}
+            description={`Automaticamente daremos ${AUTO_PRIZE.toLocaleString("pt-BR")} tokens para quem fizer a maior pontuação. Cadastre abaixo o prêmio físico do seu desafio.`}
+            action={
+              <Link to="/admin/regras-ia" className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg bg-primary/15 text-primary border border-primary/30 text-xs font-bold hover:bg-primary/20">
+                <Sparkles className="h-3.5 w-3.5" /> Treinar IA — Arte 1080×1080
+              </Link>
+            }
           >
+            <Field label="Nome do prêmio">
+              <input value={prizeName} onChange={(e) => setPrizeName(e.target.value)} placeholder="Ex.: Caixa de cerveja Heineken 350 ml" className="input" />
+            </Field>
 
-            <div className="text-xs uppercase tracking-wider font-bold text-muted-foreground mb-2">Cadastre seu próprio prêmio físico</div>
-
-
-            {/* Prêmios cadastrados (admin) — múltiplos sorteios */}
-            <div className="rounded-xl border border-gold/40 bg-gold/5 p-4 mb-4">
-              <div className="flex items-start gap-3">
-                <Gift className="h-5 w-5 text-gold mt-0.5 shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <div className="font-bold text-sm">Sortear vários prêmios cadastrados</div>
-                  <div className="text-xs text-muted-foreground mb-2">
-                    Escolha de 1 a 10 prêmios já cadastrados pelo administrador e defina qual prêmio vai para cada posição (1º, 2º, 3º...).
-                  </div>
-                  {pickedPrizes.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mb-2">
-                      {prizeSlots.map((s) => {
-                        const p = pickedPrizes.find((x) => x.id === s.prizeId);
-                        return (
-                          <span key={s.position} className="inline-flex items-center gap-1.5 pl-2 pr-3 py-1 rounded-full bg-background/80 border border-gold/40 text-xs">
-                            <strong>{s.position}º</strong> {p?.name ?? "vazio"}
-                          </span>
-                        );
-                      })}
-                    </div>
-                  )}
-                  <button
-                    type="button"
-                    onClick={() => setPrizesPickerOpen(true)}
-                    className="inline-flex items-center gap-2 h-10 px-4 rounded-lg bg-gold/15 text-gold border border-gold/40 text-sm font-bold hover:bg-gold/25"
-                  >
-                    <Gift className="h-4 w-4" /> {pickedPrizes.length > 0 ? "Editar prêmios" : "Selecionar prêmios"}
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <Field label="Prêmio do desafio (opcional)">
-              <input value={prizeName} onChange={(e) => setPrizeName(e.target.value)} placeholder="Ex.: 1 Camiseta do Brasil, Caixa de Cerveja…" className="input" />
+            <Field label="Detalhes do prêmio">
+              <textarea
+                rows={2}
+                value={aiPrompt}
+                onChange={(e) => setAiPrompt(e.target.value)}
+                placeholder="Descreva o prêmio: ex. caixa com 12 latas de cerveja Heineken 350ml geladas sobre balde de gelo"
+                className="input resize-none"
+              />
             </Field>
 
             <div className="grid sm:grid-cols-2 gap-4">
               <div>
-                <div className="text-xs uppercase tracking-wider font-bold text-muted-foreground mb-1.5">Imagem do prêmio (proporção 4:5)</div>
-                <div className="rounded-xl border border-dashed border-border/70 bg-background/40 p-4 aspect-[4/5] grid place-items-center overflow-hidden">
+                <div className="text-xs uppercase tracking-wider font-bold text-muted-foreground mb-1.5">Imagem do prêmio (1080×1080)</div>
+                <div className="rounded-xl border border-dashed border-border/70 bg-background/40 p-4 aspect-square grid place-items-center overflow-hidden">
                   {prizeImg ? (
                     <img src={prizeImg} alt="Prêmio" className="w-full h-full object-cover rounded-lg" />
                   ) : (
@@ -1252,27 +1242,9 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
                 </div>
               </div>
 
-
               <div className="space-y-3">
-                <Field label="Gerar com IA">
-                  <textarea
-                    rows={3}
-                    value={aiPrompt}
-                    onChange={(e) => setAiPrompt(e.target.value)}
-                    placeholder="Descreva o prêmio: ex. camiseta amarela da seleção brasileira sobre fundo verde"
-                    className="input resize-none"
-                  />
-                </Field>
-                <button
-                  type="button"
-                  onClick={generatePrize}
-                  disabled={generating}
-                  className="w-full h-11 rounded-lg bg-gradient-brand text-primary-foreground font-display font-bold inline-flex items-center justify-center gap-2 shadow-glow disabled:opacity-60"
-                >
-                  <Wand2 className="h-4 w-4" /> {generating ? "Gerando..." : "Gerar imagem 500x500"}
-                </button>
                 <label className="w-full h-11 rounded-lg border border-border inline-flex items-center justify-center gap-2 text-sm font-semibold cursor-pointer hover:border-primary hover:text-primary">
-                  <Upload className="h-4 w-4" /> Upload (500x500)
+                  <Upload className="h-4 w-4" /> Upload do prêmio (1080×1080)
                   <input
                     type="file"
                     accept="image/*"
@@ -1280,15 +1252,24 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
                     onChange={(e) => e.target.files?.[0] && handleUpload(e.target.files[0])}
                   />
                 </label>
-                <p className="text-xs text-muted-foreground">Aceita qualquer tamanho — a imagem será redimensionada automaticamente para 500×500.</p>
+                <button
+                  type="button"
+                  onClick={generatePrize}
+                  disabled={generating}
+                  className="w-full h-11 rounded-lg bg-gradient-brand text-primary-foreground font-display font-bold inline-flex items-center justify-center gap-2 shadow-glow disabled:opacity-60"
+                >
+                  <Wand2 className="h-4 w-4" /> {generating ? "Gerando..." : "Gerar arte do prêmio"}
+                </button>
+                <p className="text-xs text-muted-foreground">Aceita qualquer tamanho — a imagem será redimensionada automaticamente.</p>
               </div>
             </div>
           </Section>
 
+
           {/* Banner personalizado (para todos) */}
           <Section
             step={6}
-            title="Banner do desafio (opcional)"
+            title="Banner"
             description="Imagem horizontal exibida no topo do desafio. Recomendado 1600×600px (proporção 8:3) em JPG ou PNG."
           >
             <UploadCard
@@ -1789,6 +1770,37 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
           setPrizesPickerOpen(false);
         }}
       />
+      {helpKey && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" onClick={() => setHelpKey(null)} />
+          <div className="relative max-w-md glass-card rounded-2xl p-6 border border-primary/40">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="h-6 w-6 text-primary shrink-0 mt-0.5" />
+              <div>
+                <h3 className="font-display font-black text-lg">
+                  {helpKey === "palpites" && "Seus Palpites"}
+                  {helpKey === "ganhador" && "Como o ganhador é definido"}
+                </h3>
+                <div className="text-sm text-muted-foreground mt-2 space-y-2">
+                  {helpKey === "palpites" && (
+                    <p>Aqui você pode <strong>apagar</strong> palpites, <strong>editar</strong> as opções, <strong>gerar novos com IA</strong> a partir do título do desafio, ou <strong>criar novos manualmente</strong> clicando em "Novo palpite".</p>
+                  )}
+                  {helpKey === "ganhador" && (
+                    <>
+                      <p>Você pode definir o vencedor de duas formas:</p>
+                      <p><strong>1) Quem fizer mais pontos:</strong> são somados pontos dos palpites certos, pontos de amigos que se cadastraram e criaram uma campanha, pontos de missões e pontos de check-in.</p>
+                      <p><strong>2) Quem acertar todas:</strong> só leva o prêmio quem acertar 100% dos palpites do desafio.</p>
+                    </>
+                  )}
+                </div>
+                <button type="button" onClick={() => setHelpKey(null)} className="mt-4 h-10 px-5 rounded-full bg-gradient-brand text-primary-foreground font-bold text-sm shadow-glow">
+                  Entendi
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       {showClosedInfo && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" onClick={() => { setShowClosedInfo(false); setClosedInfoSeen(true); }} />
@@ -2025,16 +2037,17 @@ function MissionWizard({
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <span className="h-8 w-8 grid place-items-center rounded-md bg-primary/15 text-primary"><Instagram className="h-4 w-4" /></span>
-                <div className="font-semibold text-sm">Qual é o endereço do seu Instagram?</div>
+                <div className="font-semibold text-sm">Quais perfis do Instagram?</div>
               </div>
-              <input
+              <textarea
                 value={data.instagram}
                 onChange={(e) => setData((p) => ({ ...p, instagram: e.target.value }))}
-                placeholder="https://www.instagram.com/casadinapoli/"
-                className="input"
+                placeholder={"https://www.instagram.com/casadinapoli/\nhttps://www.instagram.com/outro-perfil/\nou separe com vírgula (,) ou ponto-e-vírgula (;)"}
+                rows={4}
+                className="input min-h-[100px] resize-y"
                 autoFocus
               />
-              <p className="text-[11px] text-muted-foreground">Cole o endereço completo do perfil (com https://).</p>
+              <p className="text-[11px] text-muted-foreground">Pode adicionar vários perfis — um por linha, ou separados por vírgula (,) ou ponto-e-vírgula (;).</p>
             </div>
           )}
 
@@ -2494,73 +2507,114 @@ async function renderCreative(
   return canvas.toDataURL("image/png");
 }
 
-// ----- Event Quick Picker (next 48h) -----
+// ----- Event Quick Picker (next 4h) -----
 function EventQuickPicker({ category, onPick }: { category: string; onPick: (m: typeof WORLD_CUP_MATCHES[number]) => void }) {
   const [mounted, setMounted] = useState(false);
+  const [mode, setMode] = useState<"none" | "soon" | "scratch">("none");
+  const [helpOpen, setHelpOpen] = useState(false);
   useEffect(() => { setMounted(true); }, []);
   if (!mounted) return null;
   const isFootball = /futebol|copa|esporte/i.test(category);
   const now = Date.now();
-  const horizon = now + 48 * 60 * 60 * 1000;
-  const in48h = WORLD_CUP_MATCHES
+  const horizon = now + 4 * 60 * 60 * 1000;
+  const in4h = WORLD_CUP_MATCHES
     .filter(m => {
       const t = new Date(m.kickoff).getTime();
       return t >= now && t <= horizon;
     })
     .sort((a, b) => new Date(a.kickoff).getTime() - new Date(b.kickoff).getTime());
-  const fallback = WORLD_CUP_MATCHES
-    .filter(m => new Date(m.kickoff).getTime() >= now)
-    .sort((a, b) => new Date(a.kickoff).getTime() - new Date(b.kickoff).getTime())
-    .slice(0, 6);
-  const list = in48h.length ? in48h : fallback;
-  const labelHeader = in48h.length ? "Eventos terminando em até 48h" : "Próximos eventos";
-
-  if (!isFootball || list.length === 0) {
-    return (
-      <div className="rounded-xl border border-dashed border-border bg-card/40 p-4">
-        <div className="flex items-center gap-2 mb-1">
-          <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-muted text-foreground text-[10px] font-black">02</span>
-          <span className="text-sm font-bold">Selecione um Evento</span>
-        </div>
-        <p className="text-xs text-muted-foreground">
-          Nenhum evento próximo para a categoria <b>{category}</b>. Você pode preencher o nome do desafio livremente acima.
-        </p>
-      </div>
-    );
-  }
 
   return (
-    <div className="rounded-xl border border-primary/20 bg-card p-4">
-      <div className="flex items-center justify-between flex-wrap gap-2 mb-3">
+    <div className="rounded-xl border border-primary/20 bg-card p-4 space-y-3">
+      <div className="flex items-center justify-between flex-wrap gap-2">
         <div className="flex items-center gap-2">
           <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground text-[10px] font-black">02</span>
-          <span className="text-sm font-bold">Selecione um Evento</span>
-          <span className="text-xs text-muted-foreground">({category})</span>
+          <span className="text-sm font-bold">Como você quer começar?</span>
         </div>
-        <span className="text-[11px] font-semibold uppercase tracking-wide text-primary">{labelHeader}</span>
+        <button
+          type="button"
+          onClick={() => setHelpOpen(true)}
+          className="h-8 w-8 rounded-lg border border-border grid place-items-center text-muted-foreground hover:text-primary hover:border-primary/40"
+          aria-label="Ajuda"
+        >
+          <AlertCircle className="h-4 w-4" />
+        </button>
       </div>
+
       <div className="grid sm:grid-cols-2 gap-2">
-        {list.map((m) => {
-          const d = new Date(m.kickoff);
-          const pad = (n: number) => String(n).padStart(2, "0");
-          const when = `${pad(d.getDate())}/${pad(d.getMonth() + 1)} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
-          return (
-            <button
-              key={m.id}
-              type="button"
-              onClick={() => onPick(m)}
-              className="group flex items-center justify-between gap-3 rounded-lg border border-border bg-background hover:border-primary hover:bg-primary/5 px-3 py-2 text-left transition"
-            >
-              <div className="flex items-center gap-2 min-w-0">
-                <img src={`https://flagcdn.com/24x18/${m.homeCode}.png`} alt="" className="h-3 w-4 object-cover rounded-sm" />
-                <span className="text-sm font-bold truncate">{m.home} x {m.away}</span>
-                <img src={`https://flagcdn.com/24x18/${m.awayCode}.png`} alt="" className="h-3 w-4 object-cover rounded-sm" />
-              </div>
-              <span className="text-[11px] font-bold text-muted-foreground group-hover:text-primary whitespace-nowrap">{when}</span>
-            </button>
-          );
-        })}
+        <button
+          type="button"
+          onClick={() => setMode(mode === "soon" ? "none" : "soon")}
+          className={`flex items-center gap-3 rounded-lg border-2 px-4 py-3 text-left transition ${mode === "soon" ? "border-primary bg-primary/10" : "border-border bg-background hover:border-primary/50"}`}
+        >
+          <CalIcon className="h-5 w-5 text-primary shrink-0" />
+          <div className="min-w-0">
+            <div className="text-sm font-bold">Eventos terminando em até 4 horas</div>
+            <div className="text-[11px] text-muted-foreground">{isFootball && in4h.length > 0 ? `${in4h.length} jogo(s) próximo(s)` : "Nenhum agora"}</div>
+          </div>
+        </button>
+        <button
+          type="button"
+          onClick={() => setMode("scratch")}
+          className={`flex items-center gap-3 rounded-lg border-2 px-4 py-3 text-left transition ${mode === "scratch" ? "border-primary bg-primary/10" : "border-border bg-background hover:border-primary/50"}`}
+        >
+          <PencilLine className="h-5 w-5 text-primary shrink-0" />
+          <div className="min-w-0">
+            <div className="text-sm font-bold">Criar do zero</div>
+            <div className="text-[11px] text-muted-foreground">Preencha tudo manualmente abaixo</div>
+          </div>
+        </button>
       </div>
+
+      {mode === "soon" && isFootball && in4h.length > 0 && (
+        <div className="grid sm:grid-cols-2 gap-2 pt-1">
+          {in4h.map((m) => {
+            const d = new Date(m.kickoff);
+            const pad = (n: number) => String(n).padStart(2, "0");
+            const when = `${pad(d.getDate())}/${pad(d.getMonth() + 1)} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+            return (
+              <button
+                key={m.id}
+                type="button"
+                onClick={() => onPick(m)}
+                className="group flex items-center justify-between gap-3 rounded-lg border border-border bg-background hover:border-primary hover:bg-primary/5 px-3 py-2 text-left transition"
+              >
+                <div className="flex items-center gap-2 min-w-0">
+                  <img src={`https://flagcdn.com/24x18/${m.homeCode}.png`} alt="" className="h-3 w-4 object-cover rounded-sm" />
+                  <span className="text-sm font-bold truncate">{m.home} x {m.away}</span>
+                  <img src={`https://flagcdn.com/24x18/${m.awayCode}.png`} alt="" className="h-3 w-4 object-cover rounded-sm" />
+                </div>
+                <span className="text-[11px] font-bold text-muted-foreground group-hover:text-primary whitespace-nowrap">{when}</span>
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {mode === "soon" && (!isFootball || in4h.length === 0) && (
+        <p className="text-xs text-muted-foreground">Nenhum evento terminando nas próximas 4 horas para a categoria <b>{category}</b>.</p>
+      )}
+
+      {helpOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" onClick={() => setHelpOpen(false)} />
+          <div className="relative max-w-md glass-card rounded-2xl p-6 border border-primary/40">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="h-6 w-6 text-primary shrink-0 mt-0.5" />
+              <div>
+                <h3 className="font-display font-black text-lg">Como começar seu desafio</h3>
+                <p className="text-sm text-muted-foreground mt-2">
+                  Caso você ainda não tenha começado a criar seu desafio, aqui você pode <strong>escolher um evento</strong> que termine nas próximas 4 horas (palpites são gerados automaticamente), ou <strong>criar do zero</strong> e preencher tudo manualmente.
+                </p>
+                <button type="button" onClick={() => setHelpOpen(false)} className="mt-4 h-10 px-5 rounded-full bg-gradient-brand text-primary-foreground font-bold text-sm shadow-glow">
+                  Entendi
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+
