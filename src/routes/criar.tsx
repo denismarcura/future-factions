@@ -2097,6 +2097,7 @@ function MissionWizard({
                   </div>
                 );
               })()}
+            </div>
           )}
 
           {step === 1 && (
