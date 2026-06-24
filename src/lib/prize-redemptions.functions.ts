@@ -47,10 +47,12 @@ export const requestRedemption = createServerFn({ method: "POST" })
     if (!p.active) throw new Error("Prêmio indisponível");
     if (p.stock <= 0) throw new Error("Sem estoque");
 
+    const req = getRequest();
+    const h = req.headers;
     const ip =
-      getRequestHeader("cf-connecting-ip") ||
-      getRequestHeader("x-forwarded-for")?.split(",")[0]?.trim() ||
-      getRequestHeader("x-real-ip") ||
+      h.get("cf-connecting-ip") ||
+      h.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+      h.get("x-real-ip") ||
       null;
 
     const { data: row, error } = await supabase
