@@ -261,9 +261,11 @@ function DesafiosPage() {
                     ? dt.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", timeZone: "America/Sao_Paulo" })
                     : "--:--";
                   return (
-                    <article
+                    <Link
                       key={`upcoming-${m.id}`}
-                      className="rounded-2xl border border-border/60 bg-card p-4 hover:border-primary/50 hover:shadow-glow transition"
+                      to="/previsao/$id"
+                      params={{ id: m.id }}
+                      className="rounded-2xl border border-border/60 bg-card p-4 hover:border-primary/50 hover:shadow-glow transition block"
                     >
                       <div className="flex items-center justify-between text-[11px] text-muted-foreground mb-2">
                         <span className="inline-flex items-center gap-1 font-bold text-primary">
@@ -282,8 +284,9 @@ function DesafiosPage() {
                           <img src={flagUrl(m.awayCode)} alt="" className="h-5 w-7 rounded-sm border border-border/60 object-cover" />
                         </div>
                       </div>
-                    </article>
+                    </Link>
                   );
+
                 })}
               </div>
             )}
