@@ -214,28 +214,6 @@ function HowItWorks() {
         </p>
       </section>
 
-      {/* Prêmio mérito iPhone 17 */}
-      <section className="glass-card rounded-2xl p-6 sm:p-8 mb-12 bg-gradient-to-br from-primary/15 via-accent/10 to-fuchsia-500/15 border border-primary/30">
-        <div className="flex items-start gap-4">
-          <div className="h-12 w-12 rounded-xl bg-primary/20 border border-primary/40 flex items-center justify-center shrink-0">
-            <Crown className="h-6 w-6 text-primary" />
-          </div>
-          <div className="flex-1">
-            <span className="inline-block text-[10px] uppercase tracking-widest text-accent font-bold mb-1">
-              Ranking por mérito
-            </span>
-            <h2 className="font-display text-2xl sm:text-3xl font-black leading-tight">
-              Prêmio: <span className="text-gradient-brand">iPhone 17</span>
-            </h2>
-            <p className="text-muted-foreground text-sm mt-2 max-w-3xl leading-relaxed">
-              Teremos um ranking que avalia os usuários que mais participam, acertam e convidam amigos — com premiação
-              alta de Tokens para quem indicar o Desafio dos Palpites para empresas, restaurantes etc. O prêmio é um{" "}
-              <strong className="text-foreground">iPhone 17</strong>, e{" "}
-              <strong className="text-foreground">não é sorteio — é mérito</strong>. A data será divulgada 1 mês antes.
-            </p>
-          </div>
-        </div>
-      </section>
 
       {/* Exemplo de Desafio Aberto */}
       <section className="glass-card rounded-2xl p-6 sm:p-8 mb-12">
