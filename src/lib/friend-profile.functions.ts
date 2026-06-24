@@ -120,7 +120,33 @@ export const getChallengeInvite = createServerFn({ method: "GET" })
       .select("id, title, image_url, category, prize_pool, closes_at, owner_id")
       .eq("id", data.id)
       .maybeSingle();
-    if (!ch) return null;
+    if (!ch) {
+      const { data: corp } = await sb
+        .from("corporate_challenges")
+        .select("id, title, banner_url, logo_url, category, prize_name, ends_at, owner_id, company_name")
+        .eq("id", data.id)
+        .maybeSingle();
+      if (!corp) return null;
+      let ownerName: string | null = (corp as any).company_name ?? null;
+      if ((corp as any).owner_id) {
+        const { data: p } = await sb
+          .from("profiles")
+          .select("full_name")
+          .eq("id", (corp as any).owner_id)
+          .maybeSingle();
+        ownerName = ownerName ?? ((p as any)?.full_name ?? null);
+      }
+      return {
+        id: (corp as any).id,
+        title: (corp as any).title,
+        image_url: (corp as any).banner_url ?? (corp as any).logo_url,
+        category: (corp as any).category,
+        prize_pool: (corp as any).prize_name,
+        closes_at: (corp as any).ends_at,
+        owner_id: (corp as any).owner_id,
+        owner_name: ownerName,
+      };
+    }
     let ownerName: string | null = null;
     if (ch.owner_id) {
       const { data: p } = await sb

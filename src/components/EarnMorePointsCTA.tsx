@@ -16,8 +16,8 @@ export function EarnMorePointsCTA({ challenge }: { challenge?: ChallengeCtx } = 
 
   const origin = typeof window !== "undefined" ? window.location.origin : "";
   const ref8 = userId ? userId.slice(0, 8) : "";
-  const inviteUrl = challenge && ref8
-    ? `${origin}/amigo/${ref8}?d=${challenge.id}`
+  const inviteUrl = challenge
+    ? `${origin}/previsao/${challenge.id}${ref8 ? `?ref=${ref8}` : ""}`
     : userId
       ? `${origin}/auth?ref=${userId}`
       : `${origin}/auth`;

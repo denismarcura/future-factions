@@ -119,6 +119,7 @@ function buildCorporateMissions(data: MissionData, sponsorName: string): Corpora
 }
 
 function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bare?: boolean } = {}) {
+  const { user } = useAuth();
   const [isOpen, setIsOpen] = useState(true);
   const [name, setName] = useState("");
   const [category, setCategory] = useState<string>(CATEGORIES[0]);
@@ -524,7 +525,7 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
               question: s.question,
               options: s.options.filter(Boolean),
             })),
-            inviteLink: origin ? `${origin}/previsao/${id}` : undefined,
+            inviteLink: origin ? `${origin}/previsao/${id}${(user?.id ?? "").slice(0, 8) ? `?ref=${(user?.id ?? "").slice(0, 8)}` : ""}` : undefined,
           },
         });
       } catch {
@@ -2182,12 +2183,10 @@ function PublishedSuccess({ name, id, onCreateAnother }: { name: string; id: str
   const { user } = useAuth();
   const [copied, setCopied] = useState(false);
   const [textCopied, setTextCopied] = useState(false);
-  const PUBLIC_DOMAIN = "https://www.desafiodospalpites.com.br";
+  const origin = typeof window !== "undefined" ? window.location.origin : "https://www.desafiodospalpites.com.br";
   const refCode = (user?.id ?? "").slice(0, 8);
-  // Link de convite: leva para a área pública do amigo (com destaque do desafio criado).
-  const link = refCode
-    ? `${PUBLIC_DOMAIN}/amigo/${refCode}?d=${id}`
-    : `${PUBLIC_DOMAIN}/previsao/${id}`;
+  // Link de convite: abre diretamente o desafio publicado, inclusive no preview.
+  const link = `${origin}/previsao/${id}${refCode ? `?ref=${refCode}` : ""}`;
 
   const inviteSubject = `🎯 Participe do meu desafio "${name}" — Desafio dos Palpites (100% GRATUITO)`;
   const inviteBody = `Olá!
