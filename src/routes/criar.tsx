@@ -1168,6 +1168,11 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
             step={3}
             title="Ganhador"
             description="Escolha como será definido o vencedor do desafio. Obrigatório selecionar uma opção."
+            action={
+              <button type="button" onClick={() => setHelpKey("ganhador")} className="h-9 w-9 rounded-lg border border-border grid place-items-center text-muted-foreground hover:text-primary hover:border-primary/40" aria-label="Ajuda">
+                <AlertCircle className="h-4 w-4" />
+              </button>
+            }
           >
             <div className="space-y-3">
               <label className={`flex items-start gap-3 rounded-xl border p-4 cursor-pointer transition ${winnerType === "points" ? "border-primary bg-primary/10" : "border-border hover:border-primary/50"}`}>
