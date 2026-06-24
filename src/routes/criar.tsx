@@ -2079,8 +2079,24 @@ function MissionWizard({
                 className="input min-h-[100px] resize-y"
                 autoFocus
               />
-              <p className="text-[11px] text-muted-foreground">Pode adicionar vários perfis — um por linha, ou separados por vírgula (,) ou ponto-e-vírgula (;).</p>
-            </div>
+              <p className="text-[11px] text-muted-foreground">Pode adicionar vários perfis — um por linha, ou separados por vírgula (,), ponto-e-vírgula (;) ou espaço. Aceita @usuario ou URL completa. Duplicados são removidos automaticamente.</p>
+              {data.instagram.trim() && (() => {
+                const { valid, invalid } = parseInstagramHandles(data.instagram);
+                return (
+                  <div className="space-y-1">
+                    {valid.length > 0 && (
+                      <div className="flex flex-wrap gap-1">
+                        {valid.map((v) => (
+                          <span key={v.handle} className="inline-flex items-center gap-1 rounded-full bg-primary/10 text-primary px-2 py-0.5 text-[11px]">@{v.handle}</span>
+                        ))}
+                      </div>
+                    )}
+                    {invalid.length > 0 && (
+                      <div className="text-[11px] text-destructive">Inválido(s): {invalid.join(", ")}</div>
+                    )}
+                  </div>
+                );
+              })()}
           )}
 
           {step === 1 && (
