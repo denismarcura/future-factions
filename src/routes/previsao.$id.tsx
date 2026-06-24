@@ -612,7 +612,7 @@ function PredictionInner({ p }: { p: Prediction }) {
         </article>
 
         {/* CTA padrão — ganhe mais pontos para dar palpites */}
-        <EarnMorePointsCTA />
+        <EarnMorePointsCTA challenge={{ id: p.id, title: p.title, image: p.imageUrl }} />
 
         {isClosed && <NextChallengeBanner />}
 
