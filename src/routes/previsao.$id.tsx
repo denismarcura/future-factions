@@ -330,7 +330,7 @@ function PredictionInner({ p }: { p: Prediction }) {
 
   async function handleMissionClick() {
     if (!user) {
-      toast.error("Faça login para ganhar palpites extras.");
+      goToSignup();
       return;
     }
     const mission = missionQueue[missionStep];
@@ -407,7 +407,7 @@ function PredictionInner({ p }: { p: Prediction }) {
             }
             if (confirmed) return;
             const fee = p.entryFee ?? 0;
-            if (!user) { toast.error("Faça login para participar."); return; }
+            if (!user) { goToSignup(); return; }
             if (balance !== null && balance < fee) {
               toast.error(`Saldo insuficiente. Você tem ${formatTokens(balance)} TKN e precisa de ${fee}.`);
               return;
@@ -420,7 +420,7 @@ function PredictionInner({ p }: { p: Prediction }) {
             });
             toast.success(`🎯 Participação confirmada! ${fee} TKN debitados. Missões bônus liberadas!`);
           } else {
-            if (!user) { toast.error("Faça login para apostar."); return; }
+            if (!user) { goToSignup(); return; }
             if (balance !== null && balance < amount) {
               toast.error(`Saldo insuficiente. Você tem ${formatTokens(balance)} TKN.`); return;
             }
@@ -444,7 +444,7 @@ function PredictionInner({ p }: { p: Prediction }) {
               return;
             }
           }
-          if (!user) { toast.error("Faça login para participar."); return; }
+          if (!user) { goToSignup(); return; }
           if (regAccepted) { doConfirm(); return; }
           // Open regulamento for first-time acceptance
           pendingConfirmRef.current = doConfirm;

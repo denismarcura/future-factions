@@ -119,6 +119,7 @@ function buildCorporateMissions(data: MissionData, sponsorName: string): Corpora
 }
 
 function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bare?: boolean } = {}) {
+  const { user } = useAuth();
   const [isOpen, setIsOpen] = useState(true);
   const [name, setName] = useState("");
   const [category, setCategory] = useState<string>(CATEGORIES[0]);
