@@ -104,8 +104,8 @@ function AdminPremios() {
               <div className="p-3 space-y-1">
                 <div className="text-sm font-bold truncate">{p.name}</div>
                 <div className="text-[11px] text-muted-foreground flex items-center justify-between">
-                  <span>Estoque: {p.stock}</span>
-                  {p.estimated_value != null && <span>R$ {Number(p.estimated_value).toFixed(2)}</span>}
+                  <span>{p.cost_tokens ?? 0} tokens</span>
+                  <span>Est: {p.stock}</span>
                 </div>
                 <div className="flex items-center gap-2 pt-2">
                   <button onClick={() => setEditing(p)} className="flex-1 h-8 rounded-lg glass-card border border-border/60 text-xs font-semibold hover:border-primary/60 inline-flex items-center justify-center gap-1">
