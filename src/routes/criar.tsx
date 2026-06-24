@@ -77,7 +77,6 @@ const BRAZIL_BONUS = 10000;
 function uid() { return Math.random().toString(36).slice(2, 9); }
 
 import { parseInstagramHandles } from "@/lib/instagram-handles";
-export { parseInstagramHandles };
 
 function buildCorporateMissions(data: MissionData, sponsorName: string): CorporateMission[] {
   const sponsor = sponsorName.trim() || "Empresa";
