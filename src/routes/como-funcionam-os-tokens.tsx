@@ -363,7 +363,7 @@ function TokensPage() {
             ))}
           </div>
 
-          <div className="mt-5 p-4 rounded-xl bg-gradient-gold/10 border-2 border-gold/40 flex items-center justify-between">
+          <div className="mt-5 p-4 rounded-xl bg-gold/10 border-2 border-gold/40 flex items-center justify-between">
             <span className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
               Total acumulado
             </span>
