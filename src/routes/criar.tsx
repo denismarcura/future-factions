@@ -2070,7 +2070,13 @@ function MissionWizard({
                       </div>
                     )}
                     {invalid.length > 0 && (
-                      <div className="text-[11px] text-destructive">Inválido(s): {invalid.join(", ")}</div>
+                      <ul className="text-[11px] text-destructive space-y-0.5 mt-1">
+                        {invalid.map((item, i) => (
+                          <li key={`${item.token}-${i}`}>
+                            <span className="font-mono">{item.token}</span> — {item.message}
+                          </li>
+                        ))}
+                      </ul>
                     )}
                   </div>
                 );
