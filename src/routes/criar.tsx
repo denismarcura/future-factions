@@ -1015,17 +1015,22 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
 
           <Section
             step={2}
-            title={`Sub-categorias de palpites (${subs.length})`}
+            title={`Seus Palpites (${subs.length})`}
             description={`Crie quantas perguntas quiser, cada uma com até ${MAX_OPTIONS} opções. Cada acerto vale ${REWARD_PER_HIT} tokens.`}
 
             action={
-              <button
-                type="button"
-                onClick={addSub}
-                className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg bg-primary/15 text-primary border border-primary/30 text-sm font-semibold hover:bg-primary/20"
-              >
-                <Plus className="h-4 w-4" /> Nova sub-categoria
-              </button>
+              <div className="flex items-center gap-2">
+                <button type="button" onClick={() => setHelpKey("palpites")} className="h-9 w-9 rounded-lg border border-border grid place-items-center text-muted-foreground hover:text-primary hover:border-primary/40" aria-label="Ajuda">
+                  <AlertCircle className="h-4 w-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={addSub}
+                  className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg bg-primary/15 text-primary border border-primary/30 text-sm font-semibold hover:bg-primary/20"
+                >
+                  <Plus className="h-4 w-4" /> Novo palpite
+                </button>
+              </div>
             }
           >
             {/* Gerar palpites com IA — inline */}
