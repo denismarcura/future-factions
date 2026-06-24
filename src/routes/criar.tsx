@@ -264,8 +264,8 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
   const [prizeSlots, setPrizeSlots] = useState<PrizeSlot[]>([]);
   const [pickedPrizes, setPickedPrizes] = useState<AdminPrize[]>([]);
   // Acceptance
-  const [acceptDisclaimer, setAcceptDisclaimer] = useState(false);
-  const [authorizeMarketing, setAuthorizeMarketing] = useState(false);
+  const [acceptDisclaimer, setAcceptDisclaimer] = useState(true);
+  const [authorizeMarketing, setAuthorizeMarketing] = useState(true);
   const [closedInfoSeen, setClosedInfoSeen] = useState(false);
   const [showClosedInfo, setShowClosedInfo] = useState(false);
 
