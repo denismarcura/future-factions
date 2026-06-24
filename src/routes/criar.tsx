@@ -1206,52 +1206,31 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
           <Section
             step={4}
             title="Prêmio"
-            description={`Automaticamente daremos ${AUTO_PRIZE.toLocaleString("pt-BR")} tokens para quem fizer a maior pontuação. Você pode somar seus próprios tokens, escolher um prêmio da nossa loja ou cadastrar um prêmio físico próprio.`}
+            description={`Automaticamente daremos ${AUTO_PRIZE.toLocaleString("pt-BR")} tokens para quem fizer a maior pontuação. Cadastre abaixo o prêmio físico do seu desafio.`}
+            action={
+              <Link to="/admin/regras-ia" className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg bg-primary/15 text-primary border border-primary/30 text-xs font-bold hover:bg-primary/20">
+                <Sparkles className="h-3.5 w-3.5" /> Treinar IA — Arte 1080×1080
+              </Link>
+            }
           >
+            <Field label="Nome do prêmio">
+              <input value={prizeName} onChange={(e) => setPrizeName(e.target.value)} placeholder="Ex.: Caixa de cerveja Heineken 350 ml" className="input" />
+            </Field>
 
-            <div className="text-xs uppercase tracking-wider font-bold text-muted-foreground mb-2">Cadastre seu próprio prêmio físico</div>
-
-
-            {/* Prêmios cadastrados (admin) — múltiplos sorteios */}
-            <div className="rounded-xl border border-gold/40 bg-gold/5 p-4 mb-4">
-              <div className="flex items-start gap-3">
-                <Gift className="h-5 w-5 text-gold mt-0.5 shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <div className="font-bold text-sm">Sortear vários prêmios cadastrados</div>
-                  <div className="text-xs text-muted-foreground mb-2">
-                    Escolha de 1 a 10 prêmios já cadastrados pelo administrador e defina qual prêmio vai para cada posição (1º, 2º, 3º...).
-                  </div>
-                  {pickedPrizes.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mb-2">
-                      {prizeSlots.map((s) => {
-                        const p = pickedPrizes.find((x) => x.id === s.prizeId);
-                        return (
-                          <span key={s.position} className="inline-flex items-center gap-1.5 pl-2 pr-3 py-1 rounded-full bg-background/80 border border-gold/40 text-xs">
-                            <strong>{s.position}º</strong> {p?.name ?? "vazio"}
-                          </span>
-                        );
-                      })}
-                    </div>
-                  )}
-                  <button
-                    type="button"
-                    onClick={() => setPrizesPickerOpen(true)}
-                    className="inline-flex items-center gap-2 h-10 px-4 rounded-lg bg-gold/15 text-gold border border-gold/40 text-sm font-bold hover:bg-gold/25"
-                  >
-                    <Gift className="h-4 w-4" /> {pickedPrizes.length > 0 ? "Editar prêmios" : "Selecionar prêmios"}
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <Field label="Prêmio do desafio (opcional)">
-              <input value={prizeName} onChange={(e) => setPrizeName(e.target.value)} placeholder="Ex.: 1 Camiseta do Brasil, Caixa de Cerveja…" className="input" />
+            <Field label="Detalhes do prêmio">
+              <textarea
+                rows={2}
+                value={aiPrompt}
+                onChange={(e) => setAiPrompt(e.target.value)}
+                placeholder="Descreva o prêmio: ex. caixa com 12 latas de cerveja Heineken 350ml geladas sobre balde de gelo"
+                className="input resize-none"
+              />
             </Field>
 
             <div className="grid sm:grid-cols-2 gap-4">
               <div>
-                <div className="text-xs uppercase tracking-wider font-bold text-muted-foreground mb-1.5">Imagem do prêmio (proporção 4:5)</div>
-                <div className="rounded-xl border border-dashed border-border/70 bg-background/40 p-4 aspect-[4/5] grid place-items-center overflow-hidden">
+                <div className="text-xs uppercase tracking-wider font-bold text-muted-foreground mb-1.5">Imagem do prêmio (1080×1080)</div>
+                <div className="rounded-xl border border-dashed border-border/70 bg-background/40 p-4 aspect-square grid place-items-center overflow-hidden">
                   {prizeImg ? (
                     <img src={prizeImg} alt="Prêmio" className="w-full h-full object-cover rounded-lg" />
                   ) : (
@@ -1263,27 +1242,9 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
                 </div>
               </div>
 
-
               <div className="space-y-3">
-                <Field label="Gerar com IA">
-                  <textarea
-                    rows={3}
-                    value={aiPrompt}
-                    onChange={(e) => setAiPrompt(e.target.value)}
-                    placeholder="Descreva o prêmio: ex. camiseta amarela da seleção brasileira sobre fundo verde"
-                    className="input resize-none"
-                  />
-                </Field>
-                <button
-                  type="button"
-                  onClick={generatePrize}
-                  disabled={generating}
-                  className="w-full h-11 rounded-lg bg-gradient-brand text-primary-foreground font-display font-bold inline-flex items-center justify-center gap-2 shadow-glow disabled:opacity-60"
-                >
-                  <Wand2 className="h-4 w-4" /> {generating ? "Gerando..." : "Gerar imagem 500x500"}
-                </button>
                 <label className="w-full h-11 rounded-lg border border-border inline-flex items-center justify-center gap-2 text-sm font-semibold cursor-pointer hover:border-primary hover:text-primary">
-                  <Upload className="h-4 w-4" /> Upload (500x500)
+                  <Upload className="h-4 w-4" /> Upload do prêmio (1080×1080)
                   <input
                     type="file"
                     accept="image/*"
@@ -1291,10 +1252,19 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
                     onChange={(e) => e.target.files?.[0] && handleUpload(e.target.files[0])}
                   />
                 </label>
-                <p className="text-xs text-muted-foreground">Aceita qualquer tamanho — a imagem será redimensionada automaticamente para 500×500.</p>
+                <button
+                  type="button"
+                  onClick={generatePrize}
+                  disabled={generating}
+                  className="w-full h-11 rounded-lg bg-gradient-brand text-primary-foreground font-display font-bold inline-flex items-center justify-center gap-2 shadow-glow disabled:opacity-60"
+                >
+                  <Wand2 className="h-4 w-4" /> {generating ? "Gerando..." : "Gerar arte do prêmio"}
+                </button>
+                <p className="text-xs text-muted-foreground">Aceita qualquer tamanho — a imagem será redimensionada automaticamente.</p>
               </div>
             </div>
           </Section>
+
 
           {/* Banner personalizado (para todos) */}
           <Section
