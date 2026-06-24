@@ -58,6 +58,7 @@ const ADMIN_GROUPS: NavGroup[] = [
       { to: "/admin/bonus-login", label: "Bônus de Login", icon: Gift },
       { to: "/admin/raspadinha", label: "Raspadinha", icon: Sparkle },
       { to: "/admin/loja", label: "Loja de Prêmios", icon: Store },
+      { to: "/admin/trocas", label: "Trocas (Resgates)", icon: ArrowLeftRight },
       { to: "/admin/ranking", label: "Ranking", icon: Trophy },
     ],
   },
