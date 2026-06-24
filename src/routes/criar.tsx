@@ -426,9 +426,10 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
         errs.push("Cadastre o endereço do Instagram nas missões (obrigatório para empresas).");
       } else {
         const { valid, invalid } = parseInstagramHandles(missionData.instagram);
-        if (invalid.length) errs.push(`Perfil(s) de Instagram inválido(s): ${invalid.join(", ")}`);
+        for (const item of invalid) {
+          errs.push(`Instagram "${item.token}": ${item.message}.`);
+        }
         if (!valid.length) errs.push("Informe ao menos um perfil de Instagram válido (ex.: @seuperfil).");
-      }
     }
     if (!winnerType) errs.push("Escolha o critério de ganhador (maior pontuação ou acertar todas).");
     if (reachMode === "public" && !coverAllBrazil && selectedCities.length === 0) {
