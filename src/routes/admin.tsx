@@ -6,7 +6,7 @@ import {
   Users, KeyRound, Mail, LayoutDashboard, Shield, ListChecks, Sparkles, Target,
   Loader2, Lock, FolderTree, Image as ImageIcon, Building2, UserPlus, Gift,
   Sparkle, Store, Trophy, Bell, Coins, FileBarChart, ShieldAlert, ChevronLeft,
-  ChevronRight, Trophy as TrophyIcon, Menu, Instagram, Newspaper,
+  ChevronRight, Trophy as TrophyIcon, Menu, Instagram, Newspaper, ArrowLeftRight,
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { checkIsAdmin, claimAdminIfNone } from "@/lib/admin.functions";
