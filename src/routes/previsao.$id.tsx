@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import {
@@ -241,6 +241,7 @@ function PredictionPage() {
 
 function PredictionInner({ p }: { p: Prediction }) {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const totalPool = p.options.reduce((s: number, o) => s + o.pool, 0);
   const [selected, setSelected] = useState(p.options[0].id);
   const [amount, setAmount] = useState(p.entryFee ?? p.minTokens);
@@ -374,6 +375,11 @@ function PredictionInner({ p }: { p: Prediction }) {
 
   const deadlineMs = mounted ? new Date(p.closesAt).getTime() - Date.now() : 1;
   const isClosed = deadlineMs <= 0;
+  const inviteRef = mounted ? new URLSearchParams(window.location.search).get("ref") ?? undefined : undefined;
+  const goToSignup = () => {
+    toast.error("Faça login ou cadastre-se para participar deste desafio.");
+    navigate({ to: "/auth", search: { d: p.id, ...(inviteRef ? { ref: inviteRef } : {}) } as any });
+  };
 
 
   return (
