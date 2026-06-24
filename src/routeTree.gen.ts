@@ -23,6 +23,7 @@ import { Route as EmpresasRouteImport } from './routes/empresas'
 import { Route as DesafiosEmpresasRouteImport } from './routes/desafios-empresas'
 import { Route as DesafiosRouteImport } from './routes/desafios'
 import { Route as CriarRouteImport } from './routes/criar'
+import { Route as ComoFuncionamOsTokensRouteImport } from './routes/como-funcionam-os-tokens'
 import { Route as ComoFuncionaRouteImport } from './routes/como-funciona'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminRouteImport } from './routes/admin'
@@ -131,6 +132,11 @@ const DesafiosRoute = DesafiosRouteImport.update({
 const CriarRoute = CriarRouteImport.update({
   id: '/criar',
   path: '/criar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ComoFuncionamOsTokensRoute = ComoFuncionamOsTokensRouteImport.update({
+  id: '/como-funcionam-os-tokens',
+  path: '/como-funcionam-os-tokens',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ComoFuncionaRoute = ComoFuncionaRouteImport.update({
@@ -336,6 +342,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRoute
   '/como-funciona': typeof ComoFuncionaRoute
+  '/como-funcionam-os-tokens': typeof ComoFuncionamOsTokensRoute
   '/criar': typeof CriarRoute
   '/desafios': typeof DesafiosRoute
   '/desafios-empresas': typeof DesafiosEmpresasRoute
@@ -389,6 +396,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/como-funciona': typeof ComoFuncionaRoute
+  '/como-funcionam-os-tokens': typeof ComoFuncionamOsTokensRoute
   '/criar': typeof CriarRoute
   '/desafios': typeof DesafiosRoute
   '/desafios-empresas': typeof DesafiosEmpresasRoute
@@ -445,6 +453,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRoute
   '/como-funciona': typeof ComoFuncionaRoute
+  '/como-funcionam-os-tokens': typeof ComoFuncionamOsTokensRoute
   '/criar': typeof CriarRoute
   '/desafios': typeof DesafiosRoute
   '/desafios-empresas': typeof DesafiosEmpresasRoute
@@ -501,6 +510,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/auth'
     | '/como-funciona'
+    | '/como-funcionam-os-tokens'
     | '/criar'
     | '/desafios'
     | '/desafios-empresas'
@@ -554,6 +564,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/como-funciona'
+    | '/como-funcionam-os-tokens'
     | '/criar'
     | '/desafios'
     | '/desafios-empresas'
@@ -609,6 +620,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/auth'
     | '/como-funciona'
+    | '/como-funcionam-os-tokens'
     | '/criar'
     | '/desafios'
     | '/desafios-empresas'
@@ -665,6 +677,7 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRouteWithChildren
   AuthRoute: typeof AuthRoute
   ComoFuncionaRoute: typeof ComoFuncionaRoute
+  ComoFuncionamOsTokensRoute: typeof ComoFuncionamOsTokensRoute
   CriarRoute: typeof CriarRoute
   DesafiosRoute: typeof DesafiosRoute
   DesafiosEmpresasRoute: typeof DesafiosEmpresasRoute
@@ -785,6 +798,13 @@ declare module '@tanstack/react-router' {
       path: '/criar'
       fullPath: '/criar'
       preLoaderRoute: typeof CriarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/como-funcionam-os-tokens': {
+      id: '/como-funcionam-os-tokens'
+      path: '/como-funcionam-os-tokens'
+      fullPath: '/como-funcionam-os-tokens'
+      preLoaderRoute: typeof ComoFuncionamOsTokensRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/como-funciona': {
@@ -1161,6 +1181,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRouteWithChildren,
   AuthRoute: AuthRoute,
   ComoFuncionaRoute: ComoFuncionaRoute,
+  ComoFuncionamOsTokensRoute: ComoFuncionamOsTokensRoute,
   CriarRoute: CriarRoute,
   DesafiosRoute: DesafiosRoute,
   DesafiosEmpresasRoute: DesafiosEmpresasRoute,

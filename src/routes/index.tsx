@@ -141,6 +141,16 @@ function Feed() {
             </Link>
           </div>
 
+          <div className="mt-4">
+            <Link
+              to="/como-funcionam-os-tokens"
+              className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold text-gold hover:text-gold/80 underline-offset-4 hover:underline transition"
+            >
+              <Coins className="h-4 w-4" /> Entenda como funcionam os Tokens
+            </Link>
+          </div>
+
+
           {/* Stats */}
           <div className="mt-5 sm:mt-8 grid grid-cols-3 gap-2 sm:gap-3 max-w-md mx-auto">
             {[

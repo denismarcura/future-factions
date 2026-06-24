@@ -26,6 +26,8 @@ const COLS: { title: string; links: { label: string; to: string }[] }[] = [
     title: "Ajuda",
     links: [
       { label: "Como Funciona", to: "/como-funciona" },
+      { label: "Tokens e Recompensas", to: "/como-funcionam-os-tokens" },
+
       { label: "FAQ", to: "/faq" },
       { label: "Termos de Uso", to: "/termos" },
     ],

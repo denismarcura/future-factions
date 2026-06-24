@@ -39,6 +39,8 @@ const ADMIN_EMAILS = ["denismarcura@gmail.com", "antoinio.salvador@gmail.com"];
 const NAV = [
   { to: "/", label: "Home", icon: Home },
   { to: "/como-funciona", label: "Como Funciona", icon: BookOpen },
+  { to: "/como-funcionam-os-tokens", label: "Como funcionam os Tokens", icon: Coins },
+
   { to: "/desafios", label: "Desafios", icon: ListChecks },
   { to: "/criar", label: "Criar Desafio", icon: Plus },
   { to: "/palpite-ia", label: "Palpite da IA", icon: Brain },

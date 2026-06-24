@@ -281,6 +281,23 @@
   animation: float-y 4s ease-in-out infinite;
 }
 
+@utility animate-float {
+  animation: float-y 5s ease-in-out infinite;
+}
+
+@utility animate-float-slow {
+  animation: float-y 7s ease-in-out infinite;
+}
+
+@utility animate-float-slower {
+  animation: float-y 9s ease-in-out infinite;
+}
+
+@utility animate-pulse-slow {
+  animation: neon-pulse 4s ease-in-out infinite;
+}
+
+
 @utility shine-on-hover {
   position: relative;
   overflow: hidden;
