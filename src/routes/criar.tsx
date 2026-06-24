@@ -79,18 +79,18 @@ function uid() { return Math.random().toString(36).slice(2, 9); }
 function buildCorporateMissions(data: MissionData, sponsorName: string): CorporateMission[] {
   const sponsor = sponsorName.trim() || "Empresa";
   const missions: CorporateMission[] = [];
-  const instagram = data.instagram.trim();
-  if (instagram) {
+  const instagramHandles = data.instagram.split(/[\n,;]+/).map(s => s.trim()).filter(Boolean);
+  instagramHandles.forEach((link, index) => {
     missions.push({
       id: uid(),
       sponsorName: sponsor,
       platform: "instagram",
       actionType: "follow",
-      title: `Seguir ${sponsor}`,
-      link: instagram,
+      title: instagramHandles.length > 1 ? `Seguir perfil ${index + 1} de ${sponsor}` : `Seguir ${sponsor}`,
+      link,
       tokens: 50,
     });
-  }
+  });
   data.likeLinks.map((l) => l.trim()).filter(Boolean).forEach((link, index) => {
     missions.push({
       id: uid(),
