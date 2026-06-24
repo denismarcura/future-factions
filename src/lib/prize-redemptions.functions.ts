@@ -1,5 +1,4 @@
-import { createServerFn } from "@tanstack/react-start";
-import { getHeader } from "@tanstack/react-start/server";
+import { createServerFn, getRequest } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 export type Redemption = {
