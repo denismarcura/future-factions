@@ -33,7 +33,12 @@ export async function uploadCorpAsset(
   const blob = dataUrlToBlob(dataUrl);
   if (!blob) return null;
   const ext = extFromMime(blob.type);
-  const path = `${challengeId}/${name}-${Date.now()}.${ext}`;
+  // Storage INSERT policy requires the first folder to be the uploader's user id.
+  const { data: userData, error: userErr } = await supabase.auth.getUser();
+  if (userErr || !userData.user) {
+    throw new Error("Sessão expirada — entre novamente para enviar arquivos.");
+  }
+  const path = `${userData.user.id}/${challengeId}/${name}-${Date.now()}.${ext}`;
   const { error: upErr } = await supabase.storage
     .from(BUCKET)
     .upload(path, blob, { contentType: blob.type, upsert: true });
@@ -56,3 +61,4 @@ export async function uploadCorpAssets(
   }
   return out;
 }
+

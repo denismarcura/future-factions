@@ -30,7 +30,9 @@ export function pointsForParticipants(p: number): number {
 export const getTop100 = createServerFn({ method: "GET" })
   .inputValidator((d: { monthKey?: string } | undefined) => d ?? {})
   .handler(async ({ data }) => {
-    const sb = publicClient();
+    // top100_snapshots is no longer publicly readable; use admin client server-side.
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const sb = supabaseAdmin;
     let monthKey = data.monthKey;
     if (!monthKey) {
       const { data: latest } = await sb
@@ -52,6 +54,7 @@ export const getTop100 = createServerFn({ method: "GET" })
     const { data: profs } = ids.length
       ? await sb.from("profiles").select("id, full_name, avatar_url").in("id", ids)
       : { data: [] as Array<{ id: string; full_name: string | null; avatar_url: string | null }> };
+
     const map = new Map((profs ?? []).map((p) => [p.id, p]));
     const entries: Top100Entry[] = (rows ?? []).map((r: { rank: number; user_id: string; challenges_count: number; total_participants: number; points: number }) => ({
       rank: r.rank,

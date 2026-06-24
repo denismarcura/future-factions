@@ -76,10 +76,13 @@ export const getChallengeRanking = createServerFn({ method: "GET" })
       if (!prev || p.created_at < prev) firstPalpiteByUser.set(p.user_id, p.created_at);
     }
 
-    const { data: winners } = await sb
+    // winners table is no longer anon-readable; use admin client server-side
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: winners } = await supabaseAdmin
       .from("challenge_winners")
       .select("user_id, tokens, reason")
       .eq("challenge_id", data.challengeId);
+
 
     type Agg = { tokens: number; acertos: number; reasons: string[] };
     const aggByUser = new Map<string, Agg>();
