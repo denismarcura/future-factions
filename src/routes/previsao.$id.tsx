@@ -502,8 +502,7 @@ function PredictionInner({ p }: { p: Prediction }) {
                   {extraPalpites.length > 0 && <span className="text-gold ml-1">· +{extraPalpites.length} extras</span>}
                 </span>
               </div>
-              {p.subPredictions.map((s, i) => {
-                const palpiteNum = extraPalpites.length * p.subPredictions!.length + i + 1;
+              {p.subPredictions.map((s) => {
                 return (
                   <div key={s.id} className="rounded-xl border border-border/60 bg-background/40 p-4">
                     <div className="text-sm font-bold mb-3">
