@@ -47,8 +47,9 @@ function ConvidarAmigos() {
   const [copied, setCopied] = useState(false);
   const [preview, setPreview] = useState(false);
   const [sent, setSent] = useState(false);
+  const [sending, setSending] = useState(false);
+  const sendInvites = useServerFn(sendFriendInviteEmails);
 
-  const emails = useMemo(() => parseEmails(raw), [raw]);
   const invalidCount = useMemo(() => {
     const tokens = raw.split(/[\s,;]+/).map((s) => s.trim()).filter(Boolean);
     return tokens.filter((t) => !EMAIL_RX.test(t.toLowerCase())).length;
