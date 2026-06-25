@@ -3,6 +3,7 @@ import { Target, Gift, Share2, Copy, Check, Instagram, Youtube, Star, Loader2, F
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { AppShell } from "@/components/layout/AppShell";
+import { InviteLinkCard } from "@/components/InviteLinkCard";
 import { CURRENT_USER, formatTokens } from "@/lib/mock-data";
 import {
   type Mission,
