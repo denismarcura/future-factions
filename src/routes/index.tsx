@@ -31,11 +31,8 @@ export const Route = createFileRoute("/")({
   component: Feed,
 });
 
-type Sort = "trending" | "new" | "popular" | "closing";
-
 function Feed() {
-  const [cat, setCat] = useState<string>("Todas");
-  const [sort, setSort] = useState<Sort>("new");
+
   const [banners, setBanners] = useState<Banner[]>([]);
   const [bottomBanners, setBottomBanners] = useState<BottomBanner[]>([]);
   const [userChallenges, setUserChallenges] = useState<Prediction[]>([]);
