@@ -1,47 +1,31 @@
-## Problema
+# Histórico detalhado de débitos de tokens
 
-A página `/perfil` (`src/routes/perfil.tsx`) hoje usa apenas dados mockados (`CURRENT_USER`, `PREDICTIONS` de `mock-data`). Por isso não aparecem os desafios reais que o usuário participou nem os palpites acertados — mesmo quando ele já submeteu palpites de verdade na base (`public.palpites`).
+Hoje o saldo (`src/lib/balance.ts`) é calculado a partir de 4 fontes, mas o usuário não consegue ver o que entrou e o que saiu. Vou criar uma página dedicada que lista cada movimento com data, motivo, link de origem e impacto no saldo.
 
-Já existe um server fn pronto que retorna os palpites do usuário autenticado: `listMyPalpites` em `src/lib/my-palpites.functions.ts` (campos `id`, `challenge_id`, `is_correct`, `evaluated_at`, `created_at`). Vou usar ele e cruzar com a tabela `challenges` para mostrar título, categoria e link.
+## O que vai aparecer
 
-## O que vou alterar (somente apresentação no perfil — sem cobrar tokens, sem nova lógica de negócio)
+Uma timeline unificada com filtro (Todos / Entradas / Saídas), mostrando:
 
-1. **`src/routes/perfil.tsx`**
-   - Buscar os palpites reais do usuário via `useServerFn(listMyPalpites)` dentro de um `useQuery` (key: `["my-palpites", userId]`).
-   - Buscar os desafios correspondentes (`challenges.id, title, category, status, closes_at, banner_url`) com o cliente Supabase do browser, filtrando por `in("id", challengeIds)`.
-   - Calcular métricas reais a partir do retorno:
-     - **Participações**: total de palpites distintos por `challenge_id`.
-     - **Acertos**: `is_correct === true`.
-     - **Erros**: `is_correct === false`.
-     - **Pendentes**: `is_correct === null` (ainda não apurado) — exibido como badge "aguardando resultado".
-     - **Taxa**: acertos / (acertos+erros) quando houver avaliados.
-   - Substituir os KVs hardcoded (`u.acertos`, `u.erros`, "#1.482") pelos valores reais. Tokens continuam vindo do hook existente de saldo (sem novas cobranças).
+**Créditos (entradas)**
+- Bônus de boas-vindas (`profiles.welcome_bonus`) — 1 linha inicial
+- Missões concluídas (`mission_claims` via `listMyClaims`) — "Missão: {título} — +{tokens_awarded}"
 
-2. **Nova seção "Desafios que participei"**
-   - Lista os desafios reais do usuário com:
-     - Título, categoria, data do palpite.
-     - Status visual: ✅ Acertou / ❌ Errou / ⏳ Aguardando resultado.
-     - Link para `/previsao/$id` (somente leitura do palpite já enviado).
-   - Acima, sub-aba "Acertei" filtrando `is_correct === true`.
+**Débitos (saídas)**
+- Participação em desafio (`listParticipations()` no localStorage) — "Palpite em {title} — −{entryFee}" com link para `/previsao/{id}`
+- Resgate de prêmio (`listMyRedemptions`) — "Resgate: {prize_name} — −{cost_tokens}" + badge do status (pendente / aprovado / entregue / rejeitado). Resgates rejeitados aparecem riscados com nota "estornado".
 
-3. **Seção mockada "Suas previsões"** é removida (era `PREDICTIONS.slice(0, 4)` — desafios fictícios).
+Cabeçalho da página:
+- Saldo atual (reaproveita `getTokenBalance`)
+- Totais do período: total ganho, total gasto, nº de movimentos
 
-4. **Estados de UI**
-   - Loading skeleton enquanto carrega.
-   - Empty state amigável: "Você ainda não participou de nenhum desafio. [Ver desafios abertos]".
-   - Mantém `InviteLinkCard` e Conquistas como estão.
+## Arquivos
 
-## Sobre os tokens cobrados
-
-Não consigo estornar tokens diretamente pelo chat — isso depende do suporte da Lovable. O que faço neste plano é **apenas corrigir o que está faltando aparecer** no perfil; não toco em nenhum fluxo de cobrança ou criação de desafio, então não há débito adicional pelo lado do produto. Se quiser, te ajudo a redigir uma mensagem para o suporte pedindo análise do estorno.
-
-## Detalhes técnicos
-
-- `listMyPalpites` já existe e usa `requireSupabaseAuth` — o bearer é anexado automaticamente pelo `functionMiddleware` registrado no `src/start.ts`.
-- A rota `/perfil` é pública hoje; vou manter (sem gate), e dentro do componente: se `useAuth()` não tiver usuário, mostro CTA "Entrar para ver seu histórico" em vez de chamar o server fn.
-- Sem migrações de banco. Sem novos endpoints. Sem mudanças em `criar.tsx` ou fluxos pagos.
+1. **Novo** `src/lib/token-history.ts` — função `buildTokenHistory()` que junta as 4 fontes acima em um array tipado `{ id, date, type: "credit"|"debit", reason, amount, source, link? , status? }`, ordenado por data desc. Sem novas chamadas de rede além das já usadas em `balance.ts`.
+2. **Novo** `src/routes/_authenticated/historico-tokens.tsx` — rota protegida, usa `useQuery` para chamar `buildTokenHistory`, renderiza cabeçalho de saldo, filtros (tabs) e lista. Estados de loading/empty. Usa componentes existentes (`Card`, `Badge`, `Tabs`, `Skeleton`).
+3. **Editar** `src/routes/perfil.tsx` — adicionar botão/link "Ver histórico de tokens" no bloco onde já mostramos os tokens.
 
 ## Fora do escopo
 
-- Estorno de tokens (precisa do suporte Lovable).
-- Mudanças em `desafios.tsx` / `index.tsx` (a participação já é ocultada por lá via `useParticipatedChallengeIds`).
+- Sem mudanças no cálculo de saldo, em `criar.tsx`, no fluxo de cobrança, ou em qualquer função server.
+- Sem migração de banco — usamos exclusivamente as fontes que já alimentam `getTokenBalance`.
+- Sem endpoint novo de admin/estorno.
