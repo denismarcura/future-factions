@@ -734,194 +734,141 @@ function Feed() {
   );
 }
 
-function SmartSearch({ corpChallenges }: { corpChallenges: CorpChallengeRecord[] }) {
-  const aiSearch = useServerFn(aiSearchChallenges);
-  const [q, setQ] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [results, setResults] = useState<string[] | null>(null);
-  const [error, setError] = useState<string | null>(null);
+function ThreeColumnWidgets({
+  corpChallenges,
+  mounted,
+  formatTimeLeft,
+}: {
+  corpChallenges: CorpChallengeRecord[];
+  mounted: boolean;
+  formatTimeLeft: (endsAt: string | null) => string | null;
+}) {
+  const featured = corpChallenges.slice(0, 4);
 
-  const submit = async (e?: React.FormEvent) => {
-    e?.preventDefault();
-    const query = q.trim();
-    if (!query) return;
-    setLoading(true);
-    setError(null);
-    try {
-      const predItems = PREDICTIONS.slice(0, 80).map((p) => ({
-        id: `pred:${p.id}`,
-        title: p.title,
-        category: p.category,
-      }));
-      const corpItems = corpChallenges.slice(0, 80).map((c) => ({
-        id: `corp:${c.id}`,
-        title: `${c.title}${c.companyName ? " — " + c.companyName : ""}`,
-        category: "Empresa",
-      }));
-      const items = [...corpItems, ...predItems];
-      const res = await aiSearch({ data: { query, items } });
-      setResults(res.ids);
-    } catch (err) {
-      console.error(err);
-      setError("Não foi possível buscar agora. Tente novamente.");
-    } finally {
-      setLoading(false);
-    }
-  };
+  const missions = [
+    { t: "Fazer 3 palpites", p: 3, tot: 3, tk: 100 },
+    { t: "Acertar 1 resultado", p: 1, tot: 1, tk: 150 },
+    { t: "Participar de 2 desafios", p: 1, tot: 2, tk: 200 },
+    { t: "Convidar 1 amigo", p: 0, tot: 1, tk: 150 },
+    { t: "Fazer 5 palpites", p: 3, tot: 5, tk: 250 },
+  ];
 
-  const clear = () => {
-    setQ("");
-    setResults(null);
-    setError(null);
-  };
-
-  type FoundItem =
-    | { kind: "pred"; id: string; title: string; category: string }
-    | { kind: "corp"; id: string; title: string; companyName: string | null; logoUrl: string | null; bannerUrl: string | null; prizeName: string | null };
-
-  const found: FoundItem[] = results
-    ? (results
-        .map((id): FoundItem | null => {
-          if (id.startsWith("corp:")) {
-            const c = corpChallenges.find((x) => x.id === id.slice(5));
-            if (!c) return null;
-            return {
-              kind: "corp",
-              id: c.id,
-              title: c.title,
-              companyName: c.companyName ?? null,
-              logoUrl: c.logoUrl ?? null,
-              bannerUrl: c.bannerUrl ?? null,
-              prizeName: c.prizeName ?? null,
-            };
-          }
-          const pid = id.startsWith("pred:") ? id.slice(5) : id;
-          const p = PREDICTIONS.find((x) => x.id === pid);
-          if (!p) return null;
-          return { kind: "pred", id: p.id, title: p.title, category: p.category };
-        })
-        .filter((x): x is FoundItem => !!x)
-        .slice(0, 12))
-    : [];
+  const ranking = [
+    { pos: 1, name: "Palpiteiro Pro", pts: "25.980" },
+    { pos: 2, name: "Mestre dos Palpites", pts: "22.450" },
+    { pos: 3, name: "Craque Visionário", pts: "21.300" },
+    { pos: 4, name: "Gênio da Bola", pts: "18.670" },
+    { pos: 5, name: "Palpiteiro Nato", pts: "17.890" },
+  ];
 
   return (
-    <section className="mb-8">
-      <div className="relative overflow-hidden rounded-2xl border border-primary/30 glass-card p-4 sm:p-5">
-        <div className="absolute -top-16 -right-12 h-40 w-40 rounded-full bg-primary/20 blur-3xl pointer-events-none" />
-        <div className="relative">
-          <div className="flex items-center gap-2 mb-3">
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/15 text-primary text-[10px] sm:text-xs font-black uppercase tracking-wider border border-primary/30">
-              <Sparkles className="h-3 w-3" /> Busca inteligente
-            </span>
-            <span className="text-[11px] text-muted-foreground hidden sm:block">
-              Diga em linguagem natural o que procura
-            </span>
-          </div>
-
-          <form onSubmit={submit} className="flex items-center gap-2">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <input
-                value={q}
-                onChange={(e) => setQ(e.target.value)}
-                placeholder="Ex.: Casa di Napoli, Copa, futebol..."
-                className="w-full h-11 sm:h-12 pl-9 pr-9 rounded-full bg-background/70 border border-border/60 text-sm focus:outline-none focus:ring-2 focus:ring-primary/60"
-              />
-              {q && (
-                <button
-                  type="button"
-                  onClick={clear}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 h-7 w-7 grid place-items-center rounded-full hover:bg-muted"
-                  aria-label="Limpar"
-                >
-                  <X className="h-3.5 w-3.5" />
-                </button>
-              )}
-            </div>
-            <button
-              type="submit"
-              disabled={loading || !q.trim()}
-              className="h-11 sm:h-12 px-4 sm:px-5 rounded-full bg-gradient-brand text-primary-foreground text-sm font-black uppercase tracking-wide shadow-glow disabled:opacity-50 inline-flex items-center gap-2"
-            >
-              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
-              <span className="hidden sm:inline">Buscar</span>
-            </button>
-          </form>
-
-          {error && (
-            <p className="mt-3 text-xs text-destructive">{error}</p>
-          )}
-
-          {results && !loading && (
-            <div className="mt-4">
-              {found.length === 0 ? (
-                <p className="text-sm text-muted-foreground">Nenhum desafio encontrado. Tente outras palavras.</p>
-              ) : (
-                <>
-                  <div className="mb-2 text-[11px] uppercase tracking-wider text-muted-foreground font-bold">
-                    {found.length} resultado{found.length > 1 ? "s" : ""}
-                  </div>
-                  <ul className="grid gap-2 sm:grid-cols-2">
-                    {found.map((item) =>
-                      item.kind === "corp" ? (
-                        <li key={`corp-${item.id}`}>
-                          <Link
-                            to="/previsao/$id"
-                            params={{ id: item.id }}
-                            className="flex items-center gap-3 p-3 rounded-xl border border-gold/40 bg-gold/5 hover:border-gold hover:shadow-glow transition"
-                          >
-                            {item.logoUrl ? (
-                              <img src={item.logoUrl} alt="" className="h-10 w-10 rounded-lg object-cover border border-border/60 shrink-0" />
-                            ) : item.bannerUrl ? (
-                              <img src={item.bannerUrl} alt="" className="h-10 w-10 rounded-lg object-cover border border-border/60 shrink-0" />
-                            ) : (
-                              <span className="h-10 w-10 rounded-lg bg-gold/15 text-gold grid place-items-center shrink-0">
-                                <Building2 className="h-5 w-5" />
-                              </span>
-                            )}
-                            <div className="min-w-0 flex-1">
-                              <div className="flex items-center gap-1.5">
-                                <span className="text-[9px] font-black uppercase tracking-wider text-gold bg-gold/15 px-1.5 py-0.5 rounded">Patrocinado</span>
-                                {item.companyName && (
-                                  <span className="text-[11px] font-bold text-gold truncate">{item.companyName}</span>
-                                )}
-                              </div>
-                              <div className="text-sm font-semibold truncate">{item.title}</div>
-                              {item.prizeName && (
-                                <div className="text-[11px] text-muted-foreground truncate">🎁 {item.prizeName}</div>
-                              )}
-                            </div>
-                            <span className="text-[11px] font-bold text-gold shrink-0">Abrir →</span>
-                          </Link>
-                        </li>
-                      ) : (
-                        <li key={`pred-${item.id}`}>
-                          <Link
-                            to="/previsao/$id"
-                            params={{ id: item.id }}
-                            className="flex items-center gap-3 p-3 rounded-xl border border-border/60 hover:border-primary/60 hover:bg-card transition"
-                          >
-                            <span className="h-10 w-10 rounded-lg bg-primary/15 text-primary grid place-items-center shrink-0">
-                              <Trophy className="h-5 w-5" />
-                            </span>
-                            <div className="min-w-0 flex-1">
-                              <div className="text-sm font-semibold truncate">{item.title}</div>
-                              <div className="text-[11px] text-muted-foreground truncate">{item.category}</div>
-                            </div>
-                            <span className="text-[11px] font-bold text-primary shrink-0">Abrir →</span>
-                          </Link>
-                        </li>
-                      ),
-                    )}
-                  </ul>
-                </>
-              )}
-            </div>
-          )}
+    <section className="mb-8 grid gap-4 lg:grid-cols-3">
+      {/* MISSÕES */}
+      <div className="rounded-2xl border border-primary/30 glass-card p-4 flex flex-col">
+        <div className="mb-3">
+          <div className="text-[11px] uppercase tracking-wider text-primary font-black">Missões</div>
+          <div className="text-xs text-muted-foreground">Complete missões e ganhe Tokens!</div>
         </div>
+        <ul className="space-y-2.5 flex-1">
+          {missions.map((m) => {
+            const done = m.p >= m.tot;
+            const pct = Math.min(100, (m.p / m.tot) * 100);
+            return (
+              <li key={m.t} className="flex items-center gap-2">
+                <span className={`h-5 w-5 rounded grid place-items-center text-[10px] font-black shrink-0 ${done ? "bg-primary text-primary-foreground" : "border border-border/60 text-muted-foreground"}`}>
+                  {done ? "✓" : ""}
+                </span>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-xs font-bold truncate">{m.t}</span>
+                    <span className="text-[10px] font-mono text-muted-foreground shrink-0">{m.p}/{m.tot}</span>
+                  </div>
+                  <div className="mt-1 h-1.5 rounded-full bg-muted overflow-hidden">
+                    <div className="h-full bg-gradient-brand transition-all" style={{ width: `${pct}%` }} />
+                  </div>
+                </div>
+                <span className="inline-flex items-center gap-0.5 text-[10px] font-black text-gold shrink-0">
+                  {m.tk} <Coins className="h-3 w-3" />
+                </span>
+              </li>
+            );
+          })}
+        </ul>
+        <Link to="/missoes" className="mt-3 inline-flex items-center justify-center h-9 px-3 rounded-full bg-gradient-brand text-primary-foreground text-[11px] font-black uppercase shadow-glow">
+          Ver todas as missões
+        </Link>
+      </div>
+
+      {/* DESAFIOS EM DESTAQUE */}
+      <div className="rounded-2xl border border-gold/40 glass-card p-4 flex flex-col">
+        <div className="mb-3 flex items-end justify-between gap-2">
+          <div>
+            <div className="text-[11px] uppercase tracking-wider text-gold font-black">Desafios em destaque</div>
+            <div className="text-xs text-muted-foreground">Participe dos principais ativos</div>
+          </div>
+          <Link to="/desafios" className="text-[10px] font-bold text-gold hover:underline shrink-0">Ver todos →</Link>
+        </div>
+        {featured.length === 0 ? (
+          <div className="flex-1 grid place-items-center text-xs text-muted-foreground py-8">Nenhum desafio em destaque ainda.</div>
+        ) : (
+          <ul className="space-y-2 flex-1">
+            {featured.map((c) => {
+              const tl = formatTimeLeft(c.endsAt);
+              return (
+                <li key={c.id}>
+                  <Link to="/previsao/$id" params={{ id: c.id }} className="flex items-center gap-2 p-2 rounded-xl border border-border/60 hover:border-gold/60 hover:bg-card transition">
+                    {c.logoUrl ? (
+                      <img src={c.logoUrl} alt="" className="h-9 w-9 rounded-lg object-cover border border-border/60 shrink-0" />
+                    ) : (
+                      <span className="h-9 w-9 rounded-lg bg-gold/15 text-gold grid place-items-center shrink-0">
+                        <Building2 className="h-4 w-4" />
+                      </span>
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <div className="text-xs font-bold truncate">{c.title}</div>
+                      <div className="text-[10px] text-muted-foreground truncate">
+                        {c.companyName ?? "Empresa"}
+                        {mounted && tl && tl !== "Encerrado" && <> · <span className="text-gold font-bold">⏱ {tl}</span></>}
+                      </div>
+                    </div>
+                    <span className="text-[10px] font-black text-gold shrink-0 uppercase">Abrir</span>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </div>
+
+      {/* RANKING GERAL */}
+      <div className="rounded-2xl border border-emerald-500/30 glass-card p-4 flex flex-col">
+        <div className="mb-3 flex items-end justify-between gap-2">
+          <div>
+            <div className="text-[11px] uppercase tracking-wider text-emerald-400 font-black">Ranking geral</div>
+            <div className="text-xs text-muted-foreground">Veja os melhores palpiteiros</div>
+          </div>
+          <Link to="/top100" className="text-[10px] font-bold text-emerald-400 hover:underline shrink-0">Ver TOP 100 →</Link>
+        </div>
+        <ul className="space-y-2 flex-1">
+          {ranking.map((r) => (
+            <li key={r.pos} className="flex items-center gap-2 p-2 rounded-xl border border-border/60">
+              <span className={`h-7 w-7 rounded-full grid place-items-center text-xs font-black shrink-0 ${
+                r.pos === 1 ? "bg-gold/20 text-gold" : r.pos === 2 ? "bg-zinc-300/20 text-zinc-300" : r.pos === 3 ? "bg-amber-700/20 text-amber-500" : "bg-muted text-muted-foreground"
+              }`}>
+                {r.pos === 1 ? "🥇" : r.pos === 2 ? "🥈" : r.pos === 3 ? "🥉" : r.pos}
+              </span>
+              <span className="text-xs font-bold flex-1 truncate">{r.name}</span>
+              <span className="text-xs font-mono font-black text-foreground shrink-0">{r.pts}</span>
+            </li>
+          ))}
+        </ul>
+        <Link to="/ranking" className="mt-3 inline-flex items-center justify-center h-9 px-3 rounded-full bg-gradient-to-r from-emerald-500 to-green-500 text-white text-[11px] font-black uppercase shadow-glow">
+          Ver ranking completo
+        </Link>
       </div>
     </section>
   );
 }
+
 
 
