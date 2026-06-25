@@ -429,35 +429,91 @@ function DesafiosPage() {
       )}
 
       {tab === "empresas" && (
-        <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {[...COMPANY_CHALLENGES].reverse().map((c) => (
-            <article
-              key={c.id}
-              className="rounded-2xl border border-border/60 bg-card p-5 hover:border-primary/50 hover:shadow-glow transition"
-            >
-              <div className="flex items-center gap-3">
-                <img src={c.company.logo} alt="" className="h-12 w-12 rounded-xl border border-border/60" />
-                <div className="min-w-0">
-                  <div className="text-xs text-muted-foreground">{c.company.category} · {c.company.city}</div>
-                  <div className="font-display font-bold truncate">{c.company.name}</div>
-                </div>
+        <>
+          {corpChallenges.length > 0 && (
+            <section className="mb-8">
+              <h2 className="font-display text-lg font-black mb-3 flex items-center gap-2">
+                <Star className="h-5 w-5 text-gold fill-gold" /> Desafios Patrocinados
+              </h2>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {corpChallenges.map((c) => (
+                  <Link
+                    key={c.id}
+                    to="/previsao/$id"
+                    params={{ id: c.id }}
+                    className="block rounded-2xl border-2 border-gold/40 bg-gradient-to-br from-gold/5 to-card p-5 hover:border-gold hover:shadow-glow transition"
+                  >
+                    <div className="flex items-center gap-3">
+                      {c.logoUrl ? (
+                        <img src={c.logoUrl} alt="" className="h-12 w-12 rounded-xl object-cover border border-border/60" />
+                      ) : (
+                        <div className="h-12 w-12 rounded-xl bg-gold/15 grid place-items-center text-gold font-black">
+                          {(c.companyName ?? c.title).slice(0, 1).toUpperCase()}
+                        </div>
+                      )}
+                      <div className="min-w-0">
+                        <div className="text-[10px] uppercase tracking-wider font-bold text-gold">Patrocinado · Empresa</div>
+                        <div className="font-display font-bold truncate">{c.companyName ?? "Empresa"}</div>
+                      </div>
+                    </div>
+                    <h3 className="mt-3 font-display font-bold text-base leading-snug line-clamp-2">{c.title}</h3>
+                    <div className="mt-3 flex items-center gap-2 text-xs flex-wrap">
+                      <span className="px-2 py-0.5 rounded-full bg-primary/15 text-primary font-bold border border-primary/30">
+                        🟢 {c.status}
+                      </span>
+                      {c.prizeName && (
+                        <span className="px-2 py-0.5 rounded-full bg-gold/15 text-gold font-bold border border-gold/30 truncate max-w-full">
+                          🎁 {c.prizeName}
+                        </span>
+                      )}
+                    </div>
+                    <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
+                      <span className="inline-flex items-center gap-1"><Users className="h-3.5 w-3.5" /> {c.participants} part.</span>
+                      <span className="text-gold font-bold">Participar →</span>
+                    </div>
+                  </Link>
+                ))}
               </div>
-              <h3 className="mt-3 font-display font-bold text-base leading-snug">{c.title}</h3>
-              <div className="mt-3 flex items-center gap-2 text-xs">
-                <span className="px-2 py-0.5 rounded-full bg-primary/15 text-primary font-bold border border-primary/30">
-                  🟢 {c.status}
-                </span>
-                <span className="px-2 py-0.5 rounded-full bg-gold/15 text-gold font-bold border border-gold/30">
-                  Prêmio: {c.prize}
-                </span>
+            </section>
+          )}
+
+          {COMPANY_CHALLENGES.length > 0 && (
+            <section>
+              <h2 className="font-display text-lg font-bold mb-3 text-muted-foreground">
+                Outras empresas
+              </h2>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {[...COMPANY_CHALLENGES].reverse().map((c) => (
+                  <article
+                    key={c.id}
+                    className="rounded-2xl border border-border/60 bg-card p-5 hover:border-primary/50 hover:shadow-glow transition"
+                  >
+                    <div className="flex items-center gap-3">
+                      <img src={c.company.logo} alt="" className="h-12 w-12 rounded-xl border border-border/60" />
+                      <div className="min-w-0">
+                        <div className="text-xs text-muted-foreground">{c.company.category} · {c.company.city}</div>
+                        <div className="font-display font-bold truncate">{c.company.name}</div>
+                      </div>
+                    </div>
+                    <h3 className="mt-3 font-display font-bold text-base leading-snug">{c.title}</h3>
+                    <div className="mt-3 flex items-center gap-2 text-xs">
+                      <span className="px-2 py-0.5 rounded-full bg-primary/15 text-primary font-bold border border-primary/30">
+                        🟢 {c.status}
+                      </span>
+                      <span className="px-2 py-0.5 rounded-full bg-gold/15 text-gold font-bold border border-gold/30">
+                        Prêmio: {c.prize}
+                      </span>
+                    </div>
+                    <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
+                      <span className="inline-flex items-center gap-1"><Users className="h-3.5 w-3.5" /> {c.participants} part.</span>
+                      <Link to="/desafios" className="text-primary font-bold">Participar →</Link>
+                    </div>
+                  </article>
+                ))}
               </div>
-              <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
-                <span className="inline-flex items-center gap-1"><Users className="h-3.5 w-3.5" /> {c.participants} part.</span>
-                <Link to="/desafios" className="text-primary font-bold">Participar →</Link>
-              </div>
-            </article>
-          ))}
-        </section>
+            </section>
+          )}
+        </>
       )}
     </AppShell>
   );
