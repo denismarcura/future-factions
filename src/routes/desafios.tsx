@@ -242,8 +242,54 @@ function DesafiosPage() {
 
       {tab !== "empresas" && (
         <>
-          {/* Próximos jogos — Copa 2026 (removido) */}
-
+          {/* Próximos jogos — Copa 2026 */}
+          {upcomingMatches.length > 0 && (
+            <section className="mb-8">
+              <div className="flex items-center justify-between mb-3 gap-3">
+                <h2 className="font-display text-lg font-bold flex items-center gap-2 min-w-0">
+                  <CalendarDays className="h-5 w-5 text-primary shrink-0" />
+                  <span className="truncate">Próximos jogos — Copa 2026</span>
+                </h2>
+                <span className="text-xs text-muted-foreground shrink-0">
+                  {upcomingMatches.length} partidas
+                </span>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {upcomingMatches.map((m) => {
+                  const d = new Date(m.kickoff);
+                  const pad = (n: number) => String(n).padStart(2, "0");
+                  const dateLabel = `${pad(d.getDate())}/${pad(d.getMonth() + 1)} · ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+                  return (
+                    <Link
+                      key={m.id}
+                      to="/previsao/$id"
+                      params={{ id: String(m.id) }}
+                      className="block rounded-2xl border border-border/60 bg-card p-4 hover:border-primary/50 hover:shadow-glow transition"
+                    >
+                      <div className="flex items-center justify-between gap-2 mb-2">
+                        <span className="inline-flex items-center gap-1.5 text-xs font-bold text-primary min-w-0">
+                          <Trophy className="h-3.5 w-3.5 shrink-0" />
+                          <span className="truncate">Grupo {m.group}</span>
+                        </span>
+                        <span className="text-[11px] text-muted-foreground shrink-0">{dateLabel}</span>
+                      </div>
+                      <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <img src={flagUrl(m.homeCode)} alt="" className="h-6 w-6 rounded-full object-cover shrink-0" />
+                          <span className="font-display font-bold text-sm truncate">{m.home}</span>
+                        </div>
+                        <span className="text-muted-foreground text-xs">×</span>
+                        <div className="flex items-center gap-2 min-w-0 justify-end">
+                          <span className="font-display font-bold text-sm truncate text-right">{m.away}</span>
+                          <img src={flagUrl(m.awayCode)} alt="" className="h-6 w-6 rounded-full object-cover shrink-0" />
+                        </div>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+            </section>
+          )}
 
           {/* Encerrando em breve */}
           <section id="encerrando" className="mb-8 scroll-mt-24">
