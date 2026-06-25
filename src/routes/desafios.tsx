@@ -250,6 +250,66 @@ function DesafiosPage() {
         )}
       </form>
 
+        {aiError && (
+          <div className="mt-2 text-xs text-destructive">{aiError}</div>
+        )}
+      </form>
+
+      {/* Resultados da busca IA — visível em todas as abas */}
+      {aiResults && aiResults.total > 0 && (
+        <section className="mb-8 rounded-3xl border-2 border-primary/40 bg-gradient-to-br from-primary/10 via-card to-card p-5 shadow-glow">
+          <div className="flex items-center justify-between mb-4 gap-3">
+            <h2 className="font-display text-xl font-black flex items-center gap-2 min-w-0">
+              <Sparkles className="h-6 w-6 text-gold shrink-0" />
+              <span className="truncate">Resultados da busca</span>
+            </h2>
+            <button onClick={clearAiSearch} className="text-xs sm:text-sm font-bold text-primary hover:underline shrink-0">
+              limpar
+            </button>
+          </div>
+
+          {aiResults.corps.length > 0 && (
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 mb-4">
+              {aiResults.corps.map((c) => (
+                <Link
+                  key={`r-corp-${c.id}`}
+                  to="/previsao/$id"
+                  params={{ id: c.id }}
+                  className="block rounded-2xl border-2 border-gold/40 bg-gradient-to-br from-gold/5 to-card p-4 hover:border-gold hover:shadow-glow transition group"
+                >
+                  <div className="flex items-center gap-3 mb-2">
+                    {c.logoUrl ? (
+                      <img src={c.logoUrl} alt="" className="h-11 w-11 rounded-xl object-cover border border-border/60" />
+                    ) : (
+                      <div className="h-11 w-11 rounded-xl bg-gold/15 grid place-items-center text-gold font-black">
+                        {(c.companyName ?? c.title).slice(0, 1).toUpperCase()}
+                      </div>
+                    )}
+                    <div className="min-w-0">
+                      <div className="text-[10px] uppercase tracking-wider font-bold text-gold">Patrocinado</div>
+                      <div className="font-display font-bold truncate text-sm">{c.companyName ?? "Empresa"}</div>
+                    </div>
+                  </div>
+                  <h3 className="font-display font-bold text-sm leading-snug line-clamp-2 group-hover:text-gold transition">{c.title}</h3>
+                  {c.prizeName && (
+                    <div className="mt-2 text-xs text-muted-foreground line-clamp-1">🎁 {c.prizeName}</div>
+                  )}
+                  <div className="mt-2 text-xs text-gold font-bold">Participar →</div>
+                </Link>
+              ))}
+            </div>
+          )}
+
+          {aiResults.predictions.length > 0 && (
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {aiResults.predictions.map((p) => (
+                <PredictionCard key={`r-pred-${p.id}`} prediction={p} />
+              ))}
+            </div>
+          )}
+        </section>
+      )}
+
       <div className="flex flex-wrap gap-2 mb-6">
         {[
           { k: "todos", label: "Todos", icon: ListChecks },
