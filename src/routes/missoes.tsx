@@ -125,38 +125,9 @@ function Missoes() {
         </div>
       </header>
 
-      <section className="rounded-2xl glass-card p-6 mb-6">
-        <div className="flex items-start gap-4">
-          <div className="h-12 w-12 rounded-xl bg-gradient-brand grid place-items-center shadow-glow shrink-0">
-            <Gift className="h-6 w-6 text-primary-foreground" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <h2 className="font-display text-xl font-black">Indique amigos · +100 Tokens cada</h2>
-            <p className="text-sm text-muted-foreground mt-1">
-              Compartilhe seu link e ganhe Tokens toda vez que um amigo entrar.
-            </p>
-            <div className="mt-4 flex flex-col sm:flex-row gap-2">
-              <div className="flex-1 h-11 px-3 rounded-lg bg-background border border-border/60 flex items-center font-mono text-sm overflow-hidden">
-                {referralLink}
-              </div>
-              <button
-                onClick={() => {
-                  navigator.clipboard.writeText(referralLink);
-                  setCopied(true);
-                  setTimeout(() => setCopied(false), 1500);
-                }}
-                className="h-11 px-4 rounded-lg bg-gradient-brand text-primary-foreground font-bold inline-flex items-center gap-2 shadow-glow"
-              >
-                {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                {copied ? "Copiado!" : "Copiar link"}
-              </button>
-              <button className="h-11 px-4 rounded-lg border border-gold/60 text-gold font-bold inline-flex items-center gap-2 hover:bg-gold/10">
-                <Share2 className="h-4 w-4" /> Compartilhar
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
+      <div className="mb-6">
+        <InviteLinkCard />
+      </div>
 
       {loading ? (
         <div className="text-center py-10 text-muted-foreground"><Loader2 className="h-6 w-6 animate-spin inline" /></div>
