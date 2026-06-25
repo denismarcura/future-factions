@@ -166,6 +166,38 @@ function Feed() {
         </div>
       </section>
 
+      {/* Banners inferiores (cadastrados no admin) */}
+      {bottomBanners.length > 0 && (
+        <section className="mb-8 grid gap-4 sm:grid-cols-2">
+          {bottomBanners.map((b) => {
+            const img = (
+              <img
+                src={b.imageUrl}
+                alt={b.alt ?? "Banner"}
+                width={800}
+                height={350}
+                loading="lazy"
+                decoding="async"
+                className="w-full h-auto block rounded-2xl border border-border/60"
+              />
+            );
+            return b.link ? (
+              <a
+                key={b.id}
+                href={b.link}
+                target={b.link.startsWith("http") ? "_blank" : undefined}
+                rel={b.link.startsWith("http") ? "noopener noreferrer" : undefined}
+                className="block hover:opacity-95 transition"
+              >
+                {img}
+              </a>
+            ) : (
+              <div key={b.id}>{img}</div>
+            );
+          })}
+        </section>
+      )}
+
       {/* Como Funciona — 4 passos */}
       <section className="mb-8">
         <div className="mb-4 text-center sm:text-left">
