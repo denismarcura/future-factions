@@ -13,6 +13,7 @@ import { Route as Top100RouteImport } from './routes/top100'
 import { Route as TermosRouteImport } from './routes/termos'
 import { Route as ShopRouteImport } from './routes/shop'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as RankingCaixaMisteriosaRouteImport } from './routes/ranking-caixa-misteriosa'
 import { Route as RankingRouteImport } from './routes/ranking'
 import { Route as PerfilRouteImport } from './routes/perfil'
 import { Route as PalpiteIaRouteImport } from './routes/palpite-ia'
@@ -89,6 +90,11 @@ const ShopRoute = ShopRouteImport.update({
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RankingCaixaMisteriosaRoute = RankingCaixaMisteriosaRouteImport.update({
+  id: '/ranking-caixa-misteriosa',
+  path: '/ranking-caixa-misteriosa',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RankingRoute = RankingRouteImport.update({
@@ -400,6 +406,7 @@ export interface FileRoutesByFullPath {
   '/palpite-ia': typeof PalpiteIaRoute
   '/perfil': typeof PerfilRoute
   '/ranking': typeof RankingRouteWithChildren
+  '/ranking-caixa-misteriosa': typeof RankingCaixaMisteriosaRoute
   '/reset-password': typeof ResetPasswordRoute
   '/shop': typeof ShopRoute
   '/termos': typeof TermosRoute
@@ -461,6 +468,7 @@ export interface FileRoutesByTo {
   '/palpite-ia': typeof PalpiteIaRoute
   '/perfil': typeof PerfilRoute
   '/ranking': typeof RankingRouteWithChildren
+  '/ranking-caixa-misteriosa': typeof RankingCaixaMisteriosaRoute
   '/reset-password': typeof ResetPasswordRoute
   '/shop': typeof ShopRoute
   '/termos': typeof TermosRoute
@@ -525,6 +533,7 @@ export interface FileRoutesById {
   '/palpite-ia': typeof PalpiteIaRoute
   '/perfil': typeof PerfilRoute
   '/ranking': typeof RankingRouteWithChildren
+  '/ranking-caixa-misteriosa': typeof RankingCaixaMisteriosaRoute
   '/reset-password': typeof ResetPasswordRoute
   '/shop': typeof ShopRoute
   '/termos': typeof TermosRoute
@@ -589,6 +598,7 @@ export interface FileRouteTypes {
     | '/palpite-ia'
     | '/perfil'
     | '/ranking'
+    | '/ranking-caixa-misteriosa'
     | '/reset-password'
     | '/shop'
     | '/termos'
@@ -650,6 +660,7 @@ export interface FileRouteTypes {
     | '/palpite-ia'
     | '/perfil'
     | '/ranking'
+    | '/ranking-caixa-misteriosa'
     | '/reset-password'
     | '/shop'
     | '/termos'
@@ -713,6 +724,7 @@ export interface FileRouteTypes {
     | '/palpite-ia'
     | '/perfil'
     | '/ranking'
+    | '/ranking-caixa-misteriosa'
     | '/reset-password'
     | '/shop'
     | '/termos'
@@ -777,6 +789,7 @@ export interface RootRouteChildren {
   PalpiteIaRoute: typeof PalpiteIaRoute
   PerfilRoute: typeof PerfilRoute
   RankingRoute: typeof RankingRouteWithChildren
+  RankingCaixaMisteriosaRoute: typeof RankingCaixaMisteriosaRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   ShopRoute: typeof ShopRoute
   TermosRoute: typeof TermosRoute
@@ -818,6 +831,13 @@ declare module '@tanstack/react-router' {
       path: '/reset-password'
       fullPath: '/reset-password'
       preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ranking-caixa-misteriosa': {
+      id: '/ranking-caixa-misteriosa'
+      path: '/ranking-caixa-misteriosa'
+      fullPath: '/ranking-caixa-misteriosa'
+      preLoaderRoute: typeof RankingCaixaMisteriosaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/ranking': {
@@ -1341,6 +1361,7 @@ const rootRouteChildren: RootRouteChildren = {
   PalpiteIaRoute: PalpiteIaRoute,
   PerfilRoute: PerfilRoute,
   RankingRoute: RankingRouteWithChildren,
+  RankingCaixaMisteriosaRoute: RankingCaixaMisteriosaRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   ShopRoute: ShopRoute,
   TermosRoute: TermosRoute,
@@ -1356,13 +1377,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
