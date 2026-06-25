@@ -2227,13 +2227,21 @@ function MissionWizard({
 }
 
 
-function PublishedSuccess({ name, id, onCreateAnother }: { name: string; id: string; onCreateAnother: () => void }) {
-  const { user } = useAuth();
+function PublishedSuccess({
+  name,
+  id,
+  inviteUrl,
+  onCreateAnother,
+}: {
+  name: string;
+  id: string;
+  inviteUrl: string;
+  onCreateAnother: () => void;
+}) {
   const [copied, setCopied] = useState(false);
   const [textCopied, setTextCopied] = useState(false);
-  const origin = typeof window !== "undefined" ? window.location.origin : "https://www.desafiodospalpites.com.br";
   // Link de convite único do usuário: URL limpa, sem cobrança de tokens.
-  const link = user ? buildInviteUrl(user, origin) : `${origin}/desafios`;
+  const link = inviteUrl || "https://www.desafiodospalpites.com.br/desafios";
 
   const inviteSubject = `🎯 Participe do meu desafio "${name}" — Desafio dos Palpites (100% GRATUITO)`;
   const inviteBody = `Olá!
