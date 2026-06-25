@@ -76,7 +76,27 @@ export function InviteLinkCard({ variant = "full", title }: { variant?: Variant;
           >
             <Share2 className="h-3.5 w-3.5" /> Compartilhar
           </button>
+          <button
+            onClick={() => setShowQR((v) => !v)}
+            className="h-9 px-3 rounded-lg border border-border text-xs font-bold inline-flex items-center gap-1.5 hover:bg-muted"
+            aria-label="Mostrar QR Code"
+          >
+            <QrCode className="h-3.5 w-3.5" /> QR
+          </button>
         </div>
+        {showQR && (
+          <div className="w-full flex flex-col items-center gap-2 pt-2 border-t border-gold/20" ref={qrWrapRef}>
+            <div className="bg-white p-2 rounded-lg">
+              <QRCodeCanvas value={url} size={140} includeMargin={false} />
+            </div>
+            <button
+              onClick={downloadQR}
+              className="h-8 px-3 rounded-lg border border-gold/60 text-gold text-xs font-bold inline-flex items-center gap-1.5 hover:bg-gold/10"
+            >
+              <Download className="h-3.5 w-3.5" /> Baixar QR
+            </button>
+          </div>
+        )}
       </div>
     );
   }
