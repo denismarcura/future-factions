@@ -22,7 +22,7 @@ export function PredictionCard({ prediction: p, hideOptions = false }: { predict
       >
         <div className="flex-1 flex flex-col min-h-0">
           <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 text-xs">
-            <span className="px-2 py-0.5 rounded-full bg-primary/15 text-primary font-semibold border border-primary/30">
+            <span className="px-2.5 py-1 rounded-lg bg-primary/15 text-primary font-semibold border border-primary/30">
               {p.category}
             </span>
             <span className="shrink-0">
