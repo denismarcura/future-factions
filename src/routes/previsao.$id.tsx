@@ -239,6 +239,9 @@ function PredictionPage() {
   return <PredictionInner p={p} />;
 }
 
+const MISSION_REWARD_TKN = 50;
+const CORRECT_PALPITE_REWARD_TKN = 100;
+
 function PredictionInner({ p }: { p: Prediction }) {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -340,7 +343,7 @@ function PredictionInner({ p }: { p: Prediction }) {
     setTimeout(async () => {
       if (isCatalogMission(mission)) {
         try {
-          await claimMission(mission.id, `challenge:${p.id}`, mission.tokens);
+          await claimMission(mission.id, `challenge:${p.id}`, MISSION_REWARD_TKN);
         } catch {
           // ignore (likely already claimed)
         }
@@ -350,11 +353,11 @@ function PredictionInner({ p }: { p: Prediction }) {
       setSubAnswers({});
       if (confirmed) {
         setPendingExtra({ platform: mission.platform, sponsor: getMissionSponsor(mission) });
-        toast.success("✅ Missão feita! Preencha o novo palpite e clique em CONFIRMAR PALPITE EXTRA.");
+        toast.success(`✅ Missão feita! +${MISSION_REWARD_TKN} TKN. Preencha o novo palpite e clique em CONFIRMAR PALPITE EXTRA.`);
       } else {
         // Mission done before confirming participation: just credit tokens
         setExtraPalpites((prev) => [...prev, { platform: mission.platform, sponsor: getMissionSponsor(mission), answers: {} }]);
-        toast.success(`✅ Missão feita! +${mission.tokens} TKN no seu saldo. Você pode continuar ou já participar do desafio.`);
+        toast.success(`✅ Missão feita! +${MISSION_REWARD_TKN} TKN no seu saldo.`);
       }
       setMissionStatus("done");
       setTimeout(() => {
@@ -418,7 +421,7 @@ function PredictionInner({ p }: { p: Prediction }) {
               answers: subAnswers, closesAt: p.closesAt,
               participatedAt: new Date().toISOString(),
             });
-            toast.success(`🎯 Participação confirmada! ${fee} TKN debitados. Missões bônus liberadas!`);
+            toast.success(`🎯 Participação confirmada! ${fee} TKN debitados. +${CORRECT_PALPITE_REWARD_TKN} TKN por palpite acertado. Missões bônus liberadas!`);
           } else {
             if (!user) { goToSignup(); return; }
             if (balance !== null && balance < amount) {
@@ -429,7 +432,8 @@ function PredictionInner({ p }: { p: Prediction }) {
               answers: {}, optionLabel: sel.label, closesAt: p.closesAt,
               participatedAt: new Date().toISOString(),
             });
-            toast.success(`✅ Aposta de ${amount} TKN em "${sel.label}" confirmada!`);
+            setConfirmed(true);
+            toast.success(`✅ Aposta de ${amount} TKN em "${sel.label}" confirmada! +${CORRECT_PALPITE_REWARD_TKN} TKN por palpite acertado.`);
           }
         };
 
@@ -630,7 +634,7 @@ function PredictionInner({ p }: { p: Prediction }) {
 
 
         {/* Banner de missões sequenciais — abaixo do slider */}
-        {p.subPredictions && (() => {
+        {(() => {
           const allDone = missionStep >= missionQueue.length;
           const currentMission = missionQueue[missionStep] ?? null;
           const currentPlatform = (currentMission?.platform as SeqPlatform) ?? null;
@@ -661,9 +665,15 @@ function PredictionInner({ p }: { p: Prediction }) {
                 </div>
               )}
 
+              {confirmed && !allDone && missionQueue.length > 0 && (
+                <div className="rounded-xl border border-emerald-500/40 bg-emerald-500/10 p-3 text-xs text-center">
+                  🎯 <strong className="text-emerald-400">Palpite enviado!</strong> Complete as missões abaixo para ganhar <strong className="text-gold">+{MISSION_REWARD_TKN} TKN</strong> cada — e <strong className="text-gold">+{CORRECT_PALPITE_REWARD_TKN} TKN</strong> para cada palpite acertado.
+                </div>
+              )}
+
               {!confirmed && missionQueue.length > 0 && (
                 <div className="rounded-xl border border-primary/30 bg-primary/5 p-3 text-xs text-center text-muted-foreground">
-                  💡 Faça as missões agora para ganhar <strong className="text-gold">tokens extras</strong> e depois usar nos palpites — ou confirme sua participação primeiro.
+                  💡 Faça as missões agora para ganhar <strong className="text-gold">+{MISSION_REWARD_TKN} TKN</strong> em cada uma — ou confirme sua participação primeiro (<strong className="text-gold">+{CORRECT_PALPITE_REWARD_TKN} TKN</strong> por palpite acertado).
                 </div>
               )}
 
@@ -686,7 +696,7 @@ function PredictionInner({ p }: { p: Prediction }) {
                       </span>
                     </div>
                     <p className="text-xs text-muted-foreground mb-3">
-                      <strong>{ACTION_LABEL[getMissionAction(currentMission) as keyof typeof ACTION_LABEL] ?? "Abrir"}</strong> {getMissionSponsor(currentMission)} no {T.label} e ganhe <strong className="text-gold">+{currentMission.tokens} TKN</strong>
+                      <strong>{ACTION_LABEL[getMissionAction(currentMission) as keyof typeof ACTION_LABEL] ?? "Abrir"}</strong> {getMissionSponsor(currentMission)} no {T.label} e ganhe <strong className="text-gold">+{MISSION_REWARD_TKN} TKN</strong>
                       {confirmed ? <> (libera +1 round de palpites extras).</> : <> no seu saldo.</>}
                     </p>
                     <button
