@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { Gift, Flame, Trophy, Coins, ArrowLeft } from "lucide-react";
 import { getMysteryBoxRanking, type StreakPeriod } from "@/lib/mystery-box-ranking.functions";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 export const Route = createFileRoute("/ranking-caixa-misteriosa")({
   head: () => ({
@@ -21,10 +22,10 @@ const PERIODS: { id: StreakPeriod; label: string }[] = [
 ];
 
 function medal(pos: number) {
-  if (pos === 1) return { emoji: "🥇", cls: "bg-gold/20 text-gold border-gold/40" };
-  if (pos === 2) return { emoji: "🥈", cls: "bg-zinc-300/20 text-zinc-200 border-zinc-300/40" };
-  if (pos === 3) return { emoji: "🥉", cls: "bg-amber-700/20 text-amber-500 border-amber-700/40" };
-  return { emoji: String(pos), cls: "bg-muted text-muted-foreground border-border" };
+  if (pos === 1) return { emoji: "🥇", cls: "bg-gold/20 text-gold border-gold/40 shadow-[0_0_12px_rgba(255,200,0,0.5)]", label: "Ouro" };
+  if (pos === 2) return { emoji: "🥈", cls: "bg-zinc-300/20 text-zinc-200 border-zinc-300/40 shadow-[0_0_10px_rgba(200,200,210,0.35)]", label: "Prata" };
+  if (pos === 3) return { emoji: "🥉", cls: "bg-amber-700/20 text-amber-500 border-amber-700/40 shadow-[0_0_10px_rgba(180,100,30,0.35)]", label: "Bronze" };
+  return { emoji: String(pos), cls: "bg-muted text-muted-foreground border-border", label: `Posição ${pos}` };
 }
 
 function RankingCaixaPage() {
