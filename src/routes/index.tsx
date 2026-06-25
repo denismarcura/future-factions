@@ -43,18 +43,57 @@ function Feed() {
   const [bottomBanners, setBottomBanners] = useState<BottomBanner[]>([]);
   const [userChallenges, setUserChallenges] = useState<Prediction[]>([]);
   const [mounted, setMounted] = useState(false);
+  const [corpChallenges, setCorpChallenges] = useState<CorpChallengeRecord[]>([]);
+  const [corpPage, setCorpPage] = useState(0);
+  const [nowTs, setNowTs] = useState<number>(0);
+  const fetchCorp = useServerFn(listLatestCorpChallenges);
   const participatedIds = useParticipatedChallengeIds();
   const notParticipated = <T extends { id: string }>(p: T) => !participatedIds.has(String(p.id));
 
   useEffect(() => {
     setMounted(true);
+    setNowTs(Date.now());
     setBanners(listActiveBanners());
     setBottomBanners(listActiveBottomBanners());
     setUserChallenges(getUserChallenges());
     const onUpdate = () => setUserChallenges(getUserChallenges());
     window.addEventListener("ddp:user-challenges-updated", onUpdate);
-    return () => window.removeEventListener("ddp:user-challenges-updated", onUpdate);
-  }, []);
+    fetchCorp({ data: { limit: 50 } }).then(setCorpChallenges).catch(() => {});
+    const interval = setInterval(() => setNowTs(Date.now()), 60_000);
+    return () => {
+      window.removeEventListener("ddp:user-challenges-updated", onUpdate);
+      clearInterval(interval);
+    };
+  }, [fetchCorp]);
+
+  // Sort: closest endsAt first, then most recently created
+  const sortedCorp = useMemo(() => {
+    const arr = [...corpChallenges];
+    arr.sort((a, b) => {
+      const aEnd = a.endsAt ? new Date(a.endsAt).getTime() : Infinity;
+      const bEnd = b.endsAt ? new Date(b.endsAt).getTime() : Infinity;
+      if (aEnd !== bEnd) return aEnd - bEnd;
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
+    return arr;
+  }, [corpChallenges]);
+
+  const corpPerPage = 6;
+  const corpTotalPages = Math.max(1, Math.ceil(sortedCorp.length / corpPerPage));
+  const corpPageItems = sortedCorp.slice(corpPage * corpPerPage, corpPage * corpPerPage + corpPerPage);
+
+  const formatTimeLeft = (endsAt: string | null) => {
+    if (!endsAt) return null;
+    const diff = new Date(endsAt).getTime() - nowTs;
+    if (diff <= 0) return "Encerrado";
+    const d = Math.floor(diff / 86_400_000);
+    const h = Math.floor((diff % 86_400_000) / 3_600_000);
+    const m = Math.floor((diff % 3_600_000) / 60_000);
+    if (d > 0) return `${d}d ${h}h`;
+    if (h > 0) return `${h}h ${m}m`;
+    return `${m}m`;
+  };
+
 
   const closingSoon = useMemo(() => {
     const now = mounted ? Date.now() : 0;
