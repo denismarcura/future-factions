@@ -91,7 +91,7 @@ const REVIEWS: Review[] = [
     rating: 5,
     date: "há 5 dias",
     comment:
-      "Os palpites malucos da Copa são geniais! Dá pra apostar em coisas que nenhuma outra plataforma tem.",
+      "Os palpites malucos da Copa são geniais! Dá pra dar palpite em coisas que nenhuma outra plataforma tem.",
     color: "bg-amber-500",
   },
   {

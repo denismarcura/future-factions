@@ -1153,7 +1153,7 @@ function MyChallengesSection({ items }: { items: Prediction[] }) {
                     {c.title}
                   </Link>
                   <div className="text-[11px] text-muted-foreground flex items-center justify-between gap-2">
-                    <span>{c.bettors} apostadores</span>
+                    <span>{c.bettors} palpiteiros</span>
                     <span>
                       {ended ? "Encerrou" : "Fecha"} em{" "}
                       {new Date(c.closesAt).toLocaleDateString("pt-BR", {
@@ -2164,7 +2164,7 @@ function MyParticipationsSection({
 }) {
   // Merge local participations with palpites from the database (the DB is the
   // source of truth for is_correct/evaluated_at; the local list ensures the
-  // UI works imediatamente após apostar, antes da apuração).
+  // UI works imediatamente após dar palpite, antes da apuração).
   const palpitesByChallenge = useMemo(() => {
     const map = new Map<string, MyPalpiteRow[]>();
     for (const p of palpites) {
@@ -2412,7 +2412,7 @@ function PalpiteTokenExchange({
       <SectionTitle
         icon={Target}
         title="Trocar TKN por Tokens Palpite"
-        hint={`Use Tokens Palpite para apostar nos desafios. Conversão: ${PALPITE_TOKEN_RATE} TKN = 1 Token Palpite.`}
+        hint={`Use Tokens Palpite para dar palpite nos desafios. Conversão: ${PALPITE_TOKEN_RATE} TKN = 1 Token Palpite.`}
       />
       <div className="flex flex-wrap items-end gap-4">
         <div>

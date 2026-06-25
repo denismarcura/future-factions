@@ -122,7 +122,7 @@ function makeOptions(seed: number, labels: string[]): PredictionOption[] {
 export const PALPITES_MALUCOS: Prediction[] = MALUCOS.map((m, i) => ({
   id: `pm${i + 1}`,
   title: `${m.emoji} ${m.title}`,
-  description: `🤪 PALPITES MALUCOS\n\nRequisitos:\n${REQUIREMENTS.join("\n")}\n\n🎁 Premiação: ${m.prize.toLocaleString("pt-BR")} Tokens\n📅 Data limite para apostas: 01/07/2026\n💰 Valor para palpitar: ${ENTRY_FEE} Tokens`,
+  description: `🤪 PALPITES MALUCOS\n\nRequisitos:\n${REQUIREMENTS.join("\n")}\n\n🎁 Premiação: ${m.prize.toLocaleString("pt-BR")} Tokens\n📅 Data limite para palpites: 01/07/2026\n💰 Valor para palpitar: ${ENTRY_FEE} Tokens`,
   category: "Palpites Malucos da Copa",
   author: USERS[i % USERS.length],
   createdAt: new Date(Date.now() - (i + 1) * 86400000).toISOString(),

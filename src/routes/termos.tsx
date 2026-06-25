@@ -75,7 +75,7 @@ function TermosPage() {
             <Bullets
               items={[
                 "A plataforma não possui fins lucrativos relacionados aos palpites realizados pelos usuários.",
-                "Não existe qualquer modalidade de aposta em dinheiro, jogos de azar ou atividades financeiras envolvendo os participantes.",
+                "Não existe qualquer modalidade de palpite em dinheiro, jogos de azar ou atividades financeiras envolvendo os participantes.",
                 "Os Tokens não possuem valor monetário, não podem ser convertidos em dinheiro, vendidos, negociados ou transferidos entre usuários.",
               ]}
             />

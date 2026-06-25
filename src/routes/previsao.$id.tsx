@@ -433,7 +433,7 @@ function PredictionInner({ p }: { p: Prediction }) {
               participatedAt: new Date().toISOString(),
             });
             setConfirmed(true);
-            toast.success(`✅ Aposta de ${amount} TKN em "${sel.label}" confirmada! +${CORRECT_PALPITE_REWARD_TKN} TKN por palpite acertado.`);
+            toast.success(`✅ Palpite de ${amount} TKN em "${sel.label}" confirmada! +${CORRECT_PALPITE_REWARD_TKN} TKN por palpite acertado.`);
           }
         };
 
@@ -465,7 +465,7 @@ function PredictionInner({ p }: { p: Prediction }) {
               <Clock className="h-3 w-3" /> {mounted ? (isClosed ? "Apostas encerradas" : `Encerra em ${timeLeft(p.closesAt)}`) : "Carregando..."}
             </span>
             <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-card border border-border/60 text-muted-foreground">
-              <Users className="h-3 w-3" /> {p.bettors} apostadores
+              <Users className="h-3 w-3" /> {p.bettors} palpiteiros
             </span>
           </div>
 
@@ -758,7 +758,7 @@ function PredictionInner({ p }: { p: Prediction }) {
                 >
                   <div className="text-xs text-primary font-semibold">{r.category}</div>
                   <div className="font-display font-bold mt-1 line-clamp-2">{r.title}</div>
-                  <div className="mt-2 text-xs text-muted-foreground">{r.bettors} apostadores · {timeLeft(r.closesAt)}</div>
+                  <div className="mt-2 text-xs text-muted-foreground">{r.bettors} palpiteiros · {timeLeft(r.closesAt)}</div>
                 </Link>
               ))}
             </div>

@@ -175,7 +175,7 @@ export function PredictionCard({ prediction: p, hideOptions = false }: { predict
 
         <div className="mt-3 flex items-center gap-4 text-xs text-muted-foreground shrink-0">
           <span className="inline-flex items-center gap-1">
-            <Users className="h-3.5 w-3.5" /> {p.bettors} apostadores
+            <Users className="h-3.5 w-3.5" /> {p.bettors} palpiteiros
           </span>
           <span className="text-gold font-semibold tabular-nums">
             {formatTokens(totalPool)} tokens

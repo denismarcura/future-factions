@@ -176,7 +176,7 @@ function HowItWorks() {
           <BookOpen className="h-8 w-8 text-primary" /> Desafio dos <span className="text-gradient-brand">Palpites</span>
         </h1>
         <p className="text-muted-foreground mt-3 max-w-3xl leading-relaxed">
-          Você já fez uma aposta com um amigo? Já participou de um bolão? O{" "}
+          Você já fez uma palpite com um amigo? Já participou de um bolão? O{" "}
           <strong className="text-foreground">Desafio dos Palpites</strong> é a plataforma para você se divertir com seus
           amigos, <strong className="text-foreground">sem gastar R$ 1 real</strong>, e ainda ganhar Tokens para trocar por
           brindes fantásticos.

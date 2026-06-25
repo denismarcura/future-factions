@@ -17,10 +17,10 @@ const FAQ: { q: string; a: string }[] = [
   { q: "Os Tokens valem dinheiro?", a: "Não. Tokens não têm valor monetário e não podem ser convertidos em dinheiro. Você troca por prêmios reais no Shop." },
   { q: "Como ganho Tokens?", a: "Acertando palpites, criando desafios, cumprindo missões diárias/semanais/mensais, indicando amigos e participando de eventos." },
   { q: "Como funciona o Shop de Prêmios?", a: "Você acumula Tokens e troca por produtos reais (smartphones, vouchers, eletrônicos, brindes parceiros). Quanto mais Tokens, melhores os prêmios." },
-  { q: "Posso criar um desafio entre amigos?", a: "Sim. Você cria desafios privados e convida apenas quem quiser. Funciona como uma aposta entre amigos — só que sem dinheiro real." },
+  { q: "Posso criar um desafio entre amigos?", a: "Sim. Você cria desafios privados e convida apenas quem quiser. Funciona como uma palpite entre amigos — só que sem dinheiro real." },
   { q: "Sou empresa, posso criar desafios?", a: "Sim! Empresas oferecem prêmios (combos, brindes, vouchers) e ganham visibilidade. Cadastre-se em /empresas." },
   { q: "O que é o Profeta da Copa?", a: "Um selo dourado concedido a quem acerta palpites improváveis. Aparece no seu perfil e impulsiona seu ranking." },
-  { q: "Quantos Tokens ganho ao me cadastrar?", a: "1.000 Tokens grátis para começar a apostar imediatamente." },
+  { q: "Quantos Tokens ganho ao me cadastrar?", a: "1.000 Tokens grátis para começar a dar palpite imediatamente." },
 ];
 
 function FAQPage() {

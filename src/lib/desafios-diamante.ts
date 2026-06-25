@@ -32,7 +32,7 @@ const DIAMANTES: Prediction[] = [
   {
     id: "dd1",
     title: "🏆 CAMPEÃO DA COPA",
-    description: `Quem levantará a taça?\n\nRequisitos:\n${REQUIREMENTS.join("\n")}\n\n🎁 Premiação: 📱 iPhone 17 Pro Max\n📅 Data limite para apostas: 01/07/2026\n💰 Valor para palpitar: 500 Tokens`,
+    description: `Quem levantará a taça?\n\nRequisitos:\n${REQUIREMENTS.join("\n")}\n\n🎁 Premiação: 📱 iPhone 17 Pro Max\n📅 Data limite para palpites: 01/07/2026\n💰 Valor para palpitar: 500 Tokens`,
     category: "Desafios Diamante",
     author: USERS[0],
     createdAt: new Date(Date.now() - 2 * 86400000).toISOString(),
@@ -51,7 +51,7 @@ const DIAMANTES: Prediction[] = [
   {
     id: "dd2",
     title: "⚽ FINAL DA COPA",
-    description: `Qual será o placar da grande final?\n\n🎯 Acertar o 1º, 2º e 3º colocado\n${REQUIREMENTS.join("\n")}\n\n🎁 Premiação: 🎮 PlayStation 5 + 💰 75.000 Tokens\n📅 Data limite para apostas: 01/07/2026\n💰 Valor para palpitar: 500 Tokens`,
+    description: `Qual será o placar da grande final?\n\n🎯 Acertar o 1º, 2º e 3º colocado\n${REQUIREMENTS.join("\n")}\n\n🎁 Premiação: 🎮 PlayStation 5 + 💰 75.000 Tokens\n📅 Data limite para palpites: 01/07/2026\n💰 Valor para palpitar: 500 Tokens`,
     category: "Desafios Diamante",
     author: USERS[1],
     createdAt: new Date(Date.now() - 3 * 86400000).toISOString(),
@@ -70,7 +70,7 @@ const DIAMANTES: Prediction[] = [
   {
     id: "dd3",
     title: "⚽ QUANTOS GOLS TERÁ A COPA?",
-    description: `Acertar a faixa de gols da Copa inteira\n\n🎯 Acertar o 1º, 2º e 3º colocado\n${REQUIREMENTS.join("\n")}\n\n🎁 Premiação: ⚽ Bola Oficial Adidas FIFA + 💰 75.000 Tokens\n📅 Data limite para apostas: 10/07/2026\n💰 Valor para palpitar: 200 Tokens`,
+    description: `Acertar a faixa de gols da Copa inteira\n\n🎯 Acertar o 1º, 2º e 3º colocado\n${REQUIREMENTS.join("\n")}\n\n🎁 Premiação: ⚽ Bola Oficial Adidas FIFA + 💰 75.000 Tokens\n📅 Data limite para palpites: 10/07/2026\n💰 Valor para palpitar: 200 Tokens`,
     category: "Desafios Diamante",
     author: USERS[2],
     createdAt: new Date(Date.now() - 4 * 86400000).toISOString(),
@@ -89,7 +89,7 @@ const DIAMANTES: Prediction[] = [
   {
     id: "dd4",
     title: "🇧🇷 CAMINHO DO BRASIL",
-    description: `Até onde o Brasil chegará?\n\nRequisitos:\n${REQUIREMENTS.join("\n")}\n\n🎁 Premiação: 👕 Camiseta Oficial do Brasil + 💰 30.000 Tokens\n📅 Data limite para apostas: 01/07/2026\n💰 Valor para palpitar: 200 Tokens`,
+    description: `Até onde o Brasil chegará?\n\nRequisitos:\n${REQUIREMENTS.join("\n")}\n\n🎁 Premiação: 👕 Camiseta Oficial do Brasil + 💰 30.000 Tokens\n📅 Data limite para palpites: 01/07/2026\n💰 Valor para palpitar: 200 Tokens`,
     category: "Desafios Diamante",
     author: USERS[3],
     createdAt: new Date(Date.now() - 5 * 86400000).toISOString(),
@@ -108,7 +108,7 @@ const DIAMANTES: Prediction[] = [
   {
     id: "dd5",
     title: "🏆 DESAFIO DIAMANTE — TRIPLO COROA",
-    description: `Acertar o Campeão + Artilheiro + Melhor Jogador\n\nRequisitos:\n${REQUIREMENTS.join("\n")}\n\n🎁 Premiação: 💻 Notebook Gamer + 💰 150.000 Tokens\n📅 Data limite para apostas: 01/07/2026\n💰 Valor para palpitar: 500 Tokens`,
+    description: `Acertar o Campeão + Artilheiro + Melhor Jogador\n\nRequisitos:\n${REQUIREMENTS.join("\n")}\n\n🎁 Premiação: 💻 Notebook Gamer + 💰 150.000 Tokens\n📅 Data limite para palpites: 01/07/2026\n💰 Valor para palpitar: 500 Tokens`,
     category: "Desafios Diamante",
     author: USERS[4],
     createdAt: new Date(Date.now() - 1 * 86400000).toISOString(),
@@ -132,7 +132,7 @@ const DIAMANTES: Prediction[] = [
   {
     id: "dd6",
     title: "🏆 DESAFIO DIAMANTE — OITAVAS DE FINAL",
-    description: `⚽ Oitavas de Final\nQuantas seleções favoritas serão eliminadas?\n\nRequisitos:\n${REQUIREMENTS.join("\n")}\n\n🎁 Premiação: 💳 Vale-Compras R$ 1.000\n📅 Data limite para apostas: 01/07/2026\n💰 Valor para palpitar: 500 Tokens`,
+    description: `⚽ Oitavas de Final\nQuantas seleções favoritas serão eliminadas?\n\nRequisitos:\n${REQUIREMENTS.join("\n")}\n\n🎁 Premiação: 💳 Vale-Compras R$ 1.000\n📅 Data limite para palpites: 01/07/2026\n💰 Valor para palpitar: 500 Tokens`,
     category: "Desafios Diamante",
     author: USERS[5],
     createdAt: new Date(Date.now() - 6 * 86400000).toISOString(),
@@ -151,7 +151,7 @@ const DIAMANTES: Prediction[] = [
   {
     id: "dd7",
     title: "🏆 DESAFIO DIAMANTE — QUARTAS DE FINAL",
-    description: `⚽ Quartas de Final\nQuantas partidas serão decididas nos pênaltis?\n\nRequisitos:\n${REQUIREMENTS.join("\n")}\n\n🎁 Premiação: 💳 Vale-Compras R$ 2.000\n📅 Data limite para apostas: 01/07/2026\n💰 Valor para palpitar: 500 Tokens`,
+    description: `⚽ Quartas de Final\nQuantas partidas serão decididas nos pênaltis?\n\nRequisitos:\n${REQUIREMENTS.join("\n")}\n\n🎁 Premiação: 💳 Vale-Compras R$ 2.000\n📅 Data limite para palpites: 01/07/2026\n💰 Valor para palpitar: 500 Tokens`,
     category: "Desafios Diamante",
     author: USERS[6],
     createdAt: new Date(Date.now() - 7 * 86400000).toISOString(),
@@ -170,7 +170,7 @@ const DIAMANTES: Prediction[] = [
   {
     id: "dd8",
     title: "🏆 DESAFIO DIAMANTE — SEMIFINAL",
-    description: `⚽ Semifinal\nQual será a seleção com mais gols nas semifinais?\n\nRequisitos:\n${REQUIREMENTS.join("\n")}\n\n🎁 Premiação: 💳 Vale-Compras R$ 5.000\n📅 Data limite para apostas: 01/07/2026\n💰 Valor para palpitar: 500 Tokens`,
+    description: `⚽ Semifinal\nQual será a seleção com mais gols nas semifinais?\n\nRequisitos:\n${REQUIREMENTS.join("\n")}\n\n🎁 Premiação: 💳 Vale-Compras R$ 5.000\n📅 Data limite para palpites: 01/07/2026\n💰 Valor para palpitar: 500 Tokens`,
     category: "Desafios Diamante",
     author: USERS[7],
     createdAt: new Date(Date.now() - 8 * 86400000).toISOString(),
@@ -189,7 +189,7 @@ const DIAMANTES: Prediction[] = [
   {
     id: "dd9",
     title: "🏆 DESAFIO DIAMANTE — DISPUTA DO 3º LUGAR",
-    description: `⚽ Disputa do 3º Lugar\nQual será o placar da disputa do terceiro lugar?\n\nRequisitos:\n${REQUIREMENTS.join("\n")}\n\n🎁 Premiação: 💳 Vale-Compras R$ 3.000\n📅 Data limite para apostas: 01/07/2026\n💰 Valor para palpitar: 500 Tokens`,
+    description: `⚽ Disputa do 3º Lugar\nQual será o placar da disputa do terceiro lugar?\n\nRequisitos:\n${REQUIREMENTS.join("\n")}\n\n🎁 Premiação: 💳 Vale-Compras R$ 3.000\n📅 Data limite para palpites: 01/07/2026\n💰 Valor para palpitar: 500 Tokens`,
     category: "Desafios Diamante",
     author: USERS[8],
     createdAt: new Date(Date.now() - 9 * 86400000).toISOString(),
