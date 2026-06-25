@@ -50,6 +50,7 @@ function ConvidarAmigos() {
   const [sending, setSending] = useState(false);
   const sendInvites = useServerFn(sendFriendInviteEmails);
 
+  const emails = useMemo(() => parseEmails(raw), [raw]);
   const invalidCount = useMemo(() => {
     const tokens = raw.split(/[\s,;]+/).map((s) => s.trim()).filter(Boolean);
     return tokens.filter((t) => !EMAIL_RX.test(t.toLowerCase())).length;
@@ -57,22 +58,41 @@ function ConvidarAmigos() {
 
   const body = `${intro}\n\n👉 ${inviteUrl}\n\nAbraço,\n${fullName}`;
 
-  function buildMailto() {
-    const bcc = emails.join(",");
-    // mailto requires %20 for spaces (not '+') and proper encoding so the link survives in the body
-    return `mailto:?bcc=${encodeURIComponent(bcc)}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-  }
-
-  function send() {
+  async function send() {
     if (emails.length === 0) {
       toast.error("Adicione pelo menos um e-mail válido.");
       return;
     }
-    const href = buildMailto();
-    window.location.href = href;
-    setSent(true);
-    toast.success(`Abrindo seu e-mail com ${emails.length} convite(s) prontos.`);
+    if (!inviteUrl) {
+      toast.error("Faça login para gerar seu link de convite.");
+      return;
+    }
+    setSending(true);
+    try {
+      const res = await sendInvites({
+        data: {
+          recipients: emails,
+          subject,
+          intro,
+          inviteUrl,
+          senderName: fullName,
+        },
+      });
+      setSent(true);
+      if (res.sent > 0) {
+        toast.success(`✅ ${res.sent} convite(s) enviado(s) com o link no corpo do e-mail!`);
+      }
+      if (res.failed.length > 0) {
+        toast.error(`Falha em ${res.failed.length}: ${res.failed.join(", ")}`);
+      }
+    } catch (e: any) {
+      console.error(e);
+      toast.error("Não foi possível enviar os e-mails. Tente novamente.");
+    } finally {
+      setSending(false);
+    }
   }
+
 
   async function copyMessage() {
     try {
