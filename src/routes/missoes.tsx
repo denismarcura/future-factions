@@ -52,6 +52,7 @@ function Missoes() {
   const { user } = useAuth();
   const [missions, setMissions] = useState<Mission[]>([]);
   const [claimed, setClaimed] = useState<Set<string>>(new Set());
+  const [exiting, setExiting] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [running, setRunning] = useState<string | null>(null);
   const [confirmed, setConfirmed] = useState(false);
