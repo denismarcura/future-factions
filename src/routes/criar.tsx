@@ -6,8 +6,10 @@ import {
   Gift, Coins, Instagram, Facebook, Youtube, Music2, Globe, Lock,
   CheckCircle2, Share2, Copy, AlertCircle, UserPlus, Mail, Users, Loader2,
   PencilLine, MessageCircle, Download, ImageIcon, ShoppingBag, X,
-  Linkedin, Twitter, Star, Heart, Check, ExternalLink,
+  Linkedin, Twitter, Star, Heart, Check, ExternalLink, Send, QrCode, Link2,
 } from "lucide-react";
+import { QRCodeCanvas } from "qrcode.react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { AppShell } from "@/components/layout/AppShell";
 import { useAuth } from "@/hooks/use-auth";
 import { useInviteUrl } from "@/hooks/use-invite-url";
