@@ -250,10 +250,6 @@ function DesafiosPage() {
         )}
       </form>
 
-        {aiError && (
-          <div className="mt-2 text-xs text-destructive">{aiError}</div>
-        )}
-      </form>
 
       {/* Resultados da busca IA — visível em todas as abas */}
       {aiResults && aiResults.total > 0 && (
