@@ -234,6 +234,7 @@ function Feed() {
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {[...PREDICTIONS]
             .filter((p) => new Date(p.closesAt).getTime() > Date.now())
+            .filter(notParticipated)
             .sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt))
             .slice(0, 6)
             .map((p) => (
