@@ -421,78 +421,124 @@ function Feed() {
         </Link>
       </section>
 
-      {/* Categorias em destaque */}
-      <section className="mb-8">
-        <div className="mb-4">
-          <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-wider text-primary font-bold">
-            <Sparkles className="h-3.5 w-3.5" /> Explore
-          </div>
-          <h2 className="font-display text-2xl sm:text-3xl font-black">Categorias em destaque</h2>
-        </div>
-        <div className="grid grid-cols-2 gap-4">
-          {[
-            {
-              to: "/desafios",
-              label: "Desafios Diamantes",
-              desc: "Prêmios exclusivos e alta recompensa",
-              image: imgCampeao,
-              icon: Diamond,
-              accent: "text-gold",
-            },
-            {
-              to: "/desafios",
-              label: "Palpites Malucos da Copa",
-              desc: "Apostas inusitadas para a Copa 2026",
-              image: imgMalucos,
-              icon: Trophy,
-              accent: "text-primary",
-            },
-            {
-              to: "/desafios",
-              label: "Alienígenas",
-              desc: "Mistérios e teorias extraterrestres",
-              image: imgAlien,
-              icon: Zap,
-              accent: "text-gold",
-            },
-            {
-              to: "/empresas",
-              label: "Empresas",
-              desc: "Desafios corporativos e promoções",
-              image: null,
-              icon: Building2,
-              accent: "text-primary",
-            },
-          ].map((c) => (
-            <Link
-              key={c.label}
-              to={c.to}
-              className="group relative block overflow-hidden rounded-2xl border border-border/60 hover:border-primary/50 hover:shadow-glow transition"
-            >
-              {c.image ? (
-                <div className="aspect-[16/10] w-full overflow-hidden">
-                  <img
-                    src={c.image}
-                    alt={c.label}
-                    className="h-full w-full object-cover group-hover:scale-105 transition duration-500"
-                    loading="lazy"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/50 to-transparent" />
-                </div>
-              ) : (
-                <div className="aspect-[16/10] w-full bg-gradient-to-br from-primary/15 to-gold/10" />
-              )}
-              <div className="absolute inset-x-0 bottom-0 p-3 sm:p-4">
-                <div className="flex items-center gap-2">
-                  <c.icon className={`h-4 w-4 ${c.accent} shrink-0`} />
-                  <div className="font-display font-bold text-sm sm:text-base truncate">{c.label}</div>
-                </div>
-                <div className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{c.desc}</div>
+      {/* Empresas em destaque */}
+      {sortedCorp.length > 0 && (
+        <section className="mb-8">
+          <div className="mb-4 flex items-end justify-between gap-3">
+            <div>
+              <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-wider text-gold font-bold">
+                <Star className="h-3.5 w-3.5 fill-gold" /> Patrocinados
               </div>
+              <h2 className="font-display text-2xl sm:text-3xl font-black">Empresas em destaque</h2>
+            </div>
+            <Link to="/desafios" className="text-xs sm:text-sm font-bold text-gold hover:underline shrink-0">
+              Ver todos →
             </Link>
-          ))}
-        </div>
-      </section>
+          </div>
+
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+            {corpPageItems.map((c, idx) => {
+              const isFirst = corpPage === 0 && idx === 0;
+              const timeLabel = formatTimeLeft(c.endsAt);
+              return (
+                <Link
+                  key={c.id}
+                  to="/previsao/$id"
+                  params={{ id: c.id }}
+                  className={`group relative block overflow-hidden rounded-2xl border transition ${
+                    isFirst
+                      ? "border-gold/60 bg-gradient-to-br from-gold/15 via-card to-card shadow-glow"
+                      : "border-border/60 bg-card hover:border-gold/50 hover:shadow-glow"
+                  }`}
+                >
+                  {c.bannerUrl ? (
+                    <div className="aspect-[16/9] w-full overflow-hidden bg-muted">
+                      <img
+                        src={c.bannerUrl}
+                        alt={c.title}
+                        className="h-full w-full object-cover group-hover:scale-105 transition duration-500"
+                        loading="lazy"
+                      />
+                    </div>
+                  ) : (
+                    <div className="aspect-[16/9] w-full bg-gradient-to-br from-gold/15 to-primary/10 grid place-items-center">
+                      <Building2 className="h-10 w-10 text-gold/60" />
+                    </div>
+                  )}
+
+                  {isFirst && mounted && timeLabel && (
+                    <div className="absolute top-2 left-2 inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-destructive text-destructive-foreground text-[10px] font-black uppercase tracking-wider shadow-lg">
+                      <Timer className="h-3 w-3" /> Encerra em {timeLabel}
+                    </div>
+                  )}
+                  {!isFirst && mounted && timeLabel && timeLabel !== "Encerrado" && (
+                    <div className="absolute top-2 left-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-background/85 backdrop-blur text-[10px] font-bold text-foreground">
+                      <Clock className="h-3 w-3 text-gold" /> {timeLabel}
+                    </div>
+                  )}
+
+                  <div className="p-3 sm:p-4">
+                    <div className="flex items-center gap-2 mb-1.5">
+                      {c.logoUrl ? (
+                        <img src={c.logoUrl} alt="" className="h-7 w-7 rounded-lg object-cover border border-border/60 shrink-0" />
+                      ) : (
+                        <div className="h-7 w-7 rounded-lg bg-gold/15 grid place-items-center text-gold font-black text-xs shrink-0">
+                          {(c.companyName ?? c.title).slice(0, 1).toUpperCase()}
+                        </div>
+                      )}
+                      <div className="text-[11px] font-bold text-gold truncate">{c.companyName ?? "Empresa"}</div>
+                    </div>
+                    <h3 className="font-display font-bold text-sm sm:text-base leading-snug line-clamp-2 group-hover:text-gold transition">
+                      {c.title}
+                    </h3>
+                    {c.prizeName && (
+                      <div className="mt-1.5 text-xs text-muted-foreground line-clamp-1">🎁 {c.prizeName}</div>
+                    )}
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+
+          {corpTotalPages > 1 && (
+            <div className="mt-4 flex items-center justify-center gap-2">
+              <button
+                onClick={() => setCorpPage((p) => Math.max(0, p - 1))}
+                disabled={corpPage === 0}
+                className="h-9 w-9 grid place-items-center rounded-full border border-border/60 bg-card text-muted-foreground hover:text-foreground disabled:opacity-40 disabled:cursor-not-allowed"
+                aria-label="Página anterior"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </button>
+              <div className="flex items-center gap-1">
+                {Array.from({ length: corpTotalPages }).map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setCorpPage(i)}
+                    className={`h-8 min-w-8 px-2 rounded-full text-xs font-bold transition ${
+                      i === corpPage
+                        ? "bg-gradient-brand text-primary-foreground shadow-glow"
+                        : "bg-card text-muted-foreground border border-border/60 hover:text-foreground"
+                    }`}
+                  >
+                    {i + 1}
+                  </button>
+                ))}
+              </div>
+              <button
+                onClick={() => setCorpPage((p) => Math.min(corpTotalPages - 1, p + 1))}
+                disabled={corpPage >= corpTotalPages - 1}
+                className="h-9 w-9 grid place-items-center rounded-full border border-border/60 bg-card text-muted-foreground hover:text-foreground disabled:opacity-40 disabled:cursor-not-allowed"
+                aria-label="Próxima página"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </button>
+            </div>
+          )}
+        </section>
+      )}
+
+
 
       {/* Filters */}
       <section id="feed" className="mb-4 flex items-center gap-2 overflow-x-auto -mx-4 px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
