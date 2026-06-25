@@ -97,7 +97,7 @@ function ShopPage() {
           Nenhum prêmio disponível no momento.
         </div>
       ) : (
-        <section className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+        <section className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
           {items.map((p) => {
             const canAfford = user && balance >= (p.cost_tokens ?? 0);
             const noStock = p.stock <= 0;
@@ -123,59 +123,61 @@ function ShopPage() {
             }
             return (
               <article key={p.id} className="group relative rounded-2xl border border-border/60 bg-card overflow-hidden hover:border-primary/50 hover:shadow-glow transition flex flex-col">
-                <div className="aspect-[4/5] bg-black grid place-items-center border-b border-border/60 overflow-hidden">
+                <div className="relative aspect-[4/5] bg-black border-b border-border/60 overflow-hidden">
                   {p.image_url ? (
-                    <img src={p.image_url} alt={p.name} className="w-full h-full object-contain" loading="lazy" />
+                    <img src={p.image_url} alt={p.name} className="absolute inset-0 w-full h-full object-contain" loading="lazy" />
                   ) : (
-                    <Gift className="h-12 w-12 text-muted-foreground" />
+                    <div className="absolute inset-0 grid place-items-center">
+                      <Gift className="h-10 w-10 text-muted-foreground" />
+                    </div>
                   )}
                 </div>
-                <div className="p-4 flex flex-col flex-1">
-                  <h3 className="font-display font-bold leading-snug line-clamp-2 flex-1">{p.name}</h3>
+                <div className="p-2.5 sm:p-4 flex flex-col flex-1 gap-2">
+                  <h3 className="font-display font-bold leading-snug line-clamp-2 text-sm sm:text-base min-h-[2.5em]">{p.name}</h3>
                   {p.description && (
-                    <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{p.description}</p>
+                    <p className="hidden sm:block text-xs text-muted-foreground line-clamp-2">{p.description}</p>
                   )}
-                  <div className="mt-3 flex items-baseline justify-between gap-2">
+                  <div className="mt-auto flex items-center justify-between gap-2 min-w-0">
                     {isEditing ? (
-                      <div className="flex items-center gap-1 flex-1">
+                      <div className="flex items-center gap-1 flex-1 min-w-0">
                         <input
                           type="number"
                           value={editVal}
                           onChange={(e) => setEditVal(e.target.value)}
-                          className="w-full h-8 px-2 rounded-lg bg-background border border-border/60 text-sm tabular-nums"
+                          className="w-full min-w-0 h-8 px-2 rounded-lg bg-background border border-border/60 text-sm tabular-nums"
                           autoFocus
                         />
-                        <button onClick={saveTokens} disabled={savingId === p.id} className="h-8 w-8 grid place-items-center rounded-lg bg-primary text-primary-foreground">
+                        <button onClick={saveTokens} disabled={savingId === p.id} className="h-8 w-8 shrink-0 grid place-items-center rounded-lg bg-primary text-primary-foreground">
                           {savingId === p.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
                         </button>
-                        <button onClick={() => setEditingId(null)} className="h-8 w-8 grid place-items-center rounded-lg hover:bg-muted/40">
+                        <button onClick={() => setEditingId(null)} className="h-8 w-8 shrink-0 grid place-items-center rounded-lg hover:bg-muted/40">
                           <X className="h-3.5 w-3.5" />
                         </button>
                       </div>
                     ) : (
                       <>
-                        <div className="inline-flex items-center gap-1.5 text-gold">
-                          <Coins className="h-4 w-4" />
-                          <span className="font-display font-black text-lg tabular-nums">{formatTokens(p.cost_tokens ?? 0)}</span>
+                        <div className="inline-flex items-center gap-1 text-gold min-w-0">
+                          <Coins className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
+                          <span className="font-display font-black text-base sm:text-lg tabular-nums truncate">{formatTokens(p.cost_tokens ?? 0)}</span>
                           {isAdmin && (
                             <button
                               onClick={() => { setEditingId(p.id); setEditVal(String(p.cost_tokens ?? 0)); }}
-                              className="ml-1 h-6 w-6 grid place-items-center rounded-md hover:bg-muted/40 text-muted-foreground"
+                              className="ml-0.5 h-6 w-6 shrink-0 grid place-items-center rounded-md hover:bg-muted/40 text-muted-foreground"
                               title="Editar valor em tokens"
                             >
                               <Pencil className="h-3 w-3" />
                             </button>
                           )}
                         </div>
-                        <span className="text-[10px] text-muted-foreground">{p.stock} em estoque</span>
+                        <span className="text-[10px] text-muted-foreground shrink-0 whitespace-nowrap">{p.stock} em estoque</span>
                       </>
                     )}
                   </div>
-                  {!noStock && (
+                  {!noStock ? (
                     <button
                       onClick={() => handleRedeem(p)}
                       disabled={disabled}
-                      className={`mt-3 h-10 rounded-full text-sm font-black uppercase tracking-wide transition inline-flex items-center justify-center gap-1.5 ${
+                      className={`h-9 sm:h-10 px-2 rounded-full text-[11px] sm:text-sm font-black uppercase tracking-wide transition inline-flex items-center justify-center gap-1.5 whitespace-nowrap ${
                         !disabled
                           ? "bg-gradient-brand text-primary-foreground shadow-glow hover:scale-[1.02]"
                           : "bg-muted text-muted-foreground cursor-not-allowed border border-border/60"
@@ -184,14 +186,13 @@ function ShopPage() {
                       {busy === p.id ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
                       ) : !user ? (
-                        "Entrar p/ solicitar"
+                        "Entrar"
                       ) : (
                         "Solicitar troca"
                       )}
                     </button>
-                  )}
-                  {noStock && (
-                    <div className="mt-3 h-10 rounded-full grid place-items-center text-xs font-bold uppercase tracking-wide bg-muted text-muted-foreground border border-border/60">
+                  ) : (
+                    <div className="h-9 sm:h-10 rounded-full grid place-items-center text-[11px] sm:text-xs font-bold uppercase tracking-wide bg-muted text-muted-foreground border border-border/60">
                       Esgotado
                     </div>
                   )}
