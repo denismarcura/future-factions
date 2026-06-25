@@ -3,6 +3,7 @@ import { MapPin, Trophy, Target, Award, Sparkles } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { ACHIEVEMENTS, CURRENT_USER, formatTokens, PREDICTIONS } from "@/lib/mock-data";
 import { PredictionCard } from "@/components/PredictionCard";
+import { InviteLinkCard } from "@/components/InviteLinkCard";
 
 export const Route = createFileRoute("/perfil")({
   head: () => ({
@@ -51,6 +52,9 @@ function Perfil() {
           </button>
         </div>
       </section>
+      <div className="mb-6">
+        <InviteLinkCard title="Seu link · convide e ganhe +100 Tokens por amigo" />
+      </div>
 
       <div className="grid lg:grid-cols-[1fr_320px] gap-6">
         <div>
