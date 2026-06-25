@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Target, Gift, Share2, Copy, Check, Instagram, Youtube, Star, Loader2, Facebook, Music2, Play, AlertTriangle } from "lucide-react";
+import { Target, Gift, Check, Instagram, Youtube, Star, Loader2, Facebook, Music2, Play, AlertTriangle, Trophy, Coins, Calendar, CalendarDays, Sparkles, ListChecks, Users } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { AppShell } from "@/components/layout/AppShell";
@@ -26,9 +26,18 @@ export const Route = createFileRoute("/missoes")({
   component: Missoes,
 });
 
-const PLATFORMS: Platform[] = ["instagram", "facebook", "youtube", "tiktok", "google"];
-const COMPLETION_BONUS_TOKENS = 50; // bônus extra por cada missão cumprida
-const COMPLETION_BONUS_CHANCES = 1; // +1 chance de palpite por missão cumprida
+const COMPLETION_BONUS_TOKENS = 50;
+const COMPLETION_BONUS_CHANCES = 1;
+
+type TabKey = "todas" | "instagram" | "facebook" | "youtube" | "tiktok" | "google" | "especiais";
+const TABS: { key: TabKey; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
+  { key: "todas", label: "Todas", icon: ListChecks },
+  { key: "instagram", label: "Instagram", icon: Instagram },
+  { key: "youtube", label: "YouTube", icon: Youtube },
+  { key: "tiktok", label: "TikTok", icon: Music2 },
+  { key: "facebook", label: "Facebook", icon: Facebook },
+  { key: "especiais", label: "Especiais", icon: Sparkles },
+];
 
 function PlatformIcon({ p, className }: { p: Platform; className?: string }) {
   if (p === "instagram") return <Instagram className={className} />;
@@ -45,7 +54,7 @@ function Missoes() {
   const [loading, setLoading] = useState(true);
   const [running, setRunning] = useState<string | null>(null);
   const [confirmed, setConfirmed] = useState(false);
-
+  const [tab, setTab] = useState<TabKey>("todas");
 
   useEffect(() => {
     (async () => {
@@ -54,8 +63,6 @@ function Missoes() {
         const all = await listMissions({ activeOnly: true });
         setMissions(all);
         if (user) {
-          // Consider claims from any context (dashboard, previsão, missões page)
-          // so a mission completed elsewhere shows as "Concluída" here too.
           const claims = await listMyClaims();
           setClaimed(new Set(claims.map((c) => c.mission_id)));
         }
@@ -74,7 +81,6 @@ function Missoes() {
     }
     if (claimed.has(m.id) || running) return;
     setRunning(m.id);
-    // open the target in a new tab using a real anchor (more compatible inside iframes)
     try {
       const a = document.createElement("a");
       a.href = m.link;
@@ -92,7 +98,7 @@ function Missoes() {
       await claimMission(m.id, "missoes", totalAward);
       setClaimed((prev) => new Set(prev).add(m.id));
       toast.success(
-        `Tarefa concluída! +${m.tokens + (m.bonus_tokens || 0)} Tokens da missão · +${COMPLETION_BONUS_TOKENS} bônus · +${COMPLETION_BONUS_CHANCES} chance de palpite.`
+        `Tarefa concluída! +${m.tokens + (m.bonus_tokens || 0)} Tokens · +${COMPLETION_BONUS_TOKENS} bônus · +${COMPLETION_BONUS_CHANCES} chance.`
       );
     } catch (e: any) {
       toast.error(e.message ?? "Erro ao registrar");
@@ -101,106 +107,184 @@ function Missoes() {
     }
   }
 
-  const grouped = useMemo(() => {
-    const base: Record<Platform, Mission[]> = { instagram: [], facebook: [], youtube: [], tiktok: [], google: [] };
-    missions.forEach((m) => base[m.platform].push(m));
-    return base;
-  }, [missions]);
+  const filtered = useMemo(() => {
+    if (tab === "todas") return missions;
+    if (tab === "especiais") return missions.filter((m) => (m.bonus_tokens || 0) > 0);
+    return missions.filter((m) => m.platform === tab);
+  }, [missions, tab]);
+
+  const totalClaimable = useMemo(
+    () => missions.filter((m) => !claimed.has(m.id)).reduce((s, m) => s + m.tokens + (m.bonus_tokens || 0) + COMPLETION_BONUS_TOKENS, 0),
+    [missions, claimed]
+  );
+  const completed = claimed.size;
+  const totalMissions = missions.length;
+  const progressPct = totalMissions > 0 ? Math.round((completed / totalMissions) * 100) : 0;
 
   return (
     <AppShell>
-      <header className="mb-6">
-        <h1 className="font-display text-3xl font-black flex items-center gap-3">
-          <Target className="h-7 w-7 text-primary" /> Missões
-        </h1>
-        <p className="text-muted-foreground mt-1">Ganhe Tokens fazendo coisas que você já faz.</p>
-        <div className="mt-3 inline-flex items-center gap-2 rounded-xl border border-gold/40 bg-gold/10 px-3 py-2 text-sm">
-          <Gift className="h-4 w-4 text-gold" />
-          <span>
-            A cada missão cumprida você ganha{" "}
-            <span className="font-bold text-gold">+{COMPLETION_BONUS_CHANCES} chance</span> de fazer um novo palpite e{" "}
-            <span className="font-bold text-gold">+{COMPLETION_BONUS_TOKENS} tokens</span> extras.
-          </span>
+      {/* HERO */}
+      <header className="relative overflow-hidden rounded-3xl border border-primary/25 bg-gradient-to-br from-card via-card to-primary/10 p-5 sm:p-7 mb-5">
+        <div className="absolute -top-12 -right-12 h-48 w-48 rounded-full bg-primary/20 blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-16 -left-10 h-44 w-44 rounded-full bg-gold/15 blur-3xl pointer-events-none" />
+        <div className="relative grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4">
+          <div className="min-w-0">
+            <div className="inline-flex items-center gap-1.5 rounded-full bg-primary/15 border border-primary/30 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-primary mb-2">
+              <Target className="h-3 w-3" /> Missões
+            </div>
+            <h1 className="font-display text-3xl sm:text-4xl font-black leading-none">
+              MISSÕES
+            </h1>
+            <p className="text-sm text-muted-foreground mt-2 max-w-[26ch]">
+              Complete missões e <span className="text-gold font-bold">ganhe tokens</span> e mais chances de palpitar!
+            </p>
+          </div>
+          <div className="shrink-0 grid h-20 w-20 sm:h-24 sm:w-24 place-items-center rounded-2xl bg-gradient-to-br from-gold/30 to-primary/20 border border-gold/40 shadow-glow">
+            <Coins className="h-10 w-10 sm:h-12 sm:w-12 text-gold" />
+          </div>
         </div>
       </header>
 
-      <div className="mb-6">
-        <InviteLinkCard />
-      </div>
-
-      {loading ? (
-        <div className="text-center py-10 text-muted-foreground"><Loader2 className="h-6 w-6 animate-spin inline" /></div>
-      ) : missions.length === 0 ? (
-        <div className="rounded-2xl bg-card border border-border/60 p-8 text-center text-muted-foreground">
-          Nenhuma missão disponível agora. Volte em breve!
-        </div>
-      ) : (
-        PLATFORMS.map((p) =>
-          grouped[p].length === 0 ? null : (
-            <section key={p} className="mb-6">
-              <h2 className="font-display font-black text-lg mb-3 flex items-center gap-2">
-                <PlatformIcon p={p} className="h-5 w-5 text-primary" />
-                {PLATFORM_LABEL[p]}
-              </h2>
-              <div className="grid sm:grid-cols-2 gap-3">
-                {grouped[p].map((m) => {
-                  const done = claimed.has(m.id);
-                  const isRunning = running === m.id;
-                  return (
-                    <div key={m.id} className="rounded-xl bg-card border border-border/60 p-4 flex items-center gap-4 hover:border-primary/40 transition">
-                      <div className="h-10 w-10 rounded-lg bg-primary/15 border border-primary/30 grid place-items-center text-primary font-bold uppercase text-xs">
-                        {ACTION_LABEL[m.action_type].slice(0, 2)}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="font-semibold truncate">{m.sponsor_name}</div>
-                        <div className="text-xs text-muted-foreground truncate">{ACTION_LABEL[m.action_type]}</div>
-                        <div className="text-xs text-gold font-bold mt-0.5">
-                          +{m.tokens} Tokens{m.bonus_tokens > 0 && ` · +${m.bonus_tokens} bônus`} · +{COMPLETION_BONUS_TOKENS} extra · +{COMPLETION_BONUS_CHANCES} chance
-                        </div>
-                      </div>
-                      <button
-                        onClick={() => handleDo(m)}
-                        disabled={done || isRunning || !!running}
-                        className={`h-9 px-4 rounded-full font-bold text-xs inline-flex items-center gap-1 transition ${
-                          done
-                            ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30"
-                            : "bg-gradient-brand text-primary-foreground shadow-glow hover:scale-[1.03] disabled:opacity-60 disabled:hover:scale-100"
-                        }`}
-                      >
-                        {isRunning ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : done ? <Check className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
-                        {isRunning ? "Verificando…" : done ? "Concluída" : "Fazer tarefa"}
-                      </button>
-                    </div>
-                  );
-                })}
-              </div>
-            </section>
-          )
-        )
-      )}
-
-      <section className="mt-8 rounded-2xl bg-card border border-border/60 p-5 text-sm text-muted-foreground">
-        Saldo atual: <span className="text-gold font-display font-black text-base">{formatTokens(CURRENT_USER.tokens)} Tokens</span>
-      </section>
-
-      <section className="mt-6 rounded-2xl border border-amber-500/40 bg-amber-500/5 p-5">
-        <div className="flex items-start gap-3">
-          <AlertTriangle className="h-5 w-5 text-amber-400 shrink-0 mt-0.5" />
-          <div className="flex-1">
-            <label className="flex items-start gap-3 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={confirmed}
-                onChange={(e) => setConfirmed(e.target.checked)}
-                className="h-5 w-5 mt-0.5 accent-amber-400"
+      {/* PROGRESS */}
+      <section className="rounded-2xl border border-border/60 bg-card p-4 sm:p-5 mb-5">
+        <div className="text-[11px] font-bold uppercase tracking-wider text-primary mb-3">Seu progresso</div>
+        <div className="grid grid-cols-[auto_minmax(0,1fr)] sm:grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-4">
+          <div className="relative h-16 w-16 shrink-0">
+            <svg viewBox="0 0 36 36" className="h-full w-full -rotate-90">
+              <circle cx="18" cy="18" r="15.5" fill="none" stroke="hsl(var(--border))" strokeWidth="3" />
+              <circle
+                cx="18" cy="18" r="15.5" fill="none"
+                stroke="hsl(var(--primary))" strokeWidth="3" strokeLinecap="round"
+                strokeDasharray={`${(progressPct / 100) * 97.4} 97.4`}
               />
-              <span className="text-sm text-foreground">
-                <strong>Confirmo que realizei todas as tarefas selecionadas.</strong> Em caso de premiação, as tarefas serão verificadas. Caso constatado que não foram realizadas, o usuário será <strong>desclassificado</strong>.
-              </span>
-            </label>
+            </svg>
+            <div className="absolute inset-0 grid place-items-center">
+              <Trophy className="h-6 w-6 text-primary" />
+            </div>
+          </div>
+          <div className="min-w-0">
+            <div className="font-bold leading-tight text-sm sm:text-base">Missões concluídas</div>
+            <div className="text-xs text-muted-foreground">{completed}/{totalMissions} disponíveis</div>
+            <div className="text-[11px] text-primary font-bold mt-1">{progressPct}% completo</div>
+          </div>
+          <div className="col-span-2 sm:col-span-1 sm:text-right border-t sm:border-t-0 sm:border-l border-border/60 pt-3 sm:pt-0 sm:pl-5">
+            <div className="text-[11px] uppercase tracking-wider text-muted-foreground">Disponível</div>
+            <div className="font-display text-2xl font-black text-gold">+{formatTokens(totalClaimable)}</div>
+            <div className="text-[11px] text-muted-foreground">tokens em missões</div>
           </div>
         </div>
       </section>
+
+      {/* TABS */}
+      <div className="-mx-4 sm:mx-0 mb-4 overflow-x-auto no-scrollbar">
+        <div className="flex gap-2 px-4 sm:px-0 sm:flex-wrap min-w-max sm:min-w-0">
+          {TABS.map((t) => {
+            const Icon = t.icon;
+            const active = tab === t.key;
+            return (
+              <button
+                key={t.key}
+                onClick={() => setTab(t.key)}
+                className={`shrink-0 inline-flex items-center gap-1.5 rounded-full border px-3.5 py-2 text-xs font-bold transition ${
+                  active
+                    ? "bg-primary text-primary-foreground border-primary shadow-glow"
+                    : "bg-card border-border/60 text-muted-foreground hover:text-foreground hover:border-primary/40"
+                }`}
+              >
+                <Icon className="h-3.5 w-3.5" />
+                {t.label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* MISSION LIST */}
+      {loading ? (
+        <div className="text-center py-10 text-muted-foreground"><Loader2 className="h-6 w-6 animate-spin inline" /></div>
+      ) : filtered.length === 0 ? (
+        <div className="rounded-2xl bg-card border border-border/60 p-8 text-center text-muted-foreground">
+          Nenhuma missão nessa categoria. Tente outra aba!
+        </div>
+      ) : (
+        <div className="space-y-2.5">
+          {filtered.map((m) => {
+            const done = claimed.has(m.id);
+            const isRunning = running === m.id;
+            const totalTokens = m.tokens + (m.bonus_tokens || 0) + COMPLETION_BONUS_TOKENS;
+            return (
+              <div
+                key={m.id}
+                className={`rounded-2xl border p-3 sm:p-4 grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 transition ${
+                  done
+                    ? "bg-emerald-500/5 border-emerald-500/30"
+                    : "bg-card border-border/60 hover:border-primary/40"
+                }`}
+              >
+                <div className="shrink-0 h-12 w-12 rounded-xl bg-primary/10 border border-primary/25 grid place-items-center">
+                  <PlatformIcon p={m.platform} className="h-5 w-5 text-primary" />
+                </div>
+                <div className="min-w-0">
+                  <div className="font-bold text-sm truncate">{m.sponsor_name}</div>
+                  <div className="text-[11px] text-muted-foreground truncate">
+                    {ACTION_LABEL[m.action_type]} · {PLATFORM_LABEL[m.platform]}
+                  </div>
+                  <div className="mt-1 inline-flex items-center gap-1 text-[11px] font-bold text-gold">
+                    <Coins className="h-3 w-3" /> +{totalTokens} tokens
+                  </div>
+                </div>
+                <button
+                  onClick={() => handleDo(m)}
+                  disabled={done || isRunning || !!running}
+                  className={`shrink-0 h-9 px-3.5 rounded-full font-bold text-[11px] uppercase tracking-wide inline-flex items-center gap-1 transition ${
+                    done
+                      ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30"
+                      : "bg-gradient-brand text-primary-foreground shadow-glow hover:scale-[1.03] disabled:opacity-60 disabled:hover:scale-100"
+                  }`}
+                >
+                  {isRunning ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : done ? <Check className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
+                  {isRunning ? "..." : done ? "Feita" : "Fazer"}
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* INVITE CTA BANNER */}
+      <section className="mt-6 rounded-3xl border border-gold/40 bg-gradient-to-br from-gold/10 via-card to-primary/10 p-5 overflow-hidden relative">
+        <div className="absolute -top-10 -right-10 h-40 w-40 rounded-full bg-gold/20 blur-3xl pointer-events-none" />
+        <div className="relative grid grid-cols-[auto_minmax(0,1fr)] items-center gap-4 mb-4">
+          <div className="grid h-14 w-14 place-items-center rounded-2xl bg-gold/20 border border-gold/40 shrink-0">
+            <Users className="h-7 w-7 text-gold" />
+          </div>
+          <div className="min-w-0">
+            <h3 className="font-display font-black text-lg leading-tight">Convide amigos e ganhe mais tokens!</h3>
+            <p className="text-xs text-muted-foreground mt-1">Cada amigo cadastrado vale <span className="text-gold font-bold">+50 tokens</span>.</p>
+          </div>
+        </div>
+        <InviteLinkCard />
+      </section>
+
+      {/* CONFIRMATION */}
+      <section className="mt-5 rounded-2xl border border-amber-500/40 bg-amber-500/5 p-4">
+        <label className="flex items-start gap-3 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={confirmed}
+            onChange={(e) => setConfirmed(e.target.checked)}
+            className="h-5 w-5 mt-0.5 accent-amber-400 shrink-0"
+          />
+          <span className="text-xs text-foreground leading-relaxed">
+            <AlertTriangle className="h-3.5 w-3.5 inline text-amber-400 mr-1" />
+            <strong>Confirmo que realizei todas as tarefas.</strong> Em caso de premiação, serão verificadas. Caso constatado que não foram realizadas, o usuário será <strong>desclassificado</strong>.
+          </span>
+        </label>
+      </section>
+
+      <div className="mt-5 mb-2 text-center text-xs text-muted-foreground">
+        Saldo atual: <span className="text-gold font-display font-black text-sm">{formatTokens(CURRENT_USER.tokens)} tokens</span>
+      </div>
     </AppShell>
   );
 }
