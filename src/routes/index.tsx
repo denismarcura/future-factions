@@ -346,6 +346,14 @@ function Feed() {
             <div className="text-[11px] uppercase tracking-wider font-black text-emerald-400">Convite e Ganhe</div>
           </div>
           <p className="relative text-[11px] text-muted-foreground mb-3 leading-snug">Convide amigos e ganhe prêmios!</p>
+          {mounted && (
+            <div className="relative mb-3 flex items-center justify-between gap-2 rounded-lg bg-emerald-500/10 border border-emerald-500/30 px-2 py-1.5">
+              <span className="text-[10px] font-bold text-emerald-300 uppercase tracking-wider">Campanha</span>
+              <span className="inline-flex items-center gap-1 text-[10px] font-black font-mono text-emerald-300">
+                <Timer className="h-3 w-3" /> {fmtDHMS(msUntilSundayEnd())}
+              </span>
+            </div>
+          )}
           <ul className="relative space-y-2 mb-3 flex-1">
             <li className="flex items-center gap-2">
               <span className="h-6 w-6 rounded-full bg-emerald-500/15 text-emerald-400 grid place-items-center text-[10px] font-black shrink-0">1</span>
