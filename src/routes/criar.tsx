@@ -2234,63 +2234,38 @@ function MissionWizard({
 function PublishedSuccess({
   name,
   id,
-  inviteUrl,
+  bannerUrl,
+  senderName,
   onCreateAnother,
 }: {
   name: string;
   id: string;
-  inviteUrl: string;
+  bannerUrl?: string;
+  senderName: string;
   onCreateAnother: () => void;
 }) {
+  const origin = typeof window !== "undefined" ? window.location.origin : "https://www.desafiodospalpites.com.br";
+  const link = `${origin}/previsao/${id}`;
+
   const [copied, setCopied] = useState(false);
-  const [textCopied, setTextCopied] = useState(false);
-  // Link de convite único do usuário: URL limpa, sem cobrança de tokens.
-  const link = inviteUrl || "https://www.desafiodospalpites.com.br/desafios";
+  const [emailOpen, setEmailOpen] = useState(false);
+  const sendInvitesFn = useServerFn(sendChallengeInvites);
 
-  const inviteSubject = `🎯 Participe do meu desafio "${name}" — Desafio dos Palpites (100% GRATUITO)`;
-  const inviteBody = `Olá!
-
-Acabei de criar um desafio no Desafio dos Palpites e quero te convidar para participar:
-
-🏆 "${name}"
-👉 ${link}
-
-⚠️ ATENÇÃO: O DESAFIO DOS PALPITES É TOTALMENTE GRATUITO. Muitos prêmios são fornecidos por nossos patrocinadores!
-
-🎯 Existem vários tipos de Desafios:
-• Desafio dos Palpites (oficiais da plataforma)
-• Desafios criados por usuários
-• Desafios criados por empresas
-
-🪙 A plataforma usa 2 tipos de tokens:
-• Token Acumulativo — você ganha criando desafios, convidando amigos, fazendo missões e check-in diário
-• Token Palpite — usado para participar de determinados desafios; você ganha completando missões
-
-✅ Tarefas diárias:
-Fazendo todas as tarefas diárias você pode ganhar até 5.000 tokens de troca e até 10 tokens de palpites.
-
-🎁 Clique no meu link, cadastre-se e ganhe 1.000 tokens — mais 100 tokens quando criar seu primeiro desafio!
-${link}
-
-Te espero lá! 🚀`;
-
-  const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(inviteBody)}`;
-  const mailtoUrl = `mailto:?subject=${encodeURIComponent(inviteSubject)}&body=${encodeURIComponent(inviteBody)}`;
+  const shareMessage = `🏆 Você foi convidado para participar do desafio:\n\n*${name}*\n\nÉ totalmente gratuito. Faça seus palpites e concorra aos prêmios.\n\nParticipe agora:\n${link}`;
 
   const writeToClipboard = async (value: string) => {
     try {
       if (navigator.clipboard?.writeText) {
         await navigator.clipboard.writeText(value);
       } else {
-        const textarea = document.createElement("textarea");
-        textarea.value = value;
-        textarea.setAttribute("readonly", "");
-        textarea.style.position = "fixed";
-        textarea.style.opacity = "0";
-        document.body.appendChild(textarea);
-        textarea.select();
+        const ta = document.createElement("textarea");
+        ta.value = value;
+        ta.style.position = "fixed";
+        ta.style.opacity = "0";
+        document.body.appendChild(ta);
+        ta.select();
         document.execCommand("copy");
-        document.body.removeChild(textarea);
+        document.body.removeChild(ta);
       }
       return true;
     } catch {
@@ -2298,80 +2273,155 @@ Te espero lá! 🚀`;
     }
   };
 
-  const copy = async () => {
+  const copyLink = async () => {
     if (await writeToClipboard(link)) {
       setCopied(true);
+      toast.success("✅ Link copiado com sucesso");
       setTimeout(() => setCopied(false), 1500);
+    } else {
+      toast.error("Não foi possível copiar");
     }
   };
-  const copyText = async () => {
-    if (await writeToClipboard(inviteBody)) {
-      setTextCopied(true);
-      setTimeout(() => setTextCopied(false), 1500);
-    }
+
+  const encMsg = encodeURIComponent(shareMessage);
+  const encLink = encodeURIComponent(link);
+  const encTitle = encodeURIComponent(name);
+
+  const openShare = (url: string) => {
+    window.open(url, "_blank", "noopener,noreferrer");
+  };
+
+  const shareButtons: { label: string; icon: React.ReactNode; bg: string; onClick: () => void }[] = [
+    {
+      label: "WhatsApp",
+      icon: <MessageCircle className="h-5 w-5" />,
+      bg: "bg-[#25D366] text-white",
+      onClick: () => openShare(`https://wa.me/?text=${encMsg}`),
+    },
+    {
+      label: "Facebook",
+      icon: <Facebook className="h-5 w-5" />,
+      bg: "bg-[#1877F2] text-white",
+      onClick: () => openShare(`https://www.facebook.com/sharer/sharer.php?u=${encLink}&quote=${encTitle}`),
+    },
+    {
+      label: "Telegram",
+      icon: <Send className="h-5 w-5" />,
+      bg: "bg-[#229ED9] text-white",
+      onClick: () => openShare(`https://t.me/share/url?url=${encLink}&text=${encTitle}`),
+    },
+    {
+      label: "X / Twitter",
+      icon: <Twitter className="h-5 w-5" />,
+      bg: "bg-black text-white",
+      onClick: () => openShare(`https://twitter.com/intent/tweet?text=${encTitle}&url=${encLink}`),
+    },
+    {
+      label: "Instagram",
+      icon: <Instagram className="h-5 w-5" />,
+      bg: "bg-gradient-to-br from-[#f09433] via-[#dc2743] to-[#bc1888] text-white",
+      onClick: () => {
+        void copyLink();
+        toast.info("Link copiado! Cole no seu story ou bio do Instagram 📲");
+      },
+    },
+    {
+      label: "Copiar link",
+      icon: <Link2 className="h-5 w-5" />,
+      bg: "bg-card border border-border/60 text-foreground",
+      onClick: copyLink,
+    },
+  ];
+
+  // QR Code download
+  const qrRef = useRef<HTMLDivElement | null>(null);
+  const downloadQr = () => {
+    const canvas = qrRef.current?.querySelector("canvas") as HTMLCanvasElement | null;
+    if (!canvas) return;
+    const url = canvas.toDataURL("image/png");
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `desafio-${id}-qr.png`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
   };
 
   return (
-    <div className="max-w-2xl mx-auto text-center py-10">
-      <div className="mx-auto h-20 w-20 rounded-full bg-primary/15 grid place-items-center mb-5 shadow-glow">
-        <CheckCircle2 className="h-10 w-10 text-primary" />
+    <div className="max-w-3xl mx-auto py-8">
+      <div className="text-center mb-8">
+        <div className="mx-auto h-20 w-20 rounded-full bg-primary/15 grid place-items-center mb-5 shadow-glow animate-in zoom-in-50">
+          <CheckCircle2 className="h-10 w-10 text-primary" />
+        </div>
+        <h1 className="font-display text-3xl font-black mb-2">Desafio publicado!</h1>
+        <p className="text-muted-foreground">
+          <span className="text-foreground font-semibold">"{name}"</span> está no ar. Compartilhe com seus amigos.
+        </p>
       </div>
-      <h1 className="font-display text-3xl font-black mb-2">Desafio publicado!</h1>
-      <p className="text-muted-foreground mb-6">
-        <span className="text-foreground font-semibold">"{name}"</span> está no ar. Use seu link simples de convite abaixo — nenhum token foi cobrado.
-      </p>
 
-      <div className="rounded-2xl glass-card p-4 flex items-center gap-2 mb-4">
+      {/* Challenge link */}
+      <div className="rounded-2xl glass-card p-4 flex flex-wrap items-center gap-2 mb-6">
         <Share2 className="h-4 w-4 text-gold shrink-0" />
-        <input readOnly value={link} className="flex-1 bg-transparent text-sm outline-none truncate" />
-        <button onClick={copy} className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg bg-primary/15 text-primary border border-primary/30 text-sm font-semibold hover:bg-primary/20">
+        <input readOnly value={link} className="flex-1 min-w-[200px] bg-transparent text-sm outline-none truncate" />
+        <button onClick={copyLink} className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg bg-primary/15 text-primary border border-primary/30 text-sm font-semibold hover:bg-primary/20">
           <Copy className="h-4 w-4" /> {copied ? "Copiado" : "Copiar"}
         </button>
-        <a href={link} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg bg-gold/15 text-gold border border-gold/30 text-sm font-semibold hover:bg-gold/20">
-          <ExternalLink className="h-4 w-4" /> Abrir
-        </a>
+        <Link to="/previsao/$id" params={{ id }} className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg bg-gold/15 text-gold border border-gold/30 text-sm font-semibold hover:bg-gold/20">
+          <ExternalLink className="h-4 w-4" /> Abrir desafio
+        </Link>
       </div>
 
-      {/* Convide seus amigos */}
-      <div className="rounded-2xl border border-primary/30 bg-primary/5 p-5 mb-6 text-left">
-        <div className="flex items-center gap-2 mb-3">
+      {/* Invite friends section */}
+      <div className="rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/10 via-card to-card p-5 sm:p-6 mb-6">
+        <div className="flex items-center gap-2 mb-4">
           <UserPlus className="h-5 w-5 text-primary" />
-          <div className="font-display font-black text-base">Convide seus amigos</div>
+          <div className="font-display font-black text-base sm:text-lg">Convide seus amigos</div>
         </div>
-        <p className="text-xs text-muted-foreground mb-4">
-          Texto pronto destacando que o Desafio dos Palpites é <strong className="text-foreground">100% gratuito</strong>, com vários tipos de desafios e prêmios dos patrocinadores. É só escolher o canal:
-        </p>
 
-        <div className="grid sm:grid-cols-2 gap-3 mb-4">
-          <a
-            href={mailtoUrl}
-            className="inline-flex items-center justify-center gap-2 h-11 px-4 rounded-xl bg-primary text-primary-foreground font-display font-bold shadow-glow hover:opacity-90"
+        {/* Share grid */}
+        <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 sm:gap-3 mb-6">
+          {shareButtons.map((b) => (
+            <button
+              key={b.label}
+              type="button"
+              onClick={b.onClick}
+              className={`flex flex-col items-center justify-center gap-1.5 aspect-square rounded-xl ${b.bg} font-semibold text-[10px] sm:text-xs transition-transform hover:scale-105 active:scale-95 shadow-sm`}
+            >
+              {b.icon}
+              <span className="leading-tight text-center px-1">{b.label}</span>
+            </button>
+          ))}
+        </div>
+
+        {/* Email + QR */}
+        <div className="grid sm:grid-cols-2 gap-4">
+          <button
+            type="button"
+            onClick={() => setEmailOpen(true)}
+            className="flex items-center justify-center gap-2 h-12 px-4 rounded-xl bg-primary text-primary-foreground font-display font-bold shadow-glow hover:opacity-90"
           >
             <Mail className="h-4 w-4" /> Convidar por E-mail
-          </a>
-          <a
-            href={whatsappUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex items-center justify-center gap-2 h-11 px-4 rounded-xl bg-gradient-brand text-primary-foreground font-display font-bold shadow-glow hover:opacity-90"
-          >
-            <MessageCircle className="h-4 w-4" /> Convidar por WhatsApp
-          </a>
-        </div>
+          </button>
 
-        <details className="rounded-lg border border-border/60 bg-background/40 p-3">
-          <summary className="cursor-pointer text-xs font-semibold text-muted-foreground flex items-center justify-between">
-            <span>Ver / editar o texto do convite</span>
-            <button
-              type="button"
-              onClick={(e) => { e.preventDefault(); void copyText(); }}
-              className="inline-flex items-center gap-1.5 h-7 px-2 rounded-md bg-primary/15 text-primary border border-primary/30 text-[11px] font-semibold hover:bg-primary/20"
-            >
-              <Copy className="h-3 w-3" /> {textCopied ? "Copiado" : "Copiar texto"}
-            </button>
-          </summary>
-          <pre className="mt-3 whitespace-pre-wrap text-xs text-muted-foreground leading-relaxed font-sans">{inviteBody}</pre>
-        </details>
+          <div className="rounded-xl border border-border/60 bg-background/40 p-4 flex items-center gap-3">
+            <div ref={qrRef} className="bg-white p-2 rounded-lg shrink-0">
+              <QRCodeCanvas value={link} size={84} level="M" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-1.5 text-xs font-semibold text-foreground mb-1">
+                <QrCode className="h-3.5 w-3.5 text-primary" /> QR Code
+              </div>
+              <div className="text-[11px] text-muted-foreground mb-2 leading-snug">Aponte a câmera para abrir o desafio</div>
+              <button
+                type="button"
+                onClick={downloadQr}
+                className="inline-flex items-center gap-1.5 h-7 px-2.5 rounded-md bg-primary/15 text-primary border border-primary/30 text-[11px] font-semibold hover:bg-primary/20"
+              >
+                <Download className="h-3 w-3" /> Baixar
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div className="flex flex-wrap gap-3 justify-center">
@@ -2382,9 +2432,180 @@ Te espero lá! 🚀`;
           Criar outro
         </button>
       </div>
+
+      <EmailInviteModal
+        open={emailOpen}
+        onClose={() => setEmailOpen(false)}
+        challengeId={id}
+        challengeName={name}
+        challengeUrl={link}
+        bannerUrl={bannerUrl}
+        defaultSenderName={senderName}
+        sendInvites={async (input) => {
+          const res = await sendInvitesFn({ data: input });
+          return res;
+        }}
+      />
     </div>
   );
 }
+
+function EmailInviteModal({
+  open,
+  onClose,
+  challengeId,
+  challengeName,
+  challengeUrl,
+  bannerUrl,
+  defaultSenderName,
+  sendInvites,
+}: {
+  open: boolean;
+  onClose: () => void;
+  challengeId: string;
+  challengeName: string;
+  challengeUrl: string;
+  bannerUrl?: string;
+  defaultSenderName: string;
+  sendInvites: (input: {
+    challengeId: string;
+    challengeName: string;
+    challengeUrl: string;
+    bannerUrl?: string;
+    senderName: string;
+    recipients: string[];
+  }) => Promise<{ ok: number; failed: number; total: number }>;
+}) {
+  const [senderName, setSenderName] = useState(defaultSenderName);
+  const [rawEmails, setRawEmails] = useState("");
+  const [sending, setSending] = useState(false);
+
+  const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const parsed = useMemo(() => {
+    const tokens = rawEmails
+      .split(/[\s,;\n]+/)
+      .map((s) => s.trim().toLowerCase())
+      .filter(Boolean);
+    const seen = new Set<string>();
+    const valid: string[] = [];
+    const invalid: string[] = [];
+    for (const t of tokens) {
+      if (seen.has(t)) continue;
+      seen.add(t);
+      if (EMAIL_RE.test(t)) valid.push(t);
+      else invalid.push(t);
+    }
+    return { valid, invalid };
+  }, [rawEmails]);
+
+  const handleSend = async () => {
+    if (!senderName.trim()) {
+      toast.error("Informe seu nome");
+      return;
+    }
+    if (parsed.valid.length === 0) {
+      toast.error("Adicione ao menos um e-mail válido");
+      return;
+    }
+    setSending(true);
+    try {
+      const res = await sendInvites({
+        challengeId,
+        challengeName,
+        challengeUrl,
+        bannerUrl,
+        senderName: senderName.trim(),
+        recipients: parsed.valid,
+      });
+      if (res.ok > 0) {
+        toast.success(`✉️ ${res.ok} convite(s) enviado(s)${res.failed ? ` — ${res.failed} falharam` : ""}`);
+        setRawEmails("");
+        onClose();
+      } else {
+        toast.error("Não foi possível enviar os convites. Tente novamente.");
+      }
+    } catch (e) {
+      console.error(e);
+      toast.error("Erro ao enviar convites");
+    } finally {
+      setSending(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="max-w-lg">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2"><Mail className="h-5 w-5 text-primary" /> Convidar por E-mail</DialogTitle>
+          <DialogDescription>
+            Envie convites diretamente para o e-mail dos seus amigos. Eles receberão o link e o banner do desafio.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-4">
+          <div>
+            <label className="block text-xs font-semibold text-muted-foreground mb-1.5">Seu nome</label>
+            <input
+              value={senderName}
+              onChange={(e) => setSenderName(e.target.value)}
+              placeholder="Ex.: Denis"
+              className="w-full h-10 px-3 rounded-lg bg-background border border-border/60 text-sm outline-none focus:border-primary"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-muted-foreground mb-1.5">
+              E-mails dos amigos
+            </label>
+            <textarea
+              value={rawEmails}
+              onChange={(e) => setRawEmails(e.target.value)}
+              placeholder={"amigo1@gmail.com, amigo2@gmail.com\namigo3@gmail.com\namigo4@gmail.com; amigo5@gmail.com"}
+              rows={6}
+              className="w-full px-3 py-2 rounded-lg bg-background border border-border/60 text-sm outline-none focus:border-primary resize-y"
+            />
+            <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-primary/15 text-primary font-semibold">
+                <Check className="h-3 w-3" /> {parsed.valid.length} válido(s)
+              </span>
+              {parsed.invalid.length > 0 && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-destructive/15 text-destructive font-semibold">
+                  <AlertCircle className="h-3 w-3" /> {parsed.invalid.length} inválido(s)
+                </span>
+              )}
+            </div>
+            {parsed.invalid.length > 0 && (
+              <div className="mt-2 text-[11px] text-destructive/90 break-all">
+                Inválidos: {parsed.invalid.join(", ")}
+              </div>
+            )}
+          </div>
+        </div>
+
+        <DialogFooter>
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={sending}
+            className="h-10 px-4 rounded-lg border border-border text-sm font-semibold hover:border-primary disabled:opacity-50"
+          >
+            Cancelar
+          </button>
+          <button
+            type="button"
+            onClick={handleSend}
+            disabled={sending || parsed.valid.length === 0 || !senderName.trim()}
+            className="h-10 px-4 rounded-lg bg-primary text-primary-foreground text-sm font-bold inline-flex items-center gap-2 hover:opacity-90 disabled:opacity-50"
+          >
+            {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+            {sending ? "Enviando..." : `Enviar ${parsed.valid.length || ""} convite(s)`}
+          </button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 
 function loadImage(src: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
