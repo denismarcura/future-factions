@@ -173,26 +173,30 @@ export function PredictionCard({ prediction: p, hideOptions = false }: { predict
           </button>
         )}
 
-        <div className="mt-3 flex items-center gap-4 text-xs text-muted-foreground shrink-0">
-          <span className="inline-flex items-center gap-1">
-            <Users className="h-3.5 w-3.5" /> {p.bettors} palpiteiros
-          </span>
-          <span className="text-gold font-semibold tabular-nums">
-            {formatTokens(totalPool)} tokens
-          </span>
-          <span className="ml-auto inline-flex items-center gap-3">
-            <span className="inline-flex items-center gap-1"><Heart className="h-3.5 w-3.5" />{p.likes}</span>
-            <span className="inline-flex items-center gap-1"><MessageCircle className="h-3.5 w-3.5" />{p.comments}</span>
-            <span className="inline-flex items-center gap-1"><Share2 className="h-3.5 w-3.5" />{p.shares}</span>
-          </span>
-        </div>
+        {!hideOptions && (
+          <>
+            <div className="mt-3 flex items-center gap-4 text-xs text-muted-foreground shrink-0">
+              <span className="inline-flex items-center gap-1">
+                <Users className="h-3.5 w-3.5" /> {p.bettors} palpiteiros
+              </span>
+              <span className="text-gold font-semibold tabular-nums">
+                {formatTokens(totalPool)} tokens
+              </span>
+              <span className="ml-auto inline-flex items-center gap-3">
+                <span className="inline-flex items-center gap-1"><Heart className="h-3.5 w-3.5" />{p.likes}</span>
+                <span className="inline-flex items-center gap-1"><MessageCircle className="h-3.5 w-3.5" />{p.comments}</span>
+                <span className="inline-flex items-center gap-1"><Share2 className="h-3.5 w-3.5" />{p.shares}</span>
+              </span>
+            </div>
 
-        <div className="mt-4 flex items-center gap-2 pt-3 border-t border-border/60 shrink-0">
-          <img src={p.author.avatar} alt="" className="h-6 w-6 rounded-full bg-muted" />
-          <span className="text-xs text-muted-foreground">
-            por <span className="text-foreground font-medium">{p.author.username}</span> · {p.author.city}/{p.author.state}
-          </span>
-        </div>
+            <div className="mt-4 flex items-center gap-2 pt-3 border-t border-border/60 shrink-0">
+              <img src={p.author.avatar} alt="" className="h-6 w-6 rounded-full bg-muted" />
+              <span className="text-xs text-muted-foreground">
+                por <span className="text-foreground font-medium">{p.author.username}</span> · {p.author.city}/{p.author.state}
+              </span>
+            </div>
+          </>
+        )}
       </Link>
     </article>
   );
