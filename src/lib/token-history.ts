@@ -67,10 +67,10 @@ export async function buildTokenHistory(): Promise<TokenHistory> {
   if (missionIds.length) {
     const { data: missions } = await supabase
       .from("missions")
-      .select("id, title, platform, action")
+      .select("id, title, platform")
       .in("id", missionIds);
-    for (const m of (missions ?? []) as Array<{ id: string; title: string | null; platform: string; action: string }>) {
-      titleById.set(m.id, m.title || `${m.platform} · ${m.action}`);
+    for (const m of (missions ?? []) as Array<{ id: string; title: string | null; platform: string }>) {
+      titleById.set(m.id, m.title || m.platform);
     }
   }
   for (const c of claims) {

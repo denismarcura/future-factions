@@ -62,6 +62,7 @@ import { Route as AdminBannersInferioresRouteImport } from './routes/admin.banne
 import { Route as AdminBannersRouteImport } from './routes/admin.banners'
 import { Route as AdminApuracaoCopaRouteImport } from './routes/admin.apuracao-copa'
 import { Route as AdminApisRouteImport } from './routes/admin.apis'
+import { Route as AuthenticatedHistoricoTokensRouteImport } from './routes/_authenticated/historico-tokens'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as ApiPublicHooksTop100SnapshotRouteImport } from './routes/api/public/hooks/top100-snapshot'
@@ -332,6 +333,12 @@ const AdminApisRoute = AdminApisRouteImport.update({
   path: '/apis',
   getParentRoute: () => AdminRoute,
 } as any)
+const AuthenticatedHistoricoTokensRoute =
+  AuthenticatedHistoricoTokensRouteImport.update({
+    id: '/historico-tokens',
+    path: '/historico-tokens',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -384,6 +391,7 @@ export interface FileRoutesByFullPath {
   '/termos': typeof TermosRoute
   '/top100': typeof Top100Route
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/historico-tokens': typeof AuthenticatedHistoricoTokensRoute
   '/admin/apis': typeof AdminApisRoute
   '/admin/apuracao-copa': typeof AdminApuracaoCopaRoute
   '/admin/banners': typeof AdminBannersRoute
@@ -442,6 +450,7 @@ export interface FileRoutesByTo {
   '/termos': typeof TermosRoute
   '/top100': typeof Top100Route
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/historico-tokens': typeof AuthenticatedHistoricoTokensRoute
   '/admin/apis': typeof AdminApisRoute
   '/admin/apuracao-copa': typeof AdminApuracaoCopaRoute
   '/admin/banners': typeof AdminBannersRoute
@@ -503,6 +512,7 @@ export interface FileRoutesById {
   '/termos': typeof TermosRoute
   '/top100': typeof Top100Route
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/historico-tokens': typeof AuthenticatedHistoricoTokensRoute
   '/admin/apis': typeof AdminApisRoute
   '/admin/apuracao-copa': typeof AdminApuracaoCopaRoute
   '/admin/banners': typeof AdminBannersRoute
@@ -564,6 +574,7 @@ export interface FileRouteTypes {
     | '/termos'
     | '/top100'
     | '/dashboard'
+    | '/historico-tokens'
     | '/admin/apis'
     | '/admin/apuracao-copa'
     | '/admin/banners'
@@ -622,6 +633,7 @@ export interface FileRouteTypes {
     | '/termos'
     | '/top100'
     | '/dashboard'
+    | '/historico-tokens'
     | '/admin/apis'
     | '/admin/apuracao-copa'
     | '/admin/banners'
@@ -682,6 +694,7 @@ export interface FileRouteTypes {
     | '/termos'
     | '/top100'
     | '/_authenticated/dashboard'
+    | '/_authenticated/historico-tokens'
     | '/admin/apis'
     | '/admin/apuracao-copa'
     | '/admin/banners'
@@ -1124,6 +1137,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminApisRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/_authenticated/historico-tokens': {
+      id: '/_authenticated/historico-tokens'
+      path: '/historico-tokens'
+      fullPath: '/historico-tokens'
+      preLoaderRoute: typeof AuthenticatedHistoricoTokensRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/dashboard': {
       id: '/_authenticated/dashboard'
       path: '/dashboard'
@@ -1164,10 +1184,12 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedHistoricoTokensRoute: typeof AuthenticatedHistoricoTokensRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedHistoricoTokensRoute: AuthenticatedHistoricoTokensRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =

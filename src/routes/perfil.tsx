@@ -109,6 +109,15 @@ function Perfil() {
         </div>
       </section>
 
+      <div className="mb-6 flex flex-wrap items-center gap-3">
+        <Link
+          to="/historico-tokens"
+          className="inline-flex items-center gap-2 rounded-xl border border-gold/40 bg-gold/10 px-4 py-2 text-sm font-semibold text-gold hover:bg-gold/20 transition"
+        >
+          <Award className="h-4 w-4" /> Ver histórico de tokens
+        </Link>
+      </div>
+
       <div className="mb-6">
         <InviteLinkCard title="Seu link simples de convite" />
       </div>
