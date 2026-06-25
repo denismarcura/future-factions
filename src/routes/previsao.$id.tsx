@@ -581,14 +581,34 @@ function PredictionInner({ p }: { p: Prediction }) {
           {/* PARTICIPAR — botão verde único (também serve para CONFIRMAR PALPITE EXTRA) */}
           <button
             id="participar-cta"
-            onClick={handleParticipate}
-            disabled={
-              isClosed ||
-              (p.subPredictions
-                ? (Object.keys(subAnswers).length < p.subPredictions.length) || (confirmed && !pendingExtra)
-                : false) ||
-              (!confirmed && balance !== null && balance < (p.entryFee ?? amount))
-            }
+            onClick={() => {
+              if (isClosed) {
+                toast.error("As apostas para este desafio já foram encerradas.");
+                return;
+              }
+              if (confirmed && !pendingExtra) {
+                toast.info("Você já confirmou sua participação neste desafio.");
+                return;
+              }
+              if (p.subPredictions) {
+                const filled = Object.keys(subAnswers).length;
+                if (filled < p.subPredictions.length) {
+                  toast.error(`Selecione todos os ${p.subPredictions.length} palpites antes de participar (${filled}/${p.subPredictions.length}).`);
+                  const firstMissing = p.subPredictions.find((s) => !subAnswers[s.id]);
+                  if (firstMissing) {
+                    const el = document.getElementById(`sub-${firstMissing.id}`);
+                    el?.scrollIntoView({ behavior: "smooth", block: "center" });
+                  }
+                  return;
+                }
+              }
+              if (!confirmed && user && balance !== null && balance < (p.entryFee ?? amount)) {
+                toast.error(`Saldo insuficiente. Você tem ${formatTokens(balance)} TKN e precisa de ${p.entryFee ?? amount} TKN.`);
+                return;
+              }
+              handleParticipate();
+            }}
+            disabled={isClosed}
             className="mt-6 w-full h-14 rounded-xl font-display font-black tracking-wide text-lg transition disabled:opacity-60 disabled:cursor-not-allowed text-white"
             style={{
               background: pendingExtra
@@ -609,6 +629,7 @@ function PredictionInner({ p }: { p: Prediction }) {
               ? "✓ PARTICIPAÇÃO CONFIRMADA"
               : "PARTICIPAR"}
           </button>
+
           {user && balance !== null && (
             <p className="mt-2 text-[11px] text-center text-muted-foreground">
               Seu saldo: <span className="text-gold font-bold">{formatTokens(balance)} TKN</span> · Entrada:{" "}
