@@ -10,9 +10,21 @@ type Variant = "full" | "compact";
 export function InviteLinkCard({ variant = "full", title }: { variant?: Variant; title?: string }) {
   const { user } = useAuth();
   const [copied, setCopied] = useState(false);
+  const [showQR, setShowQR] = useState(variant === "full");
+  const qrWrapRef = useRef<HTMLDivElement>(null);
   const url = useInviteUrl(user);
 
   if (!user || !url) return null;
+
+  function downloadQR() {
+    const canvas = qrWrapRef.current?.querySelector("canvas");
+    if (!canvas) return;
+    const link = document.createElement("a");
+    link.download = "meu-convite-desafio.png";
+    link.href = canvas.toDataURL("image/png");
+    link.click();
+    toast.success("QR Code baixado!");
+  }
 
   async function copy() {
     try {
