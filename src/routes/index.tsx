@@ -39,6 +39,8 @@ function Feed() {
   const [sort, setSort] = useState<Sort>("new");
   const [banners, setBanners] = useState<Banner[]>([]);
   const [userChallenges, setUserChallenges] = useState<Prediction[]>([]);
+  const participatedIds = useParticipatedChallengeIds();
+  const notParticipated = <T extends { id: string }>(p: T) => !participatedIds.has(String(p.id));
 
   useEffect(() => {
     setBanners(listActiveBanners());
