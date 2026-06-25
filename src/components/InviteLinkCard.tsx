@@ -1,6 +1,7 @@
-import { useState } from "react";
-import { Copy, Check, Share2, Gift } from "lucide-react";
+import { useRef, useState } from "react";
+import { Copy, Check, Share2, Gift, QrCode, Download } from "lucide-react";
 import { toast } from "sonner";
+import { QRCodeCanvas } from "qrcode.react";
 import { useAuth } from "@/hooks/use-auth";
 import { useInviteUrl } from "@/hooks/use-invite-url";
 
