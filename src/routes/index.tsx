@@ -261,6 +261,7 @@ function Feed() {
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {userChallenges
               .filter((p) => !p.tags?.includes("link-apenas") && new Date(p.closesAt).getTime() > Date.now())
+              .filter(notParticipated)
               .slice(0, 6)
               .map((p) => (
                 <PredictionCard key={p.id} prediction={p} hideOptions />
