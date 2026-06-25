@@ -149,9 +149,10 @@ function DesafiosPage() {
     const ref = nowTs ?? new Date("2026-06-20T00:00:00-03:00").getTime();
     return WORLD_CUP_MATCHES
       .filter((m) => new Date(m.kickoff).getTime() > ref)
+      .filter((m) => !participatedIds.has(String(m.id)))
       .sort((a, b) => new Date(a.kickoff).getTime() - new Date(b.kickoff).getTime())
       .slice(0, 8);
-  }, [nowTs]);
+  }, [nowTs, participatedIds]);
 
   return (
     <AppShell>
