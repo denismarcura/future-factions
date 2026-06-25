@@ -41,7 +41,7 @@ export function ClosingTimerBadge({ closesAt }: { closesAt: string }) {
 
   return (
     <span
-      className="inline-flex items-center gap-1.5 h-7 px-3 rounded-full text-[11px] font-black uppercase tracking-wide text-white shadow-lg"
+      className="inline-flex items-center gap-1.5 h-7 px-3 rounded-lg text-[11px] font-black uppercase tracking-wide text-white shadow-lg"
       style={{
         background: gradient,
         boxShadow: glow,
