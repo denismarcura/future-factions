@@ -121,8 +121,21 @@ function Perfil() {
         </Link>
       </div>
 
+      <MissionsTeaser limit={6} />
+
       <div className="mb-6">
         <InviteLinkCard title="Seu link simples de convite" />
+        <div className="mt-3 flex flex-wrap gap-2">
+          <Link
+            to="/convidar-amigos"
+            className="inline-flex items-center gap-2 h-11 px-5 rounded-xl bg-gradient-brand text-primary-foreground font-display font-black text-sm shadow-glow hover:scale-[1.01] transition"
+          >
+            <Mail className="h-4 w-4" /> Convidar por e-mail
+          </Link>
+          <span className="text-xs text-muted-foreground self-center">
+            Envie um e-mail bonito para vários amigos de uma vez.
+          </span>
+        </div>
       </div>
 
       <div className="grid lg:grid-cols-[1fr_320px] gap-6">
