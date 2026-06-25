@@ -1,31 +1,116 @@
-# Histórico detalhado de débitos de tokens
+# Plano de execução — Desafio dos Palpites
 
-Hoje o saldo (`src/lib/balance.ts`) é calculado a partir de 4 fontes, mas o usuário não consegue ver o que entrou e o que saiu. Vou criar uma página dedicada que lista cada movimento com data, motivo, link de origem e impacto no saldo.
+Escopo grande (12 itens). Vou agrupar em 5 frentes lógicas que serão entregues em sequência, preservando layout e funcionalidades existentes.
 
-## O que vai aparecer
+---
 
-Uma timeline unificada com filtro (Todos / Entradas / Saídas), mostrando:
+## Frente A — Créditos de Palpites (itens 01, 02, 03)
 
-**Créditos (entradas)**
-- Bônus de boas-vindas (`profiles.welcome_bonus`) — 1 linha inicial
-- Missões concluídas (`mission_claims` via `listMyClaims`) — "Missão: {título} — +{tokens_awarded}"
+**Backend (migration):**
+- Adicionar coluna `palpite_credits int default 0` em `profiles`.
+- Tabela `palpite_credit_transactions` (id, user_id, delta, reason, mission_id, challenge_id, created_at) com RLS + GRANTs.
+- Função SQL `grant_palpite_credit(_user_id, _delta, _reason, _mission_id)` (security definer) usada pelo claim de missão.
+- Atualizar `mission_claims` para também conceder +1 crédito (além dos tokens já existentes).
 
-**Débitos (saídas)**
-- Participação em desafio (`listParticipations()` no localStorage) — "Palpite em {title} — −{entryFee}" com link para `/previsao/{id}`
-- Resgate de prêmio (`listMyRedemptions`) — "Resgate: {prize_name} — −{cost_tokens}" + badge do status (pendente / aprovado / entregue / rejeitado). Resgates rejeitados aparecem riscados com nota "estornado".
+**Frontend pós-palpite (`previsao.$id.tsx`):**
+Após envio do palpite, mostrar fluxo em 3 etapas no mesmo lugar do banner de sucesso atual:
+1. Lista de missões disponíveis (do hook existente em `missions.ts`) com botão "Concluir" — cada uma dá tokens + 1 crédito.
+2. Banner "Convide seus amigos e ganhe mais tokens" usando `InviteLinkCard` existente, com CTA "Convidar Amigos".
+3. Botão "Ver mais desafios" → `/desafios`.
 
-Cabeçalho da página:
-- Saldo atual (reaproveita `getTokenBalance`)
-- Totais do período: total ganho, total gasto, nº de movimentos
+**Painel do usuário:**
+- Em `perfil.tsx`, `dashboard.tsx` e header (onde já mostra tokens), adicionar pill "Créditos de Palpites: X" ao lado do saldo de tokens.
 
-## Arquivos
+---
 
-1. **Novo** `src/lib/token-history.ts` — função `buildTokenHistory()` que junta as 4 fontes acima em um array tipado `{ id, date, type: "credit"|"debit", reason, amount, source, link? , status? }`, ordenado por data desc. Sem novas chamadas de rede além das já usadas em `balance.ts`.
-2. **Novo** `src/routes/_authenticated/historico-tokens.tsx` — rota protegida, usa `useQuery` para chamar `buildTokenHistory`, renderiza cabeçalho de saldo, filtros (tabs) e lista. Estados de loading/empty. Usa componentes existentes (`Card`, `Badge`, `Tabs`, `Skeleton`).
-3. **Editar** `src/routes/perfil.tsx` — adicionar botão/link "Ver histórico de tokens" no bloco onde já mostramos os tokens.
+## Frente B — Esconder desafios participados e finalizados das áreas públicas (itens 04, 07, 11)
 
-## Fora do escopo
+- Reutilizar `useParticipated` (já existe) em todas as listagens públicas: `index.tsx`, `desafios.tsx`, listagens por tema/empresa.
+- Adicionar status `archived` ao enum/campo de challenge (já temos status; garantir suporte a: rascunho, ativo, encerrado, finalizado, arquivado).
+- Listagens públicas filtram por `status in ('ativo')` AND `id not in (participated)`.
+- Dashboard do usuário (`_authenticated/dashboard.tsx`) mostra TODOS os desafios participados, independente de status, com: palpites enviados, status, resultado, pontuação, relatório acertos/erros.
+- Admin (`admin.desafios.tsx`): mostra todos exceto `arquivado` por padrão; filtro para ver arquivados.
 
-- Sem mudanças no cálculo de saldo, em `criar.tsx`, no fluxo de cobrança, ou em qualquer função server.
-- Sem migração de banco — usamos exclusivamente as fontes que já alimentam `getTokenBalance`.
-- Sem endpoint novo de admin/estorno.
+---
+
+## Frente C — Bug: criação de desafio pela IA (item 06)
+
+Investigar `challenge-ai.functions.ts` + `criar.tsx` fluxo IA. Verificar:
+- Salvamento correto em `challenges` (status, campos obrigatórios).
+- Criação das perguntas/opções vinculadas.
+- Aparição em listagens e em `previsao.$id`.
+- Participação e pontuação funcionando ponta a ponta.
+
+Corrigir bugs encontrados e validar com script de teste.
+
+---
+
+## Frente D — Bug: desafio finalizado some (item 07)
+
+- Ajustar query do admin para NÃO filtrar por status ativo.
+- Garantir que dashboard busca desafios participados sem filtro de status.
+- Página de resultado final do desafio acessível mesmo após finalização (ranking, pontuação, relatório).
+
+---
+
+## Frente E — Seção Empresas + padrão para todos os temas (itens 08, 09, 10)
+
+**Componente reutilizável `ChallengeSection`:**
+- Props: tema/empresa, listagem de challenges.
+- Grid 3 colunas, 12 por página.
+- Busca por nome (empresa ou desafio).
+- Filtro "Tempo expirando" (ordena por `closes_at` asc).
+- Ordenação default: `created_at desc`.
+- Paginação numérica.
+- Aplica filtro de participados automaticamente.
+
+**Aplicação:**
+- Home: nova seção "Empresas" abaixo do banner "Novo Empresas".
+- Cada tema/categoria na home e em `desafios.tsx` usa o mesmo componente.
+
+---
+
+## Frente F — Pequenos ajustes (item 05)
+
+- Remover seção "Mais em Copa do Mundo 2026" do final de `previsao.$id.tsx`.
+
+---
+
+## Detalhes técnicos
+
+**Arquivos novos:**
+- `supabase/migrations/<ts>_palpite_credits.sql`
+- `src/lib/palpite-credits.functions.ts` — server fns: getCreditBalance, grantCredit, consumeCredit
+- `src/components/PostPalpiteFlow.tsx` — sequência missões → convite → próximos
+- `src/components/PalpiteCreditsBadge.tsx`
+- `src/components/ChallengeSection.tsx` — listagem reutilizável
+
+**Arquivos editados:**
+- `src/lib/missions.ts` (claim concede crédito)
+- `src/routes/previsao.$id.tsx` (fluxo pós-palpite, remover seção Copa)
+- `src/routes/index.tsx` (seção Empresas, aplicar ChallengeSection)
+- `src/routes/desafios.tsx` (aplicar ChallengeSection)
+- `src/routes/_authenticated/dashboard.tsx` (incluir todos status, créditos)
+- `src/routes/perfil.tsx` (pill créditos)
+- `src/components/layout/AppShell.tsx` ou TokenPill (pill créditos)
+- `src/routes/admin.desafios.tsx` (status + filtros)
+- `src/lib/challenge-ai.functions.ts` (fix bug IA)
+- `src/lib/user-challenges.ts` / `use-participated.ts` (helpers)
+
+**Regras preservadas:**
+- Tokens de boas-vindas, missões existentes, links de convite, layout mobile/desktop.
+- Sem remover funcionalidade — apenas adicionar e corrigir.
+
+**Validação no final:**
+- Build verde + smoke test Playwright nos fluxos: criar desafio IA → participar → ver missões/banner → ganhar crédito → usar em outro desafio → finalizar → ver no dashboard.
+
+---
+
+## Ordem de execução
+
+1. Frente A (créditos) — fundação de dados nova
+2. Frente B + F (filtros públicos + remoção texto)
+3. Frente D (fix finalizado)
+4. Frente C (fix IA)
+5. Frente E (Empresas + padrão temas)
+6. Testes finais
