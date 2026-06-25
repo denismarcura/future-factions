@@ -233,28 +233,44 @@ function Perfil() {
         </div>
 
         <aside>
-          <div className="rounded-2xl bg-card border border-border/60 p-5">
-            <h3 className="font-display font-bold flex items-center gap-2">
-              <Trophy className="h-4 w-4 text-gold" /> Conquistas
-            </h3>
-            <ul className="mt-4 space-y-2">
+          <div className="rounded-2xl bg-gradient-to-br from-[#0a3a1a] to-[#06210f] border border-gold/30 p-4 sm:p-5 shadow-glow-gold/20">
+            <div className="text-center mb-4">
+              <h3 className="font-display text-2xl font-black tracking-wide text-gradient-brand">CONQUISTAS</h3>
+              <p className="text-[11px] uppercase tracking-widest text-gold/80 font-bold mt-1">
+                Complete desafios e ganhe tokens
+              </p>
+            </div>
+            <div className="grid grid-cols-3 sm:grid-cols-2 gap-2.5">
               {ACHIEVEMENTS.map((a) => (
-                <li
+                <div
                   key={a.id}
-                  className={`flex items-start gap-3 p-2.5 rounded-lg border ${
-                    a.unlocked ? "border-gold/40 bg-gold/5" : "border-border/60 opacity-60"
+                  className={`relative rounded-xl border p-2 flex flex-col items-center text-center transition ${
+                    a.unlocked
+                      ? "border-gold/40 bg-black/30 hover:border-gold"
+                      : "border-border/40 bg-black/40 opacity-50 grayscale"
                   }`}
                 >
-                  <div className={`h-8 w-8 rounded-lg grid place-items-center ${a.unlocked ? "bg-gold/20 text-gold" : "bg-muted text-muted-foreground"}`}>
-                    <Award className="h-4 w-4" />
+                  <img
+                    src={a.image}
+                    alt={a.title}
+                    loading="lazy"
+                    className="w-full aspect-square object-contain drop-shadow-[0_4px_12px_rgba(0,0,0,0.6)]"
+                  />
+                  <div className="mt-1 text-[10px] font-black uppercase tracking-wide leading-tight line-clamp-2 min-h-[24px]">
+                    {a.title}
                   </div>
-                  <div className="min-w-0">
-                    <div className="text-sm font-semibold">{a.title}</div>
-                    <div className="text-xs text-muted-foreground">{a.desc}</div>
+                  <div className="text-[9px] text-muted-foreground leading-tight line-clamp-2 mt-0.5 min-h-[20px]">
+                    {a.desc}
                   </div>
-                </li>
+                  <div className="mt-1.5 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-gradient-to-r from-success/30 to-success/10 border border-success/40">
+                    <span className="text-[10px]">🪙</span>
+                    <span className="text-[10px] font-black text-success tabular-nums">
+                      {a.reward.toLocaleString("pt-BR")}
+                    </span>
+                  </div>
+                </div>
               ))}
-            </ul>
+            </div>
           </div>
         </aside>
       </div>
