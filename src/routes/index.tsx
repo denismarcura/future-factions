@@ -137,14 +137,6 @@ function Feed() {
   };
 
 
-  const closingSoon = useMemo(() => {
-    const now = mounted ? Date.now() : 0;
-    return [...PREDICTIONS]
-      .filter((p) => new Date(p.closesAt).getTime() > now)
-      .filter(notParticipated)
-      .sort((a, b) => +new Date(a.closesAt) - +new Date(b.closesAt))
-      .slice(0, 2);
-  }, [participatedIds, mounted]);
 
 
 
