@@ -507,7 +507,7 @@ function PredictionInner({ p }: { p: Prediction }) {
                 return (
                   <div key={s.id} className="rounded-xl border border-border/60 bg-background/40 p-4">
                     <div className="text-sm font-bold mb-3">
-                      <span className="text-primary mr-1">Palpite Nº {palpiteNum}.</span> {s.question}
+                      {s.question}
                     </div>
                     <div className="grid gap-2 sm:grid-cols-3">
                       {s.options.map((opt) => {
