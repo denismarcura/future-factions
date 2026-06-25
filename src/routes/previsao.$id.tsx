@@ -432,7 +432,8 @@ function PredictionInner({ p }: { p: Prediction }) {
               answers: {}, optionLabel: sel.label, closesAt: p.closesAt,
               participatedAt: new Date().toISOString(),
             });
-            toast.success(`✅ Aposta de ${amount} TKN em "${sel.label}" confirmada!`);
+            setConfirmed(true);
+            toast.success(`✅ Aposta de ${amount} TKN em "${sel.label}" confirmada! +${CORRECT_PALPITE_REWARD_TKN} TKN por palpite acertado.`);
           }
         };
 
