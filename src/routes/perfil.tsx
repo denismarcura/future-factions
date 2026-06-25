@@ -264,11 +264,11 @@ function Perfil() {
 
 function KV({ label, value, accent, success }: { label: string; value: string; accent?: boolean; success?: boolean }) {
   return (
-    <div className="rounded-lg bg-background/40 border border-border/60 px-3 py-2 min-w-[78px]">
-      <div className={`font-display font-black tabular-nums ${accent ? "text-gradient-brand text-lg" : success ? "text-success" : "text-foreground"}`}>
+    <div className="rounded-lg bg-background/40 border border-border/60 px-2 py-2 sm:px-3 sm:min-w-[78px] text-center sm:text-left">
+      <div className={`font-display font-black tabular-nums text-base sm:text-lg leading-tight ${accent ? "text-gradient-brand" : success ? "text-success" : "text-foreground"}`}>
         {value}
       </div>
-      <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</div>
+      <div className="text-[9px] sm:text-[10px] uppercase tracking-wider text-muted-foreground">{label}</div>
     </div>
   );
 }
