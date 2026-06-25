@@ -21,13 +21,11 @@ export const getFriendProfile = createServerFn({ method: "GET" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: profiles } = await supabaseAdmin
       .from("profiles")
-      .select("id, full_name, avatar_url, cidade, estado, created_at, instagram, email, invite_slug")
+      .select("id, full_name, avatar_url, cidade, estado, created_at, instagram, email")
       .order("created_at", { ascending: true })
       .limit(10000);
 
     const profile = (profiles ?? []).find((p: any) => {
-      const storedSlug = normalizeInviteSlug(p.invite_slug);
-      if (storedSlug && storedSlug === ref) return true;
       if (String(p.id).toLowerCase().startsWith(ref)) return true;
       return inviteSlugFromProfile({
         id: p.id,
@@ -47,7 +45,7 @@ export const getFriendProfile = createServerFn({ method: "GET" })
       estado: profile.estado,
       created_at: profile.created_at,
       instagram: profile.instagram,
-      invite_slug: normalizeInviteSlug(profile.invite_slug) || inviteSlugFromProfile(profile),
+      invite_slug: inviteSlugFromProfile(profile),
     };
 
     // Created challenges
