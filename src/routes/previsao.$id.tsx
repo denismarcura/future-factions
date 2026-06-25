@@ -576,6 +576,7 @@ function PredictionInner({ p }: { p: Prediction }) {
 
           {/* PARTICIPAR — botão verde único (também serve para CONFIRMAR PALPITE EXTRA) */}
           <button
+            id="participar-cta"
             onClick={handleParticipate}
             disabled={
               isClosed ||
