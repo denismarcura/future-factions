@@ -503,13 +503,18 @@ function PredictionInner({ p }: { p: Prediction }) {
               {!isClosed && (
                 <button
                   onClick={() => {
-                    const el = document.getElementById("participar-cta");
-                    if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+                    const btn = document.getElementById("participar-cta") as HTMLButtonElement | null;
+                    if (btn) {
+                      btn.scrollIntoView({ behavior: "smooth", block: "center" });
+                      // dispara o mesmo fluxo do CTA principal
+                      setTimeout(() => btn.click(), 350);
+                    }
                   }}
                   className="mt-4 w-full h-11 rounded-xl bg-gradient-brand text-primary-foreground font-display font-black text-sm tracking-wide shadow-glow hover:scale-[1.01] transition inline-flex items-center justify-center gap-2"
                 >
                   <Plus className="h-4 w-4" /> PARTICIPAR
                 </button>
+
               )}
             </div>
           )}
