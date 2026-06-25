@@ -660,7 +660,8 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
         <PublishedSuccess
           name={published.name}
           id={published.id}
-          inviteUrl={userInviteUrl}
+          bannerUrl={creativeUrl ?? undefined}
+          senderName={user?.user_metadata?.full_name || user?.email?.split("@")[0] || "Um amigo"}
           onCreateAnother={() => {
             setPublished(null);
             setName("");
