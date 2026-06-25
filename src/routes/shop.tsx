@@ -102,11 +102,30 @@ function ShopPage() {
             const canAfford = user && balance >= (p.cost_tokens ?? 0);
             const noStock = p.stock <= 0;
             const disabled = !canAfford || noStock || busy === p.id;
+            const isEditing = editingId === p.id;
+            async function saveTokens() {
+              const v = Number(editVal);
+              if (!Number.isFinite(v) || v < 0) {
+                toast.error("Valor inválido");
+                return;
+              }
+              setSavingId(p.id);
+              try {
+                await saveFn({ data: { ...p, cost_tokens: v } });
+                setItems((cur) => cur.map((x) => (x.id === p.id ? { ...x, cost_tokens: v } : x)));
+                toast.success("Valor atualizado");
+                setEditingId(null);
+              } catch (e) {
+                toast.error(e instanceof Error ? e.message : "Erro ao salvar");
+              } finally {
+                setSavingId(null);
+              }
+            }
             return (
               <article key={p.id} className="group relative rounded-2xl border border-border/60 bg-card overflow-hidden hover:border-primary/50 hover:shadow-glow transition flex flex-col">
-                <div className="aspect-[4/5] bg-gradient-to-br from-background to-card grid place-items-center border-b border-border/60 overflow-hidden">
+                <div className="aspect-[4/5] bg-black grid place-items-center border-b border-border/60 overflow-hidden">
                   {p.image_url ? (
-                    <img src={p.image_url} alt={p.name} className="w-full h-full object-cover" loading="lazy" />
+                    <img src={p.image_url} alt={p.name} className="w-full h-full object-contain" loading="lazy" />
                   ) : (
                     <Gift className="h-12 w-12 text-muted-foreground" />
                   )}
@@ -116,34 +135,66 @@ function ShopPage() {
                   {p.description && (
                     <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{p.description}</p>
                   )}
-                  <div className="mt-3 flex items-baseline justify-between">
-                    <div className="inline-flex items-center gap-1.5 text-gold">
-                      <Coins className="h-4 w-4" />
-                      <span className="font-display font-black text-lg tabular-nums">{formatTokens(p.cost_tokens ?? 0)}</span>
-                    </div>
-                    <span className="text-[10px] text-muted-foreground">{p.stock} em estoque</span>
-                  </div>
-                  <button
-                    onClick={() => handleRedeem(p)}
-                    disabled={disabled}
-                    className={`mt-3 h-10 rounded-full text-sm font-black uppercase tracking-wide transition inline-flex items-center justify-center gap-1.5 ${
-                      !disabled
-                        ? "bg-gradient-brand text-primary-foreground shadow-glow hover:scale-[1.02]"
-                        : "bg-muted text-muted-foreground cursor-not-allowed border border-border/60"
-                    }`}
-                  >
-                    {busy === p.id ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : noStock ? (
-                      "Esgotado"
-                    ) : !user ? (
-                      "Entrar p/ solicitar"
-                    ) : !canAfford ? (
-                      <><Lock className="h-3.5 w-3.5" /> Faltam tokens</>
+                  <div className="mt-3 flex items-baseline justify-between gap-2">
+                    {isEditing ? (
+                      <div className="flex items-center gap-1 flex-1">
+                        <input
+                          type="number"
+                          value={editVal}
+                          onChange={(e) => setEditVal(e.target.value)}
+                          className="w-full h-8 px-2 rounded-lg bg-background border border-border/60 text-sm tabular-nums"
+                          autoFocus
+                        />
+                        <button onClick={saveTokens} disabled={savingId === p.id} className="h-8 w-8 grid place-items-center rounded-lg bg-primary text-primary-foreground">
+                          {savingId === p.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
+                        </button>
+                        <button onClick={() => setEditingId(null)} className="h-8 w-8 grid place-items-center rounded-lg hover:bg-muted/40">
+                          <X className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
                     ) : (
-                      "Solicitar troca"
+                      <>
+                        <div className="inline-flex items-center gap-1.5 text-gold">
+                          <Coins className="h-4 w-4" />
+                          <span className="font-display font-black text-lg tabular-nums">{formatTokens(p.cost_tokens ?? 0)}</span>
+                          {isAdmin && (
+                            <button
+                              onClick={() => { setEditingId(p.id); setEditVal(String(p.cost_tokens ?? 0)); }}
+                              className="ml-1 h-6 w-6 grid place-items-center rounded-md hover:bg-muted/40 text-muted-foreground"
+                              title="Editar valor em tokens"
+                            >
+                              <Pencil className="h-3 w-3" />
+                            </button>
+                          )}
+                        </div>
+                        <span className="text-[10px] text-muted-foreground">{p.stock} em estoque</span>
+                      </>
                     )}
-                  </button>
+                  </div>
+                  {!noStock && (
+                    <button
+                      onClick={() => handleRedeem(p)}
+                      disabled={disabled}
+                      className={`mt-3 h-10 rounded-full text-sm font-black uppercase tracking-wide transition inline-flex items-center justify-center gap-1.5 ${
+                        !disabled
+                          ? "bg-gradient-brand text-primary-foreground shadow-glow hover:scale-[1.02]"
+                          : "bg-muted text-muted-foreground cursor-not-allowed border border-border/60"
+                      }`}
+                    >
+                      {busy === p.id ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : !user ? (
+                        "Entrar p/ solicitar"
+                      ) : (
+                        "Solicitar troca"
+                      )}
+                    </button>
+                  )}
+                  {noStock && (
+                    <div className="mt-3 h-10 rounded-full grid place-items-center text-xs font-bold uppercase tracking-wide bg-muted text-muted-foreground border border-border/60">
+                      Esgotado
+                    </div>
+                  )}
                 </div>
               </article>
             );
