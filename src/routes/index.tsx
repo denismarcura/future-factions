@@ -13,6 +13,7 @@ import { CATEGORIES, PREDICTIONS, type Prediction } from "@/lib/mock-data";
 import { getUserChallenges } from "@/lib/user-challenges";
 import { useParticipatedChallengeIds } from "@/hooks/use-participated";
 import { listActiveBanners, type Banner } from "@/lib/banners";
+import { listActiveBottomBanners, type BottomBanner } from "@/lib/bottom-banners";
 import { aiSearchChallenges } from "@/lib/search-ai.functions";
 import logoAsset from "@/assets/logo-desafio.png.asset.json";
 
@@ -38,6 +39,7 @@ function Feed() {
   const [cat, setCat] = useState<string>("Todas");
   const [sort, setSort] = useState<Sort>("new");
   const [banners, setBanners] = useState<Banner[]>([]);
+  const [bottomBanners, setBottomBanners] = useState<BottomBanner[]>([]);
   const [userChallenges, setUserChallenges] = useState<Prediction[]>([]);
   const [mounted, setMounted] = useState(false);
   const participatedIds = useParticipatedChallengeIds();
@@ -46,6 +48,7 @@ function Feed() {
   useEffect(() => {
     setMounted(true);
     setBanners(listActiveBanners());
+    setBottomBanners(listActiveBottomBanners());
     setUserChallenges(getUserChallenges());
     const onUpdate = () => setUserChallenges(getUserChallenges());
     window.addEventListener("ddp:user-challenges-updated", onUpdate);
