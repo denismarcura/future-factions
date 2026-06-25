@@ -1,23 +1,17 @@
-import { useEffect, useState } from "react";
-import type { User } from "@supabase/supabase-js";
+import { useState } from "react";
 import { Coins, Target, Mail, MessageCircle, Copy, Check } from "lucide-react";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
 import { whatsappLink } from "@/lib/friends";
-import { buildInviteUrl } from "@/lib/invite-link";
+import { useAuth } from "@/hooks/use-auth";
+import { useInviteUrl } from "@/hooks/use-invite-url";
 
 type ChallengeCtx = { id: string; title: string; image?: string };
 
 export function EarnMorePointsCTA({ challenge }: { challenge?: ChallengeCtx } = {}) {
-  const [user, setUser] = useState<User | null>(null);
+  const { user } = useAuth();
   const [copied, setCopied] = useState(false);
 
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => setUser(data.user ?? null));
-  }, []);
-
-  const origin = typeof window !== "undefined" ? window.location.origin : undefined;
-  const inviteUrl = user ? buildInviteUrl(user, origin) : `${origin ?? ""}/auth`;
+  const inviteUrl = useInviteUrl(user) || "/desafios";
   const code = inviteUrl ? inviteUrl.replace(/^https?:\/\/(www\.)?/i, "") : "";
 
   const waMsg = challenge
