@@ -634,7 +634,7 @@ function PredictionInner({ p }: { p: Prediction }) {
 
 
         {/* Banner de missões sequenciais — abaixo do slider */}
-        {p.subPredictions && (() => {
+        {(() => {
           const allDone = missionStep >= missionQueue.length;
           const currentMission = missionQueue[missionStep] ?? null;
           const currentPlatform = (currentMission?.platform as SeqPlatform) ?? null;
