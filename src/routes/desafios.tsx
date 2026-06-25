@@ -232,8 +232,8 @@ function DesafiosPage() {
       <div className="flex flex-wrap gap-2 mb-6">
         {[
           { k: "todos", label: "Todos", icon: ListChecks },
+          { k: "empresas", label: "⭐ Empresas", icon: Building2 },
           { k: "publicos", label: "Públicos", icon: Globe2 },
-          { k: "empresas", label: "Empresas", icon: Building2 },
           { k: "privados", label: "Privados (amigos)", icon: Lock },
         ].map((t) => (
           <button
@@ -242,7 +242,9 @@ function DesafiosPage() {
             className={`inline-flex items-center gap-2 h-10 px-4 rounded-full text-sm font-bold border transition ${
               tab === t.k
                 ? "bg-gradient-brand text-primary-foreground border-transparent shadow-glow"
-                : "bg-card text-muted-foreground border-border/60 hover:text-foreground"
+                : t.k === "empresas"
+                  ? "bg-gold/10 text-gold border-gold/40 hover:bg-gold/20"
+                  : "bg-card text-muted-foreground border-border/60 hover:text-foreground"
             }`}
           >
             <t.icon className="h-4 w-4" />
@@ -250,6 +252,53 @@ function DesafiosPage() {
           </button>
         ))}
       </div>
+
+      {/* ⭐ Empresas em Destaque — sempre no topo, exceto na aba dedicada */}
+      {tab !== "empresas" && corpChallenges.length > 0 && (
+        <section className="mb-8 rounded-3xl border-2 border-gold/40 bg-gradient-to-br from-gold/10 via-card to-card p-5 shadow-glow">
+          <div className="flex items-center justify-between mb-4 gap-3">
+            <h2 className="font-display text-xl font-black flex items-center gap-2 min-w-0">
+              <Star className="h-6 w-6 text-gold fill-gold shrink-0" />
+              <span className="truncate">Empresas em Destaque</span>
+            </h2>
+            <button
+              onClick={() => setTab("empresas")}
+              className="text-xs sm:text-sm font-bold text-gold hover:underline shrink-0"
+            >
+              Ver todos →
+            </button>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {corpChallenges.slice(0, 6).map((c) => (
+              <Link
+                key={c.id}
+                to="/desafio-corp/$id"
+                params={{ id: c.id }}
+                className="block rounded-2xl border border-gold/30 bg-card p-4 hover:border-gold hover:shadow-glow transition group"
+              >
+                <div className="flex items-center gap-3 mb-2">
+                  {c.logoUrl ? (
+                    <img src={c.logoUrl} alt="" className="h-11 w-11 rounded-xl object-cover border border-border/60" />
+                  ) : (
+                    <div className="h-11 w-11 rounded-xl bg-gold/15 grid place-items-center text-gold font-black">
+                      {(c.companyName ?? c.title).slice(0, 1).toUpperCase()}
+                    </div>
+                  )}
+                  <div className="min-w-0">
+                    <div className="text-[10px] uppercase tracking-wider font-bold text-gold">Patrocinado</div>
+                    <div className="font-display font-bold truncate text-sm">{c.companyName ?? "Empresa"}</div>
+                  </div>
+                </div>
+                <h3 className="font-display font-bold text-sm leading-snug line-clamp-2 group-hover:text-gold transition">{c.title}</h3>
+                {c.prizeName && (
+                  <div className="mt-2 text-xs text-muted-foreground line-clamp-1">🎁 {c.prizeName}</div>
+                )}
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
 
       {tab !== "empresas" && (
         <>
