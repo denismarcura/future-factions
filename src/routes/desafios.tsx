@@ -34,6 +34,8 @@ function DesafiosPage() {
   const [expiringLimit, setExpiringLimit] = useState(6);
   const [nowTs, setNowTs] = useState<number | null>(null);
   const runAiSearch = useServerFn(aiSearchChallenges);
+  const participatedIds = useParticipatedChallengeIds();
+  const notParticipated = <T extends { id: string }>(p: T) => !participatedIds.has(String(p.id));
 
   useEffect(() => {
     setNowTs(Date.now());
