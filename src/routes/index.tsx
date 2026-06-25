@@ -290,6 +290,11 @@ function Feed() {
               50 <Coins className="h-6 w-6 text-gold" />
             </div>
             <div className="text-[10px] text-muted-foreground mt-1">Tokens grátis</div>
+            {mounted && (
+              <div className="mt-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-gold/15 border border-gold/30 text-gold text-[10px] font-black font-mono">
+                <Timer className="h-3 w-3" /> Reseta em {fmtHMS(msUntilMidnight())}
+              </div>
+            )}
           </div>
           <Link
             to="/perfil"
