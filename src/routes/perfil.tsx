@@ -86,27 +86,29 @@ function Perfil() {
 
   return (
     <AppShell>
-      <section className="relative overflow-hidden rounded-3xl border border-border/60 glass-card p-6 sm:p-8 mb-6">
+      <section className="relative overflow-hidden rounded-3xl border border-border/60 glass-card p-4 sm:p-8 mb-6">
         <div className="absolute -top-16 -right-10 h-56 w-56 rounded-full bg-primary/30 blur-3xl" />
-        <div className="relative flex flex-col sm:flex-row items-start gap-6">
-          <div className="relative">
-            <img src={avatar} alt="" className="h-24 w-24 rounded-2xl border-2 border-gold shadow-glow-gold object-cover" />
+        <div className="relative flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6 text-center sm:text-left">
+          <div className="relative shrink-0">
+            <img src={avatar} alt="" className="h-20 w-20 sm:h-24 sm:w-24 rounded-2xl border-2 border-gold shadow-glow-gold object-cover" />
           </div>
-          <div className="flex-1 min-w-0">
-            <h1 className="font-display text-3xl font-black truncate">{fullName}</h1>
+          <div className="flex-1 min-w-0 w-full">
+            <h1 className="font-display text-2xl sm:text-3xl font-black truncate">{fullName}</h1>
             {meta.signup_city && (
               <div className="mt-1 text-sm text-muted-foreground inline-flex items-center gap-1.5">
                 <MapPin className="h-3.5 w-3.5" /> {meta.signup_city as string}
               </div>
             )}
-            <div className="mt-4 flex flex-wrap gap-4 items-center">
+            <div className="mt-4 grid grid-cols-3 sm:flex sm:flex-wrap gap-2 sm:gap-4 sm:items-center">
               <KV label="Tokens" value={formatTokens(tokens)} accent />
-              <PalpiteCreditsBadge />
-              <KV label="Participações" value={String(uniqueParticipations)} />
+              <KV label="Particip." value={String(uniqueParticipations)} />
               <KV label="Acertos" value={String(acertos)} success />
               <KV label="Erros" value={String(erros)} />
               <KV label="Pendentes" value={String(pendentes)} />
               <KV label="Taxa" value={`${rate}%`} success />
+            </div>
+            <div className="mt-3 flex justify-center sm:justify-start">
+              <PalpiteCreditsBadge />
             </div>
           </div>
         </div>
@@ -262,11 +264,11 @@ function Perfil() {
 
 function KV({ label, value, accent, success }: { label: string; value: string; accent?: boolean; success?: boolean }) {
   return (
-    <div className="rounded-lg bg-background/40 border border-border/60 px-3 py-2 min-w-[78px]">
-      <div className={`font-display font-black tabular-nums ${accent ? "text-gradient-brand text-lg" : success ? "text-success" : "text-foreground"}`}>
+    <div className="rounded-lg bg-background/40 border border-border/60 px-2 py-2 sm:px-3 sm:min-w-[78px] text-center sm:text-left">
+      <div className={`font-display font-black tabular-nums text-base sm:text-lg leading-tight ${accent ? "text-gradient-brand" : success ? "text-success" : "text-foreground"}`}>
         {value}
       </div>
-      <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</div>
+      <div className="text-[9px] sm:text-[10px] uppercase tracking-wider text-muted-foreground">{label}</div>
     </div>
   );
 }
