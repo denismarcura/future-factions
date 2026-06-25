@@ -372,7 +372,8 @@ function Missoes() {
               key={s.label}
               href={s.href}
               target="_blank"
-              rel="noopener noreferrer"
+              rel="noopener noreferrer external"
+              referrerPolicy="no-referrer"
               className={`group relative overflow-hidden rounded-2xl p-4 bg-gradient-to-br ${s.gradient} shadow-lg hover:shadow-glow hover:scale-[1.03] transition-transform`}
             >
               <div className="absolute -top-6 -right-6 h-20 w-20 rounded-full bg-white/15 blur-2xl" />
