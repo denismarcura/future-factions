@@ -198,6 +198,15 @@ export function AppShell({ children, hidePrimarySidebar = false }: { children: R
                       </Link>
                     </SheetClose>
                   )}
+                  <div className="mt-4 flex items-center justify-between gap-2 px-3 py-2 rounded-xl glass-card shadow-glow-gold">
+                    <div className="flex items-center gap-2">
+                      <Coins className="h-4 w-4 text-gold" />
+                      <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Seus Tokens</span>
+                    </div>
+                    <span className="font-display font-black text-base tabular-nums text-gold">
+                      {formatTokens(CURRENT_USER.tokens)}
+                    </span>
+                  </div>
                 </div>
 
                 {user && (
