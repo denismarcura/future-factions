@@ -22,6 +22,7 @@ import { improveTitle } from "@/lib/title-ai.functions";
 import { listCategories, listSubcategories, type ChallengeCategory, type ChallengeSubcategory } from "@/lib/challenge-categories";
 import { generateChallenge, improveDescription, generateWhatsAppInvite, generateTiebreaker, generateRegulation } from "@/lib/challenge-ai.functions";
 import { sendChallengePublishedEmail } from "@/lib/challenge-emails.functions";
+import { sendChallengeInvites } from "@/lib/challenge-invites.functions";
 import { generatePrizeImage } from "@/lib/prize-image.functions";
 import { generateBannerFromPrize } from "@/lib/banner-from-prize.functions";
 import { createCorpChallenge, type CorporateMission } from "@/lib/corp-challenges.functions";
