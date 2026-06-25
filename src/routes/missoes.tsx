@@ -109,10 +109,11 @@ function Missoes() {
   }
 
   const filtered = useMemo(() => {
-    if (tab === "todas") return missions;
-    if (tab === "especiais") return missions.filter((m) => (m.bonus_tokens || 0) > 0);
-    return missions.filter((m) => m.platform === tab);
-  }, [missions, tab]);
+    const open = missions.filter((m) => !claimed.has(m.id));
+    if (tab === "todas") return open;
+    if (tab === "especiais") return open.filter((m) => (m.bonus_tokens || 0) > 0);
+    return open.filter((m) => m.platform === tab);
+  }, [missions, tab, claimed]);
 
   const totalClaimable = useMemo(
     () => missions.filter((m) => !claimed.has(m.id)).reduce((s, m) => s + m.tokens + (m.bonus_tokens || 0) + COMPLETION_BONUS_TOKENS, 0),
@@ -286,6 +287,40 @@ function Missoes() {
             <strong>Confirmo que realizei todas as tarefas.</strong> Em caso de premiação, serão verificadas. Caso constatado que não foram realizadas, o usuário será <strong>desclassificado</strong>.
           </span>
         </label>
+      </section>
+
+      {/* SOCIAL BRAND BANNERS */}
+      <section className="mt-8">
+        <div className="mb-3 text-center">
+          <div className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 border border-primary/30 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-primary">
+            <Sparkles className="h-3 w-3" /> Siga e ganhe tokens
+          </div>
+          <h3 className="font-display text-xl font-black mt-2">Nossas redes sociais</h3>
+          <p className="text-xs text-muted-foreground">Curta e siga para missões exclusivas toda semana.</p>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          {[
+            { label: "Instagram", icon: Instagram, href: "https://instagram.com/desafiodospalpites", gradient: "from-[#F58529] via-[#DD2A7B] to-[#8134AF]" },
+            { label: "YouTube", icon: Youtube, href: "https://youtube.com/@desafiodospalpites", gradient: "from-[#FF0000] to-[#CC0000]" },
+            { label: "TikTok", icon: Music2, href: "https://tiktok.com/@desafiodospalpites", gradient: "from-[#25F4EE] via-[#000000] to-[#FE2C55]" },
+            { label: "Facebook", icon: Facebook, href: "https://facebook.com/desafiodospalpites", gradient: "from-[#1877F2] to-[#0E5BC5]" },
+          ].map((s) => (
+            <a
+              key={s.label}
+              href={s.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`group relative overflow-hidden rounded-2xl p-4 bg-gradient-to-br ${s.gradient} shadow-lg hover:shadow-glow hover:scale-[1.03] transition-transform`}
+            >
+              <div className="absolute -top-6 -right-6 h-20 w-20 rounded-full bg-white/15 blur-2xl" />
+              <div className="relative flex flex-col items-center text-center text-white">
+                <s.icon className="h-7 w-7 mb-2 drop-shadow" />
+                <div className="font-display font-black text-sm">{s.label}</div>
+                <div className="text-[10px] uppercase tracking-wider opacity-90 mt-0.5">Seguir agora</div>
+              </div>
+            </a>
+          ))}
+        </div>
       </section>
 
       <div className="mt-5 mb-2 text-center text-xs text-muted-foreground">
