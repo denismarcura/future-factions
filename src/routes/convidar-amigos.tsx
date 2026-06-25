@@ -1,10 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Mail, Send, Copy, Check, ArrowLeft, Users, Sparkles, Eye, Trash2, Plus } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
+import { Mail, Send, Copy, Check, ArrowLeft, Users, Sparkles, Eye, Trash2, Plus, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell } from "@/components/layout/AppShell";
 import { useAuth } from "@/hooks/use-auth";
 import { useInviteUrl } from "@/hooks/use-invite-url";
+import { sendFriendInviteEmails } from "@/lib/friend-invite-emails.functions";
+
+
 
 
 export const Route = createFileRoute("/convidar-amigos")({
