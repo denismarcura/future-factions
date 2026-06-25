@@ -121,11 +121,12 @@ function Missoes() {
   }
 
   const filtered = useMemo(() => {
-    const open = missions.filter((m) => !claimed.has(m.id));
+    // keep exiting cards visible during fade-out animation
+    const open = missions.filter((m) => !claimed.has(m.id) || exiting.has(m.id));
     if (tab === "todas") return open;
     if (tab === "especiais") return open.filter((m) => (m.bonus_tokens || 0) > 0);
     return open.filter((m) => m.platform === tab);
-  }, [missions, tab, claimed]);
+  }, [missions, tab, claimed, exiting]);
 
   const totalClaimable = useMemo(
     () => missions.filter((m) => !claimed.has(m.id)).reduce((s, m) => s + m.tokens + (m.bonus_tokens || 0) + COMPLETION_BONUS_TOKENS, 0),
