@@ -292,7 +292,8 @@ function Missoes() {
 
                     {isRunning ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : (isExiting || done) ? <Check className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
                     {isRunning ? `${remaining}s` : isExiting ? "+TOKENS" : done ? "Feita" : "Fazer"}
-                  </button>
+                  </a>
+
                 </div>
                 {isRunning && (
                   <div className="mt-3 animate-fade-in">
