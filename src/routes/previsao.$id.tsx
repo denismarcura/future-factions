@@ -665,9 +665,15 @@ function PredictionInner({ p }: { p: Prediction }) {
                 </div>
               )}
 
+              {confirmed && !allDone && missionQueue.length > 0 && (
+                <div className="rounded-xl border border-emerald-500/40 bg-emerald-500/10 p-3 text-xs text-center">
+                  🎯 <strong className="text-emerald-400">Palpite enviado!</strong> Complete as missões abaixo para ganhar <strong className="text-gold">+{MISSION_REWARD_TKN} TKN</strong> cada — e <strong className="text-gold">+{CORRECT_PALPITE_REWARD_TKN} TKN</strong> para cada palpite acertado.
+                </div>
+              )}
+
               {!confirmed && missionQueue.length > 0 && (
                 <div className="rounded-xl border border-primary/30 bg-primary/5 p-3 text-xs text-center text-muted-foreground">
-                  💡 Faça as missões agora para ganhar <strong className="text-gold">tokens extras</strong> e depois usar nos palpites — ou confirme sua participação primeiro.
+                  💡 Faça as missões agora para ganhar <strong className="text-gold">+{MISSION_REWARD_TKN} TKN</strong> em cada uma — ou confirme sua participação primeiro (<strong className="text-gold">+{CORRECT_PALPITE_REWARD_TKN} TKN</strong> por palpite acertado).
                 </div>
               )}
 
