@@ -133,7 +133,7 @@ function Missoes() {
     }
   }
 
-  }
+
 
   const filtered = useMemo(() => {
     // keep exiting cards visible during fade-out animation
