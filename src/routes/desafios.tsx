@@ -242,61 +242,8 @@ function DesafiosPage() {
 
       {tab !== "empresas" && (
         <>
-          {/* Próximos jogos — Copa do Mundo 2026 */}
-          <section className="mb-8">
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="font-display text-lg font-bold flex items-center gap-2">
-                <CalendarDays className="h-5 w-5 text-primary" /> Próximos jogos — Copa 2026
-              </h2>
-              <span className="text-xs text-muted-foreground">
-                {upcomingMatches.length} partidas
-              </span>
-            </div>
-            {upcomingMatches.length === 0 ? (
-              <div className="rounded-2xl border border-dashed border-border/60 bg-card/40 p-6 text-center text-sm text-muted-foreground">
-                Nenhum próximo jogo da Copa do Mundo no momento.
-              </div>
-            ) : (
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                {upcomingMatches.map((m) => {
-                  const dt = new Date(m.kickoff);
-                  const dateStr = nowTs
-                    ? dt.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", timeZone: "America/Sao_Paulo" })
-                    : "--/--";
-                  const timeStr = nowTs
-                    ? dt.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", timeZone: "America/Sao_Paulo" })
-                    : "--:--";
-                  return (
-                    <Link
-                      key={`upcoming-${m.id}`}
-                      to="/previsao/$id"
-                      params={{ id: m.id }}
-                      className="rounded-2xl border border-border/60 bg-card p-4 hover:border-primary/50 hover:shadow-glow transition block"
-                    >
-                      <div className="flex items-center justify-between text-[11px] text-muted-foreground mb-2">
-                        <span className="inline-flex items-center gap-1 font-bold text-primary">
-                          <Trophy className="h-3 w-3" /> Grupo {m.group}
-                        </span>
-                        <span>{dateStr} · {timeStr}</span>
-                      </div>
-                      <div className="flex items-center justify-between gap-2">
-                        <div className="flex items-center gap-2 min-w-0">
-                          <img src={flagUrl(m.homeCode)} alt="" className="h-5 w-7 rounded-sm border border-border/60 object-cover" />
-                          <span className="font-bold text-sm truncate">{m.home}</span>
-                        </div>
-                        <span className="text-xs text-muted-foreground font-bold px-2">×</span>
-                        <div className="flex items-center gap-2 min-w-0 justify-end">
-                          <span className="font-bold text-sm truncate">{m.away}</span>
-                          <img src={flagUrl(m.awayCode)} alt="" className="h-5 w-7 rounded-sm border border-border/60 object-cover" />
-                        </div>
-                      </div>
-                    </Link>
-                  );
+          {/* Próximos jogos — Copa 2026 (removido) */}
 
-                })}
-              </div>
-            )}
-          </section>
 
           {/* Encerrando em breve */}
           <section id="encerrando" className="mb-8 scroll-mt-24">
