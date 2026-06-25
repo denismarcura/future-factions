@@ -95,17 +95,9 @@ function Missoes() {
     setRunning(m.id);
     setRunStart(Date.now());
     setNow(Date.now());
-    try {
-      const a = document.createElement("a");
-      a.href = m.link;
-      a.target = "_blank";
-      a.rel = "noopener noreferrer";
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-    } catch {
-      window.open(m.link, "_blank", "noopener,noreferrer");
-    }
+    // Navegação é feita pelo próprio <a href target="_blank"> nativo (escapa do iframe).
+    // Aqui só fazemos a contagem e o claim.
+
     await new Promise((r) => setTimeout(r, MISSION_VERIFY_MS));
     try {
       const earned = m.tokens + (m.bonus_tokens || 0);
