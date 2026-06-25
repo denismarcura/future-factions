@@ -584,33 +584,73 @@ function PredictionInner({ p }: { p: Prediction }) {
           <button
             id="participar-cta"
             onClick={() => {
+              const filled = p.subPredictions ? Object.keys(subAnswers).length : 0;
+              const required = p.subPredictions?.length ?? 0;
+              const baseCtx = {
+                userId: user?.id ?? null,
+                authenticated: !!user,
+                balance,
+                entryFee: p.entryFee ?? amount,
+                confirmed,
+                pendingExtra: !!pendingExtra,
+                regAccepted,
+                filledSubAnswers: filled,
+                requiredSubAnswers: required,
+              };
+              debugParticipate({ challengeId: p.id, reason: "click", message: "Participar clicado", context: baseCtx });
+
               if (isClosed) {
+                debugParticipate({ challengeId: p.id, reason: "blocked:closed", message: "Desafio encerrado", context: { closesAt: p.closesAt } });
                 toast.error("As apostas para este desafio já foram encerradas.");
                 return;
               }
               if (confirmed && !pendingExtra) {
+                debugParticipate({ challengeId: p.id, reason: "blocked:already-confirmed", message: "Usuário já confirmou", context: baseCtx });
                 toast.info("Você já confirmou sua participação neste desafio.");
                 return;
               }
-              if (p.subPredictions) {
-                const filled = Object.keys(subAnswers).length;
-                if (filled < p.subPredictions.length) {
-                  toast.error(`Selecione todos os ${p.subPredictions.length} palpites antes de participar (${filled}/${p.subPredictions.length}).`);
-                  const firstMissing = p.subPredictions.find((s) => !subAnswers[s.id]);
-                  if (firstMissing) {
-                    const el = document.getElementById(`sub-${firstMissing.id}`);
-                    el?.scrollIntoView({ behavior: "smooth", block: "center" });
-                  }
-                  return;
+              if (p.subPredictions && filled < required) {
+                const firstMissing = p.subPredictions.find((s) => !subAnswers[s.id]);
+                debugParticipate({
+                  challengeId: p.id,
+                  reason: "blocked:missing-subanswers",
+                  message: `${filled}/${required} palpites preenchidos`,
+                  context: { ...baseCtx, firstMissingId: firstMissing?.id ?? null },
+                });
+                toast.error(`Selecione todos os ${required} palpites antes de participar (${filled}/${required}).`);
+                if (firstMissing) {
+                  const el = document.getElementById(`sub-${firstMissing.id}`);
+                  el?.scrollIntoView({ behavior: "smooth", block: "center" });
                 }
+                return;
+              }
+              if (!user) {
+                debugParticipate({ challengeId: p.id, reason: "blocked:not-authenticated", message: "Usuário não logado", context: baseCtx });
               }
               if (!confirmed && user && balance !== null && balance < (p.entryFee ?? amount)) {
+                debugParticipate({
+                  challengeId: p.id,
+                  reason: "blocked:insufficient-balance",
+                  message: `Saldo ${balance} < fee ${p.entryFee ?? amount}`,
+                  context: baseCtx,
+                });
                 toast.error(`Saldo insuficiente. Você tem ${formatTokens(balance)} TKN e precisa de ${p.entryFee ?? amount} TKN.`);
                 return;
               }
-              handleParticipate();
+              try {
+                handleParticipate();
+              } catch (err) {
+                debugParticipate({
+                  challengeId: p.id,
+                  reason: "error",
+                  message: err instanceof Error ? err.message : String(err),
+                  context: baseCtx,
+                });
+                throw err;
+              }
             }}
             disabled={isClosed}
+
             className="mt-6 w-full h-14 rounded-xl font-display font-black tracking-wide text-lg transition disabled:opacity-60 disabled:cursor-not-allowed text-white"
             style={{
               background: pendingExtra
