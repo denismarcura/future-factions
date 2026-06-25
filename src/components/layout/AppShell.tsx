@@ -269,9 +269,9 @@ export function AppShell({ children, hidePrimarySidebar = false }: { children: R
       </header>
 
 
-      <div className="max-w-7xl mx-auto px-4 pb-24 md:flex md:gap-8 pt-6">
+      <div className="max-w-7xl mx-auto px-4 pb-24 xl:flex xl:gap-8 pt-6">
         {!hidePrimarySidebar && (
-          <aside className="hidden md:block w-60 shrink-0">
+          <aside className="hidden xl:block w-60 shrink-0">
             <nav className="sticky top-24 space-y-1">
               {NAV.filter((n) => !n.adminOnly || (user?.email && ADMIN_EMAILS.includes(user.email.toLowerCase()))).map(({ to, label, icon: Icon }) => {
                 const active = to === "/" ? pathname === "/" : pathname.startsWith(to);
