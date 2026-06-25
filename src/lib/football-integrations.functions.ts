@@ -184,3 +184,66 @@ export const listFootballSyncLogs = createServerFn({ method: "GET" })
     if (error) throw new Error(error.message);
     return data ?? [];
   });
+
+export const getFootballSyncDashboard = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context);
+    const since24h = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
+    const since7d = new Date(Date.now() - 7 * 24 * 3600 * 1000).toISOString();
+
+    const [compsRes, logsRes, errorsRes] = await Promise.all([
+      context.supabase
+        .from("football_competitions")
+        .select("code, name, active, season, last_synced_at, auto_create_challenges, auto_update_results")
+        .order("code"),
+      context.supabase
+        .from("football_sync_logs")
+        .select("competition_code, http_status, imported, updated, error_message, created_at")
+        .gte("created_at", since7d),
+      context.supabase
+        .from("football_sync_logs")
+        .select("competition_code, http_status, error_message, endpoint, created_at")
+        .not("error_message", "is", null)
+        .order("created_at", { ascending: false })
+        .limit(10),
+    ]);
+
+    const logs7d = logsRes.data ?? [];
+    const byComp = new Map<string, {
+      imported24h: number; updated24h: number; imported7d: number; updated7d: number;
+      errors7d: number; calls7d: number; lastLogAt: string | null;
+    }>();
+    const totals = { imported24h: 0, updated24h: 0, imported7d: 0, updated7d: 0, errors7d: 0, calls7d: logs7d.length };
+
+    for (const l of logs7d) {
+      const code = l.competition_code ?? "—";
+      const cur = byComp.get(code) ?? { imported24h: 0, updated24h: 0, imported7d: 0, updated7d: 0, errors7d: 0, calls7d: 0, lastLogAt: null };
+      const isError = !!l.error_message || (l.http_status != null && l.http_status >= 400);
+      cur.imported7d += l.imported ?? 0;
+      cur.updated7d += l.updated ?? 0;
+      cur.calls7d += 1;
+      if (isError) cur.errors7d += 1;
+      if (l.created_at >= since24h) {
+        cur.imported24h += l.imported ?? 0;
+        cur.updated24h += l.updated ?? 0;
+      }
+      if (!cur.lastLogAt || l.created_at > cur.lastLogAt) cur.lastLogAt = l.created_at;
+      byComp.set(code, cur);
+
+      totals.imported7d += l.imported ?? 0;
+      totals.updated7d += l.updated ?? 0;
+      if (isError) totals.errors7d += 1;
+      if (l.created_at >= since24h) {
+        totals.imported24h += l.imported ?? 0;
+        totals.updated24h += l.updated ?? 0;
+      }
+    }
+
+    const competitions = (compsRes.data ?? []).map((c: any) => ({
+      ...c,
+      stats: byComp.get(c.code) ?? { imported24h: 0, updated24h: 0, imported7d: 0, updated7d: 0, errors7d: 0, calls7d: 0, lastLogAt: null },
+    }));
+
+    return { competitions, totals, recentErrors: errorsRes.data ?? [] };
+  });

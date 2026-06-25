@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Loader2, RefreshCcw, Plus, ExternalLink } from "lucide-react";
+import { Loader2, RefreshCcw, Plus, ExternalLink, AlertTriangle, CheckCircle2, Activity } from "lucide-react";
 import {
   listFootballCompetitions,
   upsertFootballCompetition,
@@ -11,6 +11,7 @@ import {
   listFootballSyncLogs,
   refreshFootballMatch,
   createChallengeForFootballMatch,
+  getFootballSyncDashboard,
 } from "@/lib/football-integrations.functions";
 
 export const Route = createFileRoute("/admin/integracoes-futebol")({
@@ -18,10 +19,10 @@ export const Route = createFileRoute("/admin/integracoes-futebol")({
   component: Page,
 });
 
-type Tab = "competitions" | "matches" | "logs";
+type Tab = "dashboard" | "competitions" | "matches" | "logs";
 
 function Page() {
-  const [tab, setTab] = useState<Tab>("competitions");
+  const [tab, setTab] = useState<Tab>("dashboard");
   return (
     <div className="space-y-5">
       <header className="glass-card rounded-2xl p-5 border border-border/60">
@@ -32,26 +33,166 @@ function Page() {
         </p>
       </header>
 
-      <div className="flex gap-2 border-b border-border/60">
-        {(["competitions", "matches", "logs"] as Tab[]).map((t) => (
+      <div className="flex gap-2 border-b border-border/60 overflow-x-auto">
+        {(["dashboard", "competitions", "matches", "logs"] as Tab[]).map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}
-            className={`px-4 py-2 text-sm font-bold border-b-2 -mb-px transition ${
+            className={`px-4 py-2 text-sm font-bold border-b-2 -mb-px transition whitespace-nowrap ${
               tab === t ? "border-primary text-foreground" : "border-transparent text-muted-foreground"
             }`}
           >
-            {t === "competitions" ? "Competições" : t === "matches" ? "Jogos" : "Logs"}
+            {t === "dashboard" ? "Painel" : t === "competitions" ? "Competições" : t === "matches" ? "Jogos" : "Logs"}
           </button>
         ))}
       </div>
 
+      {tab === "dashboard" && <DashboardTab />}
       {tab === "competitions" && <CompetitionsTab />}
       {tab === "matches" && <MatchesTab />}
       {tab === "logs" && <LogsTab />}
     </div>
   );
 }
+
+function DashboardTab() {
+  const dashFn = useServerFn(getFootballSyncDashboard);
+  const syncFn = useServerFn(syncFootballCompetition);
+  const [data, setData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [syncing, setSyncing] = useState<string | null>(null);
+
+  async function load() {
+    setLoading(true);
+    try { setData(await dashFn()); } catch (e) { toast.error(String(e)); } finally { setLoading(false); }
+  }
+  useEffect(() => { load(); }, []);
+
+  async function sync(code: string) {
+    setSyncing(code);
+    try {
+      const r = await syncFn({ data: { code } });
+      if (r.ok) toast.success(`OK — ${r.imported} novos, ${r.updated} atualizados`);
+      else toast.error(r.error ?? "Falha");
+      load();
+    } catch (e) { toast.error(String(e)); } finally { setSyncing(null); }
+  }
+
+  if (loading || !data) return <div className="py-12 grid place-items-center"><Loader2 className="h-5 w-5 animate-spin" /></div>;
+
+  const t = data.totals;
+  const fmt = (d: string | null) => d ? new Date(d).toLocaleString("pt-BR") : "—";
+  const ago = (d: string | null) => {
+    if (!d) return "nunca";
+    const mins = Math.floor((Date.now() - new Date(d).getTime()) / 60000);
+    if (mins < 1) return "agora";
+    if (mins < 60) return `${mins} min atrás`;
+    const h = Math.floor(mins / 60);
+    if (h < 24) return `${h}h atrás`;
+    return `${Math.floor(h / 24)}d atrás`;
+  };
+
+  return (
+    <div className="space-y-5">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <StatCard label="Chamadas (7d)" value={t.calls7d} icon={<Activity className="h-4 w-4" />} />
+        <StatCard label="Importados (24h / 7d)" value={`${t.imported24h} / ${t.imported7d}`} icon={<Plus className="h-4 w-4" />} />
+        <StatCard label="Atualizados (24h / 7d)" value={`${t.updated24h} / ${t.updated7d}`} icon={<RefreshCcw className="h-4 w-4" />} />
+        <StatCard label="Erros (7d)" value={t.errors7d} icon={<AlertTriangle className="h-4 w-4" />} tone={t.errors7d > 0 ? "danger" : "ok"} />
+      </div>
+
+      <div className="glass-card rounded-2xl border border-border/60 overflow-x-auto">
+        <div className="px-4 py-3 border-b border-border/60 flex items-center justify-between">
+          <h2 className="text-sm font-bold">Por competição</h2>
+          <button onClick={load} className="h-8 px-3 rounded bg-muted/40 text-xs font-bold inline-flex items-center gap-1">
+            <RefreshCcw className="h-3 w-3" /> Recarregar
+          </button>
+        </div>
+        <table className="w-full text-sm">
+          <thead className="bg-muted/30 text-xs uppercase">
+            <tr>
+              <th className="text-left p-3">Comp.</th>
+              <th className="text-left p-3">Nome</th>
+              <th className="text-left p-3">Ativo</th>
+              <th className="text-left p-3">Última sync</th>
+              <th className="text-left p-3">Imp. 24h / 7d</th>
+              <th className="text-left p-3">Upd. 24h / 7d</th>
+              <th className="text-left p-3">Erros 7d</th>
+              <th className="text-right p-3">Ação</th>
+            </tr>
+          </thead>
+          <tbody>
+            {data.competitions.map((c: any) => {
+              const lastSync = c.last_synced_at ?? c.stats.lastLogAt;
+              return (
+                <tr key={c.code} className="border-t border-border/40">
+                  <td className="p-3 font-mono font-bold">{c.code}</td>
+                  <td className="p-3">{c.name}</td>
+                  <td className="p-3">{c.active ? <CheckCircle2 className="h-4 w-4 text-emerald-500" /> : <span className="text-xs text-muted-foreground">off</span>}</td>
+                  <td className="p-3 text-xs">
+                    <div>{fmt(lastSync)}</div>
+                    <div className="text-muted-foreground">{ago(lastSync)}</div>
+                  </td>
+                  <td className="p-3">{c.stats.imported24h} / {c.stats.imported7d}</td>
+                  <td className="p-3">{c.stats.updated24h} / {c.stats.updated7d}</td>
+                  <td className={`p-3 font-bold ${c.stats.errors7d > 0 ? "text-destructive" : "text-emerald-500"}`}>{c.stats.errors7d}</td>
+                  <td className="p-3 text-right">
+                    <button onClick={() => sync(c.code)} disabled={syncing === c.code}
+                      className="inline-flex items-center gap-1 h-8 px-3 rounded-lg bg-primary text-primary-foreground text-xs font-bold disabled:opacity-50">
+                      {syncing === c.code ? <Loader2 className="h-3 w-3 animate-spin" /> : <RefreshCcw className="h-3 w-3" />}
+                      Sincronizar
+                    </button>
+                  </td>
+                </tr>
+              );
+            })}
+            {data.competitions.length === 0 && (
+              <tr><td colSpan={8} className="p-8 text-center text-muted-foreground text-sm">Nenhuma competição cadastrada.</td></tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="glass-card rounded-2xl border border-border/60">
+        <div className="px-4 py-3 border-b border-border/60">
+          <h2 className="text-sm font-bold flex items-center gap-2"><AlertTriangle className="h-4 w-4 text-destructive" /> Últimos erros</h2>
+        </div>
+        {data.recentErrors.length === 0 ? (
+          <div className="p-8 text-center text-sm text-emerald-500">Sem erros recentes 🎉</div>
+        ) : (
+          <ul className="divide-y divide-border/40">
+            {data.recentErrors.map((e: any, i: number) => (
+              <li key={i} className="px-4 py-3 text-xs">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono font-bold">{e.competition_code ?? "—"}</span>
+                    <span className="text-muted-foreground">{e.endpoint}</span>
+                    {e.http_status != null && <span className="text-destructive font-bold">HTTP {e.http_status}</span>}
+                  </div>
+                  <span className="text-muted-foreground">{fmt(e.created_at)}</span>
+                </div>
+                <div className="mt-1 text-destructive break-words">{e.error_message}</div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function StatCard({ label, value, icon, tone }: { label: string; value: any; icon: React.ReactNode; tone?: "ok" | "danger" }) {
+  return (
+    <div className="glass-card rounded-2xl p-4 border border-border/60">
+      <div className="flex items-center justify-between">
+        <span className="text-xs text-muted-foreground uppercase font-bold">{label}</span>
+        <span className={tone === "danger" ? "text-destructive" : tone === "ok" ? "text-emerald-500" : "text-muted-foreground"}>{icon}</span>
+      </div>
+      <div className="mt-2 text-2xl font-display font-black">{value}</div>
+    </div>
+  );
+}
+
 
 function CompetitionsTab() {
   const listFn = useServerFn(listFootballCompetitions);
