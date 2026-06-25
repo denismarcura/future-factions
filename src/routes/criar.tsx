@@ -1620,15 +1620,40 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
                     <input
                       type="checkbox"
                       checked={coverAllBrazil}
-                      onChange={(e) => { setCoverAllBrazil(e.target.checked); if (e.target.checked) setSelectedCities([]); }}
+                      onChange={(e) => { setCoverAllBrazil(e.target.checked); }}
                       className="h-5 w-5 accent-primary"
                     />
                     <div>
                       <div className="font-bold text-sm">Brasil todo</div>
-                      <div className="text-xs text-muted-foreground">A campanha vale para qualquer cidade do país.</div>
+                      <div className="text-xs text-muted-foreground">Liste abaixo as cidades que podem participar da campanha.</div>
                     </div>
                   </label>
-                  {!coverAllBrazil && (
+                  {coverAllBrazil ? (
+                    <div>
+                      <div className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-1">
+                        Cidades que podem participar <span className="text-destructive">*</span>
+                      </div>
+                      <textarea
+                        value={selectedCities.join("\n")}
+                        onChange={(e) => {
+                          const list = e.target.value
+                            .split(/[\n,;]+/)
+                            .map((s) => s.trim())
+                            .filter(Boolean);
+                          setSelectedCities(list);
+                        }}
+                        placeholder={"Ex.:\nSão Paulo - SP\nRio de Janeiro - RJ\nBelo Horizonte - MG"}
+                        rows={5}
+                        className="w-full rounded-xl border border-border bg-background/50 p-3 text-sm font-mono focus:border-primary focus:outline-none resize-y"
+                      />
+                      <div className="mt-1 text-xs text-muted-foreground">
+                        Uma cidade por linha — ou separadas por vírgula (,) ou ponto-e-vírgula (;).
+                        {selectedCities.length > 0 && (
+                          <span className="ml-1 text-primary font-semibold">{selectedCities.length} cidade(s) adicionada(s).</span>
+                        )}
+                      </div>
+                    </div>
+                  ) : (
                     <div>
                       <div className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-1">Aberto apenas para as cidades selecionadas</div>
                       <CitiesScopePicker value={selectedCities} onChange={setSelectedCities} />
