@@ -35,8 +35,18 @@ function DesafiosPage() {
   const [expiringLimit, setExpiringLimit] = useState(6);
   const [nowTs, setNowTs] = useState<number | null>(null);
   const runAiSearch = useServerFn(aiSearchChallenges);
+  const fetchCorpChallenges = useServerFn(listLatestCorpChallenges);
+  const [corpChallenges, setCorpChallenges] = useState<CorpChallengeRecord[]>([]);
   const participatedIds = useParticipatedChallengeIds();
   const notParticipated = <T extends { id: string }>(p: T) => !participatedIds.has(String(p.id));
+
+  useEffect(() => {
+    let alive = true;
+    fetchCorpChallenges({ data: { limit: 50 } })
+      .then((rows) => { if (alive) setCorpChallenges(rows); })
+      .catch(() => {});
+    return () => { alive = false; };
+  }, [fetchCorpChallenges]);
 
   useEffect(() => {
     setNowTs(Date.now());
