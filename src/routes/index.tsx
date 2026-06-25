@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { Flame, Sparkles, TrendingUp, Clock, ShoppingBag, Trophy, Coins, Gift, Users, Zap, Diamond, Building2, Search, Loader2, X, Timer, ChevronLeft, ChevronRight, Star } from "lucide-react";
+import { Flame, Sparkles, TrendingUp, Clock, ShoppingBag, Trophy, Coins, Gift, Users, Zap, Diamond, Building2, Search, Loader2, X, Timer, ChevronLeft, ChevronRight, Star, Calendar, Box, Heart, PartyPopper } from "lucide-react";
 
 
 import { AppShell } from "@/components/layout/AppShell";
@@ -166,6 +166,141 @@ function Feed() {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Recompensas e Eventos — 4 cards */}
+      <section className="mb-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        {/* EVENTOS ESPECIAIS */}
+        <div className="rounded-2xl border border-primary/30 glass-card p-4 flex flex-col">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="h-8 w-8 rounded-lg bg-primary/15 grid place-items-center">
+              <PartyPopper className="h-4 w-4 text-primary" />
+            </div>
+            <div className="text-[11px] uppercase tracking-wider font-black text-primary">Eventos Especiais</div>
+          </div>
+          <p className="text-[11px] text-muted-foreground mb-3 leading-snug">Aproveite eventos limitados e ganhe mais Tokens!</p>
+          <ul className="space-y-2 mb-3 flex-1">
+            <li className="flex items-start gap-2">
+              <Flame className="h-3.5 w-3.5 text-destructive mt-0.5 shrink-0" />
+              <div className="min-w-0">
+                <div className="text-xs font-bold leading-tight">Fim de Semana Premiado</div>
+                <div className="text-[10px] text-muted-foreground">Tokens em dobro</div>
+              </div>
+            </li>
+            <li className="flex items-start gap-2">
+              <Zap className="h-3.5 w-3.5 text-gold mt-0.5 shrink-0" />
+              <div className="min-w-0">
+                <div className="text-xs font-bold leading-tight">Segunda Maluca</div>
+                <div className="text-[10px] text-muted-foreground">Missões em dobro</div>
+              </div>
+            </li>
+            <li className="flex items-start gap-2">
+              <Heart className="h-3.5 w-3.5 text-primary mt-0.5 shrink-0" />
+              <div className="min-w-0">
+                <div className="text-xs font-bold leading-tight">Hora Feliz</div>
+                <div className="text-[10px] text-muted-foreground">Das 20h às 22h</div>
+              </div>
+            </li>
+          </ul>
+          <Link
+            to="/missoes"
+            className="inline-flex items-center justify-center h-9 px-3 rounded-full bg-gradient-brand text-primary-foreground text-[11px] font-black uppercase shadow-glow"
+          >
+            Ver todos os eventos
+          </Link>
+        </div>
+
+        {/* PRESENTE DIÁRIO */}
+        <div className="rounded-2xl border border-gold/40 glass-card p-4 flex flex-col relative overflow-hidden">
+          <div className="absolute -top-10 -right-10 h-32 w-32 rounded-full bg-gold/20 blur-3xl pointer-events-none" />
+          <div className="relative flex items-center gap-2 mb-3">
+            <div className="h-8 w-8 rounded-lg bg-gold/15 grid place-items-center">
+              <Gift className="h-4 w-4 text-gold" />
+            </div>
+            <div className="text-[11px] uppercase tracking-wider font-black text-gold">Presente Diário</div>
+          </div>
+          <div className="relative flex-1 flex flex-col items-center justify-center text-center my-2">
+            <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold mb-1">Hoje você ganha</div>
+            <div className="font-display text-3xl font-black text-gradient-gold flex items-center gap-1.5">
+              50 <Coins className="h-6 w-6 text-gold" />
+            </div>
+            <div className="text-[10px] text-muted-foreground mt-1">Tokens grátis</div>
+          </div>
+          <Link
+            to="/perfil"
+            className="relative inline-flex items-center justify-center h-9 px-3 rounded-full bg-gradient-to-r from-gold to-amber-400 text-background text-[11px] font-black uppercase shadow-glow"
+          >
+            Resgatar agora
+          </Link>
+          <div className="relative mt-2 text-center text-[10px] text-muted-foreground">
+            🔥 Sequência: 12 dias
+          </div>
+        </div>
+
+        {/* CAIXA MISTERIOSA */}
+        <div className="rounded-2xl border border-purple-500/40 glass-card p-4 flex flex-col relative overflow-hidden">
+          <div className="absolute -top-10 -right-10 h-32 w-32 rounded-full bg-purple-500/20 blur-3xl pointer-events-none" />
+          <div className="relative flex items-center gap-2 mb-3">
+            <div className="h-8 w-8 rounded-lg bg-purple-500/15 grid place-items-center">
+              <Box className="h-4 w-4 text-purple-400" />
+            </div>
+            <div className="text-[11px] uppercase tracking-wider font-black text-purple-400">Caixa Misteriosa</div>
+          </div>
+          <p className="relative text-[11px] text-muted-foreground mb-2 leading-snug">Surpresas incríveis te esperam!</p>
+          <div className="relative flex-1 flex flex-col items-center justify-center text-center my-2">
+            <div className="text-4xl mb-1">🎁</div>
+            <div className="text-[10px] text-muted-foreground">Pode conter de</div>
+            <div className="text-sm font-black text-purple-300">20 até 5.000 Tokens</div>
+            <div className="text-[10px] text-muted-foreground">ou prêmios especiais!</div>
+          </div>
+          <Link
+            to="/shop"
+            className="relative inline-flex items-center justify-center gap-1.5 h-9 px-3 rounded-full bg-gradient-to-r from-purple-500 to-fuchsia-500 text-white text-[11px] font-black uppercase shadow-glow"
+          >
+            Abrir caixa <span className="inline-flex items-center gap-0.5 ml-1 px-1.5 py-0.5 rounded-full bg-black/30 text-[10px]"><Coins className="h-3 w-3" />1</span>
+          </Link>
+        </div>
+
+        {/* CONVITE E GANHE */}
+        <div className="rounded-2xl border border-emerald-500/40 glass-card p-4 flex flex-col relative overflow-hidden">
+          <div className="absolute -top-10 -right-10 h-32 w-32 rounded-full bg-emerald-500/20 blur-3xl pointer-events-none" />
+          <div className="relative flex items-center gap-2 mb-3">
+            <div className="h-8 w-8 rounded-lg bg-emerald-500/15 grid place-items-center">
+              <Users className="h-4 w-4 text-emerald-400" />
+            </div>
+            <div className="text-[11px] uppercase tracking-wider font-black text-emerald-400">Convite e Ganhe</div>
+          </div>
+          <p className="relative text-[11px] text-muted-foreground mb-3 leading-snug">Convide amigos e ganhe prêmios!</p>
+          <ul className="relative space-y-2 mb-3 flex-1">
+            <li className="flex items-center gap-2">
+              <span className="h-6 w-6 rounded-full bg-emerald-500/15 text-emerald-400 grid place-items-center text-[10px] font-black shrink-0">1</span>
+              <div className="text-[11px] min-w-0 flex-1">
+                <span className="font-bold">Convide 1 amigo</span>
+                <div className="text-[10px] text-gold font-bold">500 Tokens</div>
+              </div>
+            </li>
+            <li className="flex items-center gap-2">
+              <span className="h-6 w-6 rounded-full bg-emerald-500/15 text-emerald-400 grid place-items-center text-[10px] font-black shrink-0">5</span>
+              <div className="text-[11px] min-w-0 flex-1">
+                <span className="font-bold">Convide 5 amigos</span>
+                <div className="text-[10px] text-gold font-bold">Camisa Oficial 👕</div>
+              </div>
+            </li>
+            <li className="flex items-center gap-2">
+              <span className="h-6 w-6 rounded-full bg-emerald-500/15 text-emerald-400 grid place-items-center text-[10px] font-black shrink-0">10</span>
+              <div className="text-[11px] min-w-0 flex-1">
+                <span className="font-bold">Convide 10 amigos</span>
+                <div className="text-[10px] text-gold font-bold">PlayStation 5 🎮</div>
+              </div>
+            </li>
+          </ul>
+          <Link
+            to="/convidar-amigos"
+            className="inline-flex items-center justify-center h-9 px-3 rounded-full bg-gradient-to-r from-emerald-500 to-green-500 text-white text-[11px] font-black uppercase shadow-glow"
+          >
+            Convidar amigos
+          </Link>
         </div>
       </section>
 
