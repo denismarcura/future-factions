@@ -40,14 +40,12 @@ function PlatformIcon({ p, className }: { p: Platform; className?: string }) {
 
 function Missoes() {
   const { user } = useAuth();
-  const [copied, setCopied] = useState(false);
   const [missions, setMissions] = useState<Mission[]>([]);
   const [claimed, setClaimed] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [running, setRunning] = useState<string | null>(null);
   const [confirmed, setConfirmed] = useState(false);
 
-  const referralLink = `vaidar.app/r/${CURRENT_USER.username.toLowerCase()}`;
 
   useEffect(() => {
     (async () => {
