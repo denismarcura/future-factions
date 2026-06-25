@@ -452,13 +452,18 @@ function PredictionInner({ p }: { p: Prediction }) {
               return;
             }
           }
-          if (!user) { goToSignup(); return; }
+          if (!user) {
+            debugParticipate({ challengeId: p.id, reason: "blocked:not-authenticated", message: "handleParticipate sem usuário", context: { entryFee: p.entryFee ?? amount } });
+            goToSignup(); return;
+          }
           if (regAccepted) { doConfirm(); return; }
           // Open regulamento for first-time acceptance
+          debugParticipate({ challengeId: p.id, reason: "regulamento:open", message: "Abrindo modal de regulamento", context: { userId: user.id } });
           pendingConfirmRef.current = doConfirm;
           setRegChoice(null);
           setRegOpen(true);
         };
+
 
 
         return (
