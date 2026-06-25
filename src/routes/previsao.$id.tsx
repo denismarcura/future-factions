@@ -492,17 +492,6 @@ function PredictionInner({ p }: { p: Prediction }) {
           <ChallengeRatingBlock challengeId={p.id} />
 
 
-          {p.prizeTiers && (
-            <div className="mt-5 grid grid-cols-3 gap-3">
-              {p.prizeTiers.map((t) => (
-                <div key={t.hits} className="rounded-xl border border-gold/40 bg-gold/5 p-3 text-center">
-                  <div className="text-[11px] uppercase text-muted-foreground font-bold">{t.hits} acertos</div>
-                  <div className="font-display text-xl font-black text-gold">{t.tokens.toLocaleString("pt-BR")}</div>
-                  <div className="text-[10px] text-muted-foreground">TOKENS</div>
-                </div>
-              ))}
-            </div>
-          )}
 
           {p.subPredictions ? (
             <div className="mt-6 space-y-5">
