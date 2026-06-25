@@ -578,15 +578,9 @@ function PredictionInner({ p }: { p: Prediction }) {
                   >
                     <div className="flex items-center justify-between">
                       <div className="font-display font-bold text-lg">{o.label}</div>
-                      <div className="text-right">
-                        <div className="font-display font-black text-gradient-brand">{pct}%</div>
-                        <div className="text-[10px] text-muted-foreground">{formatTokens(o.pool)} tokens</div>
-                      </div>
-                    </div>
-                    <div className="mt-3 h-2 rounded-full bg-background overflow-hidden">
-                      <div className="h-full bg-gradient-brand" style={{ width: `${pct}%` }} />
                     </div>
                   </button>
+
                 );
               })}
             </div>
