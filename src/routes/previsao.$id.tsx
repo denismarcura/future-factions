@@ -239,6 +239,9 @@ function PredictionPage() {
   return <PredictionInner p={p} />;
 }
 
+const MISSION_REWARD_TKN = 50;
+const CORRECT_PALPITE_REWARD_TKN = 100;
+
 function PredictionInner({ p }: { p: Prediction }) {
   const { user } = useAuth();
   const navigate = useNavigate();
