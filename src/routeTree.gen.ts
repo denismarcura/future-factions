@@ -65,6 +65,7 @@ import { Route as AdminApuracaoCopaRouteImport } from './routes/admin.apuracao-c
 import { Route as AdminApisRouteImport } from './routes/admin.apis'
 import { Route as AuthenticatedHistoricoTokensRouteImport } from './routes/_authenticated/historico-tokens'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedCaixaMisteriosaRouteImport } from './routes/_authenticated/caixa-misteriosa'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as ApiPublicHooksTop100SnapshotRouteImport } from './routes/api/public/hooks/top100-snapshot'
 import { Route as ApiPublicHooksFootballSyncRouteImport } from './routes/api/public/hooks/football-sync'
@@ -350,6 +351,12 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedCaixaMisteriosaRoute =
+  AuthenticatedCaixaMisteriosaRouteImport.update({
+    id: '/caixa-misteriosa',
+    path: '/caixa-misteriosa',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const LovableEmailQueueProcessRoute =
   LovableEmailQueueProcessRouteImport.update({
     id: '/lovable/email/queue/process',
@@ -397,6 +404,7 @@ export interface FileRoutesByFullPath {
   '/shop': typeof ShopRoute
   '/termos': typeof TermosRoute
   '/top100': typeof Top100Route
+  '/caixa-misteriosa': typeof AuthenticatedCaixaMisteriosaRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/historico-tokens': typeof AuthenticatedHistoricoTokensRoute
   '/admin/apis': typeof AdminApisRoute
@@ -457,6 +465,7 @@ export interface FileRoutesByTo {
   '/shop': typeof ShopRoute
   '/termos': typeof TermosRoute
   '/top100': typeof Top100Route
+  '/caixa-misteriosa': typeof AuthenticatedCaixaMisteriosaRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/historico-tokens': typeof AuthenticatedHistoricoTokensRoute
   '/admin/apis': typeof AdminApisRoute
@@ -520,6 +529,7 @@ export interface FileRoutesById {
   '/shop': typeof ShopRoute
   '/termos': typeof TermosRoute
   '/top100': typeof Top100Route
+  '/_authenticated/caixa-misteriosa': typeof AuthenticatedCaixaMisteriosaRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/historico-tokens': typeof AuthenticatedHistoricoTokensRoute
   '/admin/apis': typeof AdminApisRoute
@@ -583,6 +593,7 @@ export interface FileRouteTypes {
     | '/shop'
     | '/termos'
     | '/top100'
+    | '/caixa-misteriosa'
     | '/dashboard'
     | '/historico-tokens'
     | '/admin/apis'
@@ -643,6 +654,7 @@ export interface FileRouteTypes {
     | '/shop'
     | '/termos'
     | '/top100'
+    | '/caixa-misteriosa'
     | '/dashboard'
     | '/historico-tokens'
     | '/admin/apis'
@@ -705,6 +717,7 @@ export interface FileRouteTypes {
     | '/shop'
     | '/termos'
     | '/top100'
+    | '/_authenticated/caixa-misteriosa'
     | '/_authenticated/dashboard'
     | '/_authenticated/historico-tokens'
     | '/admin/apis'
@@ -1171,6 +1184,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/caixa-misteriosa': {
+      id: '/_authenticated/caixa-misteriosa'
+      path: '/caixa-misteriosa'
+      fullPath: '/caixa-misteriosa'
+      preLoaderRoute: typeof AuthenticatedCaixaMisteriosaRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/lovable/email/queue/process': {
       id: '/lovable/email/queue/process'
       path: '/lovable/email/queue/process'
@@ -1203,11 +1223,13 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedCaixaMisteriosaRoute: typeof AuthenticatedCaixaMisteriosaRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedHistoricoTokensRoute: typeof AuthenticatedHistoricoTokensRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedCaixaMisteriosaRoute: AuthenticatedCaixaMisteriosaRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedHistoricoTokensRoute: AuthenticatedHistoricoTokensRoute,
 }

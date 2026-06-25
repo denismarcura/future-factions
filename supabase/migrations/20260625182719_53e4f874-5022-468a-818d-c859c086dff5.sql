@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.open_mystery_box(uuid) FROM authenticated;

@@ -897,6 +897,33 @@ export type Database = {
         }
         Relationships: []
       }
+      mystery_box_opens: {
+        Row: {
+          bonus_awarded: number
+          id: string
+          opened_at: string
+          streak_day: number
+          tokens_awarded: number
+          user_id: string
+        }
+        Insert: {
+          bonus_awarded?: number
+          id?: string
+          opened_at?: string
+          streak_day?: number
+          tokens_awarded: number
+          user_id: string
+        }
+        Update: {
+          bonus_awarded?: number
+          id?: string
+          opened_at?: string
+          streak_day?: number
+          tokens_awarded?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       news_articles: {
         Row: {
           author_id: string | null
@@ -1555,6 +1582,7 @@ export type Database = {
         }
         Returns: number
       }
+      open_mystery_box: { Args: { _user_id: string }; Returns: Json }
       read_email_batch: {
         Args: { batch_size: number; queue_name: string; vt: number }
         Returns: {
