@@ -107,16 +107,19 @@ function DesafiosPage() {
     setAiLoading(true);
     setAiError(null);
     try {
-      const pool: Prediction[] = tab === "publicos"
-        ? [...userChallenges, ...publicMock]
-        : tab === "privados"
-          ? [...userChallenges, ...privateMock]
-          : [...userChallenges, ...PREDICTIONS];
-      const payload = pool.slice(0, 250).map((p) => ({
-        id: p.id,
-        title: p.title,
-        category: p.category,
-      }));
+      const predPool: Prediction[] = [...userChallenges, ...PREDICTIONS];
+      const payload = [
+        ...predPool.slice(0, 200).map((p) => ({
+          id: p.id,
+          title: p.title,
+          category: p.category,
+        })),
+        ...corpChallenges.slice(0, 100).map((c) => ({
+          id: c.id,
+          title: `${c.title} — ${c.companyName ?? "Empresa"}`,
+          category: c.category ?? "Empresa",
+        })),
+      ];
       const res = await runAiSearch({ data: { query: q, items: payload } });
       setAiQuery(q);
       setAiIds(res.ids);
@@ -128,6 +131,24 @@ function DesafiosPage() {
       setAiLoading(false);
     }
   };
+
+  // Resultados unificados da busca IA (predições + empresas), visíveis em qualquer aba
+  const aiResults = useMemo(() => {
+    if (!aiIds || aiIds.length === 0) return null;
+    const predMap = new Map<string, Prediction>();
+    [...userChallenges, ...PREDICTIONS].forEach((p) => predMap.set(String(p.id), p));
+    const corpMap = new Map<string, CorpChallengeRecord>();
+    corpChallenges.forEach((c) => corpMap.set(String(c.id), c));
+    const predictions: Prediction[] = [];
+    const corps: CorpChallengeRecord[] = [];
+    for (const id of aiIds) {
+      const p = predMap.get(id);
+      if (p) { predictions.push(p); continue; }
+      const c = corpMap.get(id);
+      if (c) corps.push(c);
+    }
+    return { predictions, corps, total: predictions.length + corps.length };
+  }, [aiIds, userChallenges, corpChallenges]);
 
   const clearAiSearch = () => {
     setQuery("");
