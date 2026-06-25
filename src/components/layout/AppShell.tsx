@@ -30,6 +30,7 @@ import logoAsset from "@/assets/logo-desafio.png.asset.json";
 import { LiveUsersBadge } from "@/components/LiveUsersBadge";
 import { Footer } from "@/components/layout/Footer";
 import { ClosingSoonAlert } from "@/components/ClosingSoonAlert";
+import { PalpiteCreditsBadge } from "@/components/PalpiteCreditsBadge";
 import { HeaderSearch } from "@/components/HeaderSearch";
 import { GoogleReviewsSlider } from "@/components/GoogleReviewsSlider";
 
@@ -120,6 +121,7 @@ export function AppShell({ children, hidePrimarySidebar = false }: { children: R
 
           <div className="flex items-center gap-2 sm:gap-3">
             <TokenPill className="hidden sm:inline-flex" />
+            <PalpiteCreditsBadge className="hidden sm:inline-flex" />
             <button className="hidden sm:grid h-9 w-9 place-items-center rounded-full bg-card border border-border/60 hover:border-primary/60 transition">
               <Bell className="h-4 w-4" />
             </button>

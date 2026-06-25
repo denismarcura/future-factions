@@ -736,6 +736,29 @@ function PredictionInner({ p }: { p: Prediction }) {
                 </div>
               )}
 
+              {confirmed && (
+                <div className="mt-4 rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/15 via-background/40 to-gold/10 p-5 text-center">
+                  <div className="font-display text-lg font-black text-gradient-brand">Convide seus amigos e ganhe mais tokens!</div>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Cada amigo cadastrado pelo seu convite aumenta suas oportunidades dentro da plataforma.
+                  </p>
+                  <div className="mt-4 grid sm:grid-cols-2 gap-2">
+                    <Link
+                      to="/perfil"
+                      className="inline-flex items-center justify-center gap-2 h-11 rounded-xl bg-gradient-brand text-primary-foreground font-bold text-sm shadow-glow hover:scale-[1.01] transition"
+                    >
+                      Convidar Amigos
+                    </Link>
+                    <Link
+                      to="/desafios"
+                      className="inline-flex items-center justify-center gap-2 h-11 rounded-xl border border-primary/40 bg-background/40 text-primary font-bold text-sm hover:bg-primary/10 transition"
+                    >
+                      Ver mais desafios
+                    </Link>
+                  </div>
+                </div>
+              )}
+
               {missionQueue.length === 0 && (
                 <div className="rounded-xl border border-border/60 bg-background/40 p-3 text-xs text-center text-muted-foreground">
                   Nenhuma missão de seguir disponível no momento.
@@ -745,25 +768,7 @@ function PredictionInner({ p }: { p: Prediction }) {
           );
         })()}
 
-        {related.length > 0 && (
-          <section className="mt-4">
-            <h2 className="font-display text-xl font-bold mb-4">Mais em {p.category}</h2>
-            <div className="grid sm:grid-cols-2 gap-4">
-              {related.map((r) => (
-                <Link
-                  key={r.id}
-                  to="/previsao/$id"
-                  params={{ id: r.id }}
-                  className="rounded-xl bg-card border border-border/60 p-4 hover:border-primary/50 transition"
-                >
-                  <div className="text-xs text-primary font-semibold">{r.category}</div>
-                  <div className="font-display font-bold mt-1 line-clamp-2">{r.title}</div>
-                  <div className="mt-2 text-xs text-muted-foreground">{r.bettors} palpiteiros · {timeLeft(r.closesAt)}</div>
-                </Link>
-              ))}
-            </div>
-          </section>
-        )}
+        {/* "Mais em {category}" section removed by request */}
       </div>
         );
       })()}
