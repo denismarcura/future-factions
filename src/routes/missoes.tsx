@@ -29,14 +29,14 @@ export const Route = createFileRoute("/missoes")({
 const COMPLETION_BONUS_TOKENS = 50;
 const COMPLETION_BONUS_CHANCES = 1;
 
-type TabKey = "todas" | "instagram" | "facebook" | "youtube" | "tiktok" | "google" | "especiais";
-const TABS: { key: TabKey; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
+type TabKey = "todas" | "instagram" | "facebook" | "youtube" | "tiktok" | "especiais";
+const TABS: { key: TabKey; label: string; icon: React.ComponentType<{ className?: string }>; brand?: string }[] = [
   { key: "todas", label: "Todas", icon: ListChecks },
-  { key: "instagram", label: "Instagram", icon: Instagram },
-  { key: "youtube", label: "YouTube", icon: Youtube },
-  { key: "tiktok", label: "TikTok", icon: Music2 },
-  { key: "facebook", label: "Facebook", icon: Facebook },
-  { key: "especiais", label: "Especiais", icon: Sparkles },
+  { key: "instagram", label: "Instagram", icon: Instagram, brand: "#E1306C" },
+  { key: "youtube", label: "YouTube", icon: Youtube, brand: "#FF0000" },
+  { key: "tiktok", label: "TikTok", icon: Music2, brand: "#25F4EE" },
+  { key: "facebook", label: "Facebook", icon: Facebook, brand: "#1877F2" },
+  { key: "especiais", label: "Especiais", icon: Sparkles, brand: "#F5C542" },
 ];
 
 function PlatformIcon({ p, className }: { p: Platform; className?: string }) {
