@@ -218,8 +218,41 @@ function Feed() {
         </div>
       </section>
 
-      {/* Recompensas e Eventos — 4 cards */}
-      <section className="mb-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+      {/* NOVIDADES — Desafios mais recentes (movido para o topo) */}
+      <section className="mb-8">
+        <div className="flex items-end justify-between mb-4">
+          <div>
+            <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-wider text-primary font-bold">
+              <Sparkles className="h-3.5 w-3.5" /> Novidades
+            </div>
+            <h2 className="font-display text-2xl sm:text-3xl font-black">Desafios mais recentes</h2>
+            <p className="text-xs text-muted-foreground">Sempre atualizando.</p>
+          </div>
+          <Link to="/desafios" className="text-xs font-bold text-primary hover:underline shrink-0">
+            Ver todos →
+          </Link>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {[...PREDICTIONS]
+            .filter((p) => new Date(p.closesAt).getTime() > (mounted ? Date.now() : 0))
+            .filter(notParticipated)
+            .sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt))
+            .slice(0, 6)
+            .map((p) => (
+              <PredictionCard key={p.id} prediction={p} hideOptions />
+            ))}
+        </div>
+      </section>
+
+      {/* RECOMPENSA GRATUITA — 4 cards */}
+      <section className="mb-8">
+        <div className="mb-4">
+          <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-wider text-gold font-bold">
+            <Gift className="h-3.5 w-3.5" /> Recompensa gratuita
+          </div>
+          <h2 className="font-display text-2xl sm:text-3xl font-black">Ganhe Tokens e prêmios</h2>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {/* EVENTOS ESPECIAIS */}
         <div className="rounded-2xl border border-primary/30 glass-card p-4 flex flex-col">
           <div className="flex items-center gap-2 mb-3">
@@ -336,14 +369,14 @@ function Feed() {
           </Link>
         </div>
 
-        {/* CONVITE E GANHE */}
+        {/* CONVIDE E GANHE */}
         <div className="rounded-2xl border border-emerald-500/40 glass-card p-4 flex flex-col relative overflow-hidden">
           <div className="absolute -top-10 -right-10 h-32 w-32 rounded-full bg-emerald-500/20 blur-3xl pointer-events-none" />
           <div className="relative flex items-center gap-2 mb-3">
             <div className="h-8 w-8 rounded-lg bg-emerald-500/15 grid place-items-center">
               <Users className="h-4 w-4 text-emerald-400" />
             </div>
-            <div className="text-[11px] uppercase tracking-wider font-black text-emerald-400">Convite e Ganhe</div>
+            <div className="text-[11px] uppercase tracking-wider font-black text-emerald-400">Convide e Ganhe</div>
           </div>
           <p className="relative text-[11px] text-muted-foreground mb-3 leading-snug">Convide amigos e ganhe prêmios!</p>
           {mounted && (
@@ -384,7 +417,11 @@ function Feed() {
             Convidar amigos
           </Link>
         </div>
+        </div>
       </section>
+
+      {/* MISSÕES · DESTAQUES · RANKING — 3 colunas */}
+      <ThreeColumnWidgets corpChallenges={sortedCorp} mounted={mounted} formatTimeLeft={formatTimeLeft} />
 
       {/* Banners inferiores (cadastrados no admin) */}
       {bottomBanners.length > 0 && (
