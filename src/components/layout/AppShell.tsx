@@ -118,7 +118,7 @@ export function AppShell({ children, hidePrimarySidebar = false }: { children: R
           <div className="flex-1 lg:hidden" />
 
           <div className="flex items-center gap-2 sm:gap-3">
-            <TokenPill />
+            <TokenPill className="hidden sm:inline-flex" />
             <button className="hidden sm:grid h-9 w-9 place-items-center rounded-full bg-card border border-border/60 hover:border-primary/60 transition">
               <Bell className="h-4 w-4" />
             </button>
@@ -168,13 +168,15 @@ export function AppShell({ children, hidePrimarySidebar = false }: { children: R
             <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
               <SheetTrigger asChild>
                 <button
-                  className="md:hidden h-9 w-9 grid place-items-center rounded-full bg-card border border-border/60 hover:border-primary/60 transition"
+                  className="md:hidden inline-flex items-center gap-2 h-10 px-3 rounded-full bg-gradient-brand text-primary-foreground font-bold text-sm shadow-glow active:scale-95 transition"
                   aria-label="Abrir menu"
                 >
                   <Menu className="h-5 w-5" />
+                  <span className="text-xs font-black uppercase tracking-wider">Menu</span>
                 </button>
               </SheetTrigger>
-              <SheetContent side="right" className="w-[85vw] max-w-sm bg-background p-0 overflow-y-auto">
+              <SheetContent side="right" className="w-[88vw] max-w-sm bg-background p-0 overflow-y-auto">
+
                 <div className="p-5 border-b border-border/60">
                   {user ? (
                     <div className="flex items-center gap-3">
