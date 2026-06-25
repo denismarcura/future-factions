@@ -6,7 +6,6 @@ import {
   User as UserIcon,
   Plus,
   Search,
-  Coins,
   Bell,
   Crown,
   ShoppingBag,
@@ -23,14 +22,12 @@ import {
   LayoutDashboard,
 } from "lucide-react";
 import { useState, type ReactNode } from "react";
-import { CURRENT_USER, formatTokens } from "@/lib/mock-data";
 import { useAuth, signOut } from "@/hooks/use-auth";
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
 import logoAsset from "@/assets/logo-desafio.png.asset.json";
 import { LiveUsersBadge } from "@/components/LiveUsersBadge";
 import { Footer } from "@/components/layout/Footer";
 import { ClosingSoonAlert } from "@/components/ClosingSoonAlert";
-import { PalpiteCreditsBadge } from "@/components/PalpiteCreditsBadge";
 import { HeaderSearch } from "@/components/HeaderSearch";
 import { GoogleReviewsSlider } from "@/components/GoogleReviewsSlider";
 
@@ -40,8 +37,6 @@ const ADMIN_EMAILS = ["denismarcura@gmail.com", "antoinio.salvador@gmail.com"];
 const NAV = [
   { to: "/", label: "Home", icon: Home },
   { to: "/como-funciona", label: "Como Funciona", icon: BookOpen },
-  { to: "/como-funcionam-os-tokens", label: "Como funcionam os Tokens", icon: Coins },
-
   { to: "/desafios", label: "Desafios", icon: ListChecks },
   { to: "/criar", label: "Criar Desafio", icon: Plus },
   { to: "/palpite-ia", label: "Palpite da IA", icon: Brain },
@@ -87,18 +82,6 @@ function Logo() {
   );
 }
 
-function TokenPill({ className = "" }: { className?: string }) {
-  return (
-    <div className={`items-center gap-2 px-3 py-1.5 rounded-full glass-card shadow-glow-gold ${className}`}>
-      <Coins className="h-4 w-4 text-gold" />
-      <span className="font-display font-bold text-sm tabular-nums">
-        {formatTokens(CURRENT_USER.tokens)}
-      </span>
-      <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Tokens</span>
-    </div>
-  );
-}
-
 export function AppShell({ children, hidePrimarySidebar = false }: { children: ReactNode; hidePrimarySidebar?: boolean }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { user } = useAuth();
@@ -120,8 +103,6 @@ export function AppShell({ children, hidePrimarySidebar = false }: { children: R
           <div className="flex-1 lg:hidden" />
 
           <div className="flex items-center gap-2 sm:gap-3">
-            <TokenPill className="hidden sm:inline-flex" />
-            <PalpiteCreditsBadge className="hidden sm:inline-flex" />
             <button className="hidden sm:grid h-9 w-9 place-items-center rounded-full bg-card border border-border/60 hover:border-primary/60 transition">
               <Bell className="h-4 w-4" />
             </button>
@@ -201,15 +182,6 @@ export function AppShell({ children, hidePrimarySidebar = false }: { children: R
                       </Link>
                     </SheetClose>
                   )}
-                  <div className="mt-4 flex items-center justify-between gap-2 px-3 py-2 rounded-xl glass-card shadow-glow-gold">
-                    <div className="flex items-center gap-2">
-                      <Coins className="h-4 w-4 text-gold" />
-                      <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Seus Tokens</span>
-                    </div>
-                    <span className="font-display font-black text-base tabular-nums text-gold">
-                      {formatTokens(CURRENT_USER.tokens)}
-                    </span>
-                  </div>
                 </div>
 
                 {user && (
