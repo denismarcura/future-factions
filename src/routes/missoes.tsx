@@ -30,6 +30,7 @@ const COMPLETION_BONUS_TOKENS = 50;
 const COMPLETION_BONUS_CHANCES = 1;
 
 type TabKey = "todas" | "instagram" | "facebook" | "youtube" | "tiktok" | "especiais";
+type IconCmp = React.ComponentType<React.SVGProps<SVGSVGElement>>;
 const TABS: { key: TabKey; label: string; icon: React.ComponentType<{ className?: string }>; brand?: string }[] = [
   { key: "todas", label: "Todas", icon: ListChecks },
   { key: "instagram", label: "Instagram", icon: Instagram, brand: "#E1306C" },
