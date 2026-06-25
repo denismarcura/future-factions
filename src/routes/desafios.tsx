@@ -6,6 +6,7 @@ import { PredictionCard } from "@/components/PredictionCard";
 import { CATEGORIES, PREDICTIONS, type Prediction } from "@/lib/mock-data";
 import { COMPANY_CHALLENGES } from "@/lib/mock-extra";
 import { getUserChallenges } from "@/lib/user-challenges";
+import { useParticipatedChallengeIds } from "@/hooks/use-participated";
 import { aiSearchChallenges } from "@/lib/search-ai.functions";
 import { ListChecks, Building2, Users, Lock, Globe2, Sparkles, Search, Loader2, X, Wand2, Timer, CalendarDays, Trophy } from "lucide-react";
 import { timeLeft } from "@/lib/mock-data";
@@ -33,6 +34,8 @@ function DesafiosPage() {
   const [expiringLimit, setExpiringLimit] = useState(6);
   const [nowTs, setNowTs] = useState<number | null>(null);
   const runAiSearch = useServerFn(aiSearchChallenges);
+  const participatedIds = useParticipatedChallengeIds();
+  const notParticipated = <T extends { id: string }>(p: T) => !participatedIds.has(String(p.id));
 
   useEffect(() => {
     setNowTs(Date.now());
@@ -74,6 +77,7 @@ function DesafiosPage() {
       list = list.filter((p) => !isClosed(p));
       if (cat !== "Todas") list = list.filter((p) => p.category === cat);
     }
+    list = list.filter(notParticipated);
     if (aiIds && aiIds.length) {
       const order = new Map(aiIds.map((id, i) => [id, i]));
       list = list
@@ -83,7 +87,7 @@ function DesafiosPage() {
       list.sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt));
     }
     return list;
-  }, [tab, cat, userChallenges, publicMock, privateMock, aiIds]);
+  }, [tab, cat, userChallenges, publicMock, privateMock, aiIds, participatedIds]);
 
   const handleAiSearch = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
@@ -128,16 +132,17 @@ function DesafiosPage() {
       (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
     );
     const openUser = userChallenges.filter((p) => !isClosed(p));
-    return [...openUser, ...sortedMocks].slice(0, 6);
-  }, [userChallenges]);
+    return [...openUser, ...sortedMocks].filter(notParticipated).slice(0, 6);
+  }, [userChallenges, participatedIds]);
 
   // Desafios com tempo se esgotando — abertos, mais próximos do encerramento
   const expiringSoon = useMemo(() => {
     const pool = [...userChallenges, ...PREDICTIONS].filter((p) => !isClosed(p));
     return pool
+      .filter(notParticipated)
       .sort((a, b) => new Date(a.closesAt).getTime() - new Date(b.closesAt).getTime())
       .slice(0, 24);
-  }, [userChallenges]);
+  }, [userChallenges, participatedIds]);
 
   // Próximos jogos da Copa do Mundo 2026
   const upcomingMatches = useMemo(() => {

@@ -11,6 +11,7 @@ import { AppShell } from "@/components/layout/AppShell";
 import { PredictionCard } from "@/components/PredictionCard";
 import { CATEGORIES, PREDICTIONS, type Prediction } from "@/lib/mock-data";
 import { getUserChallenges } from "@/lib/user-challenges";
+import { useParticipatedChallengeIds } from "@/hooks/use-participated";
 import { listActiveBanners, type Banner } from "@/lib/banners";
 import { aiSearchChallenges } from "@/lib/search-ai.functions";
 import logoAsset from "@/assets/logo-desafio.png.asset.json";
@@ -38,6 +39,8 @@ function Feed() {
   const [sort, setSort] = useState<Sort>("new");
   const [banners, setBanners] = useState<Banner[]>([]);
   const [userChallenges, setUserChallenges] = useState<Prediction[]>([]);
+  const participatedIds = useParticipatedChallengeIds();
+  const notParticipated = <T extends { id: string }>(p: T) => !participatedIds.has(String(p.id));
 
   useEffect(() => {
     setBanners(listActiveBanners());
@@ -51,12 +54,13 @@ function Feed() {
     const now = Date.now();
     return [...PREDICTIONS]
       .filter((p) => new Date(p.closesAt).getTime() > now)
+      .filter(notParticipated)
       .sort((a, b) => +new Date(a.closesAt) - +new Date(b.closesAt))
       .slice(0, 2);
-  }, []);
+  }, [participatedIds]);
 
   const items = useMemo(() => {
-    let list = [...PREDICTIONS];
+    let list = [...PREDICTIONS].filter(notParticipated);
     const isClosed = (p: typeof PREDICTIONS[number]) =>
       new Date(p.closesAt).getTime() < Date.now();
     if (cat === "Encerrados") {
@@ -79,7 +83,7 @@ function Feed() {
         list.sort((a, b) => Number(!!b.hot) - Number(!!a.hot) || b.likes - a.likes);
     }
     return list.slice(0, 24);
-  }, [cat, sort]);
+  }, [cat, sort, participatedIds]);
 
   const sorts: { key: Sort; label: string; icon: typeof Flame }[] = [
     { key: "trending", label: "Em alta", icon: Flame },
@@ -230,6 +234,7 @@ function Feed() {
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {[...PREDICTIONS]
             .filter((p) => new Date(p.closesAt).getTime() > Date.now())
+            .filter(notParticipated)
             .sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt))
             .slice(0, 6)
             .map((p) => (
@@ -239,7 +244,7 @@ function Feed() {
       </section>
 
       {/* Desafios criados por pessoas */}
-      {userChallenges.filter((p) => !p.tags?.includes("link-apenas") && new Date(p.closesAt).getTime() > Date.now()).length > 0 && (
+      {userChallenges.filter((p) => !p.tags?.includes("link-apenas") && new Date(p.closesAt).getTime() > Date.now()).filter(notParticipated).length > 0 && (
         <section className="mb-8">
           <div className="flex items-end justify-between mb-4">
             <div>
@@ -256,6 +261,7 @@ function Feed() {
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {userChallenges
               .filter((p) => !p.tags?.includes("link-apenas") && new Date(p.closesAt).getTime() > Date.now())
+              .filter(notParticipated)
               .slice(0, 6)
               .map((p) => (
                 <PredictionCard key={p.id} prediction={p} hideOptions />
