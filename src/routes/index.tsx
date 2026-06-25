@@ -12,7 +12,7 @@ import { useParticipatedChallengeIds } from "@/hooks/use-participated";
 import { listActiveBanners, type Banner } from "@/lib/banners";
 import { listActiveBottomBanners, type BottomBanner } from "@/lib/bottom-banners";
 import { listLatestCorpChallenges, type CorpChallengeRecord } from "@/lib/corp-challenges.functions";
-import logoAsset from "@/assets/logo-desafio.png.asset.json";
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
