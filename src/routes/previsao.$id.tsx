@@ -21,6 +21,8 @@ import { StarRating } from "@/components/StarRating";
 import { NextChallengeBanner } from "@/components/NextChallengeBanner";
 import { EarnMorePointsCTA } from "@/components/EarnMorePointsCTA";
 import { getRatings, rateChallenge, getMyRating } from "@/lib/ratings.functions";
+import { debugParticipate } from "@/lib/debug-participate";
+
 
 function corpToPrediction(c: CorpChallengeRecord): Prediction {
   const first = c.subs[0];
