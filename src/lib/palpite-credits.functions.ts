@@ -34,7 +34,7 @@ export const grantCreditForMission = createServerFn({ method: "POST" })
       _delta: 1,
       _reason: "mission_claim",
       _mission_id: data.missionId,
-      _challenge_id: data.challengeId ?? null,
+      _challenge_id: data.challengeId ?? undefined,
     });
     if (error) throw error;
     return { balance: (balance as number) ?? 0 };
@@ -61,7 +61,7 @@ export const consumePalpiteCredit = createServerFn({ method: "POST" })
       _user_id: context.userId,
       _delta: -1,
       _reason: "challenge_join",
-      _mission_id: null,
+      _mission_id: undefined,
       _challenge_id: data.challengeId,
     });
     if (error) throw error;
