@@ -77,6 +77,7 @@ function DesafiosPage() {
       list = list.filter((p) => !isClosed(p));
       if (cat !== "Todas") list = list.filter((p) => p.category === cat);
     }
+    list = list.filter(notParticipated);
     if (aiIds && aiIds.length) {
       const order = new Map(aiIds.map((id, i) => [id, i]));
       list = list
@@ -86,7 +87,7 @@ function DesafiosPage() {
       list.sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt));
     }
     return list;
-  }, [tab, cat, userChallenges, publicMock, privateMock, aiIds]);
+  }, [tab, cat, userChallenges, publicMock, privateMock, aiIds, participatedIds]);
 
   const handleAiSearch = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
