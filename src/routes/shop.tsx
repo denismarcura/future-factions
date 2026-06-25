@@ -122,69 +122,100 @@ function ShopPage() {
               }
             }
             return (
-              <article key={p.id} className="group relative rounded-2xl border border-border/60 bg-card overflow-hidden hover:border-primary/50 hover:shadow-glow transition flex flex-col">
+              <article key={p.id} aria-labelledby={`prize-${p.id}-name`} className="group relative rounded-2xl border border-border/60 bg-card overflow-hidden hover:border-primary/50 hover:shadow-glow focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/40 transition flex flex-col">
                 <div className="relative aspect-[4/5] bg-black border-b border-border/60 overflow-hidden">
                   {p.image_url ? (
-                    <img src={p.image_url} alt={p.name} className="absolute inset-0 w-full h-full object-contain" loading="lazy" />
+                    <img
+                      src={p.image_url}
+                      alt={`Imagem do prêmio ${p.name}`}
+                      className="absolute inset-0 w-full h-full object-contain"
+                      loading="lazy"
+                    />
                   ) : (
-                    <div className="absolute inset-0 grid place-items-center">
+                    <div className="absolute inset-0 grid place-items-center" aria-hidden="true">
                       <Gift className="h-10 w-10 text-muted-foreground" />
                     </div>
                   )}
                 </div>
                 <div className="p-2.5 sm:p-4 flex flex-col flex-1 gap-2">
-                  <h3 className="font-display font-bold leading-snug line-clamp-2 text-sm sm:text-base min-h-[2.5em]">{p.name}</h3>
+                  <h3 id={`prize-${p.id}-name`} className="font-display font-bold leading-snug line-clamp-2 text-sm sm:text-base min-h-[2.5em]">{p.name}</h3>
                   {p.description && (
                     <p className="hidden sm:block text-xs text-muted-foreground line-clamp-2">{p.description}</p>
                   )}
                   <div className="mt-auto flex items-center justify-between gap-2 min-w-0">
                     {isEditing ? (
-                      <div className="flex items-center gap-1 flex-1 min-w-0">
+                      <div className="flex items-center gap-1 flex-1 min-w-0" role="group" aria-label={`Editar valor em tokens de ${p.name}`}>
+                        <label htmlFor={`prize-${p.id}-cost`} className="sr-only">Valor em tokens</label>
                         <input
+                          id={`prize-${p.id}-cost`}
                           type="number"
+                          min={0}
                           value={editVal}
                           onChange={(e) => setEditVal(e.target.value)}
-                          className="w-full min-w-0 h-8 px-2 rounded-lg bg-background border border-border/60 text-sm tabular-nums"
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") saveTokens();
+                            if (e.key === "Escape") setEditingId(null);
+                          }}
+                          className="w-full min-w-0 h-9 px-2 rounded-lg bg-background border border-border/60 text-sm tabular-nums focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                           autoFocus
                         />
-                        <button onClick={saveTokens} disabled={savingId === p.id} className="h-8 w-8 shrink-0 grid place-items-center rounded-lg bg-primary text-primary-foreground">
-                          {savingId === p.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
+                        <button
+                          type="button"
+                          onClick={saveTokens}
+                          disabled={savingId === p.id}
+                          aria-label="Salvar valor em tokens"
+                          className="h-9 w-9 shrink-0 grid place-items-center rounded-lg bg-primary text-primary-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-card disabled:opacity-60"
+                        >
+                          {savingId === p.id ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <Check className="h-4 w-4" aria-hidden="true" />}
                         </button>
-                        <button onClick={() => setEditingId(null)} className="h-8 w-8 shrink-0 grid place-items-center rounded-lg hover:bg-muted/40">
-                          <X className="h-3.5 w-3.5" />
+                        <button
+                          type="button"
+                          onClick={() => setEditingId(null)}
+                          aria-label="Cancelar edição"
+                          className="h-9 w-9 shrink-0 grid place-items-center rounded-lg hover:bg-muted/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-card"
+                        >
+                          <X className="h-4 w-4" aria-hidden="true" />
                         </button>
                       </div>
                     ) : (
                       <>
                         <div className="inline-flex items-center gap-1 text-gold min-w-0">
-                          <Coins className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
-                          <span className="font-display font-black text-base sm:text-lg tabular-nums truncate">{formatTokens(p.cost_tokens ?? 0)}</span>
+                          <Coins className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" aria-hidden="true" />
+                          <span className="font-display font-black text-base sm:text-lg tabular-nums truncate" aria-label={`Custo: ${formatTokens(p.cost_tokens ?? 0)} tokens`}>
+                            {formatTokens(p.cost_tokens ?? 0)}
+                          </span>
                           {isAdmin && (
                             <button
+                              type="button"
                               onClick={() => { setEditingId(p.id); setEditVal(String(p.cost_tokens ?? 0)); }}
-                              className="ml-0.5 h-6 w-6 shrink-0 grid place-items-center rounded-md hover:bg-muted/40 text-muted-foreground"
-                              title="Editar valor em tokens"
+                              aria-label={`Editar valor em tokens de ${p.name}`}
+                              className="ml-0.5 h-8 w-8 shrink-0 grid place-items-center rounded-md hover:bg-muted/40 text-muted-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-card"
                             >
-                              <Pencil className="h-3 w-3" />
+                              <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
                             </button>
                           )}
                         </div>
-                        <span className="text-[10px] text-muted-foreground shrink-0 whitespace-nowrap">{p.stock} em estoque</span>
+                        <span className="text-[10px] text-muted-foreground shrink-0 whitespace-nowrap" aria-label={`${p.stock} unidades em estoque`}>
+                          {p.stock} em estoque
+                        </span>
                       </>
                     )}
                   </div>
                   {!noStock ? (
                     <button
+                      type="button"
                       onClick={() => handleRedeem(p)}
                       disabled={disabled}
-                      className={`h-9 sm:h-10 px-2 rounded-full text-[11px] sm:text-sm font-black uppercase tracking-wide transition inline-flex items-center justify-center gap-1.5 whitespace-nowrap ${
+                      aria-label={!user ? `Entrar para solicitar ${p.name}` : `Solicitar troca de ${p.name} por ${formatTokens(p.cost_tokens ?? 0)} tokens`}
+                      aria-busy={busy === p.id}
+                      className={`min-h-11 h-11 sm:h-11 px-3 rounded-full text-[11px] sm:text-sm font-black uppercase tracking-wide transition inline-flex items-center justify-center gap-1.5 whitespace-nowrap focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-card ${
                         !disabled
                           ? "bg-gradient-brand text-primary-foreground shadow-glow hover:scale-[1.02]"
                           : "bg-muted text-muted-foreground cursor-not-allowed border border-border/60"
                       }`}
                     >
                       {busy === p.id ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
                       ) : !user ? (
                         "Entrar"
                       ) : (
@@ -192,7 +223,11 @@ function ShopPage() {
                       )}
                     </button>
                   ) : (
-                    <div className="h-9 sm:h-10 rounded-full grid place-items-center text-[11px] sm:text-xs font-bold uppercase tracking-wide bg-muted text-muted-foreground border border-border/60">
+                    <div
+                      role="status"
+                      aria-label={`${p.name} esgotado`}
+                      className="min-h-11 h-11 rounded-full grid place-items-center text-[11px] sm:text-xs font-bold uppercase tracking-wide bg-muted text-muted-foreground border border-border/60"
+                    >
                       Esgotado
                     </div>
                   )}
