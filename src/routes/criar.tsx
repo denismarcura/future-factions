@@ -1634,12 +1634,18 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
                         Cidades que podem participar <span className="text-destructive">*</span>
                       </div>
                       <textarea
-                        value={selectedCities.join("\n")}
+                        value={selectedCities.map((c) => c.nome + (c.uf ? ` - ${c.uf}` : "")).join("\n")}
                         onChange={(e) => {
                           const list = e.target.value
                             .split(/[\n,;]+/)
                             .map((s) => s.trim())
-                            .filter(Boolean);
+                            .filter(Boolean)
+                            .map((raw, idx) => {
+                              const m = raw.match(/^(.+?)\s*[-–/]\s*([A-Za-z]{2})$/);
+                              const nome = (m ? m[1] : raw).trim();
+                              const uf = m ? m[2].toUpperCase() : "";
+                              return { id: -(idx + 1), nome, uf };
+                            });
                           setSelectedCities(list);
                         }}
                         placeholder={"Ex.:\nSão Paulo - SP\nRio de Janeiro - RJ\nBelo Horizonte - MG"}
