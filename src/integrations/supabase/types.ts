@@ -1110,6 +1110,36 @@ export type Database = {
           },
         ]
       }
+      palpite_credit_transactions: {
+        Row: {
+          challenge_id: string | null
+          created_at: string
+          delta: number
+          id: string
+          mission_id: string | null
+          reason: string
+          user_id: string
+        }
+        Insert: {
+          challenge_id?: string | null
+          created_at?: string
+          delta: number
+          id?: string
+          mission_id?: string | null
+          reason: string
+          user_id: string
+        }
+        Update: {
+          challenge_id?: string | null
+          created_at?: string
+          delta?: number
+          id?: string
+          mission_id?: string | null
+          reason?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       palpites: {
         Row: {
           challenge_id: string
@@ -1233,6 +1263,7 @@ export type Database = {
           instagram: string | null
           marketing_opt_in: boolean
           numero: string | null
+          palpite_credits: number
           provider: string | null
           signup_city: string | null
           signup_ip: string | null
@@ -1258,6 +1289,7 @@ export type Database = {
           instagram?: string | null
           marketing_opt_in?: boolean
           numero?: string | null
+          palpite_credits?: number
           provider?: string | null
           signup_city?: string | null
           signup_ip?: string | null
@@ -1283,6 +1315,7 @@ export type Database = {
           instagram?: string | null
           marketing_opt_in?: boolean
           numero?: string | null
+          palpite_credits?: number
           provider?: string | null
           signup_city?: string | null
           signup_ip?: string | null
@@ -1494,6 +1527,16 @@ export type Database = {
       }
       enqueue_email: {
         Args: { payload: Json; queue_name: string }
+        Returns: number
+      }
+      grant_palpite_credit: {
+        Args: {
+          _challenge_id?: string
+          _delta: number
+          _mission_id?: string
+          _reason: string
+          _user_id: string
+        }
         Returns: number
       }
       has_role: {
