@@ -423,7 +423,9 @@ function PredictionInner({ p }: { p: Prediction }) {
               answers: subAnswers, closesAt: p.closesAt,
               participatedAt: new Date().toISOString(),
             });
+            debugParticipate({ challengeId: p.id, reason: "confirm:success", message: `Participação confirmada (fee=${fee})`, context: { answers: subAnswers, fee } });
             toast.success(`🎯 Participação confirmada! ${fee} TKN debitados. +${CORRECT_PALPITE_REWARD_TKN} TKN por palpite acertado. Missões bônus liberadas!`);
+
           } else {
             if (!user) { goToSignup(); return; }
             if (balance !== null && balance < amount) {
