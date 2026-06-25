@@ -85,9 +85,9 @@ function Logo() {
   );
 }
 
-function TokenPill() {
+function TokenPill({ className = "" }: { className?: string }) {
   return (
-    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full glass-card shadow-glow-gold">
+    <div className={`items-center gap-2 px-3 py-1.5 rounded-full glass-card shadow-glow-gold ${className}`}>
       <Coins className="h-4 w-4 text-gold" />
       <span className="font-display font-bold text-sm tabular-nums">
         {formatTokens(CURRENT_USER.tokens)}
