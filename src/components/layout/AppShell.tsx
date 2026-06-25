@@ -55,10 +55,11 @@ const NAV = [
 ];
 
 const MOBILE_NAV = [
-  { to: "/", label: "Home", icon: Home },
+  { to: "/", label: "Início", icon: Home },
   { to: "/desafios", label: "Desafios", icon: ListChecks },
-  { to: "/shop", label: "Shop", icon: ShoppingBag },
-  { to: "/ranking", label: "Ranking", icon: Trophy },
+  { to: "/missoes", label: "Missões", icon: Target },
+  { to: "/shop", label: "Prêmios", icon: ShoppingBag },
+  { to: "/perfil", label: "Perfil", icon: UserIcon },
 ];
 
 function Logo() {
@@ -268,7 +269,7 @@ export function AppShell({ children, hidePrimarySidebar = false }: { children: R
       </header>
 
 
-      <div className="max-w-7xl mx-auto px-4 pb-24 md:pb-12 md:flex md:gap-8 pt-6">
+      <div className="max-w-7xl mx-auto px-4 pb-24 md:flex md:gap-8 pt-6">
         {!hidePrimarySidebar && (
           <aside className="hidden md:block w-60 shrink-0">
             <nav className="sticky top-24 space-y-1">
@@ -312,40 +313,16 @@ export function AppShell({ children, hidePrimarySidebar = false }: { children: R
       <Footer />
 
 
-      <nav className="md:hidden fixed bottom-0 inset-x-0 z-40 backdrop-blur-xl bg-background/90 border-t border-border/60">
-        <div className="grid grid-cols-5">
-          {MOBILE_NAV.slice(0, 2).map(({ to, label, icon: Icon }) => {
+      <nav className="fixed bottom-0 inset-x-0 z-40 backdrop-blur-xl bg-background/90 border-t border-border/60">
+        <div className="grid grid-cols-5 max-w-md mx-auto">
+          {MOBILE_NAV.map(({ to, label, icon: Icon }) => {
             const active = to === "/" ? pathname === "/" : pathname.startsWith(to);
             return (
               <Link
                 key={to}
                 to={to}
-                className={`flex flex-col items-center justify-center py-3 text-[10px] gap-1 ${
-                  active ? "text-primary" : "text-muted-foreground"
-                }`}
-              >
-                <Icon className="h-5 w-5" />
-                {label}
-              </Link>
-            );
-          })}
-          <Link
-            to="/criar"
-            className="flex items-center justify-center -mt-6"
-            aria-label="Criar desafio"
-          >
-            <span className="h-14 w-14 rounded-full bg-gradient-brand grid place-items-center shadow-glow text-primary-foreground">
-              <Plus className="h-6 w-6" />
-            </span>
-          </Link>
-          {MOBILE_NAV.slice(2).map(({ to, label, icon: Icon }) => {
-            const active = pathname.startsWith(to);
-            return (
-              <Link
-                key={to}
-                to={to}
-                className={`flex flex-col items-center justify-center py-3 text-[10px] gap-1 ${
-                  active ? "text-primary" : "text-muted-foreground"
+                className={`flex flex-col items-center justify-center py-2.5 text-[10px] gap-1 transition ${
+                  active ? "text-primary" : "text-muted-foreground hover:text-foreground"
                 }`}
               >
                 <Icon className="h-5 w-5" />
