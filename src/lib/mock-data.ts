@@ -61,7 +61,7 @@ export const CURRENT_USER: User = {
 export type PredictionOption = {
   id: string;
   label: string;
-  pool: number; // tokens apostados
+  pool: number; // tokens em palpites
 };
 
 export type SubPrediction = {
