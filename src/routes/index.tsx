@@ -53,18 +53,19 @@ function Feed() {
   }, []);
 
   const closingSoon = useMemo(() => {
-    const now = Date.now();
+    const now = mounted ? Date.now() : 0;
     return [...PREDICTIONS]
       .filter((p) => new Date(p.closesAt).getTime() > now)
       .filter(notParticipated)
       .sort((a, b) => +new Date(a.closesAt) - +new Date(b.closesAt))
       .slice(0, 2);
-  }, [participatedIds]);
+  }, [participatedIds, mounted]);
 
   const items = useMemo(() => {
+    const now = mounted ? Date.now() : 0;
     let list = [...PREDICTIONS].filter(notParticipated);
     const isClosed = (p: typeof PREDICTIONS[number]) =>
-      new Date(p.closesAt).getTime() < Date.now();
+      new Date(p.closesAt).getTime() < now;
     if (cat === "Encerrados") {
       list = list.filter(isClosed);
     } else {
@@ -85,7 +86,7 @@ function Feed() {
         list.sort((a, b) => Number(!!b.hot) - Number(!!a.hot) || b.likes - a.likes);
     }
     return list.slice(0, 24);
-  }, [cat, sort, participatedIds]);
+  }, [cat, sort, participatedIds, mounted]);
 
   const sorts: { key: Sort; label: string; icon: typeof Flame }[] = [
     { key: "trending", label: "Em alta", icon: Flame },
