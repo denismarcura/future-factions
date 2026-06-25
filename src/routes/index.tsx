@@ -244,7 +244,7 @@ function Feed() {
       </section>
 
       {/* Desafios criados por pessoas */}
-      {userChallenges.filter((p) => !p.tags?.includes("link-apenas") && new Date(p.closesAt).getTime() > Date.now()).length > 0 && (
+      {userChallenges.filter((p) => !p.tags?.includes("link-apenas") && new Date(p.closesAt).getTime() > Date.now()).filter(notParticipated).length > 0 && (
         <section className="mb-8">
           <div className="flex items-end justify-between mb-4">
             <div>
