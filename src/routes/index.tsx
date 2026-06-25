@@ -340,23 +340,18 @@ function Feed() {
             </div>
             <div className="text-[11px] uppercase tracking-wider font-black text-purple-400">Caixa Misteriosa</div>
           </div>
-          <p className="relative text-[11px] text-muted-foreground mb-2 leading-snug">Surpresas incríveis te esperam!</p>
+          <p className="relative text-[11px] text-muted-foreground mb-2 leading-snug">Abra todos os dias e ganhe tokens!</p>
           <div className="relative flex-1 flex flex-col items-center justify-center text-center my-2">
-            <div className="text-4xl mb-1">🎁</div>
-            <div className="text-[10px] text-muted-foreground">Pode conter de</div>
-            <div className="text-sm font-black text-purple-300">20 até 5.000 Tokens</div>
-            <div className="text-[10px] text-muted-foreground">ou prêmios especiais!</div>
-            {mounted && (
-              <div className="mt-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-purple-500/15 border border-purple-500/30 text-purple-300 text-[10px] font-black font-mono">
-                <Timer className="h-3 w-3" /> Próxima grátis em {fmtHMS(msUntilMidnight())}
-              </div>
-            )}
+            <div className="text-4xl mb-1 animate-bounce">🎁</div>
+            <div className="text-[10px] text-muted-foreground">Sorteio de</div>
+            <div className="text-sm font-black text-purple-300">100 a 500 Tokens</div>
+            <div className="text-[10px] text-muted-foreground">+ bônus de fidelidade</div>
           </div>
           <Link
-            to="/shop"
-            className="relative inline-flex items-center justify-center gap-1.5 h-9 px-3 rounded-full bg-gradient-to-r from-purple-500 to-fuchsia-500 text-white text-[11px] font-black uppercase shadow-glow"
+            to="/caixa-misteriosa"
+            className="relative inline-flex items-center justify-center gap-1.5 h-9 px-3 rounded-full bg-gradient-to-r from-purple-500 to-fuchsia-500 text-white text-[11px] font-black uppercase shadow-glow hover:scale-105 transition-transform"
           >
-            Abrir caixa <span className="inline-flex items-center gap-0.5 ml-1 px-1.5 py-0.5 rounded-full bg-black/30 text-[10px]"><Coins className="h-3 w-3" />1</span>
+            Abrir caixa
           </Link>
         </div>
 
