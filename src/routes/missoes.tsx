@@ -270,15 +270,26 @@ function Missoes() {
                       <Coins className="h-3 w-3" /> +{totalTokens} tokens
                     </div>
                   </div>
-                  <button
-                    onClick={() => handleDo(m)}
-                    disabled={done || isRunning || isExiting || !!running}
-                    className={`shrink-0 h-9 px-3.5 rounded-full font-bold text-[11px] uppercase tracking-wide inline-flex items-center gap-1 transition ${
+                  <a
+                    href={done || isRunning || isExiting ? undefined : m.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={(e) => {
+                      if (done || isRunning || isExiting || !!running) {
+                        e.preventDefault();
+                        return;
+                      }
+                      // deixa o navegador abrir a aba nativamente; só dispara claim
+                      handleDo(m);
+                    }}
+                    aria-disabled={done || isRunning || isExiting || !!running}
+                    className={`shrink-0 h-9 px-3.5 rounded-full font-bold text-[11px] uppercase tracking-wide inline-flex items-center gap-1 transition no-underline ${
                       isExiting || done
-                        ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30"
-                        : "bg-gradient-brand text-primary-foreground shadow-glow hover:scale-[1.03] disabled:opacity-60 disabled:hover:scale-100"
-                    }`}
+                        ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 pointer-events-none"
+                        : "bg-gradient-brand text-primary-foreground shadow-glow hover:scale-[1.03]"
+                    } ${isRunning || !!running ? "opacity-60 pointer-events-none" : ""}`}
                   >
+
                     {isRunning ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : (isExiting || done) ? <Check className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
                     {isRunning ? `${remaining}s` : isExiting ? "+TOKENS" : done ? "Feita" : "Fazer"}
                   </button>
