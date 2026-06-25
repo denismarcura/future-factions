@@ -322,6 +322,11 @@ function Feed() {
             <div className="text-[10px] text-muted-foreground">Pode conter de</div>
             <div className="text-sm font-black text-purple-300">20 até 5.000 Tokens</div>
             <div className="text-[10px] text-muted-foreground">ou prêmios especiais!</div>
+            {mounted && (
+              <div className="mt-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-purple-500/15 border border-purple-500/30 text-purple-300 text-[10px] font-black font-mono">
+                <Timer className="h-3 w-3" /> Próxima grátis em {fmtHMS(msUntilMidnight())}
+              </div>
+            )}
           </div>
           <Link
             to="/shop"
