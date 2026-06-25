@@ -272,7 +272,7 @@ function DesafiosPage() {
             {corpChallenges.slice(0, 6).map((c) => (
               <Link
                 key={c.id}
-                to="/desafio-corp/$id"
+                to="/previsao/$id"
                 params={{ id: c.id }}
                 className="block rounded-2xl border border-gold/30 bg-card p-4 hover:border-gold hover:shadow-glow transition group"
               >
