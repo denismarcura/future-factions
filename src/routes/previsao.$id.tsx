@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import {
-  Clock, Users, Heart, MessageCircle, Share2, Coins, TrendingUp, ArrowLeft, Instagram, Youtube, Facebook, Check, ExternalLink, Loader2, ScrollText, ShieldCheck, Star, Twitter, Linkedin,
+  Clock, Users, Heart, MessageCircle, Share2, Coins, TrendingUp, ArrowLeft, Instagram, Youtube, Facebook, Check, ExternalLink, Loader2, ScrollText, ShieldCheck, Star, Twitter, Linkedin, Plus,
 } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell } from "@/components/layout/AppShell";
@@ -456,34 +456,48 @@ function PredictionInner({ p }: { p: Prediction }) {
         return (
       <div className="space-y-6">
         <article className="rounded-2xl bg-card border border-border/60 p-6">
-          <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 text-xs sm:flex sm:flex-wrap">
-            <span className="px-2 py-0.5 rounded-full bg-primary/15 text-primary font-semibold border border-primary/30">{p.category}</span>
-            <span className="inline-flex items-center gap-1 text-muted-foreground"><Clock className="h-3 w-3" /> {mounted ? (isClosed ? "Apostas encerradas" : `Encerra em ${timeLeft(p.closesAt)}`) : "Carregando..."}</span>
-            <span className="inline-flex items-center gap-1 text-muted-foreground"><Users className="h-3 w-3" /> {p.bettors} apostadores</span>
+          <div className="flex flex-wrap items-center gap-2 text-xs">
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-card border border-border/60 text-muted-foreground">
+              <Clock className="h-3 w-3" /> {mounted ? (isClosed ? "Apostas encerradas" : `Encerra em ${timeLeft(p.closesAt)}`) : "Carregando..."}
+            </span>
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-card border border-border/60 text-muted-foreground">
+              <Users className="h-3 w-3" /> {p.bettors} apostadores
+            </span>
           </div>
 
           {p.match && (
-            <div className="mt-4 rounded-2xl border border-border/60 bg-gradient-to-br from-primary/10 via-background/40 to-gold/10 p-5">
-              <div className="flex items-center justify-around gap-3">
-                <div className="flex flex-col items-center gap-2">
-                  <img src={p.match.homeFlag} alt={p.match.home} className="h-16 w-24 object-cover rounded shadow-md" />
-                  <span className="font-display font-bold">{p.match.home}</span>
+            <div className="mt-4 rounded-2xl border border-border/60 bg-gradient-to-br from-primary/10 via-background/40 to-gold/10 p-4 sm:p-5">
+              <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
+                <div className="flex flex-col items-center gap-2 min-w-0">
+                  <img src={p.match.homeFlag} alt={p.match.home} className="h-12 w-16 sm:h-16 sm:w-24 object-cover rounded-lg shadow-md" />
+                  <span className="font-display font-bold text-sm sm:text-base text-center truncate w-full">{p.match.home}</span>
                 </div>
-                <div className="text-center">
-                  <div className="font-display text-4xl font-black text-gradient-brand">VS</div>
-                  <div className="text-xs text-muted-foreground mt-1">Grupo {p.match.group}</div>
+                <div className="text-center px-2">
+                  <div className="font-display text-3xl sm:text-4xl font-black text-gradient-brand leading-none">VS</div>
+                  <div className="text-[10px] sm:text-xs text-muted-foreground mt-1 whitespace-nowrap">Grupo {p.match.group}</div>
                 </div>
-                <div className="flex flex-col items-center gap-2">
-                  <img src={p.match.awayFlag} alt={p.match.away} className="h-16 w-24 object-cover rounded shadow-md" />
-                  <span className="font-display font-bold">{p.match.away}</span>
+                <div className="flex flex-col items-center gap-2 min-w-0">
+                  <img src={p.match.awayFlag} alt={p.match.away} className="h-12 w-16 sm:h-16 sm:w-24 object-cover rounded-lg shadow-md" />
+                  <span className="font-display font-bold text-sm sm:text-base text-center truncate w-full">{p.match.away}</span>
                 </div>
               </div>
-              <div className="mt-3 text-center text-sm text-muted-foreground">
-                Início: <span className="text-foreground font-semibold">{new Date(p.match.kickoff).toLocaleString("pt-BR", { dateStyle: "full", timeStyle: "short", timeZone: "America/Sao_Paulo" })}</span>
+              <div className="mt-4 text-center text-xs sm:text-sm text-muted-foreground">
+                Início: <span className="text-foreground font-semibold">{new Date(p.match.kickoff).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short", timeZone: "America/Sao_Paulo" })}</span>
               </div>
-              <div className="mt-1 text-center text-xs text-destructive font-semibold">
-                Apostas encerram 10 minutos antes do jogo
+              <div className="mt-1 text-center text-[11px] text-destructive font-semibold">
+                Apostas encerram 10 min antes do jogo
               </div>
+              {!isClosed && (
+                <button
+                  onClick={() => {
+                    const el = document.getElementById("participar-cta");
+                    if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+                  }}
+                  className="mt-4 w-full h-11 rounded-xl bg-gradient-brand text-primary-foreground font-display font-black text-sm tracking-wide shadow-glow hover:scale-[1.01] transition inline-flex items-center justify-center gap-2"
+                >
+                  <Plus className="h-4 w-4" /> PARTICIPAR
+                </button>
+              )}
             </div>
           )}
 
@@ -562,6 +576,7 @@ function PredictionInner({ p }: { p: Prediction }) {
 
           {/* PARTICIPAR — botão verde único (também serve para CONFIRMAR PALPITE EXTRA) */}
           <button
+            id="participar-cta"
             onClick={handleParticipate}
             disabled={
               isClosed ||
