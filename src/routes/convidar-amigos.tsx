@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { AppShell } from "@/components/layout/AppShell";
 import { useAuth } from "@/hooks/use-auth";
 import { useInviteUrl } from "@/hooks/use-invite-url";
-import { parseInstagramHandles } from "@/lib/instagram-handles";
+
 
 export const Route = createFileRoute("/convidar-amigos")({
   head: () => ({

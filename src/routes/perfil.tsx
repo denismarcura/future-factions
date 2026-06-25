@@ -1,11 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { MapPin, Trophy, Target, Award, Sparkles, CheckCircle2, XCircle, Clock, LogIn } from "lucide-react";
+// (Mail imported separately below)
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { AppShell } from "@/components/layout/AppShell";
 import { ACHIEVEMENTS, formatTokens } from "@/lib/mock-data";
 import { InviteLinkCard } from "@/components/InviteLinkCard";
+import { MissionsTeaser } from "@/components/MissionsTeaser";
 import { PalpiteCreditsBadge } from "@/components/PalpiteCreditsBadge";
+import { Mail } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { listMyPalpites } from "@/lib/my-palpites.functions";
 import { supabase } from "@/integrations/supabase/client";
