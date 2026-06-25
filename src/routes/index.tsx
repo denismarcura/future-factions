@@ -98,39 +98,8 @@ function Feed() {
       .slice(0, 2);
   }, [participatedIds, mounted]);
 
-  const items = useMemo(() => {
-    const now = mounted ? Date.now() : 0;
-    let list = [...PREDICTIONS].filter(notParticipated);
-    const isClosed = (p: typeof PREDICTIONS[number]) =>
-      new Date(p.closesAt).getTime() < now;
-    if (cat === "Encerrados") {
-      list = list.filter(isClosed);
-    } else {
-      list = list.filter((p) => !isClosed(p));
-      if (cat !== "Todas") list = list.filter((p) => p.category === cat);
-    }
-    switch (sort) {
-      case "new":
-        list.sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt));
-        break;
-      case "popular":
-        list.sort((a, b) => b.bettors - a.bettors);
-        break;
-      case "closing":
-        list.sort((a, b) => +new Date(a.closesAt) - +new Date(b.closesAt));
-        break;
-      default:
-        list.sort((a, b) => Number(!!b.hot) - Number(!!a.hot) || b.likes - a.likes);
-    }
-    return list.slice(0, 24);
-  }, [cat, sort, participatedIds, mounted]);
 
-  const sorts: { key: Sort; label: string; icon: typeof Flame }[] = [
-    { key: "trending", label: "Em alta", icon: Flame },
-    { key: "new", label: "Novos", icon: Sparkles },
-    { key: "popular", label: "Mais participados", icon: TrendingUp },
-    { key: "closing", label: "Encerrando", icon: Clock },
-  ];
+
 
   return (
     <AppShell>
