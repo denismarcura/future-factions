@@ -120,6 +120,7 @@ export function AppShell({ children, hidePrimarySidebar = false }: { children: R
 
           <div className="flex items-center gap-2 sm:gap-3">
             <TokenPill className="hidden sm:inline-flex" />
+            <PalpiteCreditsBadge className="hidden sm:inline-flex" />
             <button className="hidden sm:grid h-9 w-9 place-items-center rounded-full bg-card border border-border/60 hover:border-primary/60 transition">
               <Bell className="h-4 w-4" />
             </button>
