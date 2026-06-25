@@ -24,13 +24,18 @@ export const Route = createFileRoute("/shop")({
 
 function ShopPage() {
   const { user } = useAuth();
+  const isAdmin = !!(user?.email && ADMIN_EMAILS.includes(user.email.toLowerCase()));
   const navigate = useNavigate();
   const list = useServerFn(listActivePrizes);
   const requestFn = useServerFn(requestRedemption);
+  const saveFn = useServerFn(upsertPrize);
   const [items, setItems] = useState<AdminPrize[]>([]);
   const [loading, setLoading] = useState(true);
   const [balance, setBalance] = useState(0);
   const [busy, setBusy] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editVal, setEditVal] = useState<string>("");
+  const [savingId, setSavingId] = useState<string | null>(null);
 
   useEffect(() => {
     list()
