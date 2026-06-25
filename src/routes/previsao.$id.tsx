@@ -492,17 +492,6 @@ function PredictionInner({ p }: { p: Prediction }) {
           <ChallengeRatingBlock challengeId={p.id} />
 
 
-          {p.prizeTiers && (
-            <div className="mt-5 grid grid-cols-3 gap-3">
-              {p.prizeTiers.map((t) => (
-                <div key={t.hits} className="rounded-xl border border-gold/40 bg-gold/5 p-3 text-center">
-                  <div className="text-[11px] uppercase text-muted-foreground font-bold">{t.hits} acertos</div>
-                  <div className="font-display text-xl font-black text-gold">{t.tokens.toLocaleString("pt-BR")}</div>
-                  <div className="text-[10px] text-muted-foreground">TOKENS</div>
-                </div>
-              ))}
-            </div>
-          )}
 
           {p.subPredictions ? (
             <div className="mt-6 space-y-5">
@@ -513,12 +502,11 @@ function PredictionInner({ p }: { p: Prediction }) {
                   {extraPalpites.length > 0 && <span className="text-gold ml-1">· +{extraPalpites.length} extras</span>}
                 </span>
               </div>
-              {p.subPredictions.map((s, i) => {
-                const palpiteNum = extraPalpites.length * p.subPredictions!.length + i + 1;
+              {p.subPredictions.map((s) => {
                 return (
                   <div key={s.id} className="rounded-xl border border-border/60 bg-background/40 p-4">
                     <div className="text-sm font-bold mb-3">
-                      <span className="text-primary mr-1">Palpite Nº {palpiteNum}.</span> {s.question}
+                      {s.question}
                     </div>
                     <div className="grid gap-2 sm:grid-cols-3">
                       {s.options.map((opt) => {
