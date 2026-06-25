@@ -29,14 +29,15 @@ export const Route = createFileRoute("/missoes")({
 const COMPLETION_BONUS_TOKENS = 50;
 const COMPLETION_BONUS_CHANCES = 1;
 
-type TabKey = "todas" | "instagram" | "facebook" | "youtube" | "tiktok" | "google" | "especiais";
-const TABS: { key: TabKey; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
+type TabKey = "todas" | "instagram" | "facebook" | "youtube" | "tiktok" | "especiais";
+type IconCmp = React.ComponentType<React.SVGProps<SVGSVGElement>>;
+const TABS: { key: TabKey; label: string; icon: IconCmp; brand?: string }[] = [
   { key: "todas", label: "Todas", icon: ListChecks },
-  { key: "instagram", label: "Instagram", icon: Instagram },
-  { key: "youtube", label: "YouTube", icon: Youtube },
-  { key: "tiktok", label: "TikTok", icon: Music2 },
-  { key: "facebook", label: "Facebook", icon: Facebook },
-  { key: "especiais", label: "Especiais", icon: Sparkles },
+  { key: "instagram", label: "Instagram", icon: Instagram, brand: "#E1306C" },
+  { key: "youtube", label: "YouTube", icon: Youtube, brand: "#FF0000" },
+  { key: "tiktok", label: "TikTok", icon: Music2, brand: "#25F4EE" },
+  { key: "facebook", label: "Facebook", icon: Facebook, brand: "#1877F2" },
+  { key: "especiais", label: "Especiais", icon: Sparkles, brand: "#F5C542" },
 ];
 
 function PlatformIcon({ p, className }: { p: Platform; className?: string }) {
@@ -176,27 +177,32 @@ function Missoes() {
       </section>
 
       {/* TABS */}
-      <div className="-mx-4 sm:mx-0 mb-4 overflow-x-auto no-scrollbar">
-        <div className="flex gap-2 px-4 sm:px-0 sm:flex-wrap min-w-max sm:min-w-0">
-          {TABS.map((t) => {
-            const Icon = t.icon;
-            const active = tab === t.key;
-            return (
-              <button
-                key={t.key}
-                onClick={() => setTab(t.key)}
-                className={`shrink-0 inline-flex items-center gap-1.5 rounded-full border px-3.5 py-2 text-xs font-bold transition ${
-                  active
-                    ? "bg-primary text-primary-foreground border-primary shadow-glow"
-                    : "bg-card border-border/60 text-muted-foreground hover:text-foreground hover:border-primary/40"
-                }`}
-              >
-                <Icon className="h-3.5 w-3.5" />
+      <div className="mb-4 grid grid-cols-6 gap-1.5 sm:gap-2 rounded-2xl bg-card border border-border/60 p-1.5">
+        {TABS.map((t) => {
+          const Icon = t.icon;
+          const active = tab === t.key;
+          return (
+            <button
+              key={t.key}
+              onClick={() => setTab(t.key)}
+              title={t.label}
+              aria-label={t.label}
+              className={`relative aspect-square grid place-items-center rounded-xl transition ${
+                active
+                  ? "bg-primary/15 border border-primary/40 shadow-glow"
+                  : "border border-transparent hover:bg-muted/40"
+              }`}
+            >
+              <Icon
+                className="h-5 w-5"
+                style={active && t.brand ? { color: t.brand } : undefined}
+              />
+              <span className={`absolute -bottom-0.5 left-1/2 -translate-x-1/2 text-[9px] font-bold uppercase tracking-tight ${active ? "text-primary" : "text-muted-foreground"} hidden`}>
                 {t.label}
-              </button>
-            );
-          })}
-        </div>
+              </span>
+            </button>
+          );
+        })}
       </div>
 
       {/* MISSION LIST */}
