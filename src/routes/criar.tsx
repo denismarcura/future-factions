@@ -9,6 +9,7 @@ import {
   Linkedin, Twitter, Star, Heart, Check, ExternalLink, Send, QrCode, Link2,
 } from "lucide-react";
 import { QRCodeCanvas } from "qrcode.react";
+import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { AppShell } from "@/components/layout/AppShell";
 import { useAuth } from "@/hooks/use-auth";
