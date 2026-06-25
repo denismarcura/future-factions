@@ -48,6 +48,7 @@ import { Route as AdminNotificacoesRouteImport } from './routes/admin.notificaco
 import { Route as AdminNoticiasRouteImport } from './routes/admin.noticias'
 import { Route as AdminMissoesRouteImport } from './routes/admin.missoes'
 import { Route as AdminLojaRouteImport } from './routes/admin.loja'
+import { Route as AdminIntegracoesFutebolRouteImport } from './routes/admin.integracoes-futebol'
 import { Route as AdminInstagramVideosRouteImport } from './routes/admin.instagram-videos'
 import { Route as AdminEmpresasRouteImport } from './routes/admin.empresas'
 import { Route as AdminEmailMarketingRouteImport } from './routes/admin.email-marketing'
@@ -62,6 +63,7 @@ import { Route as AdminApisRouteImport } from './routes/admin.apis'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as ApiPublicHooksTop100SnapshotRouteImport } from './routes/api/public/hooks/top100-snapshot'
+import { Route as ApiPublicHooksFootballSyncRouteImport } from './routes/api/public/hooks/football-sync'
 import { Route as ApiPublicHooksApurarCopaRouteImport } from './routes/api/public/hooks/apurar-copa'
 
 const Top100Route = Top100RouteImport.update({
@@ -258,6 +260,11 @@ const AdminLojaRoute = AdminLojaRouteImport.update({
   path: '/loja',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminIntegracoesFutebolRoute = AdminIntegracoesFutebolRouteImport.update({
+  id: '/integracoes-futebol',
+  path: '/integracoes-futebol',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminInstagramVideosRoute = AdminInstagramVideosRouteImport.update({
   id: '/instagram-videos',
   path: '/instagram-videos',
@@ -330,6 +337,12 @@ const ApiPublicHooksTop100SnapshotRoute =
     path: '/api/public/hooks/top100-snapshot',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksFootballSyncRoute =
+  ApiPublicHooksFootballSyncRouteImport.update({
+    id: '/api/public/hooks/football-sync',
+    path: '/api/public/hooks/football-sync',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksApurarCopaRoute =
   ApiPublicHooksApurarCopaRouteImport.update({
     id: '/api/public/hooks/apurar-copa',
@@ -369,6 +382,7 @@ export interface FileRoutesByFullPath {
   '/admin/email-marketing': typeof AdminEmailMarketingRoute
   '/admin/empresas': typeof AdminEmpresasRoute
   '/admin/instagram-videos': typeof AdminInstagramVideosRoute
+  '/admin/integracoes-futebol': typeof AdminIntegracoesFutebolRoute
   '/admin/loja': typeof AdminLojaRoute
   '/admin/missoes': typeof AdminMissoesRoute
   '/admin/noticias': typeof AdminNoticiasRoute
@@ -389,6 +403,7 @@ export interface FileRoutesByFullPath {
   '/ranking/$challengeId': typeof RankingChallengeIdRoute
   '/admin/': typeof AdminIndexRoute
   '/api/public/hooks/apurar-copa': typeof ApiPublicHooksApurarCopaRoute
+  '/api/public/hooks/football-sync': typeof ApiPublicHooksFootballSyncRoute
   '/api/public/hooks/top100-snapshot': typeof ApiPublicHooksTop100SnapshotRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
@@ -423,6 +438,7 @@ export interface FileRoutesByTo {
   '/admin/email-marketing': typeof AdminEmailMarketingRoute
   '/admin/empresas': typeof AdminEmpresasRoute
   '/admin/instagram-videos': typeof AdminInstagramVideosRoute
+  '/admin/integracoes-futebol': typeof AdminIntegracoesFutebolRoute
   '/admin/loja': typeof AdminLojaRoute
   '/admin/missoes': typeof AdminMissoesRoute
   '/admin/noticias': typeof AdminNoticiasRoute
@@ -443,6 +459,7 @@ export interface FileRoutesByTo {
   '/ranking/$challengeId': typeof RankingChallengeIdRoute
   '/admin': typeof AdminIndexRoute
   '/api/public/hooks/apurar-copa': typeof ApiPublicHooksApurarCopaRoute
+  '/api/public/hooks/football-sync': typeof ApiPublicHooksFootballSyncRoute
   '/api/public/hooks/top100-snapshot': typeof ApiPublicHooksTop100SnapshotRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
@@ -480,6 +497,7 @@ export interface FileRoutesById {
   '/admin/email-marketing': typeof AdminEmailMarketingRoute
   '/admin/empresas': typeof AdminEmpresasRoute
   '/admin/instagram-videos': typeof AdminInstagramVideosRoute
+  '/admin/integracoes-futebol': typeof AdminIntegracoesFutebolRoute
   '/admin/loja': typeof AdminLojaRoute
   '/admin/missoes': typeof AdminMissoesRoute
   '/admin/noticias': typeof AdminNoticiasRoute
@@ -500,6 +518,7 @@ export interface FileRoutesById {
   '/ranking/$challengeId': typeof RankingChallengeIdRoute
   '/admin/': typeof AdminIndexRoute
   '/api/public/hooks/apurar-copa': typeof ApiPublicHooksApurarCopaRoute
+  '/api/public/hooks/football-sync': typeof ApiPublicHooksFootballSyncRoute
   '/api/public/hooks/top100-snapshot': typeof ApiPublicHooksTop100SnapshotRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
@@ -537,6 +556,7 @@ export interface FileRouteTypes {
     | '/admin/email-marketing'
     | '/admin/empresas'
     | '/admin/instagram-videos'
+    | '/admin/integracoes-futebol'
     | '/admin/loja'
     | '/admin/missoes'
     | '/admin/noticias'
@@ -557,6 +577,7 @@ export interface FileRouteTypes {
     | '/ranking/$challengeId'
     | '/admin/'
     | '/api/public/hooks/apurar-copa'
+    | '/api/public/hooks/football-sync'
     | '/api/public/hooks/top100-snapshot'
     | '/lovable/email/queue/process'
   fileRoutesByTo: FileRoutesByTo
@@ -591,6 +612,7 @@ export interface FileRouteTypes {
     | '/admin/email-marketing'
     | '/admin/empresas'
     | '/admin/instagram-videos'
+    | '/admin/integracoes-futebol'
     | '/admin/loja'
     | '/admin/missoes'
     | '/admin/noticias'
@@ -611,6 +633,7 @@ export interface FileRouteTypes {
     | '/ranking/$challengeId'
     | '/admin'
     | '/api/public/hooks/apurar-copa'
+    | '/api/public/hooks/football-sync'
     | '/api/public/hooks/top100-snapshot'
     | '/lovable/email/queue/process'
   id:
@@ -647,6 +670,7 @@ export interface FileRouteTypes {
     | '/admin/email-marketing'
     | '/admin/empresas'
     | '/admin/instagram-videos'
+    | '/admin/integracoes-futebol'
     | '/admin/loja'
     | '/admin/missoes'
     | '/admin/noticias'
@@ -667,6 +691,7 @@ export interface FileRouteTypes {
     | '/ranking/$challengeId'
     | '/admin/'
     | '/api/public/hooks/apurar-copa'
+    | '/api/public/hooks/football-sync'
     | '/api/public/hooks/top100-snapshot'
     | '/lovable/email/queue/process'
   fileRoutesById: FileRoutesById
@@ -696,6 +721,7 @@ export interface RootRouteChildren {
   EmpresaCriarRoute: typeof EmpresaCriarRoute
   PrevisaoIdRoute: typeof PrevisaoIdRoute
   ApiPublicHooksApurarCopaRoute: typeof ApiPublicHooksApurarCopaRoute
+  ApiPublicHooksFootballSyncRoute: typeof ApiPublicHooksFootballSyncRoute
   ApiPublicHooksTop100SnapshotRoute: typeof ApiPublicHooksTop100SnapshotRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
 }
@@ -975,6 +1001,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminLojaRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/integracoes-futebol': {
+      id: '/admin/integracoes-futebol'
+      path: '/integracoes-futebol'
+      fullPath: '/admin/integracoes-futebol'
+      preLoaderRoute: typeof AdminIntegracoesFutebolRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/instagram-videos': {
       id: '/admin/instagram-videos'
       path: '/instagram-videos'
@@ -1073,6 +1106,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksTop100SnapshotRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/football-sync': {
+      id: '/api/public/hooks/football-sync'
+      path: '/api/public/hooks/football-sync'
+      fullPath: '/api/public/hooks/football-sync'
+      preLoaderRoute: typeof ApiPublicHooksFootballSyncRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/apurar-copa': {
       id: '/api/public/hooks/apurar-copa'
       path: '/api/public/hooks/apurar-copa'
@@ -1106,6 +1146,7 @@ interface AdminRouteChildren {
   AdminEmailMarketingRoute: typeof AdminEmailMarketingRoute
   AdminEmpresasRoute: typeof AdminEmpresasRoute
   AdminInstagramVideosRoute: typeof AdminInstagramVideosRoute
+  AdminIntegracoesFutebolRoute: typeof AdminIntegracoesFutebolRoute
   AdminLojaRoute: typeof AdminLojaRoute
   AdminMissoesRoute: typeof AdminMissoesRoute
   AdminNoticiasRoute: typeof AdminNoticiasRoute
@@ -1134,6 +1175,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminEmailMarketingRoute: AdminEmailMarketingRoute,
   AdminEmpresasRoute: AdminEmpresasRoute,
   AdminInstagramVideosRoute: AdminInstagramVideosRoute,
+  AdminIntegracoesFutebolRoute: AdminIntegracoesFutebolRoute,
   AdminLojaRoute: AdminLojaRoute,
   AdminMissoesRoute: AdminMissoesRoute,
   AdminNoticiasRoute: AdminNoticiasRoute,
@@ -1200,19 +1242,10 @@ const rootRouteChildren: RootRouteChildren = {
   EmpresaCriarRoute: EmpresaCriarRoute,
   PrevisaoIdRoute: PrevisaoIdRoute,
   ApiPublicHooksApurarCopaRoute: ApiPublicHooksApurarCopaRoute,
+  ApiPublicHooksFootballSyncRoute: ApiPublicHooksFootballSyncRoute,
   ApiPublicHooksTop100SnapshotRoute: ApiPublicHooksTop100SnapshotRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
