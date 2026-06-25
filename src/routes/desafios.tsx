@@ -132,16 +132,17 @@ function DesafiosPage() {
       (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
     );
     const openUser = userChallenges.filter((p) => !isClosed(p));
-    return [...openUser, ...sortedMocks].slice(0, 6);
-  }, [userChallenges]);
+    return [...openUser, ...sortedMocks].filter(notParticipated).slice(0, 6);
+  }, [userChallenges, participatedIds]);
 
   // Desafios com tempo se esgotando — abertos, mais próximos do encerramento
   const expiringSoon = useMemo(() => {
     const pool = [...userChallenges, ...PREDICTIONS].filter((p) => !isClosed(p));
     return pool
+      .filter(notParticipated)
       .sort((a, b) => new Date(a.closesAt).getTime() - new Date(b.closesAt).getTime())
       .slice(0, 24);
-  }, [userChallenges]);
+  }, [userChallenges, participatedIds]);
 
   // Próximos jogos da Copa do Mundo 2026
   const upcomingMatches = useMemo(() => {
