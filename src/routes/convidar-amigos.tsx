@@ -1,10 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Mail, Send, Copy, Check, ArrowLeft, Users, Sparkles, Eye, Trash2, Plus } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
+import { Mail, Send, Copy, Check, ArrowLeft, Users, Sparkles, Eye, Trash2, Plus, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell } from "@/components/layout/AppShell";
 import { useAuth } from "@/hooks/use-auth";
 import { useInviteUrl } from "@/hooks/use-invite-url";
+import { sendFriendInviteEmails } from "@/lib/friend-invite-emails.functions";
+
+
 
 
 export const Route = createFileRoute("/convidar-amigos")({
@@ -43,6 +47,8 @@ function ConvidarAmigos() {
   const [copied, setCopied] = useState(false);
   const [preview, setPreview] = useState(false);
   const [sent, setSent] = useState(false);
+  const [sending, setSending] = useState(false);
+  const sendInvites = useServerFn(sendFriendInviteEmails);
 
   const emails = useMemo(() => parseEmails(raw), [raw]);
   const invalidCount = useMemo(() => {
@@ -52,22 +58,41 @@ function ConvidarAmigos() {
 
   const body = `${intro}\n\n👉 ${inviteUrl}\n\nAbraço,\n${fullName}`;
 
-  function buildMailto() {
-    const bcc = emails.join(",");
-    // mailto requires %20 for spaces (not '+') and proper encoding so the link survives in the body
-    return `mailto:?bcc=${encodeURIComponent(bcc)}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-  }
-
-  function send() {
+  async function send() {
     if (emails.length === 0) {
       toast.error("Adicione pelo menos um e-mail válido.");
       return;
     }
-    const href = buildMailto();
-    window.location.href = href;
-    setSent(true);
-    toast.success(`Abrindo seu e-mail com ${emails.length} convite(s) prontos.`);
+    if (!inviteUrl) {
+      toast.error("Faça login para gerar seu link de convite.");
+      return;
+    }
+    setSending(true);
+    try {
+      const res = await sendInvites({
+        data: {
+          recipients: emails,
+          subject,
+          intro,
+          inviteUrl,
+          senderName: fullName,
+        },
+      });
+      setSent(true);
+      if (res.sent > 0) {
+        toast.success(`✅ ${res.sent} convite(s) enviado(s) com o link no corpo do e-mail!`);
+      }
+      if (res.failed.length > 0) {
+        toast.error(`Falha em ${res.failed.length}: ${res.failed.join(", ")}`);
+      }
+    } catch (e: any) {
+      console.error(e);
+      toast.error("Não foi possível enviar os e-mails. Tente novamente.");
+    } finally {
+      setSending(false);
+    }
   }
+
 
   async function copyMessage() {
     try {
@@ -179,10 +204,11 @@ function ConvidarAmigos() {
           <div className="flex flex-wrap gap-2">
             <button
               onClick={send}
-              disabled={emails.length === 0}
+              disabled={emails.length === 0 || sending}
               className="inline-flex items-center gap-2 h-12 px-5 rounded-xl bg-gradient-brand text-primary-foreground font-display font-black shadow-glow disabled:opacity-50"
             >
-              <Send className="h-4 w-4" /> Enviar para {emails.length || 0} amigo(s)
+              {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+              {sending ? "Enviando..." : `Enviar para ${emails.length || 0} amigo(s)`}
             </button>
             <button
               onClick={copyMessage}
@@ -201,7 +227,7 @@ function ConvidarAmigos() {
 
           {sent && (
             <div className="rounded-xl border border-success/40 bg-success/10 text-success p-3 text-sm font-semibold">
-              ✅ Pronto! Seu cliente de e-mail abriu com os convites. Basta revisar e enviar.
+              ✅ Convites enviados! Seus amigos vão receber um e-mail HTML com o botão e o link de cadastro destacados.
             </div>
           )}
 
