@@ -736,6 +736,29 @@ function PredictionInner({ p }: { p: Prediction }) {
                 </div>
               )}
 
+              {confirmed && (
+                <div className="mt-4 rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/15 via-background/40 to-gold/10 p-5 text-center">
+                  <div className="font-display text-lg font-black text-gradient-brand">Convide seus amigos e ganhe mais tokens!</div>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Cada amigo cadastrado pelo seu convite aumenta suas oportunidades dentro da plataforma.
+                  </p>
+                  <div className="mt-4 grid sm:grid-cols-2 gap-2">
+                    <Link
+                      to="/perfil"
+                      className="inline-flex items-center justify-center gap-2 h-11 rounded-xl bg-gradient-brand text-primary-foreground font-bold text-sm shadow-glow hover:scale-[1.01] transition"
+                    >
+                      Convidar Amigos
+                    </Link>
+                    <Link
+                      to="/desafios"
+                      className="inline-flex items-center justify-center gap-2 h-11 rounded-xl border border-primary/40 bg-background/40 text-primary font-bold text-sm hover:bg-primary/10 transition"
+                    >
+                      Ver mais desafios
+                    </Link>
+                  </div>
+                </div>
+              )}
+
               {missionQueue.length === 0 && (
                 <div className="rounded-xl border border-border/60 bg-background/40 p-3 text-xs text-center text-muted-foreground">
                   Nenhuma missão de seguir disponível no momento.
