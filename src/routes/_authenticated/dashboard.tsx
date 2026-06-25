@@ -377,7 +377,6 @@ function Dashboard() {
         <FriendsSection
           friends={friends}
           inviterName={name}
-          userId={profile?.id ?? ""}
           inviteUrl={inviteUrl}
           onChange={() => setFriends(listFriends())}
         />
@@ -385,7 +384,6 @@ function Dashboard() {
         {/* INVITE PROMO (email + whatsapp + artes prontas) */}
         <InvitePromoSection
           inviterName={name}
-          userId={profile?.id ?? ""}
           inviteUrl={inviteUrl}
           myChallenges={myChallenges}
         />
@@ -1477,13 +1475,11 @@ function RecommendationsSection() {
 function FriendsSection({
   friends,
   inviterName,
-  userId,
   inviteUrl,
   onChange,
 }: {
   friends: Friend[];
   inviterName: string;
-  userId: string;
   inviteUrl: string;
   onChange: () => void;
 }) {
@@ -1765,12 +1761,10 @@ const SITE_URL = "https://www.desafiodospalpites.com.br";
 
 function InvitePromoSection({
   inviterName,
-  userId,
   inviteUrl,
   myChallenges,
 }: {
   inviterName: string;
-  userId: string;
   inviteUrl: string;
   myChallenges: Prediction[];
 }) {
