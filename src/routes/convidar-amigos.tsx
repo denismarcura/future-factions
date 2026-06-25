@@ -53,9 +53,9 @@ function ConvidarAmigos() {
   const body = `${intro}\n\n👉 ${inviteUrl}\n\nAbraço,\n${fullName}`;
 
   function buildMailto() {
-    const params = new URLSearchParams({ subject, body });
     const bcc = emails.join(",");
-    return `mailto:?bcc=${encodeURIComponent(bcc)}&${params.toString()}`;
+    // mailto requires %20 for spaces (not '+') and proper encoding so the link survives in the body
+    return `mailto:?bcc=${encodeURIComponent(bcc)}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   }
 
   function send() {
