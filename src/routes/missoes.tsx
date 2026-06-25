@@ -28,6 +28,7 @@ export const Route = createFileRoute("/missoes")({
 
 const COMPLETION_BONUS_TOKENS = 50;
 const COMPLETION_BONUS_CHANCES = 1;
+const MISSION_VERIFY_MS = 5000;
 
 type TabKey = "todas" | "instagram" | "facebook" | "youtube" | "tiktok" | "especiais";
 type IconCmp = React.ComponentType<React.SVGProps<SVGSVGElement>>;
