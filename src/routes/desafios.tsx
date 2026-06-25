@@ -8,7 +8,8 @@ import { COMPANY_CHALLENGES } from "@/lib/mock-extra";
 import { getUserChallenges } from "@/lib/user-challenges";
 import { useParticipatedChallengeIds } from "@/hooks/use-participated";
 import { aiSearchChallenges } from "@/lib/search-ai.functions";
-import { ListChecks, Building2, Users, Lock, Globe2, Sparkles, Search, Loader2, X, Wand2, Timer, CalendarDays, Trophy } from "lucide-react";
+import { listLatestCorpChallenges, type CorpChallengeRecord } from "@/lib/corp-challenges.functions";
+import { ListChecks, Building2, Users, Lock, Globe2, Sparkles, Search, Loader2, X, Wand2, Timer, CalendarDays, Trophy, Star } from "lucide-react";
 import { timeLeft } from "@/lib/mock-data";
 import { WORLD_CUP_MATCHES, flagUrl } from "@/lib/world-cup-matches";
 
@@ -34,8 +35,18 @@ function DesafiosPage() {
   const [expiringLimit, setExpiringLimit] = useState(6);
   const [nowTs, setNowTs] = useState<number | null>(null);
   const runAiSearch = useServerFn(aiSearchChallenges);
+  const fetchCorpChallenges = useServerFn(listLatestCorpChallenges);
+  const [corpChallenges, setCorpChallenges] = useState<CorpChallengeRecord[]>([]);
   const participatedIds = useParticipatedChallengeIds();
   const notParticipated = <T extends { id: string }>(p: T) => !participatedIds.has(String(p.id));
+
+  useEffect(() => {
+    let alive = true;
+    fetchCorpChallenges({ data: { limit: 50 } })
+      .then((rows) => { if (alive) setCorpChallenges(rows); })
+      .catch(() => {});
+    return () => { alive = false; };
+  }, [fetchCorpChallenges]);
 
   useEffect(() => {
     setNowTs(Date.now());
@@ -221,8 +232,8 @@ function DesafiosPage() {
       <div className="flex flex-wrap gap-2 mb-6">
         {[
           { k: "todos", label: "Todos", icon: ListChecks },
+          { k: "empresas", label: "⭐ Empresas", icon: Building2 },
           { k: "publicos", label: "Públicos", icon: Globe2 },
-          { k: "empresas", label: "Empresas", icon: Building2 },
           { k: "privados", label: "Privados (amigos)", icon: Lock },
         ].map((t) => (
           <button
@@ -231,7 +242,9 @@ function DesafiosPage() {
             className={`inline-flex items-center gap-2 h-10 px-4 rounded-full text-sm font-bold border transition ${
               tab === t.k
                 ? "bg-gradient-brand text-primary-foreground border-transparent shadow-glow"
-                : "bg-card text-muted-foreground border-border/60 hover:text-foreground"
+                : t.k === "empresas"
+                  ? "bg-gold/10 text-gold border-gold/40 hover:bg-gold/20"
+                  : "bg-card text-muted-foreground border-border/60 hover:text-foreground"
             }`}
           >
             <t.icon className="h-4 w-4" />
@@ -239,6 +252,53 @@ function DesafiosPage() {
           </button>
         ))}
       </div>
+
+      {/* ⭐ Empresas em Destaque — sempre no topo, exceto na aba dedicada */}
+      {tab !== "empresas" && corpChallenges.length > 0 && (
+        <section className="mb-8 rounded-3xl border-2 border-gold/40 bg-gradient-to-br from-gold/10 via-card to-card p-5 shadow-glow">
+          <div className="flex items-center justify-between mb-4 gap-3">
+            <h2 className="font-display text-xl font-black flex items-center gap-2 min-w-0">
+              <Star className="h-6 w-6 text-gold fill-gold shrink-0" />
+              <span className="truncate">Empresas em Destaque</span>
+            </h2>
+            <button
+              onClick={() => setTab("empresas")}
+              className="text-xs sm:text-sm font-bold text-gold hover:underline shrink-0"
+            >
+              Ver todos →
+            </button>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {corpChallenges.slice(0, 6).map((c) => (
+              <Link
+                key={c.id}
+                to="/previsao/$id"
+                params={{ id: c.id }}
+                className="block rounded-2xl border border-gold/30 bg-card p-4 hover:border-gold hover:shadow-glow transition group"
+              >
+                <div className="flex items-center gap-3 mb-2">
+                  {c.logoUrl ? (
+                    <img src={c.logoUrl} alt="" className="h-11 w-11 rounded-xl object-cover border border-border/60" />
+                  ) : (
+                    <div className="h-11 w-11 rounded-xl bg-gold/15 grid place-items-center text-gold font-black">
+                      {(c.companyName ?? c.title).slice(0, 1).toUpperCase()}
+                    </div>
+                  )}
+                  <div className="min-w-0">
+                    <div className="text-[10px] uppercase tracking-wider font-bold text-gold">Patrocinado</div>
+                    <div className="font-display font-bold truncate text-sm">{c.companyName ?? "Empresa"}</div>
+                  </div>
+                </div>
+                <h3 className="font-display font-bold text-sm leading-snug line-clamp-2 group-hover:text-gold transition">{c.title}</h3>
+                {c.prizeName && (
+                  <div className="mt-2 text-xs text-muted-foreground line-clamp-1">🎁 {c.prizeName}</div>
+                )}
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
 
       {tab !== "empresas" && (
         <>
@@ -369,35 +429,91 @@ function DesafiosPage() {
       )}
 
       {tab === "empresas" && (
-        <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {[...COMPANY_CHALLENGES].reverse().map((c) => (
-            <article
-              key={c.id}
-              className="rounded-2xl border border-border/60 bg-card p-5 hover:border-primary/50 hover:shadow-glow transition"
-            >
-              <div className="flex items-center gap-3">
-                <img src={c.company.logo} alt="" className="h-12 w-12 rounded-xl border border-border/60" />
-                <div className="min-w-0">
-                  <div className="text-xs text-muted-foreground">{c.company.category} · {c.company.city}</div>
-                  <div className="font-display font-bold truncate">{c.company.name}</div>
-                </div>
+        <>
+          {corpChallenges.length > 0 && (
+            <section className="mb-8">
+              <h2 className="font-display text-lg font-black mb-3 flex items-center gap-2">
+                <Star className="h-5 w-5 text-gold fill-gold" /> Desafios Patrocinados
+              </h2>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {corpChallenges.map((c) => (
+                  <Link
+                    key={c.id}
+                    to="/previsao/$id"
+                    params={{ id: c.id }}
+                    className="block rounded-2xl border-2 border-gold/40 bg-gradient-to-br from-gold/5 to-card p-5 hover:border-gold hover:shadow-glow transition"
+                  >
+                    <div className="flex items-center gap-3">
+                      {c.logoUrl ? (
+                        <img src={c.logoUrl} alt="" className="h-12 w-12 rounded-xl object-cover border border-border/60" />
+                      ) : (
+                        <div className="h-12 w-12 rounded-xl bg-gold/15 grid place-items-center text-gold font-black">
+                          {(c.companyName ?? c.title).slice(0, 1).toUpperCase()}
+                        </div>
+                      )}
+                      <div className="min-w-0">
+                        <div className="text-[10px] uppercase tracking-wider font-bold text-gold">Patrocinado · Empresa</div>
+                        <div className="font-display font-bold truncate">{c.companyName ?? "Empresa"}</div>
+                      </div>
+                    </div>
+                    <h3 className="mt-3 font-display font-bold text-base leading-snug line-clamp-2">{c.title}</h3>
+                    <div className="mt-3 flex items-center gap-2 text-xs flex-wrap">
+                      <span className="px-2 py-0.5 rounded-full bg-primary/15 text-primary font-bold border border-primary/30">
+                        🟢 {c.status}
+                      </span>
+                      {c.prizeName && (
+                        <span className="px-2 py-0.5 rounded-full bg-gold/15 text-gold font-bold border border-gold/30 truncate max-w-full">
+                          🎁 {c.prizeName}
+                        </span>
+                      )}
+                    </div>
+                    <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
+                      <span className="inline-flex items-center gap-1"><Users className="h-3.5 w-3.5" /> {c.participants} part.</span>
+                      <span className="text-gold font-bold">Participar →</span>
+                    </div>
+                  </Link>
+                ))}
               </div>
-              <h3 className="mt-3 font-display font-bold text-base leading-snug">{c.title}</h3>
-              <div className="mt-3 flex items-center gap-2 text-xs">
-                <span className="px-2 py-0.5 rounded-full bg-primary/15 text-primary font-bold border border-primary/30">
-                  🟢 {c.status}
-                </span>
-                <span className="px-2 py-0.5 rounded-full bg-gold/15 text-gold font-bold border border-gold/30">
-                  Prêmio: {c.prize}
-                </span>
+            </section>
+          )}
+
+          {COMPANY_CHALLENGES.length > 0 && (
+            <section>
+              <h2 className="font-display text-lg font-bold mb-3 text-muted-foreground">
+                Outras empresas
+              </h2>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {[...COMPANY_CHALLENGES].reverse().map((c) => (
+                  <article
+                    key={c.id}
+                    className="rounded-2xl border border-border/60 bg-card p-5 hover:border-primary/50 hover:shadow-glow transition"
+                  >
+                    <div className="flex items-center gap-3">
+                      <img src={c.company.logo} alt="" className="h-12 w-12 rounded-xl border border-border/60" />
+                      <div className="min-w-0">
+                        <div className="text-xs text-muted-foreground">{c.company.category} · {c.company.city}</div>
+                        <div className="font-display font-bold truncate">{c.company.name}</div>
+                      </div>
+                    </div>
+                    <h3 className="mt-3 font-display font-bold text-base leading-snug">{c.title}</h3>
+                    <div className="mt-3 flex items-center gap-2 text-xs">
+                      <span className="px-2 py-0.5 rounded-full bg-primary/15 text-primary font-bold border border-primary/30">
+                        🟢 {c.status}
+                      </span>
+                      <span className="px-2 py-0.5 rounded-full bg-gold/15 text-gold font-bold border border-gold/30">
+                        Prêmio: {c.prize}
+                      </span>
+                    </div>
+                    <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
+                      <span className="inline-flex items-center gap-1"><Users className="h-3.5 w-3.5" /> {c.participants} part.</span>
+                      <Link to="/desafios" className="text-primary font-bold">Participar →</Link>
+                    </div>
+                  </article>
+                ))}
               </div>
-              <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
-                <span className="inline-flex items-center gap-1"><Users className="h-3.5 w-3.5" /> {c.participants} part.</span>
-                <Link to="/desafios" className="text-primary font-bold">Participar →</Link>
-              </div>
-            </article>
-          ))}
-        </section>
+            </section>
+          )}
+        </>
       )}
     </AppShell>
   );
