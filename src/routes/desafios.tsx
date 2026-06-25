@@ -275,13 +275,13 @@ function DesafiosPage() {
                       </div>
                       <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
                         <div className="flex items-center gap-2 min-w-0">
-                          <img src={flagUrl(m.homeFlag)} alt="" className="h-6 w-6 rounded-full object-cover shrink-0" />
+                          <img src={flagUrl(m.homeCode)} alt="" className="h-6 w-6 rounded-full object-cover shrink-0" />
                           <span className="font-display font-bold text-sm truncate">{m.home}</span>
                         </div>
                         <span className="text-muted-foreground text-xs">×</span>
                         <div className="flex items-center gap-2 min-w-0 justify-end">
                           <span className="font-display font-bold text-sm truncate text-right">{m.away}</span>
-                          <img src={flagUrl(m.awayFlag)} alt="" className="h-6 w-6 rounded-full object-cover shrink-0" />
+                          <img src={flagUrl(m.awayCode)} alt="" className="h-6 w-6 rounded-full object-cover shrink-0" />
                         </div>
                       </div>
                     </Link>
