@@ -231,15 +231,19 @@ function Missoes() {
           {filtered.map((m) => {
             const done = claimed.has(m.id);
             const isRunning = running === m.id;
+            const isExiting = exiting.has(m.id);
             const totalTokens = m.tokens + (m.bonus_tokens || 0) + COMPLETION_BONUS_TOKENS;
             return (
               <div
                 key={m.id}
-                className={`rounded-2xl border p-3 sm:p-4 grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 transition ${
-                  done
-                    ? "bg-emerald-500/5 border-emerald-500/30"
-                    : "bg-card border-border/60 hover:border-primary/40"
+                className={`rounded-2xl border p-3 sm:p-4 grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 transition-all duration-400 ${
+                  isExiting
+                    ? "opacity-0 scale-95 -translate-x-4 bg-emerald-500/20 border-emerald-500/50"
+                    : done
+                      ? "bg-emerald-500/5 border-emerald-500/30"
+                      : "bg-card border-border/60 hover:border-primary/40"
                 }`}
+                style={isExiting ? { transitionDuration: "450ms" } : undefined}
               >
                 <div className="shrink-0 h-12 w-12 rounded-xl bg-primary/10 border border-primary/25 grid place-items-center">
                   <PlatformIcon p={m.platform} className="h-5 w-5 text-primary" />
@@ -255,15 +259,15 @@ function Missoes() {
                 </div>
                 <button
                   onClick={() => handleDo(m)}
-                  disabled={done || isRunning || !!running}
+                  disabled={done || isRunning || isExiting || !!running}
                   className={`shrink-0 h-9 px-3.5 rounded-full font-bold text-[11px] uppercase tracking-wide inline-flex items-center gap-1 transition ${
-                    done
+                    isExiting || done
                       ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30"
                       : "bg-gradient-brand text-primary-foreground shadow-glow hover:scale-[1.03] disabled:opacity-60 disabled:hover:scale-100"
                   }`}
                 >
-                  {isRunning ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : done ? <Check className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
-                  {isRunning ? "..." : done ? "Feita" : "Fazer"}
+                  {isRunning ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : (isExiting || done) ? <Check className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
+                  {isRunning ? "..." : isExiting ? "+TOKENS" : done ? "Feita" : "Fazer"}
                 </button>
               </div>
             );
