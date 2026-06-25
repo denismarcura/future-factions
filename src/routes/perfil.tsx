@@ -5,6 +5,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { AppShell } from "@/components/layout/AppShell";
 import { ACHIEVEMENTS, formatTokens } from "@/lib/mock-data";
 import { InviteLinkCard } from "@/components/InviteLinkCard";
+import { PalpiteCreditsBadge } from "@/components/PalpiteCreditsBadge";
 import { useAuth } from "@/hooks/use-auth";
 import { listMyPalpites } from "@/lib/my-palpites.functions";
 import { supabase } from "@/integrations/supabase/client";
@@ -97,8 +98,9 @@ function Perfil() {
                 <MapPin className="h-3.5 w-3.5" /> {meta.signup_city as string}
               </div>
             )}
-            <div className="mt-4 flex flex-wrap gap-4">
+            <div className="mt-4 flex flex-wrap gap-4 items-center">
               <KV label="Tokens" value={formatTokens(tokens)} accent />
+              <PalpiteCreditsBadge />
               <KV label="Participações" value={String(uniqueParticipations)} />
               <KV label="Acertos" value={String(acertos)} success />
               <KV label="Erros" value={String(erros)} />
