@@ -227,7 +227,7 @@ function ConvidarAmigos() {
 
           {sent && (
             <div className="rounded-xl border border-success/40 bg-success/10 text-success p-3 text-sm font-semibold">
-              ✅ Pronto! Seu cliente de e-mail abriu com os convites. Basta revisar e enviar.
+              ✅ Convites enviados! Seus amigos vão receber um e-mail HTML com o botão e o link de cadastro destacados.
             </div>
           )}
 
