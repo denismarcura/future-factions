@@ -304,6 +304,7 @@ export type Database = {
           created_at: string
           description: string | null
           entry_fee: number
+          external_match_id: string | null
           fifa_match_id: string | null
           fifa_match_url: string | null
           home_flag_code: string | null
@@ -323,6 +324,7 @@ export type Database = {
           result_confirmed_at: string | null
           result_payload_json: Json | null
           result_source: string | null
+          source: string
           title: string
           updated_at: string
           winner_team: string | null
@@ -337,6 +339,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           entry_fee?: number
+          external_match_id?: string | null
           fifa_match_id?: string | null
           fifa_match_url?: string | null
           home_flag_code?: string | null
@@ -356,6 +359,7 @@ export type Database = {
           result_confirmed_at?: string | null
           result_payload_json?: Json | null
           result_source?: string | null
+          source?: string
           title: string
           updated_at?: string
           winner_team?: string | null
@@ -370,6 +374,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           entry_fee?: number
+          external_match_id?: string | null
           fifa_match_id?: string | null
           fifa_match_url?: string | null
           home_flag_code?: string | null
@@ -389,6 +394,7 @@ export type Database = {
           result_confirmed_at?: string | null
           result_payload_json?: Json | null
           result_source?: string | null
+          source?: string
           title?: string
           updated_at?: string
           winner_team?: string | null
@@ -610,6 +616,165 @@ export type Database = {
           id?: string
           token?: string
           used_at?: string | null
+        }
+        Relationships: []
+      }
+      football_competitions: {
+        Row: {
+          active: boolean
+          auto_create_challenges: boolean
+          auto_update_results: boolean
+          code: string
+          created_at: string
+          id: string
+          last_synced_at: string | null
+          name: string
+          season: number | null
+          sync_frequency: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          auto_create_challenges?: boolean
+          auto_update_results?: boolean
+          code: string
+          created_at?: string
+          id?: string
+          last_synced_at?: string | null
+          name: string
+          season?: number | null
+          sync_frequency?: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          auto_create_challenges?: boolean
+          auto_update_results?: boolean
+          code?: string
+          created_at?: string
+          id?: string
+          last_synced_at?: string | null
+          name?: string
+          season?: number | null
+          sync_frequency?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      football_matches: {
+        Row: {
+          away_team_crest: string | null
+          away_team_id: number | null
+          away_team_name: string | null
+          competition_code: string
+          competition_name: string | null
+          created_at: string
+          data_hora_brasil: string | null
+          external_match_id: string
+          group_name: string | null
+          home_team_crest: string | null
+          home_team_id: number | null
+          home_team_name: string | null
+          id: string
+          last_updated_api: string | null
+          linked_challenge_id: string | null
+          matchday: number | null
+          score_away: number | null
+          score_home: number | null
+          season: number | null
+          stage: string | null
+          status: string
+          updated_at: string
+          utc_date: string
+          winner: string | null
+        }
+        Insert: {
+          away_team_crest?: string | null
+          away_team_id?: number | null
+          away_team_name?: string | null
+          competition_code: string
+          competition_name?: string | null
+          created_at?: string
+          data_hora_brasil?: string | null
+          external_match_id: string
+          group_name?: string | null
+          home_team_crest?: string | null
+          home_team_id?: number | null
+          home_team_name?: string | null
+          id?: string
+          last_updated_api?: string | null
+          linked_challenge_id?: string | null
+          matchday?: number | null
+          score_away?: number | null
+          score_home?: number | null
+          season?: number | null
+          stage?: string | null
+          status: string
+          updated_at?: string
+          utc_date: string
+          winner?: string | null
+        }
+        Update: {
+          away_team_crest?: string | null
+          away_team_id?: number | null
+          away_team_name?: string | null
+          competition_code?: string
+          competition_name?: string | null
+          created_at?: string
+          data_hora_brasil?: string | null
+          external_match_id?: string
+          group_name?: string | null
+          home_team_crest?: string | null
+          home_team_id?: number | null
+          home_team_name?: string | null
+          id?: string
+          last_updated_api?: string | null
+          linked_challenge_id?: string | null
+          matchday?: number | null
+          score_away?: number | null
+          score_home?: number | null
+          season?: number | null
+          stage?: string | null
+          status?: string
+          updated_at?: string
+          utc_date?: string
+          winner?: string | null
+        }
+        Relationships: []
+      }
+      football_sync_logs: {
+        Row: {
+          competition_code: string | null
+          created_at: string
+          duration_ms: number | null
+          endpoint: string | null
+          error_message: string | null
+          http_status: number | null
+          id: string
+          imported: number
+          updated: number
+        }
+        Insert: {
+          competition_code?: string | null
+          created_at?: string
+          duration_ms?: number | null
+          endpoint?: string | null
+          error_message?: string | null
+          http_status?: number | null
+          id?: string
+          imported?: number
+          updated?: number
+        }
+        Update: {
+          competition_code?: string | null
+          created_at?: string
+          duration_ms?: number | null
+          endpoint?: string | null
+          error_message?: string | null
+          http_status?: number | null
+          id?: string
+          imported?: number
+          updated?: number
         }
         Relationships: []
       }
