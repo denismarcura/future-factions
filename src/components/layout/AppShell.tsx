@@ -169,7 +169,7 @@ export function AppShell({ children, hidePrimarySidebar = false }: { children: R
             <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
               <SheetTrigger asChild>
                 <button
-                  className="md:hidden inline-flex items-center gap-2 h-10 px-3 rounded-full bg-gradient-brand text-primary-foreground font-bold text-sm shadow-glow active:scale-95 transition"
+                  className="xl:hidden inline-flex items-center gap-2 h-10 px-3 rounded-full bg-gradient-brand text-primary-foreground font-bold text-sm shadow-glow active:scale-95 transition"
                   aria-label="Abrir menu"
                 >
                   <Menu className="h-5 w-5" />
