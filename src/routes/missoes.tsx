@@ -118,7 +118,12 @@ function Missoes() {
         });
       }, 450);
     } catch (e: any) {
-      toast.error(e.message ?? "Erro ao registrar");
+      const msg = String(e?.message ?? "");
+      if (msg.includes("row-level security")) {
+        toast.error("Não foi possível registrar a missão. Recarregue a página e tente de novo.");
+      } else {
+        toast.error(msg || "Erro ao registrar");
+      }
     } finally {
       setRunning(null);
       setRunStart(null);
