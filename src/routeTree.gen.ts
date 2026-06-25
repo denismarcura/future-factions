@@ -62,6 +62,7 @@ import { Route as AdminApisRouteImport } from './routes/admin.apis'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as ApiPublicHooksTop100SnapshotRouteImport } from './routes/api/public/hooks/top100-snapshot'
+import { Route as ApiPublicHooksFootballSyncRouteImport } from './routes/api/public/hooks/football-sync'
 import { Route as ApiPublicHooksApurarCopaRouteImport } from './routes/api/public/hooks/apurar-copa'
 
 const Top100Route = Top100RouteImport.update({
@@ -330,6 +331,12 @@ const ApiPublicHooksTop100SnapshotRoute =
     path: '/api/public/hooks/top100-snapshot',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksFootballSyncRoute =
+  ApiPublicHooksFootballSyncRouteImport.update({
+    id: '/api/public/hooks/football-sync',
+    path: '/api/public/hooks/football-sync',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksApurarCopaRoute =
   ApiPublicHooksApurarCopaRouteImport.update({
     id: '/api/public/hooks/apurar-copa',
@@ -389,6 +396,7 @@ export interface FileRoutesByFullPath {
   '/ranking/$challengeId': typeof RankingChallengeIdRoute
   '/admin/': typeof AdminIndexRoute
   '/api/public/hooks/apurar-copa': typeof ApiPublicHooksApurarCopaRoute
+  '/api/public/hooks/football-sync': typeof ApiPublicHooksFootballSyncRoute
   '/api/public/hooks/top100-snapshot': typeof ApiPublicHooksTop100SnapshotRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
@@ -443,6 +451,7 @@ export interface FileRoutesByTo {
   '/ranking/$challengeId': typeof RankingChallengeIdRoute
   '/admin': typeof AdminIndexRoute
   '/api/public/hooks/apurar-copa': typeof ApiPublicHooksApurarCopaRoute
+  '/api/public/hooks/football-sync': typeof ApiPublicHooksFootballSyncRoute
   '/api/public/hooks/top100-snapshot': typeof ApiPublicHooksTop100SnapshotRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
@@ -500,6 +509,7 @@ export interface FileRoutesById {
   '/ranking/$challengeId': typeof RankingChallengeIdRoute
   '/admin/': typeof AdminIndexRoute
   '/api/public/hooks/apurar-copa': typeof ApiPublicHooksApurarCopaRoute
+  '/api/public/hooks/football-sync': typeof ApiPublicHooksFootballSyncRoute
   '/api/public/hooks/top100-snapshot': typeof ApiPublicHooksTop100SnapshotRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
@@ -557,6 +567,7 @@ export interface FileRouteTypes {
     | '/ranking/$challengeId'
     | '/admin/'
     | '/api/public/hooks/apurar-copa'
+    | '/api/public/hooks/football-sync'
     | '/api/public/hooks/top100-snapshot'
     | '/lovable/email/queue/process'
   fileRoutesByTo: FileRoutesByTo
@@ -611,6 +622,7 @@ export interface FileRouteTypes {
     | '/ranking/$challengeId'
     | '/admin'
     | '/api/public/hooks/apurar-copa'
+    | '/api/public/hooks/football-sync'
     | '/api/public/hooks/top100-snapshot'
     | '/lovable/email/queue/process'
   id:
@@ -667,6 +679,7 @@ export interface FileRouteTypes {
     | '/ranking/$challengeId'
     | '/admin/'
     | '/api/public/hooks/apurar-copa'
+    | '/api/public/hooks/football-sync'
     | '/api/public/hooks/top100-snapshot'
     | '/lovable/email/queue/process'
   fileRoutesById: FileRoutesById
@@ -696,6 +709,7 @@ export interface RootRouteChildren {
   EmpresaCriarRoute: typeof EmpresaCriarRoute
   PrevisaoIdRoute: typeof PrevisaoIdRoute
   ApiPublicHooksApurarCopaRoute: typeof ApiPublicHooksApurarCopaRoute
+  ApiPublicHooksFootballSyncRoute: typeof ApiPublicHooksFootballSyncRoute
   ApiPublicHooksTop100SnapshotRoute: typeof ApiPublicHooksTop100SnapshotRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
 }
@@ -1073,6 +1087,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksTop100SnapshotRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/football-sync': {
+      id: '/api/public/hooks/football-sync'
+      path: '/api/public/hooks/football-sync'
+      fullPath: '/api/public/hooks/football-sync'
+      preLoaderRoute: typeof ApiPublicHooksFootballSyncRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/apurar-copa': {
       id: '/api/public/hooks/apurar-copa'
       path: '/api/public/hooks/apurar-copa'
@@ -1200,6 +1221,7 @@ const rootRouteChildren: RootRouteChildren = {
   EmpresaCriarRoute: EmpresaCriarRoute,
   PrevisaoIdRoute: PrevisaoIdRoute,
   ApiPublicHooksApurarCopaRoute: ApiPublicHooksApurarCopaRoute,
+  ApiPublicHooksFootballSyncRoute: ApiPublicHooksFootballSyncRoute,
   ApiPublicHooksTop100SnapshotRoute: ApiPublicHooksTop100SnapshotRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
 }
