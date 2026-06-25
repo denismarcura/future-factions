@@ -304,7 +304,7 @@ function Feed() {
       )}
 
       {/* Busca inteligente */}
-      <SmartSearch />
+      <SmartSearch corpChallenges={sortedCorp} />
 
       {/* Desafios mais recentes */}
       <section className="mb-8">
@@ -507,7 +507,7 @@ function Feed() {
   );
 }
 
-function SmartSearch() {
+function SmartSearch({ corpChallenges }: { corpChallenges: CorpChallengeRecord[] }) {
   const aiSearch = useServerFn(aiSearchChallenges);
   const [q, setQ] = useState("");
   const [loading, setLoading] = useState(false);
@@ -521,11 +521,17 @@ function SmartSearch() {
     setLoading(true);
     setError(null);
     try {
-      const items = PREDICTIONS.slice(0, 80).map((p) => ({
-        id: p.id,
+      const predItems = PREDICTIONS.slice(0, 80).map((p) => ({
+        id: `pred:${p.id}`,
         title: p.title,
         category: p.category,
       }));
+      const corpItems = corpChallenges.slice(0, 80).map((c) => ({
+        id: `corp:${c.id}`,
+        title: `${c.title}${c.companyName ? " — " + c.companyName : ""}`,
+        category: "Empresa",
+      }));
+      const items = [...corpItems, ...predItems];
       const res = await aiSearch({ data: { query, items } });
       setResults(res.ids);
     } catch (err) {
@@ -542,11 +548,33 @@ function SmartSearch() {
     setError(null);
   };
 
-  const found = results
-    ? results
-        .map((id) => PREDICTIONS.find((p) => p.id === id))
-        .filter((p): p is (typeof PREDICTIONS)[number] => !!p)
-        .slice(0, 8)
+  type FoundItem =
+    | { kind: "pred"; id: string; title: string; category: string }
+    | { kind: "corp"; id: string; title: string; companyName: string | null; logoUrl: string | null; bannerUrl: string | null; prizeName: string | null };
+
+  const found: FoundItem[] = results
+    ? (results
+        .map((id): FoundItem | null => {
+          if (id.startsWith("corp:")) {
+            const c = corpChallenges.find((x) => x.id === id.slice(5));
+            if (!c) return null;
+            return {
+              kind: "corp",
+              id: c.id,
+              title: c.title,
+              companyName: c.companyName ?? null,
+              logoUrl: c.logoUrl ?? null,
+              bannerUrl: c.bannerUrl ?? null,
+              prizeName: c.prizeName ?? null,
+            };
+          }
+          const pid = id.startsWith("pred:") ? id.slice(5) : id;
+          const p = PREDICTIONS.find((x) => x.id === pid);
+          if (!p) return null;
+          return { kind: "pred", id: p.id, title: p.title, category: p.category };
+        })
+        .filter((x): x is FoundItem => !!x)
+        .slice(0, 12))
     : [];
 
   return (
@@ -569,7 +597,7 @@ function SmartSearch() {
               <input
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
-                placeholder="Ex.: desafios de futebol da Copa com prêmios altos"
+                placeholder="Ex.: Casa di Napoli, Copa, futebol..."
                 className="w-full h-11 sm:h-12 pl-9 pr-9 rounded-full bg-background/70 border border-border/60 text-sm focus:outline-none focus:ring-2 focus:ring-primary/60"
               />
               {q && (
@@ -602,26 +630,64 @@ function SmartSearch() {
               {found.length === 0 ? (
                 <p className="text-sm text-muted-foreground">Nenhum desafio encontrado. Tente outras palavras.</p>
               ) : (
-                <ul className="space-y-2">
-                  {found.map((p) => (
-                    <li key={p.id}>
-                      <Link
-                        to="/previsao/$id"
-                        params={{ id: p.id }}
-                        className="flex items-center gap-3 p-3 rounded-xl border border-border/60 hover:border-primary/60 hover:bg-card transition"
-                      >
-                        <span className="h-9 w-9 rounded-lg bg-primary/15 text-primary grid place-items-center shrink-0">
-                          <Trophy className="h-4 w-4" />
-                        </span>
-                        <div className="min-w-0 flex-1">
-                          <div className="text-sm font-semibold truncate">{p.title}</div>
-                          <div className="text-[11px] text-muted-foreground truncate">{p.category}</div>
-                        </div>
-                        <span className="text-[11px] font-bold text-primary shrink-0">Abrir →</span>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
+                <>
+                  <div className="mb-2 text-[11px] uppercase tracking-wider text-muted-foreground font-bold">
+                    {found.length} resultado{found.length > 1 ? "s" : ""}
+                  </div>
+                  <ul className="grid gap-2 sm:grid-cols-2">
+                    {found.map((item) =>
+                      item.kind === "corp" ? (
+                        <li key={`corp-${item.id}`}>
+                          <Link
+                            to="/previsao/$id"
+                            params={{ id: item.id }}
+                            className="flex items-center gap-3 p-3 rounded-xl border border-gold/40 bg-gold/5 hover:border-gold hover:shadow-glow transition"
+                          >
+                            {item.logoUrl ? (
+                              <img src={item.logoUrl} alt="" className="h-10 w-10 rounded-lg object-cover border border-border/60 shrink-0" />
+                            ) : item.bannerUrl ? (
+                              <img src={item.bannerUrl} alt="" className="h-10 w-10 rounded-lg object-cover border border-border/60 shrink-0" />
+                            ) : (
+                              <span className="h-10 w-10 rounded-lg bg-gold/15 text-gold grid place-items-center shrink-0">
+                                <Building2 className="h-5 w-5" />
+                              </span>
+                            )}
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-center gap-1.5">
+                                <span className="text-[9px] font-black uppercase tracking-wider text-gold bg-gold/15 px-1.5 py-0.5 rounded">Patrocinado</span>
+                                {item.companyName && (
+                                  <span className="text-[11px] font-bold text-gold truncate">{item.companyName}</span>
+                                )}
+                              </div>
+                              <div className="text-sm font-semibold truncate">{item.title}</div>
+                              {item.prizeName && (
+                                <div className="text-[11px] text-muted-foreground truncate">🎁 {item.prizeName}</div>
+                              )}
+                            </div>
+                            <span className="text-[11px] font-bold text-gold shrink-0">Abrir →</span>
+                          </Link>
+                        </li>
+                      ) : (
+                        <li key={`pred-${item.id}`}>
+                          <Link
+                            to="/previsao/$id"
+                            params={{ id: item.id }}
+                            className="flex items-center gap-3 p-3 rounded-xl border border-border/60 hover:border-primary/60 hover:bg-card transition"
+                          >
+                            <span className="h-10 w-10 rounded-lg bg-primary/15 text-primary grid place-items-center shrink-0">
+                              <Trophy className="h-5 w-5" />
+                            </span>
+                            <div className="min-w-0 flex-1">
+                              <div className="text-sm font-semibold truncate">{item.title}</div>
+                              <div className="text-[11px] text-muted-foreground truncate">{item.category}</div>
+                            </div>
+                            <span className="text-[11px] font-bold text-primary shrink-0">Abrir →</span>
+                          </Link>
+                        </li>
+                      ),
+                    )}
+                  </ul>
+                </>
               )}
             </div>
           )}
@@ -630,4 +696,5 @@ function SmartSearch() {
     </section>
   );
 }
+
 
