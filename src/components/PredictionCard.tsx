@@ -40,9 +40,9 @@ export function PredictionCard({ prediction: p, hideOptions = false }: { predict
             </span>
           </div>
 
-          <h3 className="mt-3 font-display text-lg font-bold leading-snug group-hover:text-gradient-brand transition flex items-start gap-2">
+          <h3 className="mt-3 font-display text-base sm:text-lg font-bold leading-snug group-hover:text-gradient-brand transition flex items-start gap-2 line-clamp-2">
             <span
-              className={`mt-2 h-2.5 w-2.5 rounded-full flex-none ${
+              className={`mt-1.5 h-2 w-2 rounded-full flex-none ${
                 hasFinalResult
                   ? "bg-muted-foreground"
                   : isLive
@@ -51,7 +51,7 @@ export function PredictionCard({ prediction: p, hideOptions = false }: { predict
               }`}
               title={hasFinalResult ? "Encerrado" : isLive ? "Ao vivo" : "Aberto"}
             />
-            <span>Desafio "{p.title}"</span>
+            <span className="min-w-0">{p.match ? `${p.match.home} × ${p.match.away}` : p.title}</span>
           </h3>
 
           {p.match ? (
