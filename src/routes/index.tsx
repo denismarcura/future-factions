@@ -53,12 +53,61 @@ function Feed() {
     const onUpdate = () => setUserChallenges(getUserChallenges());
     window.addEventListener("ddp:user-challenges-updated", onUpdate);
     fetchCorp({ data: { limit: 50 } }).then(setCorpChallenges).catch(() => {});
-    const interval = setInterval(() => setNowTs(Date.now()), 60_000);
+    const interval = setInterval(() => setNowTs(Date.now()), 1000);
     return () => {
       window.removeEventListener("ddp:user-challenges-updated", onUpdate);
       clearInterval(interval);
     };
   }, [fetchCorp]);
+
+  // Countdown helpers (tick every second)
+  const fmtHMS = (ms: number) => {
+    if (ms <= 0) return "00:00:00";
+    const h = Math.floor(ms / 3_600_000);
+    const m = Math.floor((ms % 3_600_000) / 60_000);
+    const s = Math.floor((ms % 60_000) / 1000);
+    return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+  };
+  const fmtDHMS = (ms: number) => {
+    if (ms <= 0) return "Encerrado";
+    const d = Math.floor(ms / 86_400_000);
+    const rest = ms % 86_400_000;
+    if (d > 0) return `${d}d ${fmtHMS(rest)}`;
+    return fmtHMS(rest);
+  };
+  const msUntilMidnight = () => {
+    if (!nowTs) return 0;
+    const next = new Date(nowTs);
+    next.setHours(24, 0, 0, 0);
+    return next.getTime() - nowTs;
+  };
+  const msUntilSundayEnd = () => {
+    if (!nowTs) return 0;
+    const d = new Date(nowTs);
+    const day = d.getDay();
+    const daysToSun = day === 0 ? 0 : 7 - day;
+    const target = new Date(d);
+    target.setDate(d.getDate() + daysToSun);
+    target.setHours(23, 59, 59, 999);
+    return target.getTime() - nowTs;
+  };
+  const msUntilHappyHour = () => {
+    if (!nowTs) return 0;
+    const d = new Date(nowTs);
+    const target = new Date(d);
+    target.setHours(20, 0, 0, 0);
+    if (target.getTime() <= nowTs) {
+      const end = new Date(d); end.setHours(22, 0, 0, 0);
+      if (nowTs < end.getTime()) return end.getTime() - nowTs;
+      target.setDate(d.getDate() + 1);
+    }
+    return target.getTime() - nowTs;
+  };
+  const isHappyHourLive = () => {
+    if (!nowTs) return false;
+    const h = new Date(nowTs).getHours();
+    return h >= 20 && h < 22;
+  };
 
   // Sort: closest endsAt first, then most recently created
   const sortedCorp = useMemo(() => {
@@ -183,23 +232,38 @@ function Feed() {
           <ul className="space-y-2 mb-3 flex-1">
             <li className="flex items-start gap-2">
               <Flame className="h-3.5 w-3.5 text-destructive mt-0.5 shrink-0" />
-              <div className="min-w-0">
+              <div className="min-w-0 flex-1">
                 <div className="text-xs font-bold leading-tight">Fim de Semana Premiado</div>
                 <div className="text-[10px] text-muted-foreground">Tokens em dobro</div>
+                {mounted && (
+                  <div className="mt-1 inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-destructive/15 text-destructive text-[9px] font-black font-mono">
+                    <Timer className="h-2.5 w-2.5" /> {fmtDHMS(msUntilSundayEnd())}
+                  </div>
+                )}
               </div>
             </li>
             <li className="flex items-start gap-2">
               <Zap className="h-3.5 w-3.5 text-gold mt-0.5 shrink-0" />
-              <div className="min-w-0">
+              <div className="min-w-0 flex-1">
                 <div className="text-xs font-bold leading-tight">Segunda Maluca</div>
                 <div className="text-[10px] text-muted-foreground">Missões em dobro</div>
               </div>
             </li>
             <li className="flex items-start gap-2">
               <Heart className="h-3.5 w-3.5 text-primary mt-0.5 shrink-0" />
-              <div className="min-w-0">
-                <div className="text-xs font-bold leading-tight">Hora Feliz</div>
-                <div className="text-[10px] text-muted-foreground">Das 20h às 22h</div>
+              <div className="min-w-0 flex-1">
+                <div className="text-xs font-bold leading-tight">Hora Feliz · 20h–22h</div>
+                {mounted && (
+                  isHappyHourLive() ? (
+                    <div className="mt-0.5 inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-primary/15 text-primary text-[9px] font-black font-mono animate-pulse">
+                      <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" /> AO VIVO · termina em {fmtHMS(msUntilHappyHour())}
+                    </div>
+                  ) : (
+                    <div className="mt-0.5 inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-primary/10 text-primary text-[9px] font-black font-mono">
+                      <Clock className="h-2.5 w-2.5" /> começa em {fmtHMS(msUntilHappyHour())}
+                    </div>
+                  )
+                )}
               </div>
             </li>
           </ul>
@@ -226,6 +290,11 @@ function Feed() {
               50 <Coins className="h-6 w-6 text-gold" />
             </div>
             <div className="text-[10px] text-muted-foreground mt-1">Tokens grátis</div>
+            {mounted && (
+              <div className="mt-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-gold/15 border border-gold/30 text-gold text-[10px] font-black font-mono">
+                <Timer className="h-3 w-3" /> Reseta em {fmtHMS(msUntilMidnight())}
+              </div>
+            )}
           </div>
           <Link
             to="/perfil"
@@ -253,6 +322,11 @@ function Feed() {
             <div className="text-[10px] text-muted-foreground">Pode conter de</div>
             <div className="text-sm font-black text-purple-300">20 até 5.000 Tokens</div>
             <div className="text-[10px] text-muted-foreground">ou prêmios especiais!</div>
+            {mounted && (
+              <div className="mt-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-purple-500/15 border border-purple-500/30 text-purple-300 text-[10px] font-black font-mono">
+                <Timer className="h-3 w-3" /> Próxima grátis em {fmtHMS(msUntilMidnight())}
+              </div>
+            )}
           </div>
           <Link
             to="/shop"
@@ -272,6 +346,14 @@ function Feed() {
             <div className="text-[11px] uppercase tracking-wider font-black text-emerald-400">Convite e Ganhe</div>
           </div>
           <p className="relative text-[11px] text-muted-foreground mb-3 leading-snug">Convide amigos e ganhe prêmios!</p>
+          {mounted && (
+            <div className="relative mb-3 flex items-center justify-between gap-2 rounded-lg bg-emerald-500/10 border border-emerald-500/30 px-2 py-1.5">
+              <span className="text-[10px] font-bold text-emerald-300 uppercase tracking-wider">Campanha</span>
+              <span className="inline-flex items-center gap-1 text-[10px] font-black font-mono text-emerald-300">
+                <Timer className="h-3 w-3" /> {fmtDHMS(msUntilSundayEnd())}
+              </span>
+            </div>
+          )}
           <ul className="relative space-y-2 mb-3 flex-1">
             <li className="flex items-center gap-2">
               <span className="h-6 w-6 rounded-full bg-emerald-500/15 text-emerald-400 grid place-items-center text-[10px] font-black shrink-0">1</span>
