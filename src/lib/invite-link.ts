@@ -3,11 +3,11 @@
 // open challenges, created challenges and corp opportunities.
 //
 // Pattern: {origin}/amigo/{ref}
-// `ref` is the first 8 chars of the user's id (used by amigo.$ref loader).
+// `ref` is the first 8 chars of the user's id (prefix match in loader).
 
 export function inviteRefFromUserId(userId: string | null | undefined): string {
   if (!userId) return "";
-  return userId.replace(/-/g, "").slice(0, 8);
+  return String(userId).slice(0, 8);
 }
 
 export function buildInviteUrl(userId: string | null | undefined): string {
