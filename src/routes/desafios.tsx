@@ -8,7 +8,8 @@ import { COMPANY_CHALLENGES } from "@/lib/mock-extra";
 import { getUserChallenges } from "@/lib/user-challenges";
 import { useParticipatedChallengeIds } from "@/hooks/use-participated";
 import { aiSearchChallenges } from "@/lib/search-ai.functions";
-import { ListChecks, Building2, Users, Lock, Globe2, Sparkles, Search, Loader2, X, Wand2, Timer, CalendarDays, Trophy } from "lucide-react";
+import { listLatestCorpChallenges, type CorpChallengeRecord } from "@/lib/corp-challenges.functions";
+import { ListChecks, Building2, Users, Lock, Globe2, Sparkles, Search, Loader2, X, Wand2, Timer, CalendarDays, Trophy, Star } from "lucide-react";
 import { timeLeft } from "@/lib/mock-data";
 import { WORLD_CUP_MATCHES, flagUrl } from "@/lib/world-cup-matches";
 
