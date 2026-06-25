@@ -94,50 +94,73 @@ function RankingCaixaPage() {
             </div>
           </div>
         ) : (
-          <ul className="divide-y divide-border/60">
-            {rows.map((r, i) => {
-              const pos = i + 1;
-              const m = medal(pos);
-              return (
-                <li
-                  key={r.userId}
-                  className="grid grid-cols-[44px_1fr_auto] md:grid-cols-[60px_1fr_100px_100px_120px] gap-3 px-4 py-3 items-center hover:bg-muted/20 transition"
-                >
-                  <div>
-                    <span className={`h-8 w-8 md:h-9 md:w-9 rounded-full grid place-items-center text-xs font-black border ${m.cls}`}>
-                      {m.emoji}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2 min-w-0">
-                    {r.avatarUrl ? (
-                      <img src={r.avatarUrl} alt="" className="h-8 w-8 rounded-full object-cover border border-border/60 shrink-0" />
-                    ) : (
-                      <span className="h-8 w-8 rounded-full bg-muted grid place-items-center text-xs font-black shrink-0">
-                        {r.name.charAt(0).toUpperCase()}
-                      </span>
-                    )}
-                    <div className="min-w-0">
-                      <div className="text-sm font-bold truncate">{r.name}</div>
-                      <div className="md:hidden text-[10px] text-muted-foreground flex items-center gap-2">
-                        <span className="inline-flex items-center gap-0.5 text-orange-400 font-black">
-                          <Flame className="h-3 w-3" /> {r.maxStreak}d
+          <TooltipProvider delayDuration={150}>
+            <ul key={period} className="divide-y divide-border/60 animate-fade-in">
+              {rows.map((r, i) => {
+                const pos = i + 1;
+                const m = medal(pos);
+                const isTop3 = pos <= 3;
+                const approxValue = r.totalTokens.toLocaleString("pt-BR");
+                return (
+                  <li
+                    key={r.userId}
+                    style={{ animationDelay: `${Math.min(i, 12) * 30}ms` }}
+                    className="grid grid-cols-[44px_1fr_auto] md:grid-cols-[60px_1fr_100px_100px_120px] gap-3 px-4 py-3 items-center hover:bg-muted/20 transition animate-fade-in"
+                  >
+                    <div>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span
+                            className={`h-8 w-8 md:h-9 md:w-9 rounded-full grid place-items-center text-xs font-black border cursor-help transition-transform hover:scale-110 ${m.cls} ${isTop3 ? "animate-scale-in" : ""}`}
+                          >
+                            {m.emoji}
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent side="right" className="text-xs">
+                          <div className="font-black">{m.label} · #{pos}</div>
+                          <div className="text-muted-foreground mt-0.5">
+                            🔥 Streak: <span className="text-orange-400 font-bold">{r.maxStreak} dias</span>
+                          </div>
+                          <div className="text-muted-foreground">
+                            🎁 Aberturas: <span className="font-bold">{r.totalOpens}</span>
+                          </div>
+                          <div className="text-muted-foreground">
+                            🪙 Tokens: <span className="text-gold font-bold">~{approxValue}</span>
+                          </div>
+                        </TooltipContent>
+                      </Tooltip>
+                    </div>
+                    <div className="flex items-center gap-2 min-w-0">
+                      {r.avatarUrl ? (
+                        <img src={r.avatarUrl} alt="" className="h-8 w-8 rounded-full object-cover border border-border/60 shrink-0" />
+                      ) : (
+                        <span className="h-8 w-8 rounded-full bg-muted grid place-items-center text-xs font-black shrink-0">
+                          {r.name.charAt(0).toUpperCase()}
                         </span>
-                        <span>·</span>
-                        <span>{r.totalOpens} aberturas</span>
+                      )}
+                      <div className="min-w-0">
+                        <div className="text-sm font-bold truncate">{r.name}</div>
+                        <div className="md:hidden text-[10px] text-muted-foreground flex items-center gap-2">
+                          <span className="inline-flex items-center gap-0.5 text-orange-400 font-black">
+                            <Flame className="h-3 w-3" /> {r.maxStreak}d
+                          </span>
+                          <span>·</span>
+                          <span>{r.totalOpens} aberturas</span>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  <div className="hidden md:flex items-center justify-center gap-1 text-orange-400 font-black">
-                    <Flame className="h-4 w-4" /> {r.maxStreak}d
-                  </div>
-                  <div className="hidden md:block text-center text-sm font-mono font-bold">{r.totalOpens}</div>
-                  <div className="md:text-right text-right inline-flex items-center justify-end gap-1 text-gold font-black text-sm">
-                    {r.totalTokens.toLocaleString("pt-BR")} <Coins className="h-3 w-3" />
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
+                    <div className="hidden md:flex items-center justify-center gap-1 text-orange-400 font-black">
+                      <Flame className="h-4 w-4" /> {r.maxStreak}d
+                    </div>
+                    <div className="hidden md:block text-center text-sm font-mono font-bold">{r.totalOpens}</div>
+                    <div className="md:text-right text-right inline-flex items-center justify-end gap-1 text-gold font-black text-sm">
+                      {approxValue} <Coins className="h-3 w-3" />
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          </TooltipProvider>
         )}
       </div>
 
