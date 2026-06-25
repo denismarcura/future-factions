@@ -248,45 +248,72 @@ function Missoes() {
             const isRunning = running === m.id;
             const isExiting = exiting.has(m.id);
             const totalTokens = m.tokens + (m.bonus_tokens || 0) + COMPLETION_BONUS_TOKENS;
+            const elapsed = isRunning && runStart ? Math.min(MISSION_VERIFY_MS, now - runStart) : 0;
+            const remaining = isRunning ? Math.max(0, Math.ceil((MISSION_VERIFY_MS - elapsed) / 1000)) : 0;
+            const pct = isRunning ? Math.min(100, (elapsed / MISSION_VERIFY_MS) * 100) : 0;
             return (
               <div
                 key={m.id}
-                className={`rounded-2xl border p-3 sm:p-4 grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 transition-all duration-400 ${
+                className={`rounded-2xl border p-3 sm:p-4 transition-all duration-400 ${
                   isExiting
                     ? "opacity-0 scale-95 -translate-x-4 bg-emerald-500/20 border-emerald-500/50"
                     : done
                       ? "bg-emerald-500/5 border-emerald-500/30"
-                      : "bg-card border-border/60 hover:border-primary/40"
+                      : isRunning
+                        ? "bg-primary/5 border-primary/50 shadow-glow"
+                        : "bg-card border-border/60 hover:border-primary/40"
                 }`}
                 style={isExiting ? { transitionDuration: "450ms" } : undefined}
               >
-                <div className="shrink-0 h-12 w-12 rounded-xl bg-primary/10 border border-primary/25 grid place-items-center">
-                  <PlatformIcon p={m.platform} className="h-5 w-5 text-primary" />
-                </div>
-                <div className="min-w-0">
-                  <div className="font-bold text-sm truncate">{m.sponsor_name}</div>
-                  <div className="text-[11px] text-muted-foreground truncate">
-                    {ACTION_LABEL[m.action_type]} · {PLATFORM_LABEL[m.platform]}
+                <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3">
+                  <div className="shrink-0 h-12 w-12 rounded-xl bg-primary/10 border border-primary/25 grid place-items-center">
+                    <PlatformIcon p={m.platform} className="h-5 w-5 text-primary" />
                   </div>
-                  <div className="mt-1 inline-flex items-center gap-1 text-[11px] font-bold text-gold">
-                    <Coins className="h-3 w-3" /> +{totalTokens} tokens
+                  <div className="min-w-0">
+                    <div className="font-bold text-sm truncate">{m.sponsor_name}</div>
+                    <div className="text-[11px] text-muted-foreground truncate">
+                      {ACTION_LABEL[m.action_type]} · {PLATFORM_LABEL[m.platform]}
+                    </div>
+                    <div className="mt-1 inline-flex items-center gap-1 text-[11px] font-bold text-gold">
+                      <Coins className="h-3 w-3" /> +{totalTokens} tokens
+                    </div>
                   </div>
+                  <button
+                    onClick={() => handleDo(m)}
+                    disabled={done || isRunning || isExiting || !!running}
+                    className={`shrink-0 h-9 px-3.5 rounded-full font-bold text-[11px] uppercase tracking-wide inline-flex items-center gap-1 transition ${
+                      isExiting || done
+                        ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30"
+                        : "bg-gradient-brand text-primary-foreground shadow-glow hover:scale-[1.03] disabled:opacity-60 disabled:hover:scale-100"
+                    }`}
+                  >
+                    {isRunning ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : (isExiting || done) ? <Check className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
+                    {isRunning ? `${remaining}s` : isExiting ? "+TOKENS" : done ? "Feita" : "Fazer"}
+                  </button>
                 </div>
-                <button
-                  onClick={() => handleDo(m)}
-                  disabled={done || isRunning || isExiting || !!running}
-                  className={`shrink-0 h-9 px-3.5 rounded-full font-bold text-[11px] uppercase tracking-wide inline-flex items-center gap-1 transition ${
-                    isExiting || done
-                      ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30"
-                      : "bg-gradient-brand text-primary-foreground shadow-glow hover:scale-[1.03] disabled:opacity-60 disabled:hover:scale-100"
-                  }`}
-                >
-                  {isRunning ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : (isExiting || done) ? <Check className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
-                  {isRunning ? "..." : isExiting ? "+TOKENS" : done ? "Feita" : "Fazer"}
-                </button>
+                {isRunning && (
+                  <div className="mt-3 animate-fade-in">
+                    <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider mb-1.5">
+                      <span className="text-primary inline-flex items-center gap-1">
+                        <Loader2 className="h-3 w-3 animate-spin" /> Verificando missão…
+                      </span>
+                      <span className="text-muted-foreground tabular-nums">{remaining}s restantes</span>
+                    </div>
+                    <div className="h-1.5 w-full rounded-full bg-border/60 overflow-hidden">
+                      <div
+                        className="h-full bg-gradient-brand transition-[width] duration-100 ease-linear"
+                        style={{ width: `${pct}%` }}
+                      />
+                    </div>
+                    <div className="mt-1.5 text-[10px] text-muted-foreground">
+                      Conclua a ação na aba aberta. Liberamos <span className="text-gold font-bold">+{totalTokens} tokens</span> ao final.
+                    </div>
+                  </div>
+                )}
               </div>
             );
           })}
+
         </div>
       )}
 
