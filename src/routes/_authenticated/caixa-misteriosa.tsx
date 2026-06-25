@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -108,10 +108,13 @@ function MysteryBoxPage() {
       <div className="relative overflow-hidden rounded-3xl border border-purple-500/40 bg-gradient-to-br from-purple-950/60 via-fuchsia-950/40 to-background p-6 md:p-10 mb-6">
         <div className="absolute -top-20 -right-20 h-64 w-64 rounded-full bg-purple-500/30 blur-3xl pointer-events-none animate-pulse" />
         <div className="absolute -bottom-20 -left-20 h-64 w-64 rounded-full bg-fuchsia-500/20 blur-3xl pointer-events-none" />
-        <div className="relative flex items-center gap-2 mb-3">
+        <div className="relative flex items-center gap-2 mb-3 flex-wrap">
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-500/15 border border-purple-500/30 text-purple-300 text-xs font-black uppercase tracking-wider">
             <Box className="h-3.5 w-3.5" /> Caixa Misteriosa
           </span>
+          <Link to="/ranking-caixa-misteriosa" className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gold/15 border border-gold/30 text-gold text-xs font-black uppercase tracking-wider hover:bg-gold/25 transition">
+            🏆 Top 100 Fidelidade
+          </Link>
         </div>
         <h1 className="relative text-3xl md:text-4xl font-black mb-2">
           Abra todos os dias e <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-fuchsia-400">multiplique sua sorte</span>
