@@ -79,6 +79,13 @@ function Missoes() {
     })();
   }, [user]);
 
+  // tick while a mission is in verification
+  useEffect(() => {
+    if (!running) return;
+    const id = setInterval(() => setNow(Date.now()), 100);
+    return () => clearInterval(id);
+  }, [running]);
+
   async function handleDo(m: Mission) {
     if (!user) {
       toast.error("Faça login para concluir missões.");
@@ -86,6 +93,8 @@ function Missoes() {
     }
     if (claimed.has(m.id) || running) return;
     setRunning(m.id);
+    setRunStart(Date.now());
+    setNow(Date.now());
     try {
       const a = document.createElement("a");
       a.href = m.link;
@@ -97,7 +106,7 @@ function Missoes() {
     } catch {
       window.open(m.link, "_blank", "noopener,noreferrer");
     }
-    await new Promise((r) => setTimeout(r, 5000));
+    await new Promise((r) => setTimeout(r, MISSION_VERIFY_MS));
     try {
       const earned = m.tokens + (m.bonus_tokens || 0);
       const totalAward = earned + COMPLETION_BONUS_TOKENS;
@@ -120,7 +129,10 @@ function Missoes() {
       toast.error(e.message ?? "Erro ao registrar");
     } finally {
       setRunning(null);
+      setRunStart(null);
     }
+  }
+
   }
 
   const filtered = useMemo(() => {
