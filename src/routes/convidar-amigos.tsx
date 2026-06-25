@@ -204,10 +204,11 @@ function ConvidarAmigos() {
           <div className="flex flex-wrap gap-2">
             <button
               onClick={send}
-              disabled={emails.length === 0}
+              disabled={emails.length === 0 || sending}
               className="inline-flex items-center gap-2 h-12 px-5 rounded-xl bg-gradient-brand text-primary-foreground font-display font-black shadow-glow disabled:opacity-50"
             >
-              <Send className="h-4 w-4" /> Enviar para {emails.length || 0} amigo(s)
+              {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+              {sending ? "Enviando..." : `Enviar para ${emails.length || 0} amigo(s)`}
             </button>
             <button
               onClick={copyMessage}
