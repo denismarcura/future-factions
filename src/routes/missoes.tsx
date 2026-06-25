@@ -109,10 +109,11 @@ function Missoes() {
   }
 
   const filtered = useMemo(() => {
-    if (tab === "todas") return missions;
-    if (tab === "especiais") return missions.filter((m) => (m.bonus_tokens || 0) > 0);
-    return missions.filter((m) => m.platform === tab);
-  }, [missions, tab]);
+    const open = missions.filter((m) => !claimed.has(m.id));
+    if (tab === "todas") return open;
+    if (tab === "especiais") return open.filter((m) => (m.bonus_tokens || 0) > 0);
+    return open.filter((m) => m.platform === tab);
+  }, [missions, tab, claimed]);
 
   const totalClaimable = useMemo(
     () => missions.filter((m) => !claimed.has(m.id)).reduce((s, m) => s + m.tokens + (m.bonus_tokens || 0) + COMPLETION_BONUS_TOKENS, 0),
