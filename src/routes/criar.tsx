@@ -30,6 +30,7 @@ import { PrizesPicker, type PrizeSlot } from "@/components/PrizesPicker";
 import { CitiesAutocomplete, type SelectedCity } from "@/components/CitiesAutocomplete";
 import { CitiesScopePicker } from "@/components/CitiesScopePicker";
 import type { AdminPrize } from "@/lib/admin-prizes.functions";
+import { buildInviteUrl } from "@/lib/invite-link";
 
 function getNextBrazilMatch() {
   const now = Date.now();
@@ -66,7 +67,6 @@ type SubCat = {
   options: string[]; // up to MAX_OPTIONS
 };
 
-const COST = 100;
 const REWARD_PER_HIT = 50;
 const AUTO_PRIZE = 5000;
 const MAX_OPTIONS = 10;
@@ -536,7 +536,7 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
               question: s.question,
               options: s.options.filter(Boolean),
             })),
-            inviteLink: origin ? `${origin}/previsao/${id}${(user?.id ?? "").slice(0, 8) ? `?ref=${(user?.id ?? "").slice(0, 8)}` : ""}` : undefined,
+            inviteLink: user ? buildInviteUrl(user, origin || undefined) : undefined,
           },
         });
       } catch {
@@ -546,8 +546,8 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
     } catch (err) {
       setErrors([
         err instanceof Error
-          ? `Não foi possível publicar e ativar o link: ${err.message}. Nenhum token foi debitado.`
-          : "Não foi possível publicar e ativar o link. Nenhum token foi debitado.",
+          ? `Não foi possível publicar e ativar o link: ${err.message}. Nenhum token foi cobrado.`
+          : "Não foi possível publicar e ativar o link. Nenhum token foi cobrado.",
       ]);
       window.scrollTo({ top: 0, behavior: "smooth" });
     } finally {
@@ -648,7 +648,7 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
           <Coins className="h-5 w-5 text-gold" />
           <div className="text-sm">
             <div className="text-xs text-muted-foreground">Custo de criação</div>
-            <div className="font-display font-black text-lg leading-none">{COST} <span className="text-xs text-gold">Tokens</span></div>
+            <div className="font-display font-black text-lg leading-none">Grátis</div>
           </div>
         </div>
       </header>
@@ -1664,7 +1664,7 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
         <aside className="lg:sticky lg:top-24 lg:self-start space-y-4">
           <div className="rounded-2xl glass-card p-5 space-y-3">
             <div className="text-xs uppercase tracking-wider font-bold text-gold">Resumo</div>
-            <Row label="Custo de criação" value={`${COST} Tokens`} />
+            <Row label="Custo de criação" value="Grátis" />
             <Row label="Sub-categorias" value={`${totalQuestions}/${MAX_SUBS}`} />
             <Row label="Prêmio em tokens (auto)" value={`${AUTO_PRIZE.toLocaleString("pt-BR")} Tokens`} />
             <Row label="Recompensa total possível" value={`${maxReward} Tokens / usuário`} />
@@ -1682,7 +1682,7 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
           </div>
 
           <button type="submit" disabled={publishing} className="w-full h-12 rounded-xl bg-gradient-brand text-primary-foreground font-display font-black shadow-glow hover:scale-[1.01] transition disabled:opacity-60 disabled:cursor-not-allowed inline-flex items-center justify-center gap-2">
-            {publishing ? (<><Loader2 className="h-4 w-4 animate-spin" /> Publicando…</>) : (<>Publicar desafio • {COST} Tokens</>)}
+            {publishing ? (<><Loader2 className="h-4 w-4 animate-spin" /> Publicando…</>) : (<>Publicar desafio grátis</>)}
           </button>
           <Link to="/" className="block text-center text-sm text-muted-foreground hover:text-foreground">
             Cancelar
@@ -2230,9 +2230,8 @@ function PublishedSuccess({ name, id, onCreateAnother }: { name: string; id: str
   const [copied, setCopied] = useState(false);
   const [textCopied, setTextCopied] = useState(false);
   const origin = typeof window !== "undefined" ? window.location.origin : "https://www.desafiodospalpites.com.br";
-  const refCode = (user?.id ?? "").slice(0, 8);
-  // Link de convite: abre diretamente o desafio publicado, inclusive no preview.
-  const link = `${origin}/previsao/${id}${refCode ? `?ref=${refCode}` : ""}`;
+  // Link de convite único do usuário: URL limpa, sem cobrança de tokens.
+  const link = user ? buildInviteUrl(user, origin) : `${origin}/desafios`;
 
   const inviteSubject = `🎯 Participe do meu desafio "${name}" — Desafio dos Palpites (100% GRATUITO)`;
   const inviteBody = `Olá!
@@ -2305,7 +2304,7 @@ Te espero lá! 🚀`;
       </div>
       <h1 className="font-display text-3xl font-black mb-2">Desafio publicado!</h1>
       <p className="text-muted-foreground mb-6">
-        <span className="text-foreground font-semibold">"{name}"</span> está no ar, com link de indicação ativo. 100 Tokens foram debitados da sua carteira.
+        <span className="text-foreground font-semibold">"{name}"</span> está no ar. Use seu link simples de convite abaixo — nenhum token foi cobrado.
       </p>
 
       <div className="rounded-2xl glass-card p-4 flex items-center gap-2 mb-4">

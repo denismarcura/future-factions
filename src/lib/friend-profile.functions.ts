@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
+import { inviteSlugFromProfile, normalizeInviteSlug } from "@/lib/invite-link";
 
 function publicClient() {
   return createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_PUBLISHABLE_KEY!, {
@@ -9,21 +10,45 @@ function publicClient() {
 }
 
 export const getFriendProfile = createServerFn({ method: "GET" })
-  .inputValidator((i: unknown) => z.object({ ref: z.string().min(4).max(40) }).parse(i))
+  .inputValidator((i: unknown) => z.object({ ref: z.string().min(3).max(40) }).parse(i))
   .handler(async ({ data }) => {
     const sb = publicClient();
-    const ref = data.ref.toLowerCase();
+    const ref = normalizeInviteSlug(data.ref);
 
-    // Resolve user by uuid prefix (or full uuid)
-    const { data: profile } = await sb
+    // Resolve user by the new clean slug (domain.com.br/usuario), keeping
+    // compatibility with old UUID-prefix links. Service role is used only here
+    // to resolve public invite pages without exposing private columns below.
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: profiles } = await supabaseAdmin
       .from("profiles")
-      .select("id, full_name, avatar_url, cidade, estado, created_at, instagram")
-      .ilike("id", `${ref}%`)
-      .limit(1)
-      .maybeSingle();
+      .select("id, full_name, avatar_url, cidade, estado, created_at, instagram, email, invite_slug")
+      .order("created_at", { ascending: true })
+      .limit(10000);
+
+    const profile = (profiles ?? []).find((p: any) => {
+      const storedSlug = normalizeInviteSlug(p.invite_slug);
+      if (storedSlug && storedSlug === ref) return true;
+      if (String(p.id).toLowerCase().startsWith(ref)) return true;
+      return inviteSlugFromProfile({
+        id: p.id,
+        email: p.email,
+        instagram: p.instagram,
+        full_name: p.full_name,
+      }) === ref;
+    }) as any | undefined;
 
     if (!profile) return null;
     const userId = profile.id as string;
+    const publicProfile = {
+      id: profile.id,
+      full_name: profile.full_name,
+      avatar_url: profile.avatar_url,
+      cidade: profile.cidade,
+      estado: profile.estado,
+      created_at: profile.created_at,
+      instagram: profile.instagram,
+      invite_slug: normalizeInviteSlug(profile.invite_slug) || inviteSlugFromProfile(profile),
+    };
 
     // Created challenges
     const { data: created } = await sb
@@ -58,7 +83,6 @@ export const getFriendProfile = createServerFn({ method: "GET" })
     }
 
     // Completed results (where user won) — winners table is no longer anon-readable
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: wins } = await supabaseAdmin
       .from("challenge_winners")
       .select("id, challenge_id, tokens, status, created_at, challenges(title, image_url, category)")
@@ -97,7 +121,7 @@ export const getFriendProfile = createServerFn({ method: "GET" })
       .limit(12);
 
     return {
-      profile,
+      profile: publicProfile,
       stats: {
         tokensEarned,
         friendsCount,

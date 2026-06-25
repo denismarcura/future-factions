@@ -265,8 +265,8 @@ function Missoes() {
             <Users className="h-7 w-7 text-gold" />
           </div>
           <div className="min-w-0">
-            <h3 className="font-display font-black text-lg leading-tight">Convide amigos e ganhe mais tokens!</h3>
-            <p className="text-xs text-muted-foreground mt-1">Cada amigo cadastrado vale <span className="text-gold font-bold">+50 tokens</span>.</p>
+            <h3 className="font-display font-black text-lg leading-tight">Seu link simples de convite</h3>
+            <p className="text-xs text-muted-foreground mt-1">Compartilhe o mesmo link nas missões, desafios e no seu perfil.</p>
           </div>
         </div>
         <InviteLinkCard />

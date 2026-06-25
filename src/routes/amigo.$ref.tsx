@@ -5,6 +5,7 @@ import {
 } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { getFriendProfile } from "@/lib/friend-profile.functions";
+import { buildInviteUrlFromProfile, inviteSlugFromProfile } from "@/lib/invite-link";
 import { toast } from "sonner";
 
 type SearchParams = { d?: string };
@@ -49,18 +50,20 @@ export const Route = createFileRoute("/amigo/$ref")({
 function FriendProfile() {
   const data = Route.useLoaderData() as any;
   const search = Route.useSearch();
-  const highlightId = search.d;
+  return <FriendProfileView data={data} highlightId={search.d} />;
+}
+
+export function FriendProfileView({ data, highlightId }: { data: any; highlightId?: string }) {
   const { profile, stats, createdOpen, createdClosed, participated, wins, corpOpportunities } = data;
   const name = profile.full_name || "Amigo";
 
-  const refCode = profile.id.slice(0, 8);
-  const dParam = highlightId ? `&d=${highlightId}` : "";
-  const signupUrl = typeof window !== "undefined"
-    ? `${window.location.origin}/auth?ref=${refCode}${dParam}`
-    : `/auth?ref=${refCode}${dParam}`;
+  const refCode = profile.invite_slug || inviteSlugFromProfile(profile);
+  const publicInviteUrl = typeof window !== "undefined"
+    ? buildInviteUrlFromProfile(profile, window.location.origin)
+    : `https://www.desafiodospalpites.com.br/${refCode}`;
 
   function copyLink() {
-    navigator.clipboard.writeText(signupUrl);
+    navigator.clipboard.writeText(publicInviteUrl);
     toast.success("Link copiado!");
   }
 
@@ -168,9 +171,9 @@ function FriendProfile() {
           <h2 className="font-display text-xl font-black">Entre no time e ganhe 1.000 tokens</h2>
           <p className="text-sm text-muted-foreground">Cadastre-se com o link de {name.split(" ")[0]} e comece a palpitar agora.</p>
           <div className="flex flex-col sm:flex-row gap-2 max-w-xl mx-auto">
-            <input readOnly value={signupUrl} className="flex-1 h-11 px-3 rounded-lg bg-background border border-border/60 text-xs font-mono" onFocus={(e) => e.currentTarget.select()} />
+            <input readOnly value={publicInviteUrl} className="flex-1 h-11 px-3 rounded-lg bg-background border border-border/60 text-xs font-mono" onFocus={(e) => e.currentTarget.select()} />
             <button onClick={copyLink} className="h-11 px-4 rounded-lg border border-border/60 text-xs font-bold inline-flex items-center justify-center gap-1.5"><Copy className="h-3.5 w-3.5" />Copiar</button>
-            <a href={`https://api.whatsapp.com/send?text=${encodeURIComponent(`${name} te convidou para o Desafio dos Palpites: ${signupUrl}`)}`} target="_blank" rel="noreferrer" className="h-11 px-4 rounded-lg bg-[#25D366] text-white text-xs font-bold inline-flex items-center justify-center gap-1.5"><MessageCircle className="h-3.5 w-3.5" />WhatsApp</a>
+            <a href={`https://api.whatsapp.com/send?text=${encodeURIComponent(`${name} te convidou para o Desafio dos Palpites: ${publicInviteUrl}`)}`} target="_blank" rel="noreferrer" className="h-11 px-4 rounded-lg bg-[#25D366] text-white text-xs font-bold inline-flex items-center justify-center gap-1.5"><MessageCircle className="h-3.5 w-3.5" />WhatsApp</a>
           </div>
         </section>
       </div>
