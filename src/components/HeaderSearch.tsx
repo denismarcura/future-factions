@@ -1,11 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Search, X, Trophy, Building2, User as UserIcon } from "lucide-react";
 import { Link, useNavigate } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { PREDICTIONS } from "@/lib/mock-data";
 import { USERS } from "@/lib/mock-users";
+import { searchCorpChallenges } from "@/lib/corp-challenges.functions";
 
 type Result =
-  | { kind: "challenge"; id: string; title: string; category: string }
+  | { kind: "challenge"; id: string; title: string; category: string; company?: string | null; logo?: string | null }
   | { kind: "user"; id: string; title: string; subtitle: string };
 
 function norm(s: string) {
@@ -18,14 +21,15 @@ export function HeaderSearch({ className = "" }: { className?: string }) {
   const [open, setOpen] = useState(false);
   const wrapRef = useRef<HTMLDivElement | null>(null);
   const navigate = useNavigate();
+  const searchFn = useServerFn(searchCorpChallenges);
 
-  // Debounce 180ms (AJAX-style instant search, sem chamar IA)
+  // Debounce 220ms
   useEffect(() => {
-    const t = setTimeout(() => setDebounced(q.trim()), 180);
+    const t = setTimeout(() => setDebounced(q.trim()), 220);
     return () => clearTimeout(t);
   }, [q]);
 
-  // Fechar ao clicar fora
+  // Close on outside click
   useEffect(() => {
     const onDown = (e: MouseEvent) => {
       if (!wrapRef.current?.contains(e.target as Node)) setOpen(false);
@@ -34,19 +38,51 @@ export function HeaderSearch({ className = "" }: { className?: string }) {
     return () => document.removeEventListener("mousedown", onDown);
   }, []);
 
+  const canQuery = debounced.length >= 2;
+
+  // Server-side search across real corporate challenges
+  const { data: corp = [], isFetching } = useQuery({
+    queryKey: ["search-corp", debounced],
+    queryFn: () => searchFn({ data: { q: debounced, limit: 8 } }),
+    enabled: canQuery,
+    staleTime: 30_000,
+  });
+
   const results: Result[] = useMemo(() => {
-    if (debounced.length < 3) return [];
+    if (!canQuery) return [];
     const n = norm(debounced);
     const out: Result[] = [];
+    const seen = new Set<string>();
 
-    for (const p of PREDICTIONS) {
-      if (norm(p.title).includes(n) || norm(p.category).includes(n)) {
-        out.push({ kind: "challenge", id: p.id, title: p.title, category: p.category });
-        if (out.length >= 8) break;
+    // 1) Real corporate challenges first (priority for paying clients)
+    for (const c of corp) {
+      if (seen.has(c.id)) continue;
+      seen.add(c.id);
+      out.push({
+        kind: "challenge",
+        id: c.id,
+        title: c.title,
+        category: c.companyName || c.category || "Empresa",
+        company: c.companyName,
+        logo: c.logoUrl,
+      });
+      if (out.length >= 8) break;
+    }
+
+    // 2) Mock predictions (Cup matches etc.)
+    if (out.length < 8) {
+      for (const p of PREDICTIONS) {
+        if (seen.has(p.id)) continue;
+        if (norm(p.title).includes(n) || norm(p.category).includes(n)) {
+          seen.add(p.id);
+          out.push({ kind: "challenge", id: p.id, title: p.title, category: p.category });
+          if (out.length >= 8) break;
+        }
       }
     }
 
-    if (out.length < 8) {
+    // 3) Users
+    if (out.length < 10) {
       for (const u of USERS) {
         if (norm(u.username).includes(n) || norm(u.city).includes(n)) {
           out.push({
@@ -61,10 +97,10 @@ export function HeaderSearch({ className = "" }: { className?: string }) {
     }
 
     return out;
-  }, [debounced]);
+  }, [debounced, canQuery, corp]);
 
   const showPanel = open && q.trim().length > 0;
-  const tooShort = showPanel && debounced.length > 0 && debounced.length < 3;
+  const tooShort = showPanel && debounced.length > 0 && debounced.length < 2;
 
   return (
     <div ref={wrapRef} className={`relative w-full ${className}`}>
@@ -99,10 +135,13 @@ export function HeaderSearch({ className = "" }: { className?: string }) {
         <div className="absolute left-0 right-0 top-full mt-2 rounded-xl border border-border/60 bg-popover shadow-xl overflow-hidden z-50">
           {tooShort && (
             <div className="px-4 py-3 text-xs text-muted-foreground">
-              Digite pelo menos 3 letras para buscar…
+              Digite pelo menos 2 letras para buscar…
             </div>
           )}
-          {!tooShort && results.length === 0 && (
+          {!tooShort && isFetching && results.length === 0 && (
+            <div className="px-4 py-3 text-xs text-muted-foreground">Buscando…</div>
+          )}
+          {!tooShort && !isFetching && results.length === 0 && (
             <div className="px-4 py-3 text-xs text-muted-foreground">
               Nenhum resultado para "{debounced}".
             </div>
@@ -118,8 +157,12 @@ export function HeaderSearch({ className = "" }: { className?: string }) {
                       onClick={() => setOpen(false)}
                       className="flex items-center gap-3 px-3 py-2.5 hover:bg-muted/60 transition"
                     >
-                      <span className="h-8 w-8 rounded-lg bg-primary/15 text-primary grid place-items-center shrink-0">
-                        <Trophy className="h-4 w-4" />
+                      <span className="h-8 w-8 rounded-lg bg-primary/15 text-primary grid place-items-center shrink-0 overflow-hidden">
+                        {r.logo ? (
+                          <img src={r.logo} alt="" className="h-full w-full object-cover" />
+                        ) : (
+                          <Trophy className="h-4 w-4" />
+                        )}
                       </span>
                       <div className="min-w-0 flex-1">
                         <div className="text-sm font-semibold truncate">{r.title}</div>
@@ -147,7 +190,7 @@ export function HeaderSearch({ className = "" }: { className?: string }) {
           )}
           <div className="px-3 py-2 border-t border-border/60 text-[10px] text-muted-foreground flex items-center gap-1.5">
             <Building2 className="h-3 w-3" />
-            Busca local e instantânea — não consome tokens.
+            Empresas em destaque · busca instantânea.
           </div>
         </div>
       )}

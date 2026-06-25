@@ -204,3 +204,32 @@ export const listLatestCorpChallenges = createServerFn({ method: "GET" })
       .filter((r) => Boolean(r.companyName) || r.missions.length > 0)
       .slice(0, data.limit ?? 12);
   });
+
+export const searchCorpChallenges = createServerFn({ method: "GET" })
+  .inputValidator((input: unknown) =>
+    z.object({ q: z.string().min(1).max(80), limit: z.number().int().positive().max(20).optional() }).parse(input),
+  )
+  .handler(async ({ data }) => {
+    const sb = publicClient();
+    // Escape % and _ wildcards, plus commas which break the .or() list
+    const safe = data.q.replace(/[,%_]/g, " ").trim();
+    if (!safe) return [];
+    const like = `%${safe}%`;
+    const { data: rows, error } = await sb
+      .from("corporate_challenges")
+      .select("*")
+      .or(
+        [
+          `title.ilike.${like}`,
+          `company_name.ilike.${like}`,
+          `category.ilike.${like}`,
+          `subcategory.ilike.${like}`,
+          `description.ilike.${like}`,
+          `prize_name.ilike.${like}`,
+        ].join(","),
+      )
+      .order("created_at", { ascending: false })
+      .limit(data.limit ?? 10);
+    if (error) throw new Error(error.message);
+    return (rows ?? []).map((r) => rowToRecord(r as Row));
+  });
