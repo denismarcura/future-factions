@@ -48,6 +48,7 @@ import { Route as AdminNotificacoesRouteImport } from './routes/admin.notificaco
 import { Route as AdminNoticiasRouteImport } from './routes/admin.noticias'
 import { Route as AdminMissoesRouteImport } from './routes/admin.missoes'
 import { Route as AdminLojaRouteImport } from './routes/admin.loja'
+import { Route as AdminIntegracoesFutebolRouteImport } from './routes/admin.integracoes-futebol'
 import { Route as AdminInstagramVideosRouteImport } from './routes/admin.instagram-videos'
 import { Route as AdminEmpresasRouteImport } from './routes/admin.empresas'
 import { Route as AdminEmailMarketingRouteImport } from './routes/admin.email-marketing'
@@ -259,6 +260,11 @@ const AdminLojaRoute = AdminLojaRouteImport.update({
   path: '/loja',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminIntegracoesFutebolRoute = AdminIntegracoesFutebolRouteImport.update({
+  id: '/integracoes-futebol',
+  path: '/integracoes-futebol',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminInstagramVideosRoute = AdminInstagramVideosRouteImport.update({
   id: '/instagram-videos',
   path: '/instagram-videos',
@@ -376,6 +382,7 @@ export interface FileRoutesByFullPath {
   '/admin/email-marketing': typeof AdminEmailMarketingRoute
   '/admin/empresas': typeof AdminEmpresasRoute
   '/admin/instagram-videos': typeof AdminInstagramVideosRoute
+  '/admin/integracoes-futebol': typeof AdminIntegracoesFutebolRoute
   '/admin/loja': typeof AdminLojaRoute
   '/admin/missoes': typeof AdminMissoesRoute
   '/admin/noticias': typeof AdminNoticiasRoute
@@ -431,6 +438,7 @@ export interface FileRoutesByTo {
   '/admin/email-marketing': typeof AdminEmailMarketingRoute
   '/admin/empresas': typeof AdminEmpresasRoute
   '/admin/instagram-videos': typeof AdminInstagramVideosRoute
+  '/admin/integracoes-futebol': typeof AdminIntegracoesFutebolRoute
   '/admin/loja': typeof AdminLojaRoute
   '/admin/missoes': typeof AdminMissoesRoute
   '/admin/noticias': typeof AdminNoticiasRoute
@@ -489,6 +497,7 @@ export interface FileRoutesById {
   '/admin/email-marketing': typeof AdminEmailMarketingRoute
   '/admin/empresas': typeof AdminEmpresasRoute
   '/admin/instagram-videos': typeof AdminInstagramVideosRoute
+  '/admin/integracoes-futebol': typeof AdminIntegracoesFutebolRoute
   '/admin/loja': typeof AdminLojaRoute
   '/admin/missoes': typeof AdminMissoesRoute
   '/admin/noticias': typeof AdminNoticiasRoute
@@ -547,6 +556,7 @@ export interface FileRouteTypes {
     | '/admin/email-marketing'
     | '/admin/empresas'
     | '/admin/instagram-videos'
+    | '/admin/integracoes-futebol'
     | '/admin/loja'
     | '/admin/missoes'
     | '/admin/noticias'
@@ -602,6 +612,7 @@ export interface FileRouteTypes {
     | '/admin/email-marketing'
     | '/admin/empresas'
     | '/admin/instagram-videos'
+    | '/admin/integracoes-futebol'
     | '/admin/loja'
     | '/admin/missoes'
     | '/admin/noticias'
@@ -659,6 +670,7 @@ export interface FileRouteTypes {
     | '/admin/email-marketing'
     | '/admin/empresas'
     | '/admin/instagram-videos'
+    | '/admin/integracoes-futebol'
     | '/admin/loja'
     | '/admin/missoes'
     | '/admin/noticias'
@@ -989,6 +1001,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminLojaRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/integracoes-futebol': {
+      id: '/admin/integracoes-futebol'
+      path: '/integracoes-futebol'
+      fullPath: '/admin/integracoes-futebol'
+      preLoaderRoute: typeof AdminIntegracoesFutebolRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/instagram-videos': {
       id: '/admin/instagram-videos'
       path: '/instagram-videos'
@@ -1127,6 +1146,7 @@ interface AdminRouteChildren {
   AdminEmailMarketingRoute: typeof AdminEmailMarketingRoute
   AdminEmpresasRoute: typeof AdminEmpresasRoute
   AdminInstagramVideosRoute: typeof AdminInstagramVideosRoute
+  AdminIntegracoesFutebolRoute: typeof AdminIntegracoesFutebolRoute
   AdminLojaRoute: typeof AdminLojaRoute
   AdminMissoesRoute: typeof AdminMissoesRoute
   AdminNoticiasRoute: typeof AdminNoticiasRoute
@@ -1155,6 +1175,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminEmailMarketingRoute: AdminEmailMarketingRoute,
   AdminEmpresasRoute: AdminEmpresasRoute,
   AdminInstagramVideosRoute: AdminInstagramVideosRoute,
+  AdminIntegracoesFutebolRoute: AdminIntegracoesFutebolRoute,
   AdminLojaRoute: AdminLojaRoute,
   AdminMissoesRoute: AdminMissoesRoute,
   AdminNoticiasRoute: AdminNoticiasRoute,
