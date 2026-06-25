@@ -67,28 +67,28 @@ export function PredictionCard({ prediction: p, hideOptions = false }: { predict
                 </div>
               )}
               <div className="p-4">
-                <div className="flex items-center justify-around gap-2">
-                  <div className="flex flex-col items-center gap-1.5 flex-1 min-w-0">
-                    <img src={p.match.homeFlag} alt={p.match.home} className="h-12 w-16 object-cover rounded shadow" loading="lazy" />
+                <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
+                  <div className="flex flex-col items-center gap-1.5 min-w-0">
+                    <img src={p.match.homeFlag} alt={p.match.home} className="h-10 w-14 sm:h-12 sm:w-16 object-cover rounded-lg shadow" loading="lazy" />
                     <span className="text-xs font-bold text-center truncate w-full">{p.match.home}</span>
                   </div>
-                  <div className="text-center">
+                  <div className="text-center px-1">
                     {oriented ? (
                       <>
-                        <div className="font-display text-2xl font-black text-gradient-brand tabular-nums">
+                        <div className="font-display text-xl sm:text-2xl font-black text-gradient-brand tabular-nums leading-none">
                           {oriented.homeScore} <span className="text-muted-foreground">×</span> {oriented.awayScore}
                         </div>
-                        <div className="text-[10px] text-muted-foreground">Grupo {p.match.group}</div>
+                        <div className="text-[10px] text-muted-foreground mt-1 whitespace-nowrap">Grupo {p.match.group}</div>
                       </>
                     ) : (
                       <>
-                        <div className="font-display text-2xl font-black text-gradient-brand">VS</div>
-                        <div className="text-[10px] text-muted-foreground">Grupo {p.match.group}</div>
+                        <div className="font-display text-xl sm:text-2xl font-black text-gradient-brand leading-none">VS</div>
+                        <div className="text-[10px] text-muted-foreground mt-1 whitespace-nowrap">Grupo {p.match.group}</div>
                       </>
                     )}
                   </div>
-                  <div className="flex flex-col items-center gap-1.5 flex-1 min-w-0">
-                    <img src={p.match.awayFlag} alt={p.match.away} className="h-12 w-16 object-cover rounded shadow" loading="lazy" />
+                  <div className="flex flex-col items-center gap-1.5 min-w-0">
+                    <img src={p.match.awayFlag} alt={p.match.away} className="h-10 w-14 sm:h-12 sm:w-16 object-cover rounded-lg shadow" loading="lazy" />
                     <span className="text-xs font-bold text-center truncate w-full">{p.match.away}</span>
                   </div>
                 </div>
