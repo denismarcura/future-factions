@@ -51,7 +51,8 @@ export const sendFriendInviteEmails = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => InviteInput.parse(input))
   .handler(async ({ data, context }) => {
-    const { supabase, userId } = context;
+    const { userId } = context;
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     const html = buildInviteHtml({
       intro: data.intro,
@@ -75,10 +76,10 @@ export const sendFriendInviteEmails = createServerFn({ method: "POST" })
         purpose: "transactional",
         queued_at: new Date().toISOString(),
       };
-      const { error } = await supabase.rpc("enqueue_email", {
+      const { error } = await supabaseAdmin.rpc("enqueue_email", {
         queue_name: "transactional_emails",
         payload,
-      });
+      } as never);
       if (error) {
         console.error("enqueue_email failed", to, error);
         failed.push(to);
