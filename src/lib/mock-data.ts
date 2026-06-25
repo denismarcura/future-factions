@@ -61,7 +61,7 @@ export const CURRENT_USER: User = {
 export type PredictionOption = {
   id: string;
   label: string;
-  pool: number; // tokens apostados
+  pool: number; // tokens em palpites
 };
 
 export type SubPrediction = {
@@ -266,7 +266,7 @@ export const MISSIONS: { id: string; title: string; reward: number; icon: string
 ];
 
 export const ACHIEVEMENTS = [
-  { id: "a1", title: "Primeira aposta", desc: "Faça sua primeira aposta", unlocked: true },
+  { id: "a1", title: "Primeira palpite", desc: "Faça sua primeira palpite", unlocked: true },
   { id: "a2", title: "Primeira previsão criada", desc: "Crie sua primeira previsão", unlocked: true },
   { id: "a3", title: "10 acertos", desc: "Acerte 10 previsões", unlocked: false },
   { id: "a4", title: "50 acertos", desc: "Acerte 50 previsões", unlocked: false },

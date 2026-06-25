@@ -133,7 +133,7 @@ function PalpiteIAPage() {
 
           <div className="rounded-xl bg-background/40 border border-border/60 p-4">
             <div className="text-[11px] uppercase tracking-wider text-muted-foreground flex items-center gap-1">
-              <Target className="h-3.5 w-3.5" /> Aposta da IA
+              <Target className="h-3.5 w-3.5" /> Palpite da IA
             </div>
             <div className="mt-1 font-display text-2xl font-black text-gradient-brand">{result.pick}</div>
           </div>

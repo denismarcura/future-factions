@@ -22,7 +22,7 @@ Desafio do usuário:
 
 Retorne APENAS um JSON válido (sem markdown) com:
 {
-  "pick": "Qual sua aposta principal (curto, máx 60 caracteres)",
+  "pick": "Qual sua palpite principal (curto, máx 60 caracteres)",
   "confidence": "Alta | Média | Baixa",
   "opinion": "Sua opinião em 1-2 frases curtas",
   "reasoning": "Análise em até 4 linhas explicando o porquê (estatísticas, contexto, riscos)"

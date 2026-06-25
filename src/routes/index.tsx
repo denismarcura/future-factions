@@ -104,17 +104,17 @@ function Feed() {
             <Flame className="h-3 w-3" /> 100% GRATUITO · GANHE PRÊMIOS REAIS
           </span>
 
-          <h1 className="mt-3 sm:mt-5 font-display text-2xl sm:text-6xl lg:text-7xl font-black leading-[1] sm:leading-[0.95]">
-            <span className="text-gradient-brand">Ganhe Tokens</span><br />
-            <span className="text-gradient-gold">e Troque por Prêmios Reais</span>
+          <h1 className="mt-3 sm:mt-5 font-display text-2xl sm:text-6xl lg:text-7xl font-black leading-[1.05] sm:leading-[0.95]">
+            <span className="text-gradient-brand">Crie desafios, dê palpites</span><br />
+            <span className="text-gradient-gold">e ganhe prêmios</span>
           </h1>
 
           <p className="mt-2 sm:mt-4 text-xs sm:text-lg text-muted-foreground max-w-xl mx-auto">
-            Participe gratuitamente, acumule Tokens e troque por prêmios incríveis.
+            Totalmente gratuito. Complete missões, convide amigos e acumule tokens.
           </p>
 
-          {/* Benefícios */}
-          <div className="mt-4 sm:mt-6 grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 max-w-2xl mx-auto">
+          {/* Benefícios — só em telas maiores */}
+          <div className="hidden sm:grid mt-6 grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 max-w-2xl mx-auto">
             {[
               { icon: TrendingUp, text: "100+ desafios ativos" },
               { icon: Sparkles, text: "Totalmente gratuito" },
@@ -128,35 +128,24 @@ function Feed() {
             ))}
           </div>
 
-          {/* Botões gigantes */}
-          <div className="mt-5 sm:mt-8 flex flex-wrap items-center justify-center gap-3">
+          {/* Botões principais */}
+          <div className="mt-5 sm:mt-8 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3">
             <Link
               to="/desafios"
               className="inline-flex items-center justify-center gap-2 h-12 sm:h-16 px-7 sm:px-10 rounded-full bg-gradient-brand text-primary-foreground text-base sm:text-xl font-black uppercase tracking-wide shadow-glow hover:scale-[1.03] transition"
             >
-              COMEÇAR AGORA
+              Participar Agora
             </Link>
             <Link
-              to="/auth"
-              search={{ mode: "signup" } as never}
+              to="/como-funciona"
               className="inline-flex items-center justify-center gap-2 h-12 sm:h-16 px-7 sm:px-10 rounded-full border-2 border-gold text-gold bg-gold/5 text-base sm:text-xl font-black uppercase tracking-wide hover:bg-gold/15 hover:scale-[1.03] transition"
             >
-              CADASTRE-SE
+              Como Funciona
             </Link>
           </div>
 
-          <div className="mt-4">
-            <Link
-              to="/como-funcionam-os-tokens"
-              className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold text-gold hover:text-gold/80 underline-offset-4 hover:underline transition"
-            >
-              <Coins className="h-4 w-4" /> Entenda como funcionam os Tokens
-            </Link>
-          </div>
-
-
-          {/* Stats */}
-          <div className="mt-5 sm:mt-8 grid grid-cols-3 gap-2 sm:gap-3 max-w-md mx-auto">
+          {/* Stats — só em telas maiores */}
+          <div className="hidden sm:grid mt-8 grid-cols-3 gap-2 sm:gap-3 max-w-md mx-auto">
             {[
               { k: "+1.000", v: "Tokens grátis", icon: Coins },
               { k: "150+", v: "Desafios ativos", icon: TrendingUp },
@@ -167,6 +156,64 @@ function Feed() {
                 <div className="text-[9px] sm:text-[11px] uppercase tracking-wider text-muted-foreground leading-tight">{s.v}</div>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Como Funciona — 4 passos */}
+      <section className="mb-8">
+        <div className="mb-4 text-center sm:text-left">
+          <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-wider text-primary font-bold">
+            <Sparkles className="h-3.5 w-3.5" /> Em 4 passos
+          </div>
+          <h2 className="font-display text-2xl sm:text-3xl font-black">Como Funciona</h2>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          {[
+            { n: 1, t: "Escolha um desafio", d: "Esportes, reality, cripto e mais.", icon: TrendingUp },
+            { n: 2, t: "Dê seu palpite", d: "Use seus tokens grátis.", icon: Sparkles },
+            { n: 3, t: "Ganhe tokens em missões", d: "+50 TKN por missão.", icon: Trophy },
+            { n: 4, t: "Troque por prêmios", d: "Vitrine com prêmios reais.", icon: Gift },
+          ].map((step) => (
+            <div key={step.n} className="rounded-2xl border border-border/60 glass-card p-4 flex flex-col gap-2">
+              <div className="flex items-center gap-2">
+                <span className="grid place-items-center h-7 w-7 rounded-full bg-gradient-brand text-primary-foreground text-xs font-black shrink-0">{step.n}</span>
+                <step.icon className="h-4 w-4 text-gold" />
+              </div>
+              <div className="font-display text-sm sm:text-base font-black leading-tight">{step.t}</div>
+              <div className="text-[11px] sm:text-xs text-muted-foreground leading-snug">{step.d}</div>
+            </div>
+          ))}
+        </div>
+        <div className="mt-3 text-center text-[11px] text-muted-foreground">
+          ⚠️ Tokens expiram em 12 meses.
+        </div>
+      </section>
+
+      {/* O que são Tokens */}
+      <section className="mb-8 rounded-2xl border border-gold/30 glass-card p-5 sm:p-7 relative overflow-hidden">
+        <div className="absolute -top-16 -right-16 h-48 w-48 rounded-full bg-gold/15 blur-3xl" />
+        <div className="relative">
+          <div className="flex items-center gap-2 text-[11px] uppercase tracking-wider text-gold font-bold">
+            <Coins className="h-3.5 w-3.5" /> Recompensa gratuita
+          </div>
+          <h2 className="mt-1 font-display text-xl sm:text-3xl font-black">O que são Tokens?</h2>
+          <p className="mt-2 text-sm sm:text-base text-muted-foreground max-w-2xl">
+            Tokens são recompensas gratuitas que você usa para participar de desafios, fazer mais palpites e trocar por prêmios reais.
+          </p>
+          <div className="mt-4 flex flex-col sm:flex-row gap-3">
+            <Link
+              to="/missoes"
+              className="inline-flex items-center justify-center gap-2 h-11 px-5 rounded-full bg-gradient-brand text-primary-foreground text-sm font-black uppercase shadow-glow"
+            >
+              <Coins className="h-4 w-4" /> Ganhar Tokens
+            </Link>
+            <Link
+              to="/shop"
+              className="inline-flex items-center justify-center gap-2 h-11 px-5 rounded-full border-2 border-gold text-gold bg-gold/5 text-sm font-black uppercase hover:bg-gold/15"
+            >
+              <Gift className="h-4 w-4" /> Ver Prêmios
+            </Link>
           </div>
         </div>
       </section>
