@@ -232,23 +232,38 @@ function Feed() {
           <ul className="space-y-2 mb-3 flex-1">
             <li className="flex items-start gap-2">
               <Flame className="h-3.5 w-3.5 text-destructive mt-0.5 shrink-0" />
-              <div className="min-w-0">
+              <div className="min-w-0 flex-1">
                 <div className="text-xs font-bold leading-tight">Fim de Semana Premiado</div>
                 <div className="text-[10px] text-muted-foreground">Tokens em dobro</div>
+                {mounted && (
+                  <div className="mt-1 inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-destructive/15 text-destructive text-[9px] font-black font-mono">
+                    <Timer className="h-2.5 w-2.5" /> {fmtDHMS(msUntilSundayEnd())}
+                  </div>
+                )}
               </div>
             </li>
             <li className="flex items-start gap-2">
               <Zap className="h-3.5 w-3.5 text-gold mt-0.5 shrink-0" />
-              <div className="min-w-0">
+              <div className="min-w-0 flex-1">
                 <div className="text-xs font-bold leading-tight">Segunda Maluca</div>
                 <div className="text-[10px] text-muted-foreground">Missões em dobro</div>
               </div>
             </li>
             <li className="flex items-start gap-2">
               <Heart className="h-3.5 w-3.5 text-primary mt-0.5 shrink-0" />
-              <div className="min-w-0">
-                <div className="text-xs font-bold leading-tight">Hora Feliz</div>
-                <div className="text-[10px] text-muted-foreground">Das 20h às 22h</div>
+              <div className="min-w-0 flex-1">
+                <div className="text-xs font-bold leading-tight">Hora Feliz · 20h–22h</div>
+                {mounted && (
+                  isHappyHourLive() ? (
+                    <div className="mt-0.5 inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-primary/15 text-primary text-[9px] font-black font-mono animate-pulse">
+                      <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" /> AO VIVO · termina em {fmtHMS(msUntilHappyHour())}
+                    </div>
+                  ) : (
+                    <div className="mt-0.5 inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-primary/10 text-primary text-[9px] font-black font-mono">
+                      <Clock className="h-2.5 w-2.5" /> começa em {fmtHMS(msUntilHappyHour())}
+                    </div>
+                  )
+                )}
               </div>
             </li>
           </ul>
