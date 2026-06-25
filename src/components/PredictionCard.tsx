@@ -117,18 +117,6 @@ export function PredictionCard({ prediction: p, hideOptions = false }: { predict
               />
             </div>
           )}
-          {p.entryFee && (
-            <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
-              <span className="px-2 py-0.5 rounded-full bg-gold/15 text-gold font-bold border border-gold/30">
-                Entrada: {p.entryFee} TKN
-              </span>
-              {p.prizeTiers && (
-                <span className="px-2 py-0.5 rounded-full bg-primary/15 text-primary font-bold border border-primary/30">
-                  Prêmio: até {p.prizeTiers[0].tokens.toLocaleString("pt-BR")} TKN
-                </span>
-              )}
-            </div>
-          )}
 
           {!hideOptions && (
             <div className="mt-4 space-y-2">
