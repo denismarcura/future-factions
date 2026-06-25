@@ -53,12 +53,61 @@ function Feed() {
     const onUpdate = () => setUserChallenges(getUserChallenges());
     window.addEventListener("ddp:user-challenges-updated", onUpdate);
     fetchCorp({ data: { limit: 50 } }).then(setCorpChallenges).catch(() => {});
-    const interval = setInterval(() => setNowTs(Date.now()), 60_000);
+    const interval = setInterval(() => setNowTs(Date.now()), 1000);
     return () => {
       window.removeEventListener("ddp:user-challenges-updated", onUpdate);
       clearInterval(interval);
     };
   }, [fetchCorp]);
+
+  // Countdown helpers (tick every second)
+  const fmtHMS = (ms: number) => {
+    if (ms <= 0) return "00:00:00";
+    const h = Math.floor(ms / 3_600_000);
+    const m = Math.floor((ms % 3_600_000) / 60_000);
+    const s = Math.floor((ms % 60_000) / 1000);
+    return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+  };
+  const fmtDHMS = (ms: number) => {
+    if (ms <= 0) return "Encerrado";
+    const d = Math.floor(ms / 86_400_000);
+    const rest = ms % 86_400_000;
+    if (d > 0) return `${d}d ${fmtHMS(rest)}`;
+    return fmtHMS(rest);
+  };
+  const msUntilMidnight = () => {
+    if (!nowTs) return 0;
+    const next = new Date(nowTs);
+    next.setHours(24, 0, 0, 0);
+    return next.getTime() - nowTs;
+  };
+  const msUntilSundayEnd = () => {
+    if (!nowTs) return 0;
+    const d = new Date(nowTs);
+    const day = d.getDay();
+    const daysToSun = day === 0 ? 0 : 7 - day;
+    const target = new Date(d);
+    target.setDate(d.getDate() + daysToSun);
+    target.setHours(23, 59, 59, 999);
+    return target.getTime() - nowTs;
+  };
+  const msUntilHappyHour = () => {
+    if (!nowTs) return 0;
+    const d = new Date(nowTs);
+    const target = new Date(d);
+    target.setHours(20, 0, 0, 0);
+    if (target.getTime() <= nowTs) {
+      const end = new Date(d); end.setHours(22, 0, 0, 0);
+      if (nowTs < end.getTime()) return end.getTime() - nowTs;
+      target.setDate(d.getDate() + 1);
+    }
+    return target.getTime() - nowTs;
+  };
+  const isHappyHourLive = () => {
+    if (!nowTs) return false;
+    const h = new Date(nowTs).getHours();
+    return h >= 20 && h < 22;
+  };
 
   // Sort: closest endsAt first, then most recently created
   const sortedCorp = useMemo(() => {
