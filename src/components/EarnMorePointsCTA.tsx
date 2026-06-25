@@ -1,27 +1,18 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Coins, Target, Mail, MessageCircle, Copy, Check } from "lucide-react";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
 import { whatsappLink } from "@/lib/friends";
+import { useAuth } from "@/hooks/use-auth";
+import { useInviteUrl } from "@/hooks/use-invite-url";
 
 type ChallengeCtx = { id: string; title: string; image?: string };
 
 export function EarnMorePointsCTA({ challenge }: { challenge?: ChallengeCtx } = {}) {
-  const [userId, setUserId] = useState<string>("");
+  const { user } = useAuth();
   const [copied, setCopied] = useState(false);
 
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? ""));
-  }, []);
-
-  const origin = typeof window !== "undefined" ? window.location.origin : "";
-  const ref8 = userId ? userId.slice(0, 8) : "";
-  const inviteUrl = challenge
-    ? `${origin}/previsao/${challenge.id}${ref8 ? `?ref=${ref8}` : ""}`
-    : userId
-      ? `${origin}/auth?ref=${userId}`
-      : `${origin}/auth`;
-  const code = userId ? userId.slice(0, 8).toUpperCase() : "";
+  const inviteUrl = useInviteUrl(user) || "/desafios";
+  const code = inviteUrl ? inviteUrl.replace(/^https?:\/\/(www\.)?/i, "") : "";
 
   const waMsg = challenge
     ? `🎯 Vem palpitar comigo no desafio "${challenge.title}"! 100% grátis, só tokens. Use meu link e ganhe tokens de boas-vindas: ${inviteUrl}`
@@ -36,9 +27,9 @@ export function EarnMorePointsCTA({ challenge }: { challenge?: ChallengeCtx } = 
 
   async function copyLink() {
     try {
-      await navigator.clipboard.writeText(`${waMsg}`);
+      await navigator.clipboard.writeText(inviteUrl);
       setCopied(true);
-      toast.success(challenge ? "Link do desafio copiado! Cole no seu WhatsApp." : "Link de indicação copiado! Cole no seu WhatsApp.");
+        toast.success("Link de convite copiado! Cole no seu WhatsApp.");
       setTimeout(() => setCopied(false), 2000);
     } catch {
       toast.error("Não foi possível copiar. Copie manualmente.");
@@ -79,7 +70,7 @@ export function EarnMorePointsCTA({ challenge }: { challenge?: ChallengeCtx } = 
           <Mail className="h-5 w-5 text-primary shrink-0" />
           <div className="min-w-0">
             <div className="font-display font-bold text-sm">Convide amigos por e-mail</div>
-            <div className="text-[11px] text-muted-foreground">+200 TKN por amigo cadastrado</div>
+            <div className="text-[11px] text-muted-foreground">Compartilhe seu link simples</div>
           </div>
         </a>
 
@@ -107,10 +98,10 @@ export function EarnMorePointsCTA({ challenge }: { challenge?: ChallengeCtx } = 
           )}
           <div className="min-w-0 flex-1">
             <div className="font-display font-bold text-sm">
-              {copied ? "Copiado!" : "Copiar código de indicação"}
+              {copied ? "Copiado!" : "Copiar link de convite"}
             </div>
             <div className="text-[11px] text-muted-foreground truncate">
-              {code ? `Código: ${code}` : "Cole no seu WhatsApp"}
+              {code || "Cole no seu WhatsApp"}
             </div>
           </div>
         </button>

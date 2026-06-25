@@ -2,14 +2,14 @@ import { useState } from "react";
 import { Copy, Check, Share2, Gift } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/use-auth";
-import { buildInviteUrl } from "@/lib/invite-link";
+import { useInviteUrl } from "@/hooks/use-invite-url";
 
 type Variant = "full" | "compact";
 
 export function InviteLinkCard({ variant = "full", title }: { variant?: Variant; title?: string }) {
   const { user } = useAuth();
   const [copied, setCopied] = useState(false);
-  const url = buildInviteUrl(user?.id);
+  const url = useInviteUrl(user);
 
   if (!user || !url) return null;
 
@@ -75,7 +75,7 @@ export function InviteLinkCard({ variant = "full", title }: { variant?: Variant;
           <Gift className="h-6 w-6 text-primary-foreground" />
         </div>
         <div className="flex-1 min-w-0">
-          <h2 className="font-display text-xl font-black">{title ?? "Seu link de convite · +100 Tokens por amigo"}</h2>
+          <h2 className="font-display text-xl font-black">{title ?? "Seu link de convite"}</h2>
           <p className="text-sm text-muted-foreground mt-1">
             Esse é seu link único. Ele leva para uma página com seus desafios abertos, suas participações e oportunidades.
           </p>

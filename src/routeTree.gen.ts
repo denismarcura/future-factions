@@ -27,6 +27,7 @@ import { Route as ComoFuncionamOsTokensRouteImport } from './routes/como-funcion
 import { Route as ComoFuncionaRouteImport } from './routes/como-funciona'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminRouteImport } from './routes/admin'
+import { Route as RefRouteImport } from './routes/$ref'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
@@ -154,6 +155,11 @@ const AuthRoute = AuthRouteImport.update({
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RefRoute = RefRouteImport.update({
+  id: '/$ref',
+  path: '/$ref',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
@@ -352,6 +358,7 @@ const ApiPublicHooksApurarCopaRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/$ref': typeof RefRoute
   '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRoute
   '/como-funciona': typeof ComoFuncionaRoute
@@ -409,6 +416,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/$ref': typeof RefRoute
   '/auth': typeof AuthRoute
   '/como-funciona': typeof ComoFuncionaRoute
   '/como-funcionam-os-tokens': typeof ComoFuncionamOsTokensRoute
@@ -467,6 +475,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/$ref': typeof RefRoute
   '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRoute
   '/como-funciona': typeof ComoFuncionaRoute
@@ -526,6 +535,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/$ref'
     | '/admin'
     | '/auth'
     | '/como-funciona'
@@ -583,6 +593,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/$ref'
     | '/auth'
     | '/como-funciona'
     | '/como-funcionam-os-tokens'
@@ -640,6 +651,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/_authenticated'
+    | '/$ref'
     | '/admin'
     | '/auth'
     | '/como-funciona'
@@ -699,6 +711,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  RefRoute: typeof RefRoute
   AdminRoute: typeof AdminRouteWithChildren
   AuthRoute: typeof AuthRoute
   ComoFuncionaRoute: typeof ComoFuncionaRoute
@@ -852,6 +865,13 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin'
       preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/$ref': {
+      id: '/$ref'
+      path: '/$ref'
+      fullPath: '/$ref'
+      preLoaderRoute: typeof RefRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated': {
@@ -1220,6 +1240,7 @@ const RankingRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  RefRoute: RefRoute,
   AdminRoute: AdminRouteWithChildren,
   AuthRoute: AuthRoute,
   ComoFuncionaRoute: ComoFuncionaRoute,

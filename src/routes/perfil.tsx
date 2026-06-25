@@ -53,7 +53,7 @@ function Perfil() {
         </div>
       </section>
       <div className="mb-6">
-        <InviteLinkCard title="Seu link · convide e ganhe +100 Tokens por amigo" />
+        <InviteLinkCard title="Seu link simples de convite" />
       </div>
 
       <div className="grid lg:grid-cols-[1fr_320px] gap-6">

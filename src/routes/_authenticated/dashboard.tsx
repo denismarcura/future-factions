@@ -89,6 +89,7 @@ import { Trophy, BarChart3 } from "lucide-react";
 import type { Prediction } from "@/lib/mock-data";
 import { uploadAvatar, takePendingAvatar } from "@/lib/avatar-upload";
 import { getPalpiteTokens, convertTknToPalpiteTokens, getPalpiteTokensSpentTkn, PALPITE_TOKEN_RATE } from "@/lib/palpite-tokens";
+import { buildInviteUrlFromProfile } from "@/lib/invite-link";
 import arte01 from "@/assets/dashboard-arte-01.png.asset.json";
 import arte02 from "@/assets/dashboard-arte-02.png.asset.json";
 import arte03 from "@/assets/dashboard-arte-03.png.asset.json";
@@ -223,6 +224,10 @@ function Dashboard() {
   const missionsTodo = missions.filter((m) => !claimedIds.has(m.id)).length;
 
   const name = profile?.full_name ?? "Palpiteiro";
+  const inviteUrl = useMemo(
+    () => (profile ? buildInviteUrlFromProfile(profile, SITE_URL) : `${SITE_URL}/desafios`),
+    [profile],
+  );
   const initials = name
     .split(" ")
     .map((s) => s[0])
@@ -372,14 +377,14 @@ function Dashboard() {
         <FriendsSection
           friends={friends}
           inviterName={name}
-          userId={profile?.id ?? ""}
+          inviteUrl={inviteUrl}
           onChange={() => setFriends(listFriends())}
         />
 
         {/* INVITE PROMO (email + whatsapp + artes prontas) */}
         <InvitePromoSection
           inviterName={name}
-          userId={profile?.id ?? ""}
+          inviteUrl={inviteUrl}
           myChallenges={myChallenges}
         />
 
@@ -1470,12 +1475,12 @@ function RecommendationsSection() {
 function FriendsSection({
   friends,
   inviterName,
-  userId,
+  inviteUrl,
   onChange,
 }: {
   friends: Friend[];
   inviterName: string;
-  userId: string;
+  inviteUrl: string;
   onChange: () => void;
 }) {
   const [name, setName] = useState("");
@@ -1486,9 +1491,7 @@ function FriendsSection({
   const registered = friends.filter((f) => f.registered);
   const pending = friends.filter((f) => !f.registered);
 
-  const refCode = (userId || "").slice(0, 8);
-  const referralLink = refCode ? `${SITE_URL}/auth?ref=${refCode}` : `${SITE_URL}/auth`;
-  const inviteMessage = `Oi! Vem jogar comigo no Desafio dos Palpites. ${inviterName} te convidou — você ganha 1.000 tokens de boas-vindas. ${referralLink}`;
+  const inviteMessage = `Oi! Vem jogar comigo no Desafio dos Palpites. ${inviterName} te convidou — participe grátis pelo meu link: ${inviteUrl}`;
 
   function handleBulk() {
     const n = addManyFromText(bulkText);
@@ -1758,15 +1761,14 @@ const SITE_URL = "https://www.desafiodospalpites.com.br";
 
 function InvitePromoSection({
   inviterName,
-  userId,
+  inviteUrl,
   myChallenges,
 }: {
   inviterName: string;
-  userId: string;
+  inviteUrl: string;
   myChallenges: Prediction[];
 }) {
-  const refCode = (userId || "").slice(0, 8);
-  const link = refCode ? `${SITE_URL}/auth?ref=${refCode}` : `${SITE_URL}/auth`;
+  const link = inviteUrl || `${SITE_URL}/desafios`;
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=320x320&margin=10&data=${encodeURIComponent(link)}`;
   const defaultWhats = `🎯 Já imaginou dar seus palpites e ainda ganhar prêmios?\n\nConheça o Desafio dos Palpites!\n\n✅ Totalmente gratuito\n✅ Ganhe tokens participando dos desafios\n✅ Troque seus tokens por produtos, brindes e vale-compras\n✅ Crie seus próprios desafios para amigos, familiares ou empresas\n✅ Convide amigos e ganhe ainda mais créditos\n\nTem desafios de futebol, Copa do Mundo, Brasileirão, UFC, reality shows e muito mais!\n\nCadastre-se agora e comece a acumular tokens:\n\n👉 ${link}\n\nNos vemos no ranking! 🏆🚀`;
   const defaultEmail = `Olá!\n\nQuero te convidar para conhecer o Desafio dos Palpites, uma plataforma gratuita onde você participa de desafios, acumula tokens e troca por prêmios incríveis.\n\nNa plataforma você pode:\n\n🏆 Participar de desafios esportivos e promocionais\n🎁 Ganhar tokens gratuitamente\n🎯 Trocar tokens por produtos, serviços e vale-compras\n👥 Criar seus próprios desafios para amigos, familiares ou clientes\n🚀 Participar de rankings e competir com outros usuários\n\nO melhor de tudo: a participação é totalmente gratuita.\n\nFaça seu cadastro através do link abaixo:\n\n👉 ${link}\n\nVenha se divertir, dar seus palpites e concorrer a prêmios!\n\nEquipe Desafio dos Palpites\nwww.desafiodospalpites.com.br`;
@@ -2062,7 +2064,7 @@ function InvitePromoSection({
             <div className="flex flex-wrap gap-2 justify-center sm:justify-start">
               <a
                 href={qrUrl}
-                download={`qrcode-convite-${refCode || "desafiodospalpites"}.png`}
+                download="qrcode-meu-link-desafiodospalpites.png"
                 className="h-9 px-3 rounded-full bg-gradient-brand text-primary-foreground text-xs font-bold inline-flex items-center gap-1.5"
               >
                 <Download className="h-3.5 w-3.5" /> Baixar QR Code
