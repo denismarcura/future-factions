@@ -690,7 +690,7 @@ function PredictionInner({ p }: { p: Prediction }) {
                       </span>
                     </div>
                     <p className="text-xs text-muted-foreground mb-3">
-                      <strong>{ACTION_LABEL[getMissionAction(currentMission) as keyof typeof ACTION_LABEL] ?? "Abrir"}</strong> {getMissionSponsor(currentMission)} no {T.label} e ganhe <strong className="text-gold">+{currentMission.tokens} TKN</strong>
+                      <strong>{ACTION_LABEL[getMissionAction(currentMission) as keyof typeof ACTION_LABEL] ?? "Abrir"}</strong> {getMissionSponsor(currentMission)} no {T.label} e ganhe <strong className="text-gold">+{MISSION_REWARD_TKN} TKN</strong>
                       {confirmed ? <> (libera +1 round de palpites extras).</> : <> no seu saldo.</>}
                     </p>
                     <button
