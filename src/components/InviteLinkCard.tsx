@@ -130,6 +130,25 @@ export function InviteLinkCard({ variant = "full", title }: { variant?: Variant;
               <Share2 className="h-4 w-4" /> Compartilhar
             </button>
           </div>
+          <div className="mt-5 flex flex-col sm:flex-row items-center gap-4 pt-4 border-t border-border/60" ref={qrWrapRef}>
+            <div className="bg-white p-3 rounded-xl shrink-0">
+              <QRCodeCanvas value={url} size={160} includeMargin={false} />
+            </div>
+            <div className="flex-1 text-center sm:text-left">
+              <p className="text-sm font-semibold flex items-center justify-center sm:justify-start gap-2">
+                <QrCode className="h-4 w-4 text-gold" /> QR Code do seu convite
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Mostre na tela ou baixe a imagem para compartilhar no celular, stories e impressos.
+              </p>
+              <button
+                onClick={downloadQR}
+                className="mt-3 h-10 px-4 rounded-lg border border-gold/60 text-gold font-bold inline-flex items-center gap-2 hover:bg-gold/10 text-sm"
+              >
+                <Download className="h-4 w-4" /> Baixar QR Code
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </section>
