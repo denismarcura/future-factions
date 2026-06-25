@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { useAuth } from "@/hooks/use-auth";
+import { useInviteUrl } from "@/hooks/use-invite-url";
 import { CATEGORIES, CURRENT_USER, formatTokens } from "@/lib/mock-data";
 import { PRODUCTS } from "@/lib/mock-extra";
 
@@ -30,7 +31,6 @@ import { PrizesPicker, type PrizeSlot } from "@/components/PrizesPicker";
 import { CitiesAutocomplete, type SelectedCity } from "@/components/CitiesAutocomplete";
 import { CitiesScopePicker } from "@/components/CitiesScopePicker";
 import type { AdminPrize } from "@/lib/admin-prizes.functions";
-import { buildInviteUrl } from "@/lib/invite-link";
 
 function getNextBrazilMatch() {
   const now = Date.now();
@@ -122,6 +122,7 @@ function buildCorporateMissions(data: MissionData, sponsorName: string): Corpora
 
 function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bare?: boolean } = {}) {
   const { user } = useAuth();
+  const userInviteUrl = useInviteUrl(user);
   const [isOpen, setIsOpen] = useState(true);
   const [name, setName] = useState("");
   const [category, setCategory] = useState<string>(CATEGORIES[0]);
@@ -536,7 +537,7 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
               question: s.question,
               options: s.options.filter(Boolean),
             })),
-            inviteLink: user ? buildInviteUrl(user, origin || undefined) : undefined,
+            inviteLink: userInviteUrl || (origin ? `${origin}/desafios` : undefined),
           },
         });
       } catch {
@@ -657,6 +658,7 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
         <PublishedSuccess
           name={published.name}
           id={published.id}
+          inviteUrl={userInviteUrl}
           onCreateAnother={() => {
             setPublished(null);
             setName("");
@@ -1557,7 +1559,7 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
               <Share2 className="h-4 w-4 text-gold shrink-0" />
               <input
                 readOnly
-                value="https://www.desafiodospalpites.com.br/previsao/[gerado-ao-publicar]"
+                value={userInviteUrl || "https://www.desafiodospalpites.com.br/seuusuario"}
                 className="flex-1 bg-transparent text-sm outline-none truncate text-muted-foreground"
               />
               <span className="text-[10px] uppercase tracking-wider font-bold text-primary bg-primary/10 border border-primary/30 rounded-full px-2 py-1">
