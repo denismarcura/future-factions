@@ -56,6 +56,8 @@ function Missoes() {
   const [exiting, setExiting] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [running, setRunning] = useState<string | null>(null);
+  const [runStart, setRunStart] = useState<number | null>(null);
+  const [now, setNow] = useState<number>(() => Date.now());
   const [confirmed, setConfirmed] = useState(false);
   const [tab, setTab] = useState<TabKey>("todas");
 
