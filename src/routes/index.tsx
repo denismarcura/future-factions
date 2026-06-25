@@ -54,12 +54,13 @@ function Feed() {
     const now = Date.now();
     return [...PREDICTIONS]
       .filter((p) => new Date(p.closesAt).getTime() > now)
+      .filter(notParticipated)
       .sort((a, b) => +new Date(a.closesAt) - +new Date(b.closesAt))
       .slice(0, 2);
-  }, []);
+  }, [participatedIds]);
 
   const items = useMemo(() => {
-    let list = [...PREDICTIONS];
+    let list = [...PREDICTIONS].filter(notParticipated);
     const isClosed = (p: typeof PREDICTIONS[number]) =>
       new Date(p.closesAt).getTime() < Date.now();
     if (cat === "Encerrados") {
