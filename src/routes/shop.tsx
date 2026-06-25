@@ -2,13 +2,15 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
 import { AppShell } from "@/components/layout/AppShell";
-import { ShoppingBag, Coins, Loader2, Lock, Gift } from "lucide-react";
-import { listActivePrizes, type AdminPrize } from "@/lib/admin-prizes.functions";
+import { ShoppingBag, Coins, Loader2, Gift, Pencil, Check, X } from "lucide-react";
+import { listActivePrizes, upsertPrize, type AdminPrize } from "@/lib/admin-prizes.functions";
 import { requestRedemption } from "@/lib/prize-redemptions.functions";
 import { getTokenBalance } from "@/lib/balance";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 import { formatTokens } from "@/lib/mock-data";
+
+const ADMIN_EMAILS = ["denismarcura@gmail.com", "antoinio.salvador@gmail.com"];
 
 export const Route = createFileRoute("/shop")({
   head: () => ({
