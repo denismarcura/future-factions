@@ -304,7 +304,7 @@ function Feed() {
       )}
 
       {/* Busca inteligente */}
-      <SmartSearch />
+      <SmartSearch corpChallenges={sortedCorp} />
 
       {/* Desafios mais recentes */}
       <section className="mb-8">
