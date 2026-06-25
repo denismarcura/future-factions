@@ -343,7 +343,7 @@ function PredictionInner({ p }: { p: Prediction }) {
     setTimeout(async () => {
       if (isCatalogMission(mission)) {
         try {
-          await claimMission(mission.id, `challenge:${p.id}`, mission.tokens);
+          await claimMission(mission.id, `challenge:${p.id}`, MISSION_REWARD_TKN);
         } catch {
           // ignore (likely already claimed)
         }
@@ -353,11 +353,11 @@ function PredictionInner({ p }: { p: Prediction }) {
       setSubAnswers({});
       if (confirmed) {
         setPendingExtra({ platform: mission.platform, sponsor: getMissionSponsor(mission) });
-        toast.success("✅ Missão feita! Preencha o novo palpite e clique em CONFIRMAR PALPITE EXTRA.");
+        toast.success(`✅ Missão feita! +${MISSION_REWARD_TKN} TKN. Preencha o novo palpite e clique em CONFIRMAR PALPITE EXTRA.`);
       } else {
         // Mission done before confirming participation: just credit tokens
         setExtraPalpites((prev) => [...prev, { platform: mission.platform, sponsor: getMissionSponsor(mission), answers: {} }]);
-        toast.success(`✅ Missão feita! +${mission.tokens} TKN no seu saldo. Você pode continuar ou já participar do desafio.`);
+        toast.success(`✅ Missão feita! +${MISSION_REWARD_TKN} TKN no seu saldo.`);
       }
       setMissionStatus("done");
       setTimeout(() => {
