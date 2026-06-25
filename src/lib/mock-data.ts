@@ -265,16 +265,46 @@ export const MISSIONS: { id: string; title: string; reward: number; icon: string
   { id: "m11", title: "Login diário", reward: 20, icon: "calendar" },
 ];
 
-export const ACHIEVEMENTS = [
-  { id: "a1", title: "Primeira palpite", desc: "Faça sua primeira palpite", unlocked: true },
-  { id: "a2", title: "Primeira previsão criada", desc: "Crie sua primeira previsão", unlocked: true },
-  { id: "a3", title: "10 acertos", desc: "Acerte 10 previsões", unlocked: false },
-  { id: "a4", title: "50 acertos", desc: "Acerte 50 previsões", unlocked: false },
-  { id: "a5", title: "100 acertos", desc: "Acerte 100 previsões", unlocked: false },
-  { id: "a6", title: "1.000 seguidores", desc: "Alcance 1.000 seguidores", unlocked: false },
-  { id: "a7", title: "100.000 Tokens", desc: "Acumule 100k Tokens", unlocked: false },
-  { id: "a8", title: "1.000.000 Tokens", desc: "Acumule 1M Tokens (Lenda)", unlocked: false },
-  { id: "a9", title: "Profeta da Copa", desc: "Acerte uma previsão improvável da Copa", unlocked: false },
+import aPrimeirosPassos from "@/assets/achievements/a-primeiros-passos.png.asset.json";
+import aPrimeiroAcerto from "@/assets/achievements/a-primeiro-acerto.png.asset.json";
+import a10Vitorias from "@/assets/achievements/a-10-vitorias.png.asset.json";
+import a100Palpites from "@/assets/achievements/a-100-palpites.png.asset.json";
+import aCheckins from "@/assets/achievements/a-checkins.png.asset.json";
+import aMestre from "@/assets/achievements/a-mestre-palpites.png.asset.json";
+import aPrecisao from "@/assets/achievements/a-precisao-total.png.asset.json";
+import aCriador from "@/assets/achievements/a-criador.png.asset.json";
+import aInfluenciador from "@/assets/achievements/a-influenciador.png.asset.json";
+import aDesafioSucesso from "@/assets/achievements/a-desafio-sucesso.png.asset.json";
+import aRankingMensal from "@/assets/achievements/a-ranking-mensal.png.asset.json";
+import aEliteCopa from "@/assets/achievements/a-elite-copa.png.asset.json";
+import aTop10Geral from "@/assets/achievements/a-top10-geral.png.asset.json";
+import aRei from "@/assets/achievements/a-rei.png.asset.json";
+
+export type Achievement = {
+  id: string;
+  title: string;
+  desc: string;
+  reward: number;
+  image: string;
+  tier: "bronze" | "silver" | "gold" | "diamond" | "legendary";
+  unlocked: boolean;
+};
+
+export const ACHIEVEMENTS: Achievement[] = [
+  { id: "primeiros-passos", title: "Primeiros Passos", desc: "Criar o primeiro desafio", reward: 50, image: aPrimeirosPassos.url, tier: "bronze", unlocked: true },
+  { id: "primeiro-acerto", title: "Primeiro Acerto", desc: "Acertar o primeiro palpite", reward: 50, image: aPrimeiroAcerto.url, tier: "bronze", unlocked: true },
+  { id: "10-vitorias", title: "10 Vitórias", desc: "Vencer 10 desafios", reward: 300, image: a10Vitorias.url, tier: "bronze", unlocked: false },
+  { id: "100-palpites", title: "100 Palpites", desc: "Fazer 100 palpites", reward: 250, image: a100Palpites.url, tier: "silver", unlocked: false },
+  { id: "checkins", title: "30 Check-ins", desc: "Fazer 30 check-ins", reward: 250, image: aCheckins.url, tier: "silver", unlocked: false },
+  { id: "mestre-palpites", title: "Mestre dos Palpites", desc: "Acertar 50 palpites", reward: 500, image: aMestre.url, tier: "silver", unlocked: false },
+  { id: "precisao-total", title: "Precisão Total", desc: "Acertar 10 palpites consecutivos", reward: 750, image: aPrecisao.url, tier: "gold", unlocked: false },
+  { id: "criador", title: "Criador de Desafios", desc: "Criar 100 desafios", reward: 500, image: aCriador.url, tier: "gold", unlocked: false },
+  { id: "influenciador", title: "Influenciador", desc: "Convidar 100 amigos cadastrados", reward: 1000, image: aInfluenciador.url, tier: "gold", unlocked: false },
+  { id: "desafio-sucesso", title: "Desafio de Sucesso", desc: "Criar 1 desafio com mais de 100 participantes", reward: 1000, image: aDesafioSucesso.url, tier: "silver", unlocked: false },
+  { id: "ranking-mensal", title: "Ranking Mensal", desc: "Ficar entre o Top 100 do mês", reward: 500, image: aRankingMensal.url, tier: "silver", unlocked: false },
+  { id: "elite-copa", title: "Elite da Copa", desc: "Top 10 dos palpites da Copa do Mundo", reward: 2000, image: aEliteCopa.url, tier: "gold", unlocked: false },
+  { id: "top10-geral", title: "Top 10 Geral", desc: "Entrar no Top 10 do ranking geral", reward: 3000, image: aTop10Geral.url, tier: "diamond", unlocked: false },
+  { id: "rei", title: "Rei dos Palpites", desc: "Terminar uma temporada em 1º lugar", reward: 5000, image: aRei.url, tier: "legendary", unlocked: false },
 ];
 
 export function formatTokens(n: number) {
