@@ -522,7 +522,7 @@ function PredictionInner({ p }: { p: Prediction }) {
               </div>
               {p.subPredictions.map((s) => {
                 return (
-                  <div key={s.id} className="rounded-xl border border-border/60 bg-background/40 p-4">
+                  <div key={s.id} id={`sub-${s.id}`} className="rounded-xl border border-border/60 bg-background/40 p-4">
                     <div className="text-sm font-bold mb-3">
                       {s.question}
                     </div>
