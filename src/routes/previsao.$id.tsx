@@ -21,6 +21,8 @@ import { StarRating } from "@/components/StarRating";
 import { NextChallengeBanner } from "@/components/NextChallengeBanner";
 import { EarnMorePointsCTA } from "@/components/EarnMorePointsCTA";
 import { getRatings, rateChallenge, getMyRating } from "@/lib/ratings.functions";
+import { debugParticipate } from "@/lib/debug-participate";
+
 
 function corpToPrediction(c: CorpChallengeRecord): Prediction {
   const first = c.subs[0];
@@ -421,7 +423,9 @@ function PredictionInner({ p }: { p: Prediction }) {
               answers: subAnswers, closesAt: p.closesAt,
               participatedAt: new Date().toISOString(),
             });
+            debugParticipate({ challengeId: p.id, reason: "confirm:success", message: `Participação confirmada (fee=${fee})`, context: { answers: subAnswers, fee } });
             toast.success(`🎯 Participação confirmada! ${fee} TKN debitados. +${CORRECT_PALPITE_REWARD_TKN} TKN por palpite acertado. Missões bônus liberadas!`);
+
           } else {
             if (!user) { goToSignup(); return; }
             if (balance !== null && balance < amount) {
@@ -448,13 +452,18 @@ function PredictionInner({ p }: { p: Prediction }) {
               return;
             }
           }
-          if (!user) { goToSignup(); return; }
+          if (!user) {
+            debugParticipate({ challengeId: p.id, reason: "blocked:not-authenticated", message: "handleParticipate sem usuário", context: { entryFee: p.entryFee ?? amount } });
+            goToSignup(); return;
+          }
           if (regAccepted) { doConfirm(); return; }
           // Open regulamento for first-time acceptance
+          debugParticipate({ challengeId: p.id, reason: "regulamento:open", message: "Abrindo modal de regulamento", context: { userId: user.id } });
           pendingConfirmRef.current = doConfirm;
           setRegChoice(null);
           setRegOpen(true);
         };
+
 
 
         return (
@@ -582,33 +591,73 @@ function PredictionInner({ p }: { p: Prediction }) {
           <button
             id="participar-cta"
             onClick={() => {
+              const filled = p.subPredictions ? Object.keys(subAnswers).length : 0;
+              const required = p.subPredictions?.length ?? 0;
+              const baseCtx = {
+                userId: user?.id ?? null,
+                authenticated: !!user,
+                balance,
+                entryFee: p.entryFee ?? amount,
+                confirmed,
+                pendingExtra: !!pendingExtra,
+                regAccepted,
+                filledSubAnswers: filled,
+                requiredSubAnswers: required,
+              };
+              debugParticipate({ challengeId: p.id, reason: "click", message: "Participar clicado", context: baseCtx });
+
               if (isClosed) {
+                debugParticipate({ challengeId: p.id, reason: "blocked:closed", message: "Desafio encerrado", context: { closesAt: p.closesAt } });
                 toast.error("As apostas para este desafio já foram encerradas.");
                 return;
               }
               if (confirmed && !pendingExtra) {
+                debugParticipate({ challengeId: p.id, reason: "blocked:already-confirmed", message: "Usuário já confirmou", context: baseCtx });
                 toast.info("Você já confirmou sua participação neste desafio.");
                 return;
               }
-              if (p.subPredictions) {
-                const filled = Object.keys(subAnswers).length;
-                if (filled < p.subPredictions.length) {
-                  toast.error(`Selecione todos os ${p.subPredictions.length} palpites antes de participar (${filled}/${p.subPredictions.length}).`);
-                  const firstMissing = p.subPredictions.find((s) => !subAnswers[s.id]);
-                  if (firstMissing) {
-                    const el = document.getElementById(`sub-${firstMissing.id}`);
-                    el?.scrollIntoView({ behavior: "smooth", block: "center" });
-                  }
-                  return;
+              if (p.subPredictions && filled < required) {
+                const firstMissing = p.subPredictions.find((s) => !subAnswers[s.id]);
+                debugParticipate({
+                  challengeId: p.id,
+                  reason: "blocked:missing-subanswers",
+                  message: `${filled}/${required} palpites preenchidos`,
+                  context: { ...baseCtx, firstMissingId: firstMissing?.id ?? null },
+                });
+                toast.error(`Selecione todos os ${required} palpites antes de participar (${filled}/${required}).`);
+                if (firstMissing) {
+                  const el = document.getElementById(`sub-${firstMissing.id}`);
+                  el?.scrollIntoView({ behavior: "smooth", block: "center" });
                 }
+                return;
+              }
+              if (!user) {
+                debugParticipate({ challengeId: p.id, reason: "blocked:not-authenticated", message: "Usuário não logado", context: baseCtx });
               }
               if (!confirmed && user && balance !== null && balance < (p.entryFee ?? amount)) {
+                debugParticipate({
+                  challengeId: p.id,
+                  reason: "blocked:insufficient-balance",
+                  message: `Saldo ${balance} < fee ${p.entryFee ?? amount}`,
+                  context: baseCtx,
+                });
                 toast.error(`Saldo insuficiente. Você tem ${formatTokens(balance)} TKN e precisa de ${p.entryFee ?? amount} TKN.`);
                 return;
               }
-              handleParticipate();
+              try {
+                handleParticipate();
+              } catch (err) {
+                debugParticipate({
+                  challengeId: p.id,
+                  reason: "error",
+                  message: err instanceof Error ? err.message : String(err),
+                  context: baseCtx,
+                });
+                throw err;
+              }
             }}
             disabled={isClosed}
+
             className="mt-6 w-full h-14 rounded-xl font-display font-black tracking-wide text-lg transition disabled:opacity-60 disabled:cursor-not-allowed text-white"
             style={{
               background: pendingExtra
