@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { Flame, Sparkles, TrendingUp, Clock, ShoppingBag, Trophy, Coins, Gift, Users, Zap, Diamond, Building2, Search, Loader2, X } from "lucide-react";
+import { Flame, Sparkles, TrendingUp, Clock, ShoppingBag, Trophy, Coins, Gift, Users, Zap, Diamond, Building2, Search, Loader2, X, Timer, ChevronLeft, ChevronRight, Star } from "lucide-react";
 import imgCampeao from "@/assets/dd-campeao.jpg";
 import imgMalucos from "@/assets/pm-soccer.jpg";
 import imgAlien from "@/assets/cat-alienigenas.jpg";
