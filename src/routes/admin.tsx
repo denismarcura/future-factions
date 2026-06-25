@@ -47,6 +47,7 @@ const ADMIN_GROUPS: NavGroup[] = [
       { to: "/admin/premios", label: "Cadastrar Prêmios", icon: Gift },
       { to: "/admin/categorias", label: "Categorias", icon: FolderTree },
       { to: "/admin/banners", label: "Banners", icon: ImageIcon },
+      { to: "/admin/banners-inferiores", label: "Banners Inferiores", icon: ImageIcon },
       { to: "/admin/resultado-jogos", label: "Resultado Jogos", icon: TrophyIcon },
       { to: "/admin/apuracao-copa", label: "Apuração Copa", icon: TrophyIcon },
       { to: "/admin/integracoes-futebol", label: "Integrações Futebol", icon: Cable },

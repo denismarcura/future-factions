@@ -58,6 +58,7 @@ import { Route as AdminConvitesRouteImport } from './routes/admin.convites'
 import { Route as AdminCategoriasRouteImport } from './routes/admin.categorias'
 import { Route as AdminCadastrosRouteImport } from './routes/admin.cadastros'
 import { Route as AdminBonusLoginRouteImport } from './routes/admin.bonus-login'
+import { Route as AdminBannersInferioresRouteImport } from './routes/admin.banners-inferiores'
 import { Route as AdminBannersRouteImport } from './routes/admin.banners'
 import { Route as AdminApuracaoCopaRouteImport } from './routes/admin.apuracao-copa'
 import { Route as AdminApisRouteImport } from './routes/admin.apis'
@@ -311,6 +312,11 @@ const AdminBonusLoginRoute = AdminBonusLoginRouteImport.update({
   path: '/bonus-login',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminBannersInferioresRoute = AdminBannersInferioresRouteImport.update({
+  id: '/banners-inferiores',
+  path: '/banners-inferiores',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminBannersRoute = AdminBannersRouteImport.update({
   id: '/banners',
   path: '/banners',
@@ -381,6 +387,7 @@ export interface FileRoutesByFullPath {
   '/admin/apis': typeof AdminApisRoute
   '/admin/apuracao-copa': typeof AdminApuracaoCopaRoute
   '/admin/banners': typeof AdminBannersRoute
+  '/admin/banners-inferiores': typeof AdminBannersInferioresRoute
   '/admin/bonus-login': typeof AdminBonusLoginRoute
   '/admin/cadastros': typeof AdminCadastrosRoute
   '/admin/categorias': typeof AdminCategoriasRoute
@@ -438,6 +445,7 @@ export interface FileRoutesByTo {
   '/admin/apis': typeof AdminApisRoute
   '/admin/apuracao-copa': typeof AdminApuracaoCopaRoute
   '/admin/banners': typeof AdminBannersRoute
+  '/admin/banners-inferiores': typeof AdminBannersInferioresRoute
   '/admin/bonus-login': typeof AdminBonusLoginRoute
   '/admin/cadastros': typeof AdminCadastrosRoute
   '/admin/categorias': typeof AdminCategoriasRoute
@@ -498,6 +506,7 @@ export interface FileRoutesById {
   '/admin/apis': typeof AdminApisRoute
   '/admin/apuracao-copa': typeof AdminApuracaoCopaRoute
   '/admin/banners': typeof AdminBannersRoute
+  '/admin/banners-inferiores': typeof AdminBannersInferioresRoute
   '/admin/bonus-login': typeof AdminBonusLoginRoute
   '/admin/cadastros': typeof AdminCadastrosRoute
   '/admin/categorias': typeof AdminCategoriasRoute
@@ -558,6 +567,7 @@ export interface FileRouteTypes {
     | '/admin/apis'
     | '/admin/apuracao-copa'
     | '/admin/banners'
+    | '/admin/banners-inferiores'
     | '/admin/bonus-login'
     | '/admin/cadastros'
     | '/admin/categorias'
@@ -615,6 +625,7 @@ export interface FileRouteTypes {
     | '/admin/apis'
     | '/admin/apuracao-copa'
     | '/admin/banners'
+    | '/admin/banners-inferiores'
     | '/admin/bonus-login'
     | '/admin/cadastros'
     | '/admin/categorias'
@@ -674,6 +685,7 @@ export interface FileRouteTypes {
     | '/admin/apis'
     | '/admin/apuracao-copa'
     | '/admin/banners'
+    | '/admin/banners-inferiores'
     | '/admin/bonus-login'
     | '/admin/cadastros'
     | '/admin/categorias'
@@ -1084,6 +1096,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminBonusLoginRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/banners-inferiores': {
+      id: '/admin/banners-inferiores'
+      path: '/banners-inferiores'
+      fullPath: '/admin/banners-inferiores'
+      preLoaderRoute: typeof AdminBannersInferioresRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/banners': {
       id: '/admin/banners'
       path: '/banners'
@@ -1158,6 +1177,7 @@ interface AdminRouteChildren {
   AdminApisRoute: typeof AdminApisRoute
   AdminApuracaoCopaRoute: typeof AdminApuracaoCopaRoute
   AdminBannersRoute: typeof AdminBannersRoute
+  AdminBannersInferioresRoute: typeof AdminBannersInferioresRoute
   AdminBonusLoginRoute: typeof AdminBonusLoginRoute
   AdminCadastrosRoute: typeof AdminCadastrosRoute
   AdminCategoriasRoute: typeof AdminCategoriasRoute
@@ -1187,6 +1207,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminApisRoute: AdminApisRoute,
   AdminApuracaoCopaRoute: AdminApuracaoCopaRoute,
   AdminBannersRoute: AdminBannersRoute,
+  AdminBannersInferioresRoute: AdminBannersInferioresRoute,
   AdminBonusLoginRoute: AdminBonusLoginRoute,
   AdminCadastrosRoute: AdminCadastrosRoute,
   AdminCategoriasRoute: AdminCategoriasRoute,

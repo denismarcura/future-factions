@@ -13,6 +13,7 @@ import { CATEGORIES, PREDICTIONS, type Prediction } from "@/lib/mock-data";
 import { getUserChallenges } from "@/lib/user-challenges";
 import { useParticipatedChallengeIds } from "@/hooks/use-participated";
 import { listActiveBanners, type Banner } from "@/lib/banners";
+import { listActiveBottomBanners, type BottomBanner } from "@/lib/bottom-banners";
 import { aiSearchChallenges } from "@/lib/search-ai.functions";
 import logoAsset from "@/assets/logo-desafio.png.asset.json";
 
@@ -38,6 +39,7 @@ function Feed() {
   const [cat, setCat] = useState<string>("Todas");
   const [sort, setSort] = useState<Sort>("new");
   const [banners, setBanners] = useState<Banner[]>([]);
+  const [bottomBanners, setBottomBanners] = useState<BottomBanner[]>([]);
   const [userChallenges, setUserChallenges] = useState<Prediction[]>([]);
   const [mounted, setMounted] = useState(false);
   const participatedIds = useParticipatedChallengeIds();
@@ -46,6 +48,7 @@ function Feed() {
   useEffect(() => {
     setMounted(true);
     setBanners(listActiveBanners());
+    setBottomBanners(listActiveBottomBanners());
     setUserChallenges(getUserChallenges());
     const onUpdate = () => setUserChallenges(getUserChallenges());
     window.addEventListener("ddp:user-challenges-updated", onUpdate);
@@ -162,6 +165,38 @@ function Feed() {
           </div>
         </div>
       </section>
+
+      {/* Banners inferiores (cadastrados no admin) */}
+      {bottomBanners.length > 0 && (
+        <section className="mb-8 grid gap-4 sm:grid-cols-2">
+          {bottomBanners.map((b) => {
+            const img = (
+              <img
+                src={b.imageUrl}
+                alt={b.alt ?? "Banner"}
+                width={800}
+                height={350}
+                loading="lazy"
+                decoding="async"
+                className="w-full h-auto block rounded-2xl border border-border/60"
+              />
+            );
+            return b.link ? (
+              <a
+                key={b.id}
+                href={b.link}
+                target={b.link.startsWith("http") ? "_blank" : undefined}
+                rel={b.link.startsWith("http") ? "noopener noreferrer" : undefined}
+                className="block hover:opacity-95 transition"
+              >
+                {img}
+              </a>
+            ) : (
+              <div key={b.id}>{img}</div>
+            );
+          })}
+        </section>
+      )}
 
       {/* Como Funciona — 4 passos */}
       <section className="mb-8">
