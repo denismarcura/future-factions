@@ -537,56 +537,6 @@ function Feed() {
 
 
 
-      {/* Filters */}
-      <section id="feed" className="mb-4 flex items-center gap-2 overflow-x-auto -mx-4 px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        {sorts.map(({ key, label, icon: Icon }) => (
-          <button
-            key={key}
-            onClick={() => setSort(key)}
-            className={`shrink-0 inline-flex items-center gap-1.5 h-9 px-3.5 rounded-full text-xs font-bold border transition ${
-              sort === key
-                ? "bg-gradient-brand text-primary-foreground border-transparent shadow-glow"
-                : "bg-card text-muted-foreground border-border/60 hover:text-foreground"
-            }`}
-          >
-            <Icon className="h-3.5 w-3.5" /> {label}
-          </button>
-        ))}
-      </section>
-
-      <section className="mb-6 flex items-center gap-2 overflow-x-auto -mx-4 px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        {["Todas", ...CATEGORIES, "Encerrados"].map((c) => (
-          <button
-            key={c}
-            onClick={() => setCat(c)}
-            className={`shrink-0 h-8 px-3 rounded-full text-xs font-medium border transition ${
-              cat === c
-                ? c === "Encerrados"
-                  ? "border-destructive text-destructive bg-destructive/10"
-                  : "border-gold text-gold bg-gold/10"
-                : "border-border/60 text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            {c}
-          </button>
-        ))}
-      </section>
-
-
-      <section className="grid gap-4 sm:grid-cols-2">
-        {items.map((p) => (
-          <PredictionCard key={p.id} prediction={p} hideOptions />
-        ))}
-      </section>
-
-      <div className="mt-8 text-center">
-        <Link
-          to="/desafios"
-          className="inline-flex items-center gap-2 h-11 px-6 rounded-full border border-primary/60 text-primary font-bold hover:bg-primary/10 transition"
-        >
-          Ver todos os desafios →
-        </Link>
-      </div>
     </AppShell>
   );
 }
