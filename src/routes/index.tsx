@@ -1,17 +1,16 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { Flame, Sparkles, TrendingUp, Clock, ShoppingBag, Trophy, Coins, Gift, Users, Zap, Diamond, Building2, Search, Loader2, X, Timer, ChevronLeft, ChevronRight, Star, Calendar, Box, Heart, PartyPopper } from "lucide-react";
+import { Flame, Sparkles, TrendingUp, Clock, Trophy, Coins, Gift, Users, Zap, Building2, Timer, ChevronLeft, ChevronRight, Star, Box, Heart, PartyPopper } from "lucide-react";
 
 
 import { AppShell } from "@/components/layout/AppShell";
 import { PredictionCard } from "@/components/PredictionCard";
-import { CATEGORIES, PREDICTIONS, type Prediction } from "@/lib/mock-data";
+import { PREDICTIONS, type Prediction } from "@/lib/mock-data";
 import { getUserChallenges } from "@/lib/user-challenges";
 import { useParticipatedChallengeIds } from "@/hooks/use-participated";
 import { listActiveBanners, type Banner } from "@/lib/banners";
 import { listActiveBottomBanners, type BottomBanner } from "@/lib/bottom-banners";
-import { aiSearchChallenges } from "@/lib/search-ai.functions";
 import { listLatestCorpChallenges, type CorpChallengeRecord } from "@/lib/corp-challenges.functions";
 import logoAsset from "@/assets/logo-desafio.png.asset.json";
 
