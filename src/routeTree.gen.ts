@@ -23,6 +23,7 @@ import { Route as EmpresasRouteImport } from './routes/empresas'
 import { Route as DesafiosEmpresasRouteImport } from './routes/desafios-empresas'
 import { Route as DesafiosRouteImport } from './routes/desafios'
 import { Route as CriarRouteImport } from './routes/criar'
+import { Route as ConvidarAmigosRouteImport } from './routes/convidar-amigos'
 import { Route as ComoFuncionamOsTokensRouteImport } from './routes/como-funcionam-os-tokens'
 import { Route as ComoFuncionaRouteImport } from './routes/como-funciona'
 import { Route as AuthRouteImport } from './routes/auth'
@@ -137,6 +138,11 @@ const DesafiosRoute = DesafiosRouteImport.update({
 const CriarRoute = CriarRouteImport.update({
   id: '/criar',
   path: '/criar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConvidarAmigosRoute = ConvidarAmigosRouteImport.update({
+  id: '/convidar-amigos',
+  path: '/convidar-amigos',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ComoFuncionamOsTokensRoute = ComoFuncionamOsTokensRouteImport.update({
@@ -376,6 +382,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/como-funciona': typeof ComoFuncionaRoute
   '/como-funcionam-os-tokens': typeof ComoFuncionamOsTokensRoute
+  '/convidar-amigos': typeof ConvidarAmigosRoute
   '/criar': typeof CriarRoute
   '/desafios': typeof DesafiosRoute
   '/desafios-empresas': typeof DesafiosEmpresasRoute
@@ -435,6 +442,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/como-funciona': typeof ComoFuncionaRoute
   '/como-funcionam-os-tokens': typeof ComoFuncionamOsTokensRoute
+  '/convidar-amigos': typeof ConvidarAmigosRoute
   '/criar': typeof CriarRoute
   '/desafios': typeof DesafiosRoute
   '/desafios-empresas': typeof DesafiosEmpresasRoute
@@ -497,6 +505,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/como-funciona': typeof ComoFuncionaRoute
   '/como-funcionam-os-tokens': typeof ComoFuncionamOsTokensRoute
+  '/convidar-amigos': typeof ConvidarAmigosRoute
   '/criar': typeof CriarRoute
   '/desafios': typeof DesafiosRoute
   '/desafios-empresas': typeof DesafiosEmpresasRoute
@@ -559,6 +568,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/como-funciona'
     | '/como-funcionam-os-tokens'
+    | '/convidar-amigos'
     | '/criar'
     | '/desafios'
     | '/desafios-empresas'
@@ -618,6 +628,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/como-funciona'
     | '/como-funcionam-os-tokens'
+    | '/convidar-amigos'
     | '/criar'
     | '/desafios'
     | '/desafios-empresas'
@@ -679,6 +690,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/como-funciona'
     | '/como-funcionam-os-tokens'
+    | '/convidar-amigos'
     | '/criar'
     | '/desafios'
     | '/desafios-empresas'
@@ -741,6 +753,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   ComoFuncionaRoute: typeof ComoFuncionaRoute
   ComoFuncionamOsTokensRoute: typeof ComoFuncionamOsTokensRoute
+  ConvidarAmigosRoute: typeof ConvidarAmigosRoute
   CriarRoute: typeof CriarRoute
   DesafiosRoute: typeof DesafiosRoute
   DesafiosEmpresasRoute: typeof DesafiosEmpresasRoute
@@ -862,6 +875,13 @@ declare module '@tanstack/react-router' {
       path: '/criar'
       fullPath: '/criar'
       preLoaderRoute: typeof CriarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/convidar-amigos': {
+      id: '/convidar-amigos'
+      path: '/convidar-amigos'
+      fullPath: '/convidar-amigos'
+      preLoaderRoute: typeof ConvidarAmigosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/como-funcionam-os-tokens': {
@@ -1288,6 +1308,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   ComoFuncionaRoute: ComoFuncionaRoute,
   ComoFuncionamOsTokensRoute: ComoFuncionamOsTokensRoute,
+  ConvidarAmigosRoute: ConvidarAmigosRoute,
   CriarRoute: CriarRoute,
   DesafiosRoute: DesafiosRoute,
   DesafiosEmpresasRoute: DesafiosEmpresasRoute,

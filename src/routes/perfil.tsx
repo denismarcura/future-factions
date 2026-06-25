@@ -1,10 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { MapPin, Trophy, Target, Award, Sparkles, CheckCircle2, XCircle, Clock, LogIn } from "lucide-react";
+import { MapPin, Trophy, Target, Award, Sparkles, CheckCircle2, XCircle, Clock, LogIn, Mail } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { AppShell } from "@/components/layout/AppShell";
 import { ACHIEVEMENTS, formatTokens } from "@/lib/mock-data";
 import { InviteLinkCard } from "@/components/InviteLinkCard";
+import { MissionsTeaser } from "@/components/MissionsTeaser";
 import { PalpiteCreditsBadge } from "@/components/PalpiteCreditsBadge";
 import { useAuth } from "@/hooks/use-auth";
 import { listMyPalpites } from "@/lib/my-palpites.functions";
@@ -120,8 +121,21 @@ function Perfil() {
         </Link>
       </div>
 
+      <MissionsTeaser limit={6} />
+
       <div className="mb-6">
         <InviteLinkCard title="Seu link simples de convite" />
+        <div className="mt-3 flex flex-wrap gap-2">
+          <Link
+            to="/convidar-amigos"
+            className="inline-flex items-center gap-2 h-11 px-5 rounded-xl bg-gradient-brand text-primary-foreground font-display font-black text-sm shadow-glow hover:scale-[1.01] transition"
+          >
+            <Mail className="h-4 w-4" /> Convidar por e-mail
+          </Link>
+          <span className="text-xs text-muted-foreground self-center">
+            Envie um e-mail bonito para vários amigos de uma vez.
+          </span>
+        </div>
       </div>
 
       <div className="grid lg:grid-cols-[1fr_320px] gap-6">
