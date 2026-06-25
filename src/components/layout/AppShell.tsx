@@ -30,6 +30,7 @@ import logoAsset from "@/assets/logo-desafio.png.asset.json";
 import { LiveUsersBadge } from "@/components/LiveUsersBadge";
 import { Footer } from "@/components/layout/Footer";
 import { ClosingSoonAlert } from "@/components/ClosingSoonAlert";
+import { PalpiteCreditsBadge } from "@/components/PalpiteCreditsBadge";
 import { HeaderSearch } from "@/components/HeaderSearch";
 import { GoogleReviewsSlider } from "@/components/GoogleReviewsSlider";
 
