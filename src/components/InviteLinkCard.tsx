@@ -1,6 +1,7 @@
-import { useState } from "react";
-import { Copy, Check, Share2, Gift } from "lucide-react";
+import { useRef, useState } from "react";
+import { Copy, Check, Share2, Gift, QrCode, Download } from "lucide-react";
 import { toast } from "sonner";
+import { QRCodeCanvas } from "qrcode.react";
 import { useAuth } from "@/hooks/use-auth";
 import { useInviteUrl } from "@/hooks/use-invite-url";
 
@@ -9,9 +10,21 @@ type Variant = "full" | "compact";
 export function InviteLinkCard({ variant = "full", title }: { variant?: Variant; title?: string }) {
   const { user } = useAuth();
   const [copied, setCopied] = useState(false);
+  const [showQR, setShowQR] = useState(variant === "full");
+  const qrWrapRef = useRef<HTMLDivElement>(null);
   const url = useInviteUrl(user);
 
   if (!user || !url) return null;
+
+  function downloadQR() {
+    const canvas = qrWrapRef.current?.querySelector("canvas");
+    if (!canvas) return;
+    const link = document.createElement("a");
+    link.download = "meu-convite-desafio.png";
+    link.href = canvas.toDataURL("image/png");
+    link.click();
+    toast.success("QR Code baixado!");
+  }
 
   async function copy() {
     try {
@@ -63,7 +76,27 @@ export function InviteLinkCard({ variant = "full", title }: { variant?: Variant;
           >
             <Share2 className="h-3.5 w-3.5" /> Compartilhar
           </button>
+          <button
+            onClick={() => setShowQR((v) => !v)}
+            className="h-9 px-3 rounded-lg border border-border text-xs font-bold inline-flex items-center gap-1.5 hover:bg-muted"
+            aria-label="Mostrar QR Code"
+          >
+            <QrCode className="h-3.5 w-3.5" /> QR
+          </button>
         </div>
+        {showQR && (
+          <div className="w-full flex flex-col items-center gap-2 pt-2 border-t border-gold/20" ref={qrWrapRef}>
+            <div className="bg-white p-2 rounded-lg">
+              <QRCodeCanvas value={url} size={140} includeMargin={false} />
+            </div>
+            <button
+              onClick={downloadQR}
+              className="h-8 px-3 rounded-lg border border-gold/60 text-gold text-xs font-bold inline-flex items-center gap-1.5 hover:bg-gold/10"
+            >
+              <Download className="h-3.5 w-3.5" /> Baixar QR
+            </button>
+          </div>
+        )}
       </div>
     );
   }
@@ -96,6 +129,25 @@ export function InviteLinkCard({ variant = "full", title }: { variant?: Variant;
             >
               <Share2 className="h-4 w-4" /> Compartilhar
             </button>
+          </div>
+          <div className="mt-5 flex flex-col sm:flex-row items-center gap-4 pt-4 border-t border-border/60" ref={qrWrapRef}>
+            <div className="bg-white p-3 rounded-xl shrink-0">
+              <QRCodeCanvas value={url} size={160} includeMargin={false} />
+            </div>
+            <div className="flex-1 text-center sm:text-left">
+              <p className="text-sm font-semibold flex items-center justify-center sm:justify-start gap-2">
+                <QrCode className="h-4 w-4 text-gold" /> QR Code do seu convite
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Mostre na tela ou baixe a imagem para compartilhar no celular, stories e impressos.
+              </p>
+              <button
+                onClick={downloadQR}
+                className="mt-3 h-10 px-4 rounded-lg border border-gold/60 text-gold font-bold inline-flex items-center gap-2 hover:bg-gold/10 text-sm"
+              >
+                <Download className="h-4 w-4" /> Baixar QR Code
+              </button>
+            </div>
           </div>
         </div>
       </div>
