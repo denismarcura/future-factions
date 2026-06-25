@@ -83,7 +83,7 @@ function Feed() {
         list.sort((a, b) => Number(!!b.hot) - Number(!!a.hot) || b.likes - a.likes);
     }
     return list.slice(0, 24);
-  }, [cat, sort]);
+  }, [cat, sort, participatedIds]);
 
   const sorts: { key: Sort; label: string; icon: typeof Flame }[] = [
     { key: "trending", label: "Em alta", icon: Flame },
