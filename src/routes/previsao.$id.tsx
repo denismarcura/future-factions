@@ -745,25 +745,7 @@ function PredictionInner({ p }: { p: Prediction }) {
           );
         })()}
 
-        {related.length > 0 && (
-          <section className="mt-4">
-            <h2 className="font-display text-xl font-bold mb-4">Mais em {p.category}</h2>
-            <div className="grid sm:grid-cols-2 gap-4">
-              {related.map((r) => (
-                <Link
-                  key={r.id}
-                  to="/previsao/$id"
-                  params={{ id: r.id }}
-                  className="rounded-xl bg-card border border-border/60 p-4 hover:border-primary/50 transition"
-                >
-                  <div className="text-xs text-primary font-semibold">{r.category}</div>
-                  <div className="font-display font-bold mt-1 line-clamp-2">{r.title}</div>
-                  <div className="mt-2 text-xs text-muted-foreground">{r.bettors} palpiteiros · {timeLeft(r.closesAt)}</div>
-                </Link>
-              ))}
-            </div>
-          </section>
-        )}
+        {/* "Mais em {category}" section removed by request */}
       </div>
         );
       })()}

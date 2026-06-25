@@ -130,6 +130,16 @@ export async function claimMission(missionId: string, context: string, tokensAwa
     if (retryExisting) return retryExisting as MissionClaim;
     throw error;
   }
+  // Also grant 1 palpite credit (idempotent per user+mission).
+  try {
+    const mod = await import("@/lib/palpite-credits.functions");
+    await mod.grantCreditForMission({ data: { missionId } });
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new Event("ddp:palpite-credits-updated"));
+    }
+  } catch {
+    /* don't block mission claim if credit grant fails */
+  }
   return data as MissionClaim;
 }
 
