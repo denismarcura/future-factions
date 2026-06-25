@@ -96,12 +96,23 @@ function Missoes() {
     }
     await new Promise((r) => setTimeout(r, 5000));
     try {
-      const totalAward = m.tokens + (m.bonus_tokens || 0) + COMPLETION_BONUS_TOKENS;
+      const earned = m.tokens + (m.bonus_tokens || 0);
+      const totalAward = earned + COMPLETION_BONUS_TOKENS;
       await claimMission(m.id, "missoes", totalAward);
-      setClaimed((prev) => new Set(prev).add(m.id));
-      toast.success(
-        `Tarefa concluída! +${m.tokens + (m.bonus_tokens || 0)} Tokens · +${COMPLETION_BONUS_TOKENS} bônus · +${COMPLETION_BONUS_CHANCES} chance.`
-      );
+      toast.success(`+${totalAward} TOKENS creditados! 🎉`, {
+        description: `${earned} da missão + ${COMPLETION_BONUS_TOKENS} bônus de conclusão · +${COMPLETION_BONUS_CHANCES} chance extra.`,
+        duration: 5000,
+      });
+      // Trigger fade-out then remove from list
+      setExiting((prev) => new Set(prev).add(m.id));
+      setTimeout(() => {
+        setClaimed((prev) => new Set(prev).add(m.id));
+        setExiting((prev) => {
+          const next = new Set(prev);
+          next.delete(m.id);
+          return next;
+        });
+      }, 450);
     } catch (e: any) {
       toast.error(e.message ?? "Erro ao registrar");
     } finally {
