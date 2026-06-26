@@ -78,7 +78,7 @@ export function MissionsTeaser({ limit = 6 }: { limit?: number }) {
           </div>
           <h2 className="font-display text-xl font-black">Ganhe mais pontos para dar palpites</h2>
           <p className="text-sm text-muted-foreground mt-0.5">
-            Cumpra missões rápidas e receba TOKENS + chances de palpites grátis.
+            Faça palpites, ganhe tokens, troque por prêmios.
           </p>
         </div>
         <Link
@@ -87,6 +87,23 @@ export function MissionsTeaser({ limit = 6 }: { limit?: number }) {
         >
           Ver todas →
         </Link>
+      </div>
+
+      <div className="mb-4 grid grid-cols-3 gap-2 rounded-2xl border border-gold/30 bg-gradient-to-br from-black/40 to-card p-3">
+        {[
+          { n: 1, icon: "🎯", title: "Faça palpites", sub: "em diversos desafios", color: "from-emerald-500/20 to-emerald-700/10 border-emerald-500/40" },
+          { n: 2, icon: "🏆", title: "Ganhe tokens", sub: "como recompensa", color: "from-amber-500/20 to-amber-700/10 border-amber-500/40" },
+          { n: 3, icon: "🎁", title: "Troque por prêmios", sub: "reais e incríveis", color: "from-rose-500/20 to-rose-700/10 border-rose-500/40" },
+        ].map((s) => (
+          <div key={s.n} className={`relative rounded-xl border bg-gradient-to-br ${s.color} p-2.5 text-center`}>
+            <span className="absolute -top-2 -left-2 h-5 w-5 rounded-full bg-gold text-black text-[10px] font-black grid place-items-center shadow-glow-gold">
+              {s.n}
+            </span>
+            <div className="text-2xl leading-none mb-1">{s.icon}</div>
+            <div className="font-display font-black text-[11px] uppercase leading-tight">{s.title}</div>
+            <div className="text-[9px] text-muted-foreground leading-tight mt-0.5">{s.sub}</div>
+          </div>
+        ))}
       </div>
 
       {loading && (
