@@ -12,6 +12,8 @@ import { listMyPalpites } from "@/lib/my-palpites.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import { getTokenBalance } from "@/lib/balance";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+
 
 export const Route = createFileRoute("/perfil")({
   head: () => ({
@@ -311,42 +313,15 @@ function Perfil() {
                             {rate}%
                           </span>
                         </div>
-                        <div className="mt-3">
-                          <div className="flex items-center justify-between mb-1 text-[11px]">
-                            <span className="font-bold text-muted-foreground uppercase tracking-wider">
-                              Aproveitamento
-                            </span>
-                            <span className="font-black tabular-nums">
-                              <span className="text-success">{c.acertos}</span>
-                              <span className="text-muted-foreground">/{c.total}</span>
-                              <span className="ml-1.5 text-gold">({rate}%)</span>
-                            </span>
-                          </div>
-                          <div
-                            role="progressbar"
-                            aria-valuenow={rate}
-                            aria-valuemin={0}
-                            aria-valuemax={100}
-                            aria-label={`Aproveitamento: ${c.acertos} de ${c.total} palpites (${rate}%)`}
-                            className="relative h-2.5 rounded-full bg-muted/40 overflow-hidden border border-border/40"
-                          >
-                            <div
-                              className={`h-full transition-all duration-500 ${
-                                rate >= 70 ? "bg-gradient-to-r from-success to-gold"
-                                : rate >= 40 ? "bg-gradient-to-r from-amber-500 to-gold"
-                                : "bg-gradient-to-r from-destructive to-amber-500"
-                              }`}
-                              style={{ width: `${rate}%` }}
-                            />
-                            {/* marca dos 50% para referência visual */}
-                            <div className="absolute inset-y-0 left-1/2 w-px bg-border/60" aria-hidden />
-                          </div>
-                          <div className="mt-1 flex items-center justify-between text-[10px] text-muted-foreground">
-                            <span>0%</span>
-                            <span>50%</span>
-                            <span>100%</span>
-                          </div>
-                        </div>
+                        <PerformanceBar
+                          acertos={c.acertos}
+                          erros={c.erros}
+                          pendentes={c.pendentes}
+                          total={c.total}
+                          rate={rate}
+                          title={c.title}
+                        />
+
                       </Link>
                     );
                   })}
@@ -423,3 +398,108 @@ function EmptyState({ icon, title, desc, action }: { icon: React.ReactNode; titl
     </div>
   );
 }
+
+function PerformanceBar({
+  acertos, erros, pendentes, total, rate, title,
+}: { acertos: number; erros: number; pendentes: number; total: number; rate: number; title: string }) {
+  const [open, setOpen] = useState(false);
+  const stop = (e: React.SyntheticEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+  const barColor =
+    rate >= 70 ? "bg-gradient-to-r from-success to-gold"
+    : rate >= 40 ? "bg-gradient-to-r from-amber-500 to-gold"
+    : "bg-gradient-to-r from-destructive to-amber-500";
+
+  return (
+    <div className="mt-3" onClick={stop} onMouseLeave={() => setOpen(false)}>
+      <div className="flex items-center justify-between mb-1 text-[11px]">
+        <span className="font-bold text-muted-foreground uppercase tracking-wider">
+          Aproveitamento
+        </span>
+        <span className="font-black tabular-nums">
+          <span className="text-success">{acertos}</span>
+          <span className="text-muted-foreground">/{total}</span>
+          <span className="ml-1.5 text-gold">({rate}%)</span>
+        </span>
+      </div>
+
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <button
+            type="button"
+            onClick={(e) => { stop(e); setOpen((v) => !v); }}
+            onMouseEnter={() => setOpen(true)}
+            onFocus={() => setOpen(true)}
+            onBlur={() => setOpen(false)}
+            aria-label={`Aproveitamento: ${acertos} de ${total} palpites (${rate}%). Toque para ver detalhes.`}
+            className="block w-full text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-full"
+          >
+            <div
+              role="progressbar"
+              aria-valuenow={rate}
+              aria-valuemin={0}
+              aria-valuemax={100}
+              className="relative h-2.5 rounded-full bg-muted/40 overflow-hidden border border-border/40"
+            >
+              <div className={`h-full transition-all duration-500 ${barColor}`} style={{ width: `${rate}%` }} />
+              <div className="absolute inset-y-0 left-1/2 w-px bg-border/60" aria-hidden />
+            </div>
+            <div className="mt-1 flex items-center justify-between text-[10px] text-muted-foreground">
+              <span>0%</span><span>50%</span><span>100%</span>
+            </div>
+          </button>
+        </PopoverTrigger>
+        <PopoverContent
+          side="top"
+          align="center"
+          sideOffset={8}
+          onOpenAutoFocus={(e) => e.preventDefault()}
+          onClick={stop}
+          className="w-64 p-3 bg-card border-gold/40 shadow-glow-gold/30"
+        >
+          <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold mb-1">
+            Desempenho neste desafio
+          </div>
+          <div className="font-display font-black text-sm leading-tight line-clamp-2 mb-2">{title}</div>
+
+          <div className="flex items-baseline gap-1 mb-2">
+            <span className="text-3xl font-black tabular-nums text-gold">{rate}%</span>
+            <span className="text-xs text-muted-foreground">de aproveitamento</span>
+          </div>
+
+          <div className={`h-2 rounded-full bg-muted/40 overflow-hidden border border-border/40 mb-3`}>
+            <div className={`h-full ${barColor}`} style={{ width: `${rate}%` }} />
+          </div>
+
+          <ul className="space-y-1.5 text-xs">
+            <li className="flex items-center justify-between">
+              <span className="inline-flex items-center gap-1.5 text-success">
+                <CheckCircle2 className="h-3.5 w-3.5" /> Acertos
+              </span>
+              <span className="font-black tabular-nums text-success">{acertos}</span>
+            </li>
+            <li className="flex items-center justify-between">
+              <span className="inline-flex items-center gap-1.5 text-destructive">
+                <XCircle className="h-3.5 w-3.5" /> Erros
+              </span>
+              <span className="font-black tabular-nums text-destructive">{erros}</span>
+            </li>
+            <li className="flex items-center justify-between">
+              <span className="inline-flex items-center gap-1.5 text-muted-foreground">
+                <Clock className="h-3.5 w-3.5" /> Pendentes
+              </span>
+              <span className="font-black tabular-nums">{pendentes}</span>
+            </li>
+            <li className="flex items-center justify-between border-t border-border/40 pt-1.5 mt-1.5">
+              <span className="font-bold uppercase text-[10px] tracking-wider text-muted-foreground">Total</span>
+              <span className="font-black tabular-nums">{total}</span>
+            </li>
+          </ul>
+        </PopoverContent>
+      </Popover>
+    </div>
+  );
+}
+
