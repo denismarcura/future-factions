@@ -311,11 +311,41 @@ function Perfil() {
                             {rate}%
                           </span>
                         </div>
-                        <div className="mt-2 h-1.5 rounded-full bg-muted/40 overflow-hidden">
+                        <div className="mt-3">
+                          <div className="flex items-center justify-between mb-1 text-[11px]">
+                            <span className="font-bold text-muted-foreground uppercase tracking-wider">
+                              Aproveitamento
+                            </span>
+                            <span className="font-black tabular-nums">
+                              <span className="text-success">{c.acertos}</span>
+                              <span className="text-muted-foreground">/{c.total}</span>
+                              <span className="ml-1.5 text-gold">({rate}%)</span>
+                            </span>
+                          </div>
                           <div
-                            className="h-full bg-gradient-to-r from-success to-gold"
-                            style={{ width: `${rate}%` }}
-                          />
+                            role="progressbar"
+                            aria-valuenow={rate}
+                            aria-valuemin={0}
+                            aria-valuemax={100}
+                            aria-label={`Aproveitamento: ${c.acertos} de ${c.total} palpites (${rate}%)`}
+                            className="relative h-2.5 rounded-full bg-muted/40 overflow-hidden border border-border/40"
+                          >
+                            <div
+                              className={`h-full transition-all duration-500 ${
+                                rate >= 70 ? "bg-gradient-to-r from-success to-gold"
+                                : rate >= 40 ? "bg-gradient-to-r from-amber-500 to-gold"
+                                : "bg-gradient-to-r from-destructive to-amber-500"
+                              }`}
+                              style={{ width: `${rate}%` }}
+                            />
+                            {/* marca dos 50% para referência visual */}
+                            <div className="absolute inset-y-0 left-1/2 w-px bg-border/60" aria-hidden />
+                          </div>
+                          <div className="mt-1 flex items-center justify-between text-[10px] text-muted-foreground">
+                            <span>0%</span>
+                            <span>50%</span>
+                            <span>100%</span>
+                          </div>
                         </div>
                       </Link>
                     );
