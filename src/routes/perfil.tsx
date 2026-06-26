@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { MapPin, Trophy, Target, Award, Sparkles, CheckCircle2, XCircle, Clock, LogIn, Mail } from "lucide-react";
+import { MapPin, Trophy, Target, Award, Sparkles, CheckCircle2, XCircle, Clock, LogIn, Mail, Flag } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { AppShell } from "@/components/layout/AppShell";
@@ -230,6 +230,100 @@ function Perfil() {
               );
             })}
           </div>
+
+          {/* Desafios encerrados que você participou — ordenados por mais acertos */}
+          {user && !palpitesQuery.isLoading && (() => {
+            const now = Date.now();
+            type Agg = { id: string; title: string; category: string | null; closes_at: string | null; total: number; acertos: number; erros: number; pendentes: number };
+            const map = new Map<string, Agg>();
+            palpites.forEach((p) => {
+              const ch = challengesQuery.data?.[p.challenge_id];
+              if (!ch) return;
+              const closed = ch.closes_at ? new Date(ch.closes_at).getTime() < now : false;
+              if (!closed) return;
+              const cur = map.get(p.challenge_id) ?? {
+                id: p.challenge_id,
+                title: ch.title || (ch.home_team && ch.away_team ? `${ch.home_team} × ${ch.away_team}` : "Desafio"),
+                category: ch.category,
+                closes_at: ch.closes_at,
+                total: 0, acertos: 0, erros: 0, pendentes: 0,
+              };
+              cur.total += 1;
+              if (p.is_correct === true) cur.acertos += 1;
+              else if (p.is_correct === false) cur.erros += 1;
+              else cur.pendentes += 1;
+              map.set(p.challenge_id, cur);
+            });
+            const finished = Array.from(map.values()).sort(
+              (a, b) => b.acertos - a.acertos || b.total - a.total
+            );
+            if (finished.length === 0) return null;
+            return (
+              <div className="mt-8">
+                <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+                  <h2 className="font-display text-xl font-bold flex items-center gap-2">
+                    <Flag className="h-5 w-5 text-gold" /> Desafios encerrados
+                    <span className="text-xs font-normal text-muted-foreground">({finished.length})</span>
+                  </h2>
+                  <span className="text-[11px] uppercase tracking-wider text-muted-foreground font-bold">
+                    Ordenados por mais acertos
+                  </span>
+                </div>
+                <div className="grid sm:grid-cols-2 gap-3">
+                  {finished.map((c, idx) => {
+                    const rate = c.total ? Math.round((c.acertos / c.total) * 100) : 0;
+                    const isTop = idx === 0 && c.acertos > 0;
+                    return (
+                      <Link
+                        key={c.id}
+                        to="/previsao/$id"
+                        params={{ id: c.id }}
+                        className={`relative rounded-2xl border p-4 bg-card transition block ${
+                          isTop ? "border-gold/60 shadow-glow-gold/30 bg-gradient-to-br from-gold/10 to-card" : "border-border/60 hover:border-primary/60"
+                        }`}
+                      >
+                        {isTop && (
+                          <span className="absolute -top-2 -right-2 inline-flex items-center gap-1 text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-gold text-black shadow-glow-gold">
+                            <Trophy className="h-3 w-3" /> Melhor desempenho
+                          </span>
+                        )}
+                        {c.category && (
+                          <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold mb-1">
+                            {c.category}
+                          </div>
+                        )}
+                        <div className="font-bold text-sm leading-tight mb-2 line-clamp-2">{c.title}</div>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-1 rounded-full border border-success/40 bg-success/10 text-success">
+                            <CheckCircle2 className="h-3.5 w-3.5" /> {c.acertos} acerto{c.acertos === 1 ? "" : "s"}
+                          </span>
+                          {c.erros > 0 && (
+                            <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-1 rounded-full border border-destructive/40 bg-destructive/10 text-destructive">
+                              <XCircle className="h-3.5 w-3.5" /> {c.erros}
+                            </span>
+                          )}
+                          {c.pendentes > 0 && (
+                            <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-1 rounded-full border border-border/60 bg-muted/30 text-muted-foreground">
+                              <Clock className="h-3.5 w-3.5" /> {c.pendentes}
+                            </span>
+                          )}
+                          <span className="ml-auto text-[11px] font-black tabular-nums text-gold">
+                            {rate}%
+                          </span>
+                        </div>
+                        <div className="mt-2 h-1.5 rounded-full bg-muted/40 overflow-hidden">
+                          <div
+                            className="h-full bg-gradient-to-r from-success to-gold"
+                            style={{ width: `${rate}%` }}
+                          />
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })()}
         </div>
 
         <aside>
