@@ -63,6 +63,7 @@ export const sendFriendInviteEmails = createServerFn({ method: "POST" })
     const stamp = Date.now();
     let sent = 0;
     const failed: string[] = [];
+    const errors: string[] = [];
 
     for (const to of data.recipients) {
       const messageId = `friend-invite:${userId}:${to}:${stamp}`;
@@ -83,10 +84,14 @@ export const sendFriendInviteEmails = createServerFn({ method: "POST" })
       if (error) {
         console.error("enqueue_email failed", to, error);
         failed.push(to);
+        errors.push(`${to}: ${error.message || "erro"}`);
       } else {
         sent++;
       }
     }
 
-    return { ok: failed.length === 0, sent, failed };
+    if (sent === 0 && errors.length) {
+      throw new Error(errors.join(" | "));
+    }
+    return { ok: failed.length === 0, sent, failed, errors };
   });
