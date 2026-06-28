@@ -86,8 +86,9 @@ function ConvidarAmigos() {
         toast.error(`Falha em ${res.failed.length}: ${res.failed.join(", ")}`);
       }
     } catch (e: any) {
-      console.error(e);
-      toast.error("Não foi possível enviar os e-mails. Tente novamente.");
+      console.error("sendFriendInviteEmails failed", e);
+      const msg = e?.message || e?.toString?.() || "erro desconhecido";
+      toast.error(`Não foi possível enviar os e-mails: ${msg}`);
     } finally {
       setSending(false);
     }
