@@ -1,32 +1,49 @@
-## Diagnóstico
+Vou atacar todos os problemas reportados em uma rodada, focando nos sintomas concretos que confirmei na base de dados e no código.
 
-O erro mostrado no print vem do backend: a missão tenta gravar em `mission_claims`, mas a política atual só permite salvar quando `tokens_awarded` é exatamente igual a `missions.tokens`.
+## 1. Desafios criados não aparecem na lista
 
-A tela agora envia `tokens_awarded = missão + bônus + 50`, então a regra bloqueia com: `new row violates row-level security policy for table "mission_claims"`.
+**Causa:** em `src/lib/corp-challenges.functions.ts` (`listLatestCorpChallenges`) há um filtro `Boolean(companyName) || missions.length > 0`. Todos os desafios novos do usuário têm `company_name = null` e `missions = []`, então são descartados. Por isso `tt4196w`, `l169lew`, `48flvua` etc. somem da Home e de /desafios.
 
-Também há um segundo problema de experiência: o link externo precisa abrir imediatamente no clique, antes do cronômetro/claim, para não ser bloqueado pelo navegador ou pelo iframe do preview.
+**Correção:** remover esse filtro (ou afrouxá-lo para apenas `status = 'ativo'`). Mostrar todo desafio ativo cadastrado pelo wizard.
 
-## Plano de correção
+## 2. Página /previsao/{id} feia + descrição enorme
 
-1. Ajustar a regra de segurança de `mission_claims` para permitir o valor correto:
-   - `missions.tokens + missions.bonus_tokens + 50`
-   - somente para o próprio usuário logado
-   - somente para missões ativas
+A página atual concatena todas as perguntas/opções como um parágrafo único (`1. Quem sairá... • 2. Qual será o placar... • ...`) e exibe via `<p>{p.description}</p>` quando o desafio tem partida detectada.
 
-2. Manter a leitura restrita:
-   - cada usuário continua vendo apenas as próprias missões concluídas.
+**Correções em `src/routes/previsao.$id.tsx`:**
+- Em `corpToPrediction`, só usar `c.description` quando vier preenchida pelo criador. Se vier vazia, deixar `description` curta (ex.: "Faça seus palpites e concorra"), sem dump das perguntas.
+- Renderizar as perguntas apenas no formulário de palpites (que já existe), nunca como parágrafo solto acima do card.
+- Adicionar no topo o **banner gerado** ao criar a campanha (`c.bannerUrl`) em um bloco com proporção 8:3, bordas arredondadas, fallback para `c.logoUrl`. Atualmente `imageUrl` é passado mas não há um hero visual no topo — vou inserir um `<img>` destacado antes do header do confronto.
+- Manter alinhamento dos times e botão PARTICIPAR já implementados.
 
-3. Ajustar o botão `Fazer` em `/missoes` para abrir o Instagram/YouTube/TikTok/Facebook imediatamente:
-   - abrir com `window.open(m.link, "_blank", "noopener,noreferrer")` no início do clique
-   - depois iniciar a barra de verificação de 5 segundos
-   - se o pop-up for bloqueado, mostrar toast orientando o usuário a permitir pop-ups.
+## 3. Botão "Participar" não envia palpites
 
-4. Melhorar a mensagem de erro:
-   - se o registro da missão falhar, parar a barra verde e mostrar um toast claro sem deixar o card preso em “verificando”.
+Vou instrumentar a confirmação para:
+- Validar se há ao menos uma sub-pergunta respondida e dar `toast.error` claro.
+- Garantir que `saveParticipation` é chamado mesmo quando não há missões (fluxo corp puro).
+- Logar via `debugParticipate` cada etapa (já existe) e expor o erro real no toast (hoje algumas falhas ficam silenciosas).
 
-## Arquivos/Backend afetados
+## 4. Banner gerado precisa aparecer ao abrir o desafio
 
-- Backend: política de `mission_claims`
-- Frontend: `src/routes/missoes.tsx`
+Já está salvo em `corporate_challenges.banner_url`. Falta exibir no `/previsao/$id`. Vai junto com a correção do item 2.
 
-Não vou mexer em tokens cobrados, desafios, ranking ou outras áreas.
+## 5. E-mail de convite falhando
+
+`email_send_log` está vazio — nada chegou na fila. O `sendFriendInviteEmails` usa `supabaseAdmin.rpc('enqueue_email', ...)` e a infraestrutura Lovable Emails (pgmq + cron). O usuário diz que configurou SMTP no Resend, mas o app não usa Resend — ele enfileira via `enqueue_email`.
+
+**Ações:**
+- Verificar via `email_domain--check_email_domain_status` se o domínio Lovable Emails está ativo. Se não estiver, mostrar o diálogo de setup (`<presentation-open-email-setup>`) para o usuário configurar o domínio de envio. Sem isso, nenhum e-mail sai.
+- Adicionar tratamento de erro visível em `src/routes/convidar-amigos.tsx`: mostrar a mensagem real retornada pelo servidor (failed[], reason) em vez de um toast genérico.
+- Adicionar try/catch com log no handler para inserir uma linha em `email_send_log` com `status='failed'` quando `enqueue_email` retornar erro, para facilitar diagnóstico futuro.
+
+## Arquivos afetados
+
+- `src/lib/corp-challenges.functions.ts` — remover filtro restritivo.
+- `src/routes/previsao.$id.tsx` — descrição curta, hero com banner, validação/feedback do botão Participar.
+- `src/routes/convidar-amigos.tsx` — mensagens de erro detalhadas.
+- `src/lib/friend-invite-emails.functions.ts` — log e retorno de erro mais informativo.
+- Setup do domínio de e-mail (intermediário) se ainda não estiver ativo.
+
+## Fora de escopo (confirmar antes)
+
+- Próximos jogos automáticos 28/06 e 29/06: depende do sync football-data.org já existente; posso forçar uma sincronização em sequência se você quiser, mas não está no escopo deste plano.

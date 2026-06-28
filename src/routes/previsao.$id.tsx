@@ -38,11 +38,7 @@ function corpToPrediction(c: CorpChallengeRecord): Prediction {
   return {
     id: c.id,
     title: c.title,
-    description:
-      c.description ??
-      c.subs
-        .map((s, i) => `${i + 1}. ${s.question} — ${s.options.filter(Boolean).join(" / ")}`)
-        .join("  •  "),
+    description: c.description?.trim() ? c.description : "Faça seus palpites e concorra ao prêmio.",
     category: (c.category as Category) ?? ("Entretenimento" as Category),
     author: USERS[0],
     createdAt: c.createdAt,
@@ -468,6 +464,16 @@ function PredictionInner({ p }: { p: Prediction }) {
 
         return (
       <div className="space-y-6">
+        {p.imageUrl && (
+          <div className="rounded-2xl overflow-hidden border border-border/60 bg-card shadow-glow">
+            <img
+              src={p.imageUrl}
+              alt={p.title}
+              className="w-full h-auto block"
+              style={{ aspectRatio: "8/3", objectFit: "cover" }}
+            />
+          </div>
+        )}
         <article className="rounded-2xl bg-card border border-border/60 p-6">
           <div className="flex flex-wrap items-center gap-2 text-xs">
             <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-card border border-border/60 text-muted-foreground">
@@ -520,7 +526,7 @@ function PredictionInner({ p }: { p: Prediction }) {
           )}
 
           <h1 className="mt-4 font-display text-2xl sm:text-3xl font-black leading-tight">{p.title}</h1>
-          {!p.match && <p className="mt-2 text-muted-foreground">{p.description}</p>}
+          {!p.match && !p.subPredictions && <p className="mt-2 text-muted-foreground">{p.description}</p>}
           <ChallengeRatingBlock challengeId={p.id} />
 
 
