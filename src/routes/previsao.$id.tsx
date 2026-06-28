@@ -526,7 +526,7 @@ function PredictionInner({ p }: { p: Prediction }) {
           )}
 
           <h1 className="mt-4 font-display text-2xl sm:text-3xl font-black leading-tight">{p.title}</h1>
-          {!p.match && <p className="mt-2 text-muted-foreground">{p.description}</p>}
+          {!p.match && !p.subPredictions && <p className="mt-2 text-muted-foreground">{p.description}</p>}
           <ChallengeRatingBlock challengeId={p.id} />
 
 
