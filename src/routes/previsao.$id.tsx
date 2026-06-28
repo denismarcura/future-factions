@@ -38,11 +38,7 @@ function corpToPrediction(c: CorpChallengeRecord): Prediction {
   return {
     id: c.id,
     title: c.title,
-    description:
-      c.description ??
-      c.subs
-        .map((s, i) => `${i + 1}. ${s.question} — ${s.options.filter(Boolean).join(" / ")}`)
-        .join("  •  "),
+    description: c.description?.trim() ? c.description : "Faça seus palpites e concorra ao prêmio.",
     category: (c.category as Category) ?? ("Entretenimento" as Category),
     author: USERS[0],
     createdAt: c.createdAt,
