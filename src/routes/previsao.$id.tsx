@@ -464,6 +464,16 @@ function PredictionInner({ p }: { p: Prediction }) {
 
         return (
       <div className="space-y-6">
+        {p.imageUrl && (
+          <div className="rounded-2xl overflow-hidden border border-border/60 bg-card shadow-glow">
+            <img
+              src={p.imageUrl}
+              alt={p.title}
+              className="w-full h-auto block"
+              style={{ aspectRatio: "8/3", objectFit: "cover" }}
+            />
+          </div>
+        )}
         <article className="rounded-2xl bg-card border border-border/60 p-6">
           <div className="flex flex-wrap items-center gap-2 text-xs">
             <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-card border border-border/60 text-muted-foreground">
