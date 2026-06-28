@@ -201,7 +201,6 @@ export const listLatestCorpChallenges = createServerFn({ method: "GET" })
     if (error) throw new Error(error.message);
     return (rows ?? [])
       .map((r) => rowToRecord(r as Row))
-      .filter((r) => Boolean(r.companyName) || r.missions.length > 0)
       .slice(0, data.limit ?? 12);
   });
 
