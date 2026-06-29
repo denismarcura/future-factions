@@ -44,8 +44,8 @@ function buildHtml(opts: { senderName: string; challengeName: string; challengeU
 export const sendChallengeInvites = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => InvitesInput.parse(input))
-  .handler(async ({ data, context }) => {
-    const { supabase } = context;
+  .handler(async ({ data }) => {
+    const { sendEmailViaResend } = await import("./resend.server");
     const html = buildHtml({
       senderName: data.senderName,
       challengeName: data.challengeName,
@@ -57,26 +57,11 @@ export const sendChallengeInvites = createServerFn({ method: "POST" })
     let ok = 0;
     let failed = 0;
     for (const to of data.recipients) {
-      const messageId = `challenge-invite:${data.challengeId}:${to}`;
-      const payload = {
-        message_id: messageId,
-        idempotency_key: messageId,
-        to,
-        subject,
-        html,
-        label: "challenge_invite",
-        purpose: "transactional",
-        queued_at: new Date().toISOString(),
-      };
-      const { error } = await supabase.rpc("enqueue_email", {
-        queue_name: "transactional_emails",
-        payload,
-      });
-      if (error) {
-        console.error("invite enqueue failed", to, error);
+      const r = await sendEmailViaResend({ to, subject, html, label: "challenge_invite" });
+      if (r.ok) ok++;
+      else {
+        console.error("challenge invite send failed", to, r.error);
         failed++;
-      } else {
-        ok++;
       }
     }
     return { ok, failed, total: data.recipients.length };
