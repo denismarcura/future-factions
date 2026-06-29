@@ -111,6 +111,12 @@ const MALUCOS: Maluco[] = [
   },
 ];
 
+const MOCK_BASE_DATE = new Date("2026-06-26T12:00:00-03:00").getTime();
+
+function createdAtDaysAgo(days: number) {
+  return new Date(MOCK_BASE_DATE - days * 86400000).toISOString();
+}
+
 function makeOptions(seed: number, labels: string[]): PredictionOption[] {
   return labels.map((label, i) => ({
     id: `o${i}`,
@@ -125,7 +131,7 @@ export const PALPITES_MALUCOS: Prediction[] = MALUCOS.map((m, i) => ({
   description: `🤪 PALPITES MALUCOS\n\nRequisitos:\n${REQUIREMENTS.join("\n")}\n\n🎁 Premiação: ${m.prize.toLocaleString("pt-BR")} Tokens\n📅 Data limite para palpites: 01/07/2026\n💰 Valor para palpitar: ${ENTRY_FEE} Tokens`,
   category: "Palpites Malucos da Copa",
   author: USERS[i % USERS.length],
-  createdAt: new Date(Date.now() - (i + 1) * 86400000).toISOString(),
+  createdAt: createdAtDaysAgo(i + 1),
   closesAt: ENDS_AT,
   minTokens: ENTRY_FEE,
   entryFee: ENTRY_FEE,

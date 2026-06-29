@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
+import nodemailer from "nodemailer";
 
 const InviteInput = z.object({
   recipients: z.array(z.string().trim().email()).min(1).max(50),
@@ -47,44 +48,82 @@ function buildInviteHtml(opts: { intro: string; inviteUrl: string; senderName: s
 </td></tr></table></body></html>`;
 }
 
+function readSmtpConfig() {
+  const host = process.env.SMTP_HOST;
+  const port = Number(process.env.SMTP_PORT || "465");
+  const user = process.env.SMTP_USER;
+  const pass = process.env.SMTP_PASS;
+  const from = process.env.SMTP_FROM || user;
+  const secure = String(process.env.SMTP_SECURE ?? "true").toLowerCase() === "true";
+
+  if (!host || !port || !user || !pass || !from) {
+    throw new Error("Configuração SMTP incompleta.");
+  }
+
+  return { host, port, secure, user, pass, from };
+}
+
+function logSmtpDiagnostics(smtp: ReturnType<typeof readSmtpConfig>) {
+  console.log("SMTP_HOST", smtp.host ? "OK" : "MISSING");
+  console.log("SMTP_PORT", smtp.port);
+  console.log("SMTP_SECURE", smtp.secure);
+  console.log("SMTP_USER", smtp.user || "MISSING");
+  console.log("SMTP_PASS", smtp.pass ? "OK" : "MISSING");
+  console.log("SMTP_FROM", smtp.from || "MISSING");
+}
+
+function logNodemailerError(error: unknown) {
+  if (error instanceof Error) {
+    console.error("smtp invite send failed error", {
+      name: error.name,
+      message: error.message,
+      stack: error.stack,
+      ...(typeof error === "object" ? error : {}),
+    });
+    return;
+  }
+
+  console.error("smtp invite send failed error", error);
+}
+
 export const sendFriendInviteEmails = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => InviteInput.parse(input))
-  .handler(async ({ data, context }) => {
-    const { userId } = context;
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-
+  .handler(async ({ data }) => {
     const html = buildInviteHtml({
       intro: data.intro,
       inviteUrl: data.inviteUrl,
       senderName: data.senderName,
     });
+    const smtp = readSmtpConfig();
+    logSmtpDiagnostics(smtp);
 
-    const stamp = Date.now();
+    const transporter = nodemailer.createTransport({
+      host: smtp.host,
+      port: smtp.port,
+      secure: smtp.secure,
+      auth: {
+        user: smtp.user,
+        pass: smtp.pass,
+      },
+    });
+
     let sent = 0;
     const failed: string[] = [];
 
     for (const to of data.recipients) {
-      const messageId = `friend-invite:${userId}:${to}:${stamp}`;
-      const payload = {
-        message_id: messageId,
-        idempotency_key: messageId,
-        to,
-        subject: data.subject,
-        html,
-        label: "friend_invite",
-        purpose: "transactional",
-        queued_at: new Date().toISOString(),
-      };
-      const { error } = await supabaseAdmin.rpc("enqueue_email", {
-        queue_name: "transactional_emails",
-        payload,
-      } as never);
-      if (error) {
-        console.error("enqueue_email failed", to, error);
-        failed.push(to);
-      } else {
+      try {
+        await transporter.sendMail({
+          from: smtp.from,
+          to,
+          subject: data.subject,
+          html,
+        });
         sent++;
+      } catch (error) {
+        console.error("smtp invite send failed recipient", to);
+        logNodemailerError(error);
+        failed.push(to);
       }
     }
 

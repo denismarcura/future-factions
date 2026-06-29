@@ -167,8 +167,10 @@ const OUTROS: { title: string; category: Category; desc: string }[] = [
   { title: "Eleições 2026: vai ter segundo turno presidencial?", category: "Política", desc: "Definição em segundo turno em outubro de 2026." },
 ];
 
+const MOCK_BASE_DATE = "2026-06-26T12:00:00-03:00";
+
 function daysFromNow(d: number) {
-  const date = new Date();
+  const date = new Date(MOCK_BASE_DATE);
   date.setDate(date.getDate() + d);
   return date.toISOString();
 }
@@ -185,20 +187,21 @@ function makeOptions(seed: number, labels: string[]): PredictionOption[] {
 const predictions: Prediction[] = [];
 
 OUTROS.forEach((o, i) => {
+  const rnd = seededRandom(i + 300);
   predictions.push({
     id: `p${i + 1}`,
     title: o.title,
     description: o.desc,
     category: o.category,
     author: USERS[i % USERS.length],
-    createdAt: daysFromNow(-Math.floor(Math.random() * 5) - 1),
-    closesAt: daysFromNow(Math.floor(Math.random() * 30) + 5),
+    createdAt: daysFromNow(-Math.floor(rnd() * 5) - 1),
+    closesAt: daysFromNow(Math.floor(rnd() * 30) + 5),
     minTokens: [10, 25, 50, 100][i % 4],
     options: makeOptions(i + 10, ["Sim", "Não"]),
-    bettors: Math.floor(Math.random() * 2400) + 80,
-    comments: Math.floor(Math.random() * 320),
-    likes: Math.floor(Math.random() * 1800),
-    shares: Math.floor(Math.random() * 400),
+    bettors: Math.floor(rnd() * 2400) + 80,
+    comments: Math.floor(rnd() * 320),
+    likes: Math.floor(rnd() * 1800),
+    shares: Math.floor(rnd() * 400),
     tags: [o.category.toLowerCase()],
     hot: i < 3,
   });

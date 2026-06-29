@@ -4,6 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { AppShell } from "@/components/layout/AppShell";
 import { CountdownTimer } from "@/components/CountdownTimer";
 import { listLatestCorpChallenges } from "@/lib/corp-challenges.functions";
+import { isDeadlineExpired } from "@/lib/date-utils";
 import {
   Megaphone, Trophy, Users, Sparkles, ArrowRight, CheckCircle2, Pizza,
   Beef, Shirt, IceCream, Car, Dumbbell, Rocket, TrendingUp, Heart,
@@ -180,7 +181,7 @@ function DesafiosEmpresasPage() {
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {latest.map((c) => {
-              const closed = c.endsAt ? new Date(c.endsAt).getTime() <= Date.now() : false;
+              const closed = isDeadlineExpired(c.endsAt);
               return (
                 <Link
                   key={c.id}

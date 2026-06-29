@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { MapPin, Trophy, Target, Award, Sparkles, CheckCircle2, XCircle, Clock, LogIn, Mail, Flag } from "lucide-react";
+import { MapPin, Trophy, Target, Award, Sparkles, CheckCircle2, XCircle, Clock, LogIn, Mail, Flag, Pencil } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { AppShell } from "@/components/layout/AppShell";
@@ -13,6 +13,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import { getTokenBalance } from "@/lib/balance";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { getUserChallenges } from "@/lib/user-challenges";
+import { listParticipations, type MyParticipation } from "@/lib/my-participations";
 
 
 export const Route = createFileRoute("/perfil")({
@@ -64,10 +66,34 @@ function Perfil() {
   });
 
   const [tokens, setTokens] = useState<number>(0);
+  const [createdChallenges, setCreatedChallenges] = useState<ReturnType<typeof getUserChallenges>>([]);
+  const [participationEntries, setParticipationEntries] = useState<MyParticipation[]>([]);
+
   useEffect(() => {
-    if (!user) { setTokens(0); return; }
+    if (!user) {
+      setTokens(0);
+      setCreatedChallenges([]);
+      setParticipationEntries([]);
+      return;
+    }
     getTokenBalance().then(setTokens).catch(() => setTokens(0));
   }, [user?.id]);
+
+  useEffect(() => {
+    const syncLocalLists = () => {
+      setCreatedChallenges(getUserChallenges());
+      setParticipationEntries(listParticipations());
+    };
+
+    syncLocalLists();
+    window.addEventListener("ddp:user-challenges-updated", syncLocalLists);
+    window.addEventListener("ddp:participations-updated", syncLocalLists);
+
+    return () => {
+      window.removeEventListener("ddp:user-challenges-updated", syncLocalLists);
+      window.removeEventListener("ddp:participations-updated", syncLocalLists);
+    };
+  }, []);
 
   // métricas
   const uniqueParticipations = challengeIds.length;
@@ -144,9 +170,91 @@ function Perfil() {
 
       <div className="grid lg:grid-cols-[1fr_320px] gap-6">
         <div>
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-3 flex-wrap gap-3">
+              <h2 className="font-display text-xl font-bold flex items-center gap-2">
+                <Target className="h-5 w-5 text-primary" /> Desafios que você criou
+              </h2>
+              <span className="text-[11px] uppercase tracking-wider text-muted-foreground font-bold">
+                {createdChallenges.length} desafio{createdChallenges.length === 1 ? "" : "s"}
+              </span>
+            </div>
+
+            {!user && !authLoading && (
+              <EmptyState
+                icon={<LogIn className="h-6 w-6" />}
+                title="Entre para ver os desafios que você criou"
+                desc="Faça login para visualizar os desafios que você publicou." 
+                action={<Link to="/auth" className="px-4 py-2 rounded-full bg-primary text-primary-foreground font-bold text-sm">Entrar</Link>}
+              />
+            )}
+
+            {user && createdChallenges.length === 0 && (
+              <EmptyState
+                icon={<Sparkles className="h-6 w-6" />}
+                title="Você ainda não criou desafios"
+                desc="Publique um desafio para acompanhar o desempenho e editar depois."
+                action={<Link to="/criar" className="px-4 py-2 rounded-full bg-primary text-primary-foreground font-bold text-sm">Criar desafio</Link>}
+              />
+            )}
+
+            {user && createdChallenges.length > 0 && (
+              <div className="grid sm:grid-cols-2 gap-3">
+                {createdChallenges.map((challenge) => {
+                  const isExpired = challenge.closesAt ? new Date(challenge.closesAt).getTime() <= Date.now() : false;
+                  return (
+                    <div key={challenge.id} className="rounded-2xl border border-border/60 bg-card p-4">
+                      {challenge.category && (
+                        <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold mb-1">
+                          {challenge.category}
+                        </div>
+                      )}
+                      <div className="font-bold text-sm leading-tight mb-2 line-clamp-2">{challenge.title}</div>
+                      <div className="flex items-center justify-between gap-2">
+                        <span className={`inline-flex items-center gap-1 text-[11px] font-bold px-2 py-1 rounded-full border ${isExpired ? "text-muted-foreground border-border/60 bg-muted/30" : "text-success border-success/40 bg-success/10"}`}>
+                          {isExpired ? <Clock className="h-3.5 w-3.5" /> : <CheckCircle2 className="h-3.5 w-3.5" />} {isExpired ? "Encerrado" : "Aberto"}
+                        </span>
+                        <span className="text-[10px] text-muted-foreground">
+                          {challenge.closesAt ? new Date(challenge.closesAt).toLocaleDateString("pt-BR") : "Sem prazo"}
+                        </span>
+                      </div>
+                      <div className="mt-3 flex flex-wrap items-center gap-2">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-muted/50 px-2 py-1 text-[11px] text-muted-foreground">
+                          <Target className="h-3.5 w-3.5" /> {challenge.bettors ?? 0} palpites
+                        </span>
+                        {challenge.imageUrl && (
+                          <span className="rounded-full bg-primary/10 px-2 py-1 text-[11px] text-primary">
+                            Com imagem
+                          </span>
+                        )}
+                      </div>
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        <Link
+                          to="/previsao/$id"
+                          params={{ id: challenge.id }}
+                          className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-3 py-1.5 text-[11px] font-bold text-primary hover:bg-primary/20 transition"
+                        >
+                          <Target className="h-3.5 w-3.5" /> Ver desafio
+                        </Link>
+                        <button
+                          type="button"
+                          className="inline-flex items-center gap-1 rounded-full border border-border/60 bg-background/50 px-3 py-1.5 text-[11px] font-bold text-muted-foreground cursor-not-allowed"
+                          disabled
+                          title="Rota de edição disponível em uma próxima etapa"
+                        >
+                          <Pencil className="h-3.5 w-3.5" /> Editar
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
           <div className="flex items-center justify-between mb-3 flex-wrap gap-3">
             <h2 className="font-display text-xl font-bold flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-primary" /> Desafios que participei
+              <Sparkles className="h-5 w-5 text-primary" /> Desafios que você participou
             </h2>
             <div className="flex gap-1 bg-card border border-border/60 rounded-full p-1">
               {([
@@ -203,6 +311,7 @@ function Perfil() {
             {filtered.map((p) => {
               const ch = challengesQuery.data?.[p.challenge_id];
               const title = ch?.title || (ch?.home_team && ch?.away_team ? `${ch.home_team} × ${ch.away_team}` : "Desafio");
+              const participationEntry = participationEntries.find((entry) => entry.id === p.challenge_id);
               const status =
                 p.is_correct === true ? { icon: <CheckCircle2 className="h-4 w-4" />, label: "Acertou", cls: "text-success border-success/40 bg-success/10" } :
                 p.is_correct === false ? { icon: <XCircle className="h-4 w-4" />, label: "Errou", cls: "text-destructive border-destructive/40 bg-destructive/10" } :
@@ -227,6 +336,21 @@ function Perfil() {
                     <span className="text-[10px] text-muted-foreground">
                       {new Date(p.created_at).toLocaleDateString("pt-BR")}
                     </span>
+                  </div>
+                  <div className="mt-3 flex flex-wrap items-center gap-2">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-muted/50 px-2 py-1 text-[11px] text-muted-foreground">
+                      <Target className="h-3.5 w-3.5" /> {participationEntry ? `${Object.keys(participationEntry.answers ?? {}).length} resposta${Object.keys(participationEntry.answers ?? {}).length === 1 ? "" : "s"}` : "1 palpite"}
+                    </span>
+                    {p.is_correct === true && (
+                      <span className="inline-flex items-center gap-1 rounded-full border border-success/40 bg-success/10 px-2 py-1 text-[11px] text-success">
+                        <CheckCircle2 className="h-3.5 w-3.5" /> 1 acerto
+                      </span>
+                    )}
+                    {p.is_correct === false && (
+                      <span className="inline-flex items-center gap-1 rounded-full border border-destructive/40 bg-destructive/10 px-2 py-1 text-[11px] text-destructive">
+                        <XCircle className="h-3.5 w-3.5" /> 1 erro
+                      </span>
+                    )}
                   </div>
                 </Link>
               );

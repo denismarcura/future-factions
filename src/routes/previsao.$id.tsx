@@ -7,6 +7,7 @@ import {
 import { toast } from "sonner";
 import { AppShell } from "@/components/layout/AppShell";
 import { formatTokens, getPrediction, PREDICTIONS, USERS, type Prediction, type Category, timeLeft } from "@/lib/mock-data";
+import { getDeadlineTimestamp } from "@/lib/date-utils";
 import { listMissions, listMyClaims, claimMission, type Mission, ACTION_LABEL } from "@/lib/missions";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -22,6 +23,7 @@ import { NextChallengeBanner } from "@/components/NextChallengeBanner";
 import { EarnMorePointsCTA } from "@/components/EarnMorePointsCTA";
 import { getRatings, rateChallenge, getMyRating } from "@/lib/ratings.functions";
 import { debugParticipate } from "@/lib/debug-participate";
+import { isDeadlineExpired } from "@/lib/date-utils";
 
 
 function corpToPrediction(c: CorpChallengeRecord): Prediction {
@@ -378,8 +380,8 @@ function PredictionInner({ p }: { p: Prediction }) {
 
   const related = PREDICTIONS.filter((x) => x.id !== p.id && x.category === p.category).slice(0, 4);
 
-  const deadlineMs = mounted ? new Date(p.closesAt).getTime() - Date.now() : 1;
-  const isClosed = deadlineMs <= 0;
+  const deadlineMs = mounted ? getDeadlineTimestamp(p.closesAt) - Date.now() : 1;
+  const isClosed = mounted ? isDeadlineExpired(p.closesAt) : false;
   const inviteRef = mounted ? new URLSearchParams(window.location.search).get("ref") ?? undefined : undefined;
   const goToSignup = () => {
     toast.error("Faça login ou cadastre-se para participar deste desafio.");

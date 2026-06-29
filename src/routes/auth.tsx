@@ -2,7 +2,6 @@ import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable";
 import { useAuth } from "@/hooks/use-auth";
 import { prepareSignup } from "@/lib/signup.functions";
 import { getChallengeInvite } from "@/lib/friend-profile.functions";
@@ -14,12 +13,13 @@ import {
 import { toast } from "sonner";
 import logoAsset from "@/assets/logo-desafio.png.asset.json";
 
-type AuthSearch = { d?: string; ref?: string };
+type AuthSearch = { d?: string; ref?: string; mode?: "login" | "signup" };
 
 export const Route = createFileRoute("/auth")({
   validateSearch: (s: Record<string, unknown>): AuthSearch => ({
     d: typeof s.d === "string" ? s.d : undefined,
     ref: typeof s.ref === "string" ? s.ref : undefined,
+    mode: s.mode === "signup" ? "signup" : s.mode === "login" ? "login" : undefined,
   }),
   component: AuthPage,
 });
@@ -54,7 +54,7 @@ function AuthPage() {
   const fetchInvite = useServerFn(getChallengeInvite);
   const search = Route.useSearch();
   const [invite, setInvite] = useState<any>(null);
-  const [mode, setMode] = useState<"login" | "signup">(search.d || search.ref ? "signup" : "login");
+  const [mode, setMode] = useState<"login" | "signup">(search.mode ?? (search.d || search.ref ? "signup" : "login"));
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
@@ -73,8 +73,15 @@ function AuthPage() {
     : typeof window !== "undefined"
       ? `${window.location.origin}/dashboard`
       : "/dashboard";
+  const authRedirect = typeof window !== "undefined"
+    ? `${window.location.origin}/auth${search.d ? `?d=${encodeURIComponent(search.d)}${search.ref ? `&ref=${encodeURIComponent(search.ref)}` : ""}` : ""}`
+    : "/auth";
 
   function goAfterAuth() {
+    if (typeof window !== "undefined") {
+      window.location.href = challengeRedirect;
+      return;
+    }
     if (search.d) {
       navigate({
         to: "/previsao/$id",
@@ -91,6 +98,22 @@ function AuthPage() {
   }, [user, loading, search.d, search.ref]);
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
+    const hash = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+    const accessToken = hash.get("access_token");
+    const refreshToken = hash.get("refresh_token");
+    if (!accessToken || !refreshToken) return;
+    supabase.auth
+      .setSession({ access_token: accessToken, refresh_token: refreshToken })
+      .then(({ error }) => {
+        if (error) throw error;
+        window.history.replaceState(null, "", window.location.pathname + window.location.search);
+        goAfterAuth();
+      })
+      .catch((e) => setError(readableAuthError(e)));
+  }, []);
+
+  useEffect(() => {
     if (!search.d) return;
     (fetchInvite as any)({ data: { id: search.d } })
       .then((r: any) => { if (r) setInvite(r); })
@@ -101,14 +124,15 @@ function AuthPage() {
     setError(null);
     setBusy(true);
     try {
-      const result = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: challengeRedirect,
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: authRedirect,
+        },
       });
-      if (result.redirected) return;
-      if (result.error) throw result.error;
-      goAfterAuth();
+      if (error) throw error;
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Erro ao entrar com Google");
+      setError(readableAuthError(e, "Erro ao entrar com Google"));
       setBusy(false);
     }
   }
@@ -129,7 +153,7 @@ function AuthPage() {
       setInfo(`Enviamos um link para ${email}. Abra o e-mail para criar uma nova senha.`);
       toast.success("Link de recuperação enviado");
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Não foi possível enviar o link.");
+      setError(readableAuthError(e, "Não foi possível enviar o link."));
     } finally {
       setBusy(false);
     }
@@ -150,8 +174,17 @@ function AuthPage() {
         if (password.length < 6) throw new Error("Senha deve ter pelo menos 6 caracteres");
         if (!acceptTerms) throw new Error("Você precisa aceitar as regras para continuar");
 
-        // 1. Server-side IP check + city lookup + attempt record
-        const { ip, city } = await prepare({ data: { email } });
+        // 1. Server-side IP check + city lookup + attempt record. If this
+        // auxiliary service is unavailable locally, do not block signup.
+        let ip = "0.0.0.0";
+        let city: string | null = null;
+        try {
+          const prepared = await prepare({ data: { email } });
+          ip = prepared.ip;
+          city = prepared.city;
+        } catch (prepareError) {
+          console.warn("signup preparation failed; continuing without IP enrichment", prepareError);
+        }
         const acceptedAt = new Date().toISOString();
 
         // 2. Create the auth user (Supabase sends the confirmation email)
@@ -191,7 +224,7 @@ function AuthPage() {
       toast.success("Bem-vindo de volta!");
       goAfterAuth();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Erro");
+      setError(readableAuthError(e));
     } finally {
       setBusy(false);
     }
@@ -452,4 +485,25 @@ function Field({
       />
     </div>
   );
+}
+
+function readableAuthError(
+  error: unknown,
+  fallback = "Nao foi possivel concluir. Verifique os dados e tente novamente.",
+) {
+  if (error instanceof Error && error.message && error.message !== "{}") return error.message;
+  if (error && typeof error === "object") {
+    const obj = error as Record<string, unknown>;
+    for (const key of ["message", "error_description", "error", "msg"]) {
+      const value = obj[key];
+      if (typeof value === "string" && value && value !== "{}") return value;
+    }
+    try {
+      const serialized = JSON.stringify(error);
+      if (serialized && serialized !== "{}") return serialized;
+    } catch {
+      // ignore serialization failures
+    }
+  }
+  return fallback;
 }

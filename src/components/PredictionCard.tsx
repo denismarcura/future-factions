@@ -14,11 +14,11 @@ export function PredictionCard({ prediction: p, hideOptions = false }: { predict
   const isLive = oriented?.status === "em_andamento";
 
   return (
-    <article className="group rounded-2xl bg-card border border-border/60 hover:border-primary/50 hover:shadow-glow transition overflow-hidden h-full flex flex-col">
+    <article className="group rounded-2xl bg-card border border-border/60 hover:border-primary/50 hover:shadow-glow transition overflow-hidden h-full flex flex-col p-5">
       <Link
         to="/previsao/$id"
         params={{ id: p.id }}
-        className="flex flex-col h-full p-5"
+        className="flex-1 flex flex-col min-h-0"
       >
         <div className="flex-1 flex flex-col min-h-0">
           <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 text-xs">
@@ -148,32 +148,28 @@ export function PredictionCard({ prediction: p, hideOptions = false }: { predict
             </div>
           )}
         </div>
+      </Link>
 
-        {hasFinalResult ? (
-          <button
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              navigate({ to: "/previsao/$id", params: { id: p.id } });
-            }}
-            className="mt-4 w-full h-10 rounded-xl bg-gradient-to-r from-gold to-primary text-primary-foreground font-display font-black text-sm tracking-wide shadow-glow hover:scale-[1.01] transition inline-flex items-center justify-center gap-2 shrink-0"
-          >
-            <Trophy className="h-4 w-4" /> VER RESULTADO
-          </button>
-        ) : (
-          <button
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              navigate({ to: "/previsao/$id", params: { id: p.id } });
-            }}
-            className="mt-4 w-full h-10 rounded-xl bg-gradient-brand text-primary-foreground font-display font-black text-sm tracking-wide shadow-glow hover:scale-[1.01] transition inline-flex items-center justify-center gap-2 shrink-0"
-          >
-            <Plus className="h-4 w-4" /> PARTICIPAR
-          </button>
-        )}
+      {hasFinalResult ? (
+        <button
+          type="button"
+          onClick={() => navigate({ to: "/previsao/$id", params: { id: p.id } })}
+          className="mt-4 w-full h-10 rounded-xl bg-gradient-to-r from-gold to-primary text-primary-foreground font-display font-black text-sm tracking-wide shadow-glow hover:scale-[1.01] transition inline-flex items-center justify-center gap-2 shrink-0"
+        >
+          <Trophy className="h-4 w-4" /> VER RESULTADO
+        </button>
+      ) : (
+        <button
+          type="button"
+          onClick={() => navigate({ to: "/previsao/$id", params: { id: p.id } })}
+          className="mt-4 w-full h-10 rounded-xl bg-gradient-brand text-primary-foreground font-display font-black text-sm tracking-wide shadow-glow hover:scale-[1.01] transition inline-flex items-center justify-center gap-2 shrink-0"
+        >
+          <Plus className="h-4 w-4" /> PARTICIPAR
+        </button>
+      )}
 
-        {!hideOptions && (
+      {!hideOptions && (
+        <Link to="/previsao/$id" params={{ id: p.id }} className="contents">
           <>
             <div className="mt-3 flex items-center gap-4 text-xs text-muted-foreground shrink-0">
               <span className="inline-flex items-center gap-1">
@@ -196,8 +192,8 @@ export function PredictionCard({ prediction: p, hideOptions = false }: { predict
               </span>
             </div>
           </>
-        )}
-      </Link>
+        </Link>
+      )}
     </article>
   );
 }

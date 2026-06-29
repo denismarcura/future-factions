@@ -13,9 +13,7 @@ function formatCountdown(ms: number): string {
 }
 
 export function CountdownTimer({ closesAt }: { closesAt: string }) {
-  const [text, setText] = useState(() =>
-    formatCountdown(new Date(closesAt).getTime() - Date.now()),
-  );
+  const [text, setText] = useState("Carregando...");
 
   useEffect(() => {
     const target = new Date(closesAt).getTime();
