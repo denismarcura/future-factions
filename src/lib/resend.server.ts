@@ -82,11 +82,11 @@ async function logEmail(opts: {
     await supabaseAdmin.from("email_send_log").insert(
       opts.to.map((recipient) => ({
         recipient_email: recipient,
-        subject: opts.subject,
-        label: opts.label ?? null,
+        template_name: opts.label ?? "resend",
         status: opts.status,
-        error: opts.error ?? null,
-        provider_message_id: opts.providerId ?? null,
+        error_message: opts.error ?? null,
+        message_id: opts.providerId ?? null,
+        metadata: { subject: opts.subject, provider: "resend" },
       })) as never,
     );
   } catch (e) {
