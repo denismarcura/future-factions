@@ -812,27 +812,36 @@ function PredictionInner({ p }: { p: Prediction }) {
               )}
 
               {confirmed && (
-                <div className="mt-4 rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/15 via-background/40 to-gold/10 p-5 text-center">
-                  <div className="font-display text-lg font-black text-gradient-brand">Convide seus amigos e ganhe mais tokens!</div>
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    Cada amigo cadastrado pelo seu convite aumenta suas oportunidades dentro da plataforma.
-                  </p>
-                  <div className="mt-4 grid sm:grid-cols-2 gap-2">
+                <div className="mt-4 rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/15 via-background/40 to-gold/10 p-5">
+                  <div className="text-center">
+                    <div className="font-display text-lg font-black text-gradient-brand">🎉 Palpite confirmado!</div>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      Agora aumente suas chances: cumpra missões, convide amigos por e-mail e já participe do próximo desafio.
+                    </p>
+                  </div>
+                  <div className="mt-4 grid sm:grid-cols-3 gap-2">
                     <Link
-                      to="/perfil"
+                      to="/missoes"
                       className="inline-flex items-center justify-center gap-2 h-11 rounded-xl bg-gradient-brand text-primary-foreground font-bold text-sm shadow-glow hover:scale-[1.01] transition"
                     >
-                      Convidar Amigos
+                      ⭐ Cumprir missões
+                    </Link>
+                    <Link
+                      to="/convidar-amigos"
+                      className="inline-flex items-center justify-center gap-2 h-11 rounded-xl bg-gradient-to-r from-emerald-500 to-green-500 text-white font-bold text-sm shadow-glow hover:scale-[1.01] transition"
+                    >
+                      ✉️ Convidar por e-mail
                     </Link>
                     <Link
                       to="/desafios"
-                      className="inline-flex items-center justify-center gap-2 h-11 rounded-xl border border-primary/40 bg-background/40 text-primary font-bold text-sm hover:bg-primary/10 transition"
+                      className="inline-flex items-center justify-center gap-2 h-11 rounded-xl border border-gold/40 bg-gold/10 text-gold font-bold text-sm hover:bg-gold/20 transition"
                     >
-                      Ver mais desafios
+                      ➡️ Próximo desafio
                     </Link>
                   </div>
                 </div>
               )}
+
 
               {missionQueue.length === 0 && (
                 <div className="rounded-xl border border-border/60 bg-background/40 p-3 text-xs text-center text-muted-foreground">
