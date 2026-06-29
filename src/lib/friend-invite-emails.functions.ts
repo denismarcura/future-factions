@@ -50,9 +50,8 @@ function buildInviteHtml(opts: { intro: string; inviteUrl: string; senderName: s
 export const sendFriendInviteEmails = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => InviteInput.parse(input))
-  .handler(async ({ data, context }) => {
-    const { userId } = context;
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  .handler(async ({ data }) => {
+    const { sendEmailViaResend } = await import("./resend.server");
 
     const html = buildInviteHtml({
       intro: data.intro,
@@ -60,33 +59,22 @@ export const sendFriendInviteEmails = createServerFn({ method: "POST" })
       senderName: data.senderName,
     });
 
-    const stamp = Date.now();
     let sent = 0;
     const failed: string[] = [];
     const errors: string[] = [];
 
     for (const to of data.recipients) {
-      const messageId = `friend-invite:${userId}:${to}:${stamp}`;
-      const payload = {
-        message_id: messageId,
-        idempotency_key: messageId,
+      const r = await sendEmailViaResend({
         to,
         subject: data.subject,
         html,
         label: "friend_invite",
-        purpose: "transactional",
-        queued_at: new Date().toISOString(),
-      };
-      const { error } = await supabaseAdmin.rpc("enqueue_email", {
-        queue_name: "transactional_emails",
-        payload,
-      } as never);
-      if (error) {
-        console.error("enqueue_email failed", to, error);
-        failed.push(to);
-        errors.push(`${to}: ${error.message || "erro"}`);
-      } else {
+      });
+      if (r.ok) {
         sent++;
+      } else {
+        failed.push(to);
+        errors.push(`${to}: ${r.error || "erro"}`);
       }
     }
 

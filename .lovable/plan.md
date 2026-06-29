@@ -1,49 +1,52 @@
-Vou atacar todos os problemas reportados em uma rodada, focando nos sintomas concretos que confirmei na base de dados e no código.
+# Trocar envio de e-mails para Resend (chave gerenciada no admin)
 
-## 1. Desafios criados não aparecem na lista
+## Objetivo
+A página `/admin/apis` hoje é só visual — não salva nada. Vou torná-la funcional para a chave do Resend e migrar todos os disparos (convite de amigos, convites de desafios e e-mails de desafio) para usar a API do Resend diretamente, em vez da fila interna `enqueue_email`.
 
-**Causa:** em `src/lib/corp-challenges.functions.ts` (`listLatestCorpChallenges`) há um filtro `Boolean(companyName) || missions.length > 0`. Todos os desafios novos do usuário têm `company_name = null` e `missions = []`, então são descartados. Por isso `tt4196w`, `l169lew`, `48flvua` etc. somem da Home e de /desafios.
+## O que será feito
 
-**Correção:** remover esse filtro (ou afrouxá-lo para apenas `status = 'ativo'`). Mostrar todo desafio ativo cadastrado pelo wizard.
+### 1. Persistência da chave no admin
+- Nova tabela `public.app_settings (key text PK, value jsonb, updated_at)` com RLS:
+  - SELECT/INSERT/UPDATE somente para `admin` (via `has_role`).
+  - GRANTs para `authenticated` e `service_role`.
+- Server functions (em `src/lib/admin-settings.functions.ts`):
+  - `getAdminSetting({ key })` — admin-only, devolve `{ value }`.
+  - `saveAdminSetting({ key, value })` — admin-only, faz upsert.
+- A chave do Resend fica em `app_settings` com key `resend` e valor `{ apiKey, from }`. **Não** será gravada como secret do projeto — fica no banco para o admin poder rotacionar pela UI a qualquer momento.
 
-## 2. Página /previsao/{id} feia + descrição enorme
+### 2. UI `/admin/apis` funcional (apenas card Resend nesta entrega)
+- Carrega valores existentes ao abrir.
+- Botão "Salvar chave" grava de verdade via `saveAdminSetting`.
+- Botão "Testar envio" que dispara um e-mail de teste para o e-mail do admin logado (usa a chave recém-salva).
+- Badge "Conectado" reflete o estado real.
+- Cards de ChatGPT e Maritaca seguem cosméticos por enquanto (fora do escopo do pedido).
 
-A página atual concatena todas as perguntas/opções como um parágrafo único (`1. Quem sairá... • 2. Qual será o placar... • ...`) e exibe via `<p>{p.description}</p>` quando o desafio tem partida detectada.
+### 3. Cliente Resend server-side
+- Novo helper `src/lib/resend.server.ts` com `sendEmailViaResend({ to, subject, html, from? })`:
+  - Lê a chave do `app_settings` (via `supabaseAdmin`).
+  - Faz `POST https://api.resend.com/emails`.
+  - Lança erro com a mensagem real do Resend quando falha (para aparecer no toast).
+  - Registra cada envio em `email_send_log` (tabela já existe) com status/erro.
 
-**Correções em `src/routes/previsao.$id.tsx`:**
-- Em `corpToPrediction`, só usar `c.description` quando vier preenchida pelo criador. Se vier vazia, deixar `description` curta (ex.: "Faça seus palpites e concorra"), sem dump das perguntas.
-- Renderizar as perguntas apenas no formulário de palpites (que já existe), nunca como parágrafo solto acima do card.
-- Adicionar no topo o **banner gerado** ao criar a campanha (`c.bannerUrl`) em um bloco com proporção 8:3, bordas arredondadas, fallback para `c.logoUrl`. Atualmente `imageUrl` é passado mas não há um hero visual no topo — vou inserir um `<img>` destacado antes do header do confronto.
-- Manter alinhamento dos times e botão PARTICIPAR já implementados.
+### 4. Migração dos disparos atuais
+Trocar `enqueue_email` por `sendEmailViaResend` em:
+- `src/lib/friend-invite-emails.functions.ts` (convite a amigos por e-mail).
+- `src/lib/challenge-invites.functions.ts` (convites de participantes de desafios).
+- `src/lib/challenge-emails.functions.ts` (notificações de desafio).
+- `src/lib/result-email.functions.ts` se usar a fila (verificar e migrar se for o caso).
 
-## 3. Botão "Participar" não envia palpites
+A fila `pgmq` e os workers existentes não são removidos nesta entrega — apenas deixam de ser alimentados pelos fluxos acima.
 
-Vou instrumentar a confirmação para:
-- Validar se há ao menos uma sub-pergunta respondida e dar `toast.error` claro.
-- Garantir que `saveParticipation` é chamado mesmo quando não há missões (fluxo corp puro).
-- Logar via `debugParticipate` cada etapa (já existe) e expor o erro real no toast (hoje algumas falhas ficam silenciosas).
+### 5. Validações
+- Se a chave do Resend não estiver configurada, os fluxos de e-mail retornam erro claro: "Configure a chave do Resend em /admin/apis".
+- Remetente padrão (`from`) cai para `Desafio dos Palpites <no-reply@desafiodospalpites.com.br>` quando o campo não for preenchido.
 
-## 4. Banner gerado precisa aparecer ao abrir o desafio
+## Detalhes técnicos
+- A chamada ao Resend é feita direto via `fetch` (sem SDK) para evitar dependências pesadas no Worker.
+- Toda função que envia e-mail é `createServerFn` com `requireSupabaseAuth` + verificação `has_role('admin')` quando aplicável (testes/admin); o disparo de convite de amigos continua disponível para qualquer usuário autenticado (já é hoje).
+- Como o domínio `desafiodospalpites.com.br` já está verificado no Resend pelo usuário, o `from` pode usar esse domínio sem cair em sandbox.
 
-Já está salvo em `corporate_challenges.banner_url`. Falta exibir no `/previsao/$id`. Vai junto com a correção do item 2.
-
-## 5. E-mail de convite falhando
-
-`email_send_log` está vazio — nada chegou na fila. O `sendFriendInviteEmails` usa `supabaseAdmin.rpc('enqueue_email', ...)` e a infraestrutura Lovable Emails (pgmq + cron). O usuário diz que configurou SMTP no Resend, mas o app não usa Resend — ele enfileira via `enqueue_email`.
-
-**Ações:**
-- Verificar via `email_domain--check_email_domain_status` se o domínio Lovable Emails está ativo. Se não estiver, mostrar o diálogo de setup (`<presentation-open-email-setup>`) para o usuário configurar o domínio de envio. Sem isso, nenhum e-mail sai.
-- Adicionar tratamento de erro visível em `src/routes/convidar-amigos.tsx`: mostrar a mensagem real retornada pelo servidor (failed[], reason) em vez de um toast genérico.
-- Adicionar try/catch com log no handler para inserir uma linha em `email_send_log` com `status='failed'` quando `enqueue_email` retornar erro, para facilitar diagnóstico futuro.
-
-## Arquivos afetados
-
-- `src/lib/corp-challenges.functions.ts` — remover filtro restritivo.
-- `src/routes/previsao.$id.tsx` — descrição curta, hero com banner, validação/feedback do botão Participar.
-- `src/routes/convidar-amigos.tsx` — mensagens de erro detalhadas.
-- `src/lib/friend-invite-emails.functions.ts` — log e retorno de erro mais informativo.
-- Setup do domínio de e-mail (intermediário) se ainda não estiver ativo.
-
-## Fora de escopo (confirmar antes)
-
-- Próximos jogos automáticos 28/06 e 29/06: depende do sync football-data.org já existente; posso forçar uma sincronização em sequência se você quiser, mas não está no escopo deste plano.
+## Fora do escopo
+- Reescrever os workers/fila `pgmq` existentes.
+- Cards ChatGPT/Maritaca da página `/admin/apis` (continuam visuais).
+- Templates de e-mail de Auth do Supabase (esses seguem pelo provedor de auth).

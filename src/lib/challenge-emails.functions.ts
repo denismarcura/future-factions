@@ -101,26 +101,17 @@ export const sendChallengePublishedEmail = createServerFn({ method: "POST" })
       inviteLink: data.inviteLink,
     });
 
-    const messageId = `challenge-published:${data.challengeId}`;
-    const payload = {
-      message_id: messageId,
-      idempotency_key: messageId,
+    const { sendEmailViaResend } = await import("./resend.server");
+    const r = await sendEmailViaResend({
       to: email,
       subject: `🎉 Seu desafio "${data.challengeName}" está no ar!`,
       html,
       label: "challenge_published",
-      purpose: "transactional",
-      queued_at: new Date().toISOString(),
-    };
-
-    const { error } = await supabase.rpc("enqueue_email", {
-      queue_name: "transactional_emails",
-      payload,
     });
 
-    if (error) {
-      console.error("enqueue_email failed", error);
-      return { ok: false, reason: "enqueue_failed" as const };
+    if (!r.ok) {
+      console.error("resend send failed", r.error);
+      return { ok: false, reason: "send_failed" as const };
     }
     return { ok: true as const };
   });
