@@ -597,122 +597,16 @@ function Feed() {
         </Link>
       </section>
 
-      {/* Empresas em destaque */}
-      {sortedCorp.length > 0 && (
-        <section className="mb-8">
-          <div className="mb-4 flex items-end justify-between gap-3">
-            <div>
-              <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-wider text-gold font-bold">
-                <Star className="h-3.5 w-3.5 fill-gold" /> Patrocinados
-              </div>
-              <h2 className="font-display text-2xl sm:text-3xl font-black">Empresas em destaque</h2>
-            </div>
-            <Link to="/desafios" className="text-xs sm:text-sm font-bold text-gold hover:underline shrink-0">
-              Ver todos →
-            </Link>
-          </div>
+      {/* Desafios por categoria — unifica empresas + comunidade + plataforma */}
+      <CategorizedChallenges
+        corp={sortedCorp}
+        userChallenges={userChallenges}
+        nowTs={nowTs}
+        mounted={mounted}
+        participatedIds={participatedIds}
+        formatTimeLeft={formatTimeLeft}
+      />
 
-          <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-            {corpPageItems.map((c, idx) => {
-              const isFirst = corpPage === 0 && idx === 0;
-              const timeLabel = formatTimeLeft(c.endsAt);
-              return (
-                <Link
-                  key={c.id}
-                  to="/previsao/$id"
-                  params={{ id: c.id }}
-                  className={`group relative block overflow-hidden rounded-2xl border transition ${
-                    isFirst
-                      ? "border-gold/60 bg-gradient-to-br from-gold/15 via-card to-card shadow-glow"
-                      : "border-border/60 bg-card hover:border-gold/50 hover:shadow-glow"
-                  }`}
-                >
-                  {c.bannerUrl ? (
-                    <div className="aspect-[16/9] w-full overflow-hidden bg-muted">
-                      <img
-                        src={c.bannerUrl}
-                        alt={c.title}
-                        className="h-full w-full object-cover group-hover:scale-105 transition duration-500"
-                        loading="lazy"
-                      />
-                    </div>
-                  ) : (
-                    <div className="aspect-[16/9] w-full bg-gradient-to-br from-gold/15 to-primary/10 grid place-items-center">
-                      <Building2 className="h-10 w-10 text-gold/60" />
-                    </div>
-                  )}
-
-                  {isFirst && mounted && timeLabel && (
-                    <div className="absolute top-2 left-2 inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-destructive text-destructive-foreground text-[10px] font-black uppercase tracking-wider shadow-lg">
-                      <Timer className="h-3 w-3" /> Encerra em {timeLabel}
-                    </div>
-                  )}
-                  {!isFirst && mounted && timeLabel && timeLabel !== "Encerrado" && (
-                    <div className="absolute top-2 left-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-background/85 backdrop-blur text-[10px] font-bold text-foreground">
-                      <Clock className="h-3 w-3 text-gold" /> {timeLabel}
-                    </div>
-                  )}
-
-                  <div className="p-3 sm:p-4">
-                    <div className="flex items-center gap-2 mb-1.5">
-                      {c.logoUrl ? (
-                        <img src={c.logoUrl} alt="" className="h-7 w-7 rounded-lg object-cover border border-border/60 shrink-0" />
-                      ) : (
-                        <div className="h-7 w-7 rounded-lg bg-gold/15 grid place-items-center text-gold font-black text-xs shrink-0">
-                          {(c.companyName ?? c.title).slice(0, 1).toUpperCase()}
-                        </div>
-                      )}
-                      <div className="text-[11px] font-bold text-gold truncate">{c.companyName ?? "Empresa"}</div>
-                    </div>
-                    <h3 className="font-display font-bold text-sm sm:text-base leading-snug line-clamp-2 group-hover:text-gold transition">
-                      {c.title}
-                    </h3>
-                    {c.prizeName && (
-                      <div className="mt-1.5 text-xs text-muted-foreground line-clamp-1">🎁 {c.prizeName}</div>
-                    )}
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
-
-          {corpTotalPages > 1 && (
-            <div className="mt-4 flex items-center justify-center gap-2">
-              <button
-                onClick={() => setCorpPage((p) => Math.max(0, p - 1))}
-                disabled={corpPage === 0}
-                className="h-9 w-9 grid place-items-center rounded-full border border-border/60 bg-card text-muted-foreground hover:text-foreground disabled:opacity-40 disabled:cursor-not-allowed"
-                aria-label="Página anterior"
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </button>
-              <div className="flex items-center gap-1">
-                {Array.from({ length: corpTotalPages }).map((_, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setCorpPage(i)}
-                    className={`h-8 min-w-8 px-2 rounded-full text-xs font-bold transition ${
-                      i === corpPage
-                        ? "bg-gradient-brand text-primary-foreground shadow-glow"
-                        : "bg-card text-muted-foreground border border-border/60 hover:text-foreground"
-                    }`}
-                  >
-                    {i + 1}
-                  </button>
-                ))}
-              </div>
-              <button
-                onClick={() => setCorpPage((p) => Math.min(corpTotalPages - 1, p + 1))}
-                disabled={corpPage >= corpTotalPages - 1}
-                className="h-9 w-9 grid place-items-center rounded-full border border-border/60 bg-card text-muted-foreground hover:text-foreground disabled:opacity-40 disabled:cursor-not-allowed"
-                aria-label="Próxima página"
-              >
-                <ChevronRight className="h-4 w-4" />
-              </button>
-            </div>
-          )}
-        </section>
-      )}
 
 
 
@@ -855,6 +749,225 @@ function ThreeColumnWidgets({
     </section>
   );
 }
+
+type UnifiedItem = {
+  id: string;
+  title: string;
+  category: string;
+  companyName?: string | null;
+  imageUrl?: string | null;
+  logoUrl?: string | null;
+  prizeName?: string | null;
+  endsAt: string | null;
+  source: "corp" | "user" | "platform";
+};
+
+const CAT_TABS: { key: string; label: string; match: (c: string, t: string, src: string) => boolean }[] = [
+  { key: "todos", label: "Todos", match: () => true },
+  { key: "copa", label: "Copa do Mundo", match: (c, t) => /copa/i.test(c) || /copa do mundo/i.test(t) },
+  { key: "empresas", label: "Empresas", match: (_c, _t, src) => src === "corp" },
+  { key: "masterchef", label: "MasterChef", match: (c, t) => /masterchef/i.test(c) || /masterchef/i.test(t) },
+  { key: "alien", label: "Alienígenas", match: (c) => /alien|conspira/i.test(c) },
+  { key: "diversas", label: "Diversas", match: (c, t, src) =>
+      src !== "corp" && !/copa/i.test(c) && !/copa do mundo/i.test(t) && !/masterchef/i.test(c) && !/masterchef/i.test(t) && !/alien|conspira/i.test(c) },
+];
+
+function CategorizedChallenges({
+  corp,
+  userChallenges,
+  nowTs,
+  mounted,
+  participatedIds,
+  formatTimeLeft,
+}: {
+  corp: CorpChallengeRecord[];
+  userChallenges: Prediction[];
+  nowTs: number;
+  mounted: boolean;
+  participatedIds: Set<string>;
+  formatTimeLeft: (endsAt: string | null) => string | null;
+}) {
+  const [activeCat, setActiveCat] = useState<string>("todos");
+  const [page, setPage] = useState(0);
+
+  const items: UnifiedItem[] = useMemo(() => {
+    const corpItems: UnifiedItem[] = corp.map((c) => ({
+      id: c.id, title: c.title, category: c.category ?? "Empresas",
+      companyName: c.companyName, imageUrl: c.bannerUrl, logoUrl: c.logoUrl,
+      prizeName: c.prizeName, endsAt: c.endsAt, source: "corp",
+    }));
+    const userItems: UnifiedItem[] = userChallenges
+      .filter((p) => new Date(p.closesAt).getTime() > (mounted ? Date.now() : 0))
+      .map((p) => ({
+        id: p.id, title: p.title, category: p.category,
+        imageUrl: p.imageUrl, prizeName: null,
+        endsAt: p.closesAt, source: "user",
+      }));
+    const platformItems: UnifiedItem[] = PREDICTIONS
+      .filter((p) => new Date(p.closesAt).getTime() > (mounted ? Date.now() : 0))
+      .map((p) => ({
+        id: p.id, title: p.title, category: p.category,
+        imageUrl: p.imageUrl, prizeName: null,
+        endsAt: p.closesAt, source: "platform",
+      }));
+    const all = [...corpItems, ...userItems, ...platformItems];
+    const seen = new Set<string>();
+    return all.filter((i) => {
+      if (participatedIds.has(String(i.id))) return false;
+      if (seen.has(i.id)) return false;
+      seen.add(i.id);
+      return true;
+    });
+  }, [corp, userChallenges, participatedIds, mounted]);
+
+  const tab = CAT_TABS.find((t) => t.key === activeCat) ?? CAT_TABS[0];
+  const filtered = useMemo(
+    () => items.filter((i) => tab.match(i.category ?? "", i.title ?? "", i.source))
+      .sort((a, b) => {
+        const ae = a.endsAt ? new Date(a.endsAt).getTime() : Infinity;
+        const be = b.endsAt ? new Date(b.endsAt).getTime() : Infinity;
+        return ae - be;
+      }),
+    [items, tab],
+  );
+
+  const perPage = 6;
+  const totalPages = Math.max(1, Math.ceil(filtered.length / perPage));
+  const pageItems = filtered.slice(page * perPage, page * perPage + perPage);
+
+  return (
+    <section className="mb-8">
+      <div className="mb-4 flex items-end justify-between gap-3">
+        <div>
+          <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-wider text-primary font-bold">
+            <TrendingUp className="h-3.5 w-3.5" /> Desafios
+          </div>
+          <h2 className="font-display text-2xl sm:text-3xl font-black">Desafios por categoria</h2>
+        </div>
+        <Link to="/desafios" className="text-xs sm:text-sm font-bold text-primary hover:underline shrink-0">
+          Ver todos →
+        </Link>
+      </div>
+
+      {/* Tabs */}
+      <div className="mb-4 flex flex-wrap gap-2">
+        {CAT_TABS.map((t) => {
+          const count = items.filter((i) => t.match(i.category ?? "", i.title ?? "", i.source)).length;
+          const active = t.key === activeCat;
+          return (
+            <button
+              key={t.key}
+              onClick={() => { setActiveCat(t.key); setPage(0); }}
+              className={`inline-flex items-center gap-1.5 h-9 px-3.5 rounded-full text-xs font-bold transition ${
+                active
+                  ? "bg-gradient-brand text-primary-foreground shadow-glow"
+                  : "bg-card border border-border/60 text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {t.label}
+              <span className={`text-[10px] font-mono ${active ? "opacity-80" : "opacity-60"}`}>{count}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      {filtered.length === 0 ? (
+        <div className="rounded-2xl border border-border/60 bg-card p-10 text-center text-sm text-muted-foreground">
+          Nenhum desafio ativo nesta categoria.
+        </div>
+      ) : (
+        <>
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+            {pageItems.map((c) => {
+              const timeLabel = formatTimeLeft(c.endsAt);
+              return (
+                <Link
+                  key={c.id}
+                  to="/previsao/$id"
+                  params={{ id: c.id }}
+                  className="group relative block overflow-hidden rounded-2xl border border-border/60 bg-card hover:border-primary/60 hover:shadow-glow transition"
+                >
+                  {c.imageUrl ? (
+                    <div className="aspect-[16/9] w-full overflow-hidden bg-muted">
+                      <img src={c.imageUrl} alt={c.title} className="h-full w-full object-cover group-hover:scale-105 transition duration-500" loading="lazy" />
+                    </div>
+                  ) : (
+                    <div className="aspect-[16/9] w-full bg-gradient-to-br from-primary/15 to-gold/10 grid place-items-center">
+                      <Building2 className="h-10 w-10 text-primary/60" />
+                    </div>
+                  )}
+                  {mounted && timeLabel && timeLabel !== "Encerrado" && (
+                    <div className="absolute top-2 left-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-background/85 backdrop-blur text-[10px] font-bold text-foreground">
+                      <Clock className="h-3 w-3 text-gold" /> {timeLabel}
+                    </div>
+                  )}
+                  <div className="absolute top-2 right-2 inline-flex items-center px-2 py-0.5 rounded-full bg-primary/85 text-primary-foreground text-[9px] font-black uppercase tracking-wider">
+                    {c.source === "corp" ? "Empresa" : c.source === "user" ? "Comunidade" : c.category.split(" ")[0]}
+                  </div>
+                  <div className="p-3 sm:p-4">
+                    {c.companyName && (
+                      <div className="flex items-center gap-2 mb-1.5">
+                        {c.logoUrl ? (
+                          <img src={c.logoUrl} alt="" className="h-6 w-6 rounded-md object-cover border border-border/60 shrink-0" />
+                        ) : (
+                          <div className="h-6 w-6 rounded-md bg-gold/15 grid place-items-center text-gold font-black text-[10px] shrink-0">
+                            {c.companyName.slice(0, 1).toUpperCase()}
+                          </div>
+                        )}
+                        <div className="text-[10px] font-bold text-gold truncate">{c.companyName}</div>
+                      </div>
+                    )}
+                    <h3 className="font-display font-bold text-sm sm:text-base leading-snug line-clamp-2 group-hover:text-primary transition">
+                      {c.title}
+                    </h3>
+                    {c.prizeName && (
+                      <div className="mt-1.5 text-xs text-muted-foreground line-clamp-1">🎁 {c.prizeName}</div>
+                    )}
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+
+          {totalPages > 1 && (
+            <div className="mt-4 flex items-center justify-center gap-2">
+              <button
+                onClick={() => setPage((p) => Math.max(0, p - 1))}
+                disabled={page === 0}
+                className="h-9 w-9 grid place-items-center rounded-full border border-border/60 bg-card text-muted-foreground hover:text-foreground disabled:opacity-40 disabled:cursor-not-allowed"
+                aria-label="Página anterior"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </button>
+              <div className="flex items-center gap-1">
+                {Array.from({ length: totalPages }).map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setPage(i)}
+                    className={`h-8 min-w-8 px-2 rounded-full text-xs font-bold transition ${
+                      i === page ? "bg-gradient-brand text-primary-foreground shadow-glow" : "bg-card text-muted-foreground border border-border/60 hover:text-foreground"
+                    }`}
+                  >
+                    {i + 1}
+                  </button>
+                ))}
+              </div>
+              <button
+                onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+                disabled={page >= totalPages - 1}
+                className="h-9 w-9 grid place-items-center rounded-full border border-border/60 bg-card text-muted-foreground hover:text-foreground disabled:opacity-40 disabled:cursor-not-allowed"
+                aria-label="Próxima página"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </button>
+            </div>
+          )}
+        </>
+      )}
+    </section>
+  );
+}
+
 
 
 
