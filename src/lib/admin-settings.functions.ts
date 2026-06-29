@@ -23,12 +23,13 @@ export const getAdminSetting = createServerFn({ method: "POST" })
       .eq("key", data.key)
       .maybeSingle();
     if (error) throw new Error(error.message);
-    return { value: (row?.value ?? null) as Record<string, unknown> | null, updatedAt: row?.updated_at ?? null };
+    const value = (row?.value ?? null) as Record<string, string> | null;
+    return { value, updatedAt: (row?.updated_at ?? null) as string | null };
   });
 
 const SaveSchema = z.object({
   key: z.string().trim().min(1).max(64),
-  value: z.record(z.any()),
+  value: z.record(z.string(), z.any()),
 });
 
 export const saveAdminSetting = createServerFn({ method: "POST" })
