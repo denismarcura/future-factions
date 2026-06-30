@@ -2,6 +2,10 @@
 // Usa a tabela app_settings (já existente) com chaves prefixadas "api:{key_name}".
 // Formato do value: { key_value: string, description?: string }
 // Os valores brutos NUNCA chegam ao client — apenas versões mascaradas.
+//
+// IMPORTANTE: todas as escritas usam supabaseAdmin (service role) para evitar
+// problemas de RLS — o mesmo padrão de saveAdminSetting em admin-settings.functions.ts.
+// A autorização é verificada explicitamente via ensureAdmin antes de qualquer operação.
 
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
@@ -10,11 +14,12 @@ import { z } from "zod";
 const PREFIX = "api:";
 
 async function ensureAdmin(ctx: { supabase: any; userId: string }) {
-  const { data: ok } = await ctx.supabase.rpc("has_role", {
+  const { data, error } = await ctx.supabase.rpc("has_role", {
     _user_id: ctx.userId,
     _role: "admin",
   });
-  if (!ok) throw new Error("Forbidden");
+  if (error) throw new Error(error.message);
+  if (!data) throw new Error("Apenas administradores podem executar esta ação.");
 }
 
 function maskValue(value: string): string {
@@ -24,7 +29,6 @@ function maskValue(value: string): string {
 }
 
 // ── Leitura bruta (server-only, nunca chamar do client) ─────────────────────
-// Usa supabaseAdmin (service role) pois não há contexto de usuário aqui.
 export async function getApiSetting(keyName: string): Promise<string | null> {
   try {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -54,12 +58,13 @@ export const listApiSettings = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<ApiSettingRow[]> => {
     await ensureAdmin(context);
-    const { data, error } = await context.supabase
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data, error } = await supabaseAdmin
       .from("app_settings")
       .select("key, value, updated_at")
       .like("key", `${PREFIX}%`)
       .order("key");
-    if (error) throw error;
+    if (error) throw new Error(error.message);
     return (data ?? []).map((row: any) => {
       const keyName = (row.key as string).replace(PREFIX, "");
       const v = (row.value ?? {}) as { key_value?: string; description?: string };
@@ -88,14 +93,15 @@ export const upsertApiSetting = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     await ensureAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     // Preserva description existente se não for fornecida
-    const existing = await context.supabase
+    const { data: existing } = await supabaseAdmin
       .from("app_settings")
       .select("value")
       .eq("key", `${PREFIX}${data.key_name}`)
       .maybeSingle();
-    const prev = (existing.data?.value ?? {}) as Record<string, any>;
+    const prev = (existing?.value ?? {}) as Record<string, any>;
 
     const newValue = {
       ...prev,
@@ -103,10 +109,13 @@ export const upsertApiSetting = createServerFn({ method: "POST" })
       ...(data.description !== undefined ? { description: data.description } : {}),
     };
 
-    const { error } = await context.supabase
+    const { error } = await supabaseAdmin
       .from("app_settings")
-      .upsert({ key: `${PREFIX}${data.key_name}`, value: newValue }, { onConflict: "key" });
-    if (error) throw error;
+      .upsert(
+        { key: `${PREFIX}${data.key_name}`, value: newValue, updated_by: context.userId },
+        { onConflict: "key" },
+      );
+    if (error) throw new Error(error.message);
     return { ok: true };
   });
 
@@ -116,10 +125,11 @@ export const deleteApiSetting = createServerFn({ method: "POST" })
   .validator((d: unknown) => z.object({ key_name: z.string().min(1) }).parse(d))
   .handler(async ({ data, context }) => {
     await ensureAdmin(context);
-    const { error } = await context.supabase
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin
       .from("app_settings")
       .delete()
       .eq("key", `${PREFIX}${data.key_name}`);
-    if (error) throw error;
+    if (error) throw new Error(error.message);
     return { ok: true };
   });
