@@ -21,6 +21,8 @@ import { Route as NoticiasRouteImport } from './routes/noticias'
 import { Route as MissoesRouteImport } from './routes/missoes'
 import { Route as FaqRouteImport } from './routes/faq'
 import { Route as EmpresasRouteImport } from './routes/empresas'
+import { Route as EmailPreferenciasRouteImport } from './routes/email-preferencias'
+import { Route as EmailCancelarRouteImport } from './routes/email-cancelar'
 import { Route as DesafiosEmpresasRouteImport } from './routes/desafios-empresas'
 import { Route as DesafiosRouteImport } from './routes/desafios'
 import { Route as CriarRouteImport } from './routes/criar'
@@ -55,8 +57,10 @@ import { Route as AdminIntegracoesFutebolRouteImport } from './routes/admin.inte
 import { Route as AdminInstagramVideosRouteImport } from './routes/admin.instagram-videos'
 import { Route as AdminEmpresasRouteImport } from './routes/admin.empresas'
 import { Route as AdminEmailMarketingRouteImport } from './routes/admin.email-marketing'
+import { Route as AdminDesenvolvimentoRouteImport } from './routes/admin.desenvolvimento'
 import { Route as AdminDesafiosRouteImport } from './routes/admin.desafios'
 import { Route as AdminConvitesRouteImport } from './routes/admin.convites'
+import { Route as AdminComunicacaoRouteImport } from './routes/admin.comunicacao'
 import { Route as AdminCategoriasRouteImport } from './routes/admin.categorias'
 import { Route as AdminCadastrosRouteImport } from './routes/admin.cadastros'
 import { Route as AdminBonusLoginRouteImport } from './routes/admin.bonus-login'
@@ -67,6 +71,26 @@ import { Route as AdminApisRouteImport } from './routes/admin.apis'
 import { Route as AuthenticatedHistoricoTokensRouteImport } from './routes/_authenticated/historico-tokens'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedCaixaMisteriosaRouteImport } from './routes/_authenticated/caixa-misteriosa'
+import { Route as ApiResendWebhookRouteImport } from './routes/api/resend/webhook'
+import { Route as AdminDesenvolvimentoSprintsRouteImport } from './routes/admin.desenvolvimento.sprints'
+import { Route as AdminDesenvolvimentoRoadmapRouteImport } from './routes/admin.desenvolvimento.roadmap'
+import { Route as AdminDesenvolvimentoMetricasRouteImport } from './routes/admin.desenvolvimento.metricas'
+import { Route as AdminDesenvolvimentoImplantacoesRouteImport } from './routes/admin.desenvolvimento.implantacoes'
+import { Route as AdminDesenvolvimentoDashboardRouteImport } from './routes/admin.desenvolvimento.dashboard'
+import { Route as AdminDesenvolvimentoCorrecoesRouteImport } from './routes/admin.desenvolvimento.correcoes'
+import { Route as AdminDesenvolvimentoBaseConhecimentoRouteImport } from './routes/admin.desenvolvimento.base-conhecimento'
+import { Route as AdminDesenvolvimentoBacklogRouteImport } from './routes/admin.desenvolvimento.backlog'
+import { Route as AdminComunicacaoVariaveisRouteImport } from './routes/admin.comunicacao.variaveis'
+import { Route as AdminComunicacaoTesteEnvioRouteImport } from './routes/admin.comunicacao.teste-envio'
+import { Route as AdminComunicacaoTemplatesRouteImport } from './routes/admin.comunicacao.templates'
+import { Route as AdminComunicacaoSmtpRouteImport } from './routes/admin.comunicacao.smtp'
+import { Route as AdminComunicacaoResendRouteImport } from './routes/admin.comunicacao.resend'
+import { Route as AdminComunicacaoPreferenciasRouteImport } from './routes/admin.comunicacao.preferencias'
+import { Route as AdminComunicacaoLogsRouteImport } from './routes/admin.comunicacao.logs'
+import { Route as AdminComunicacaoFilaRouteImport } from './routes/admin.comunicacao.fila'
+import { Route as AdminComunicacaoEventosRouteImport } from './routes/admin.comunicacao.eventos'
+import { Route as AdminComunicacaoEstatisticasRouteImport } from './routes/admin.comunicacao.estatisticas'
+import { Route as AdminComunicacaoCampanhasRouteImport } from './routes/admin.comunicacao.campanhas'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as ApiPublicHooksTop100SnapshotRouteImport } from './routes/api/public/hooks/top100-snapshot'
 import { Route as ApiPublicHooksFootballSyncRouteImport } from './routes/api/public/hooks/football-sync'
@@ -130,6 +154,16 @@ const FaqRoute = FaqRouteImport.update({
 const EmpresasRoute = EmpresasRouteImport.update({
   id: '/empresas',
   path: '/empresas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EmailPreferenciasRoute = EmailPreferenciasRouteImport.update({
+  id: '/email-preferencias',
+  path: '/email-preferencias',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EmailCancelarRoute = EmailCancelarRouteImport.update({
+  id: '/email-cancelar',
+  path: '/email-cancelar',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DesafiosEmpresasRoute = DesafiosEmpresasRouteImport.update({
@@ -301,6 +335,11 @@ const AdminEmailMarketingRoute = AdminEmailMarketingRouteImport.update({
   path: '/email-marketing',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminDesenvolvimentoRoute = AdminDesenvolvimentoRouteImport.update({
+  id: '/desenvolvimento',
+  path: '/desenvolvimento',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminDesafiosRoute = AdminDesafiosRouteImport.update({
   id: '/desafios',
   path: '/desafios',
@@ -309,6 +348,11 @@ const AdminDesafiosRoute = AdminDesafiosRouteImport.update({
 const AdminConvitesRoute = AdminConvitesRouteImport.update({
   id: '/convites',
   path: '/convites',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminComunicacaoRoute = AdminComunicacaoRouteImport.update({
+  id: '/comunicacao',
+  path: '/comunicacao',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminCategoriasRoute = AdminCategoriasRouteImport.update({
@@ -363,6 +407,120 @@ const AuthenticatedCaixaMisteriosaRoute =
     path: '/caixa-misteriosa',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const ApiResendWebhookRoute = ApiResendWebhookRouteImport.update({
+  id: '/api/resend/webhook',
+  path: '/api/resend/webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminDesenvolvimentoSprintsRoute =
+  AdminDesenvolvimentoSprintsRouteImport.update({
+    id: '/sprints',
+    path: '/sprints',
+    getParentRoute: () => AdminDesenvolvimentoRoute,
+  } as any)
+const AdminDesenvolvimentoRoadmapRoute =
+  AdminDesenvolvimentoRoadmapRouteImport.update({
+    id: '/roadmap',
+    path: '/roadmap',
+    getParentRoute: () => AdminDesenvolvimentoRoute,
+  } as any)
+const AdminDesenvolvimentoMetricasRoute =
+  AdminDesenvolvimentoMetricasRouteImport.update({
+    id: '/metricas',
+    path: '/metricas',
+    getParentRoute: () => AdminDesenvolvimentoRoute,
+  } as any)
+const AdminDesenvolvimentoImplantacoesRoute =
+  AdminDesenvolvimentoImplantacoesRouteImport.update({
+    id: '/implantacoes',
+    path: '/implantacoes',
+    getParentRoute: () => AdminDesenvolvimentoRoute,
+  } as any)
+const AdminDesenvolvimentoDashboardRoute =
+  AdminDesenvolvimentoDashboardRouteImport.update({
+    id: '/dashboard',
+    path: '/dashboard',
+    getParentRoute: () => AdminDesenvolvimentoRoute,
+  } as any)
+const AdminDesenvolvimentoCorrecoesRoute =
+  AdminDesenvolvimentoCorrecoesRouteImport.update({
+    id: '/correcoes',
+    path: '/correcoes',
+    getParentRoute: () => AdminDesenvolvimentoRoute,
+  } as any)
+const AdminDesenvolvimentoBaseConhecimentoRoute =
+  AdminDesenvolvimentoBaseConhecimentoRouteImport.update({
+    id: '/base-conhecimento',
+    path: '/base-conhecimento',
+    getParentRoute: () => AdminDesenvolvimentoRoute,
+  } as any)
+const AdminDesenvolvimentoBacklogRoute =
+  AdminDesenvolvimentoBacklogRouteImport.update({
+    id: '/backlog',
+    path: '/backlog',
+    getParentRoute: () => AdminDesenvolvimentoRoute,
+  } as any)
+const AdminComunicacaoVariaveisRoute =
+  AdminComunicacaoVariaveisRouteImport.update({
+    id: '/variaveis',
+    path: '/variaveis',
+    getParentRoute: () => AdminComunicacaoRoute,
+  } as any)
+const AdminComunicacaoTesteEnvioRoute =
+  AdminComunicacaoTesteEnvioRouteImport.update({
+    id: '/teste-envio',
+    path: '/teste-envio',
+    getParentRoute: () => AdminComunicacaoRoute,
+  } as any)
+const AdminComunicacaoTemplatesRoute =
+  AdminComunicacaoTemplatesRouteImport.update({
+    id: '/templates',
+    path: '/templates',
+    getParentRoute: () => AdminComunicacaoRoute,
+  } as any)
+const AdminComunicacaoSmtpRoute = AdminComunicacaoSmtpRouteImport.update({
+  id: '/smtp',
+  path: '/smtp',
+  getParentRoute: () => AdminComunicacaoRoute,
+} as any)
+const AdminComunicacaoResendRoute = AdminComunicacaoResendRouteImport.update({
+  id: '/resend',
+  path: '/resend',
+  getParentRoute: () => AdminComunicacaoRoute,
+} as any)
+const AdminComunicacaoPreferenciasRoute =
+  AdminComunicacaoPreferenciasRouteImport.update({
+    id: '/preferencias',
+    path: '/preferencias',
+    getParentRoute: () => AdminComunicacaoRoute,
+  } as any)
+const AdminComunicacaoLogsRoute = AdminComunicacaoLogsRouteImport.update({
+  id: '/logs',
+  path: '/logs',
+  getParentRoute: () => AdminComunicacaoRoute,
+} as any)
+const AdminComunicacaoFilaRoute = AdminComunicacaoFilaRouteImport.update({
+  id: '/fila',
+  path: '/fila',
+  getParentRoute: () => AdminComunicacaoRoute,
+} as any)
+const AdminComunicacaoEventosRoute = AdminComunicacaoEventosRouteImport.update({
+  id: '/eventos',
+  path: '/eventos',
+  getParentRoute: () => AdminComunicacaoRoute,
+} as any)
+const AdminComunicacaoEstatisticasRoute =
+  AdminComunicacaoEstatisticasRouteImport.update({
+    id: '/estatisticas',
+    path: '/estatisticas',
+    getParentRoute: () => AdminComunicacaoRoute,
+  } as any)
+const AdminComunicacaoCampanhasRoute =
+  AdminComunicacaoCampanhasRouteImport.update({
+    id: '/campanhas',
+    path: '/campanhas',
+    getParentRoute: () => AdminComunicacaoRoute,
+  } as any)
 const LovableEmailQueueProcessRoute =
   LovableEmailQueueProcessRouteImport.update({
     id: '/lovable/email/queue/process',
@@ -399,6 +557,8 @@ export interface FileRoutesByFullPath {
   '/criar': typeof CriarRoute
   '/desafios': typeof DesafiosRoute
   '/desafios-empresas': typeof DesafiosEmpresasRoute
+  '/email-cancelar': typeof EmailCancelarRoute
+  '/email-preferencias': typeof EmailPreferenciasRoute
   '/empresas': typeof EmpresasRoute
   '/faq': typeof FaqRoute
   '/missoes': typeof MissoesRoute
@@ -421,8 +581,10 @@ export interface FileRoutesByFullPath {
   '/admin/bonus-login': typeof AdminBonusLoginRoute
   '/admin/cadastros': typeof AdminCadastrosRoute
   '/admin/categorias': typeof AdminCategoriasRoute
+  '/admin/comunicacao': typeof AdminComunicacaoRouteWithChildren
   '/admin/convites': typeof AdminConvitesRoute
   '/admin/desafios': typeof AdminDesafiosRoute
+  '/admin/desenvolvimento': typeof AdminDesenvolvimentoRouteWithChildren
   '/admin/email-marketing': typeof AdminEmailMarketingRoute
   '/admin/empresas': typeof AdminEmpresasRoute
   '/admin/instagram-videos': typeof AdminInstagramVideosRoute
@@ -446,6 +608,26 @@ export interface FileRoutesByFullPath {
   '/previsao/$id': typeof PrevisaoIdRoute
   '/ranking/$challengeId': typeof RankingChallengeIdRoute
   '/admin/': typeof AdminIndexRoute
+  '/admin/comunicacao/campanhas': typeof AdminComunicacaoCampanhasRoute
+  '/admin/comunicacao/estatisticas': typeof AdminComunicacaoEstatisticasRoute
+  '/admin/comunicacao/eventos': typeof AdminComunicacaoEventosRoute
+  '/admin/comunicacao/fila': typeof AdminComunicacaoFilaRoute
+  '/admin/comunicacao/logs': typeof AdminComunicacaoLogsRoute
+  '/admin/comunicacao/preferencias': typeof AdminComunicacaoPreferenciasRoute
+  '/admin/comunicacao/resend': typeof AdminComunicacaoResendRoute
+  '/admin/comunicacao/smtp': typeof AdminComunicacaoSmtpRoute
+  '/admin/comunicacao/templates': typeof AdminComunicacaoTemplatesRoute
+  '/admin/comunicacao/teste-envio': typeof AdminComunicacaoTesteEnvioRoute
+  '/admin/comunicacao/variaveis': typeof AdminComunicacaoVariaveisRoute
+  '/admin/desenvolvimento/backlog': typeof AdminDesenvolvimentoBacklogRoute
+  '/admin/desenvolvimento/base-conhecimento': typeof AdminDesenvolvimentoBaseConhecimentoRoute
+  '/admin/desenvolvimento/correcoes': typeof AdminDesenvolvimentoCorrecoesRoute
+  '/admin/desenvolvimento/dashboard': typeof AdminDesenvolvimentoDashboardRoute
+  '/admin/desenvolvimento/implantacoes': typeof AdminDesenvolvimentoImplantacoesRoute
+  '/admin/desenvolvimento/metricas': typeof AdminDesenvolvimentoMetricasRoute
+  '/admin/desenvolvimento/roadmap': typeof AdminDesenvolvimentoRoadmapRoute
+  '/admin/desenvolvimento/sprints': typeof AdminDesenvolvimentoSprintsRoute
+  '/api/resend/webhook': typeof ApiResendWebhookRoute
   '/api/public/hooks/apurar-copa': typeof ApiPublicHooksApurarCopaRoute
   '/api/public/hooks/football-sync': typeof ApiPublicHooksFootballSyncRoute
   '/api/public/hooks/top100-snapshot': typeof ApiPublicHooksTop100SnapshotRoute
@@ -461,6 +643,8 @@ export interface FileRoutesByTo {
   '/criar': typeof CriarRoute
   '/desafios': typeof DesafiosRoute
   '/desafios-empresas': typeof DesafiosEmpresasRoute
+  '/email-cancelar': typeof EmailCancelarRoute
+  '/email-preferencias': typeof EmailPreferenciasRoute
   '/empresas': typeof EmpresasRoute
   '/faq': typeof FaqRoute
   '/missoes': typeof MissoesRoute
@@ -483,8 +667,10 @@ export interface FileRoutesByTo {
   '/admin/bonus-login': typeof AdminBonusLoginRoute
   '/admin/cadastros': typeof AdminCadastrosRoute
   '/admin/categorias': typeof AdminCategoriasRoute
+  '/admin/comunicacao': typeof AdminComunicacaoRouteWithChildren
   '/admin/convites': typeof AdminConvitesRoute
   '/admin/desafios': typeof AdminDesafiosRoute
+  '/admin/desenvolvimento': typeof AdminDesenvolvimentoRouteWithChildren
   '/admin/email-marketing': typeof AdminEmailMarketingRoute
   '/admin/empresas': typeof AdminEmpresasRoute
   '/admin/instagram-videos': typeof AdminInstagramVideosRoute
@@ -508,6 +694,26 @@ export interface FileRoutesByTo {
   '/previsao/$id': typeof PrevisaoIdRoute
   '/ranking/$challengeId': typeof RankingChallengeIdRoute
   '/admin': typeof AdminIndexRoute
+  '/admin/comunicacao/campanhas': typeof AdminComunicacaoCampanhasRoute
+  '/admin/comunicacao/estatisticas': typeof AdminComunicacaoEstatisticasRoute
+  '/admin/comunicacao/eventos': typeof AdminComunicacaoEventosRoute
+  '/admin/comunicacao/fila': typeof AdminComunicacaoFilaRoute
+  '/admin/comunicacao/logs': typeof AdminComunicacaoLogsRoute
+  '/admin/comunicacao/preferencias': typeof AdminComunicacaoPreferenciasRoute
+  '/admin/comunicacao/resend': typeof AdminComunicacaoResendRoute
+  '/admin/comunicacao/smtp': typeof AdminComunicacaoSmtpRoute
+  '/admin/comunicacao/templates': typeof AdminComunicacaoTemplatesRoute
+  '/admin/comunicacao/teste-envio': typeof AdminComunicacaoTesteEnvioRoute
+  '/admin/comunicacao/variaveis': typeof AdminComunicacaoVariaveisRoute
+  '/admin/desenvolvimento/backlog': typeof AdminDesenvolvimentoBacklogRoute
+  '/admin/desenvolvimento/base-conhecimento': typeof AdminDesenvolvimentoBaseConhecimentoRoute
+  '/admin/desenvolvimento/correcoes': typeof AdminDesenvolvimentoCorrecoesRoute
+  '/admin/desenvolvimento/dashboard': typeof AdminDesenvolvimentoDashboardRoute
+  '/admin/desenvolvimento/implantacoes': typeof AdminDesenvolvimentoImplantacoesRoute
+  '/admin/desenvolvimento/metricas': typeof AdminDesenvolvimentoMetricasRoute
+  '/admin/desenvolvimento/roadmap': typeof AdminDesenvolvimentoRoadmapRoute
+  '/admin/desenvolvimento/sprints': typeof AdminDesenvolvimentoSprintsRoute
+  '/api/resend/webhook': typeof ApiResendWebhookRoute
   '/api/public/hooks/apurar-copa': typeof ApiPublicHooksApurarCopaRoute
   '/api/public/hooks/football-sync': typeof ApiPublicHooksFootballSyncRoute
   '/api/public/hooks/top100-snapshot': typeof ApiPublicHooksTop100SnapshotRoute
@@ -526,6 +732,8 @@ export interface FileRoutesById {
   '/criar': typeof CriarRoute
   '/desafios': typeof DesafiosRoute
   '/desafios-empresas': typeof DesafiosEmpresasRoute
+  '/email-cancelar': typeof EmailCancelarRoute
+  '/email-preferencias': typeof EmailPreferenciasRoute
   '/empresas': typeof EmpresasRoute
   '/faq': typeof FaqRoute
   '/missoes': typeof MissoesRoute
@@ -548,8 +756,10 @@ export interface FileRoutesById {
   '/admin/bonus-login': typeof AdminBonusLoginRoute
   '/admin/cadastros': typeof AdminCadastrosRoute
   '/admin/categorias': typeof AdminCategoriasRoute
+  '/admin/comunicacao': typeof AdminComunicacaoRouteWithChildren
   '/admin/convites': typeof AdminConvitesRoute
   '/admin/desafios': typeof AdminDesafiosRoute
+  '/admin/desenvolvimento': typeof AdminDesenvolvimentoRouteWithChildren
   '/admin/email-marketing': typeof AdminEmailMarketingRoute
   '/admin/empresas': typeof AdminEmpresasRoute
   '/admin/instagram-videos': typeof AdminInstagramVideosRoute
@@ -573,6 +783,26 @@ export interface FileRoutesById {
   '/previsao/$id': typeof PrevisaoIdRoute
   '/ranking/$challengeId': typeof RankingChallengeIdRoute
   '/admin/': typeof AdminIndexRoute
+  '/admin/comunicacao/campanhas': typeof AdminComunicacaoCampanhasRoute
+  '/admin/comunicacao/estatisticas': typeof AdminComunicacaoEstatisticasRoute
+  '/admin/comunicacao/eventos': typeof AdminComunicacaoEventosRoute
+  '/admin/comunicacao/fila': typeof AdminComunicacaoFilaRoute
+  '/admin/comunicacao/logs': typeof AdminComunicacaoLogsRoute
+  '/admin/comunicacao/preferencias': typeof AdminComunicacaoPreferenciasRoute
+  '/admin/comunicacao/resend': typeof AdminComunicacaoResendRoute
+  '/admin/comunicacao/smtp': typeof AdminComunicacaoSmtpRoute
+  '/admin/comunicacao/templates': typeof AdminComunicacaoTemplatesRoute
+  '/admin/comunicacao/teste-envio': typeof AdminComunicacaoTesteEnvioRoute
+  '/admin/comunicacao/variaveis': typeof AdminComunicacaoVariaveisRoute
+  '/admin/desenvolvimento/backlog': typeof AdminDesenvolvimentoBacklogRoute
+  '/admin/desenvolvimento/base-conhecimento': typeof AdminDesenvolvimentoBaseConhecimentoRoute
+  '/admin/desenvolvimento/correcoes': typeof AdminDesenvolvimentoCorrecoesRoute
+  '/admin/desenvolvimento/dashboard': typeof AdminDesenvolvimentoDashboardRoute
+  '/admin/desenvolvimento/implantacoes': typeof AdminDesenvolvimentoImplantacoesRoute
+  '/admin/desenvolvimento/metricas': typeof AdminDesenvolvimentoMetricasRoute
+  '/admin/desenvolvimento/roadmap': typeof AdminDesenvolvimentoRoadmapRoute
+  '/admin/desenvolvimento/sprints': typeof AdminDesenvolvimentoSprintsRoute
+  '/api/resend/webhook': typeof ApiResendWebhookRoute
   '/api/public/hooks/apurar-copa': typeof ApiPublicHooksApurarCopaRoute
   '/api/public/hooks/football-sync': typeof ApiPublicHooksFootballSyncRoute
   '/api/public/hooks/top100-snapshot': typeof ApiPublicHooksTop100SnapshotRoute
@@ -591,6 +821,8 @@ export interface FileRouteTypes {
     | '/criar'
     | '/desafios'
     | '/desafios-empresas'
+    | '/email-cancelar'
+    | '/email-preferencias'
     | '/empresas'
     | '/faq'
     | '/missoes'
@@ -613,8 +845,10 @@ export interface FileRouteTypes {
     | '/admin/bonus-login'
     | '/admin/cadastros'
     | '/admin/categorias'
+    | '/admin/comunicacao'
     | '/admin/convites'
     | '/admin/desafios'
+    | '/admin/desenvolvimento'
     | '/admin/email-marketing'
     | '/admin/empresas'
     | '/admin/instagram-videos'
@@ -638,6 +872,26 @@ export interface FileRouteTypes {
     | '/previsao/$id'
     | '/ranking/$challengeId'
     | '/admin/'
+    | '/admin/comunicacao/campanhas'
+    | '/admin/comunicacao/estatisticas'
+    | '/admin/comunicacao/eventos'
+    | '/admin/comunicacao/fila'
+    | '/admin/comunicacao/logs'
+    | '/admin/comunicacao/preferencias'
+    | '/admin/comunicacao/resend'
+    | '/admin/comunicacao/smtp'
+    | '/admin/comunicacao/templates'
+    | '/admin/comunicacao/teste-envio'
+    | '/admin/comunicacao/variaveis'
+    | '/admin/desenvolvimento/backlog'
+    | '/admin/desenvolvimento/base-conhecimento'
+    | '/admin/desenvolvimento/correcoes'
+    | '/admin/desenvolvimento/dashboard'
+    | '/admin/desenvolvimento/implantacoes'
+    | '/admin/desenvolvimento/metricas'
+    | '/admin/desenvolvimento/roadmap'
+    | '/admin/desenvolvimento/sprints'
+    | '/api/resend/webhook'
     | '/api/public/hooks/apurar-copa'
     | '/api/public/hooks/football-sync'
     | '/api/public/hooks/top100-snapshot'
@@ -653,6 +907,8 @@ export interface FileRouteTypes {
     | '/criar'
     | '/desafios'
     | '/desafios-empresas'
+    | '/email-cancelar'
+    | '/email-preferencias'
     | '/empresas'
     | '/faq'
     | '/missoes'
@@ -675,8 +931,10 @@ export interface FileRouteTypes {
     | '/admin/bonus-login'
     | '/admin/cadastros'
     | '/admin/categorias'
+    | '/admin/comunicacao'
     | '/admin/convites'
     | '/admin/desafios'
+    | '/admin/desenvolvimento'
     | '/admin/email-marketing'
     | '/admin/empresas'
     | '/admin/instagram-videos'
@@ -700,6 +958,26 @@ export interface FileRouteTypes {
     | '/previsao/$id'
     | '/ranking/$challengeId'
     | '/admin'
+    | '/admin/comunicacao/campanhas'
+    | '/admin/comunicacao/estatisticas'
+    | '/admin/comunicacao/eventos'
+    | '/admin/comunicacao/fila'
+    | '/admin/comunicacao/logs'
+    | '/admin/comunicacao/preferencias'
+    | '/admin/comunicacao/resend'
+    | '/admin/comunicacao/smtp'
+    | '/admin/comunicacao/templates'
+    | '/admin/comunicacao/teste-envio'
+    | '/admin/comunicacao/variaveis'
+    | '/admin/desenvolvimento/backlog'
+    | '/admin/desenvolvimento/base-conhecimento'
+    | '/admin/desenvolvimento/correcoes'
+    | '/admin/desenvolvimento/dashboard'
+    | '/admin/desenvolvimento/implantacoes'
+    | '/admin/desenvolvimento/metricas'
+    | '/admin/desenvolvimento/roadmap'
+    | '/admin/desenvolvimento/sprints'
+    | '/api/resend/webhook'
     | '/api/public/hooks/apurar-copa'
     | '/api/public/hooks/football-sync'
     | '/api/public/hooks/top100-snapshot'
@@ -717,6 +995,8 @@ export interface FileRouteTypes {
     | '/criar'
     | '/desafios'
     | '/desafios-empresas'
+    | '/email-cancelar'
+    | '/email-preferencias'
     | '/empresas'
     | '/faq'
     | '/missoes'
@@ -739,8 +1019,10 @@ export interface FileRouteTypes {
     | '/admin/bonus-login'
     | '/admin/cadastros'
     | '/admin/categorias'
+    | '/admin/comunicacao'
     | '/admin/convites'
     | '/admin/desafios'
+    | '/admin/desenvolvimento'
     | '/admin/email-marketing'
     | '/admin/empresas'
     | '/admin/instagram-videos'
@@ -764,6 +1046,26 @@ export interface FileRouteTypes {
     | '/previsao/$id'
     | '/ranking/$challengeId'
     | '/admin/'
+    | '/admin/comunicacao/campanhas'
+    | '/admin/comunicacao/estatisticas'
+    | '/admin/comunicacao/eventos'
+    | '/admin/comunicacao/fila'
+    | '/admin/comunicacao/logs'
+    | '/admin/comunicacao/preferencias'
+    | '/admin/comunicacao/resend'
+    | '/admin/comunicacao/smtp'
+    | '/admin/comunicacao/templates'
+    | '/admin/comunicacao/teste-envio'
+    | '/admin/comunicacao/variaveis'
+    | '/admin/desenvolvimento/backlog'
+    | '/admin/desenvolvimento/base-conhecimento'
+    | '/admin/desenvolvimento/correcoes'
+    | '/admin/desenvolvimento/dashboard'
+    | '/admin/desenvolvimento/implantacoes'
+    | '/admin/desenvolvimento/metricas'
+    | '/admin/desenvolvimento/roadmap'
+    | '/admin/desenvolvimento/sprints'
+    | '/api/resend/webhook'
     | '/api/public/hooks/apurar-copa'
     | '/api/public/hooks/football-sync'
     | '/api/public/hooks/top100-snapshot'
@@ -782,6 +1084,8 @@ export interface RootRouteChildren {
   CriarRoute: typeof CriarRoute
   DesafiosRoute: typeof DesafiosRoute
   DesafiosEmpresasRoute: typeof DesafiosEmpresasRoute
+  EmailCancelarRoute: typeof EmailCancelarRoute
+  EmailPreferenciasRoute: typeof EmailPreferenciasRoute
   EmpresasRoute: typeof EmpresasRoute
   FaqRoute: typeof FaqRoute
   MissoesRoute: typeof MissoesRoute
@@ -797,6 +1101,7 @@ export interface RootRouteChildren {
   AmigoRefRoute: typeof AmigoRefRoute
   EmpresaCriarRoute: typeof EmpresaCriarRoute
   PrevisaoIdRoute: typeof PrevisaoIdRoute
+  ApiResendWebhookRoute: typeof ApiResendWebhookRoute
   ApiPublicHooksApurarCopaRoute: typeof ApiPublicHooksApurarCopaRoute
   ApiPublicHooksFootballSyncRoute: typeof ApiPublicHooksFootballSyncRoute
   ApiPublicHooksTop100SnapshotRoute: typeof ApiPublicHooksTop100SnapshotRoute
@@ -887,6 +1192,20 @@ declare module '@tanstack/react-router' {
       path: '/empresas'
       fullPath: '/empresas'
       preLoaderRoute: typeof EmpresasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/email-preferencias': {
+      id: '/email-preferencias'
+      path: '/email-preferencias'
+      fullPath: '/email-preferencias'
+      preLoaderRoute: typeof EmailPreferenciasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/email-cancelar': {
+      id: '/email-cancelar'
+      path: '/email-cancelar'
+      fullPath: '/email-cancelar'
+      preLoaderRoute: typeof EmailCancelarRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/desafios-empresas': {
@@ -1127,6 +1446,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminEmailMarketingRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/desenvolvimento': {
+      id: '/admin/desenvolvimento'
+      path: '/desenvolvimento'
+      fullPath: '/admin/desenvolvimento'
+      preLoaderRoute: typeof AdminDesenvolvimentoRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/desafios': {
       id: '/admin/desafios'
       path: '/desafios'
@@ -1139,6 +1465,13 @@ declare module '@tanstack/react-router' {
       path: '/convites'
       fullPath: '/admin/convites'
       preLoaderRoute: typeof AdminConvitesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/comunicacao': {
+      id: '/admin/comunicacao'
+      path: '/comunicacao'
+      fullPath: '/admin/comunicacao'
+      preLoaderRoute: typeof AdminComunicacaoRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/categorias': {
@@ -1211,6 +1544,146 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCaixaMisteriosaRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/resend/webhook': {
+      id: '/api/resend/webhook'
+      path: '/api/resend/webhook'
+      fullPath: '/api/resend/webhook'
+      preLoaderRoute: typeof ApiResendWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/desenvolvimento/sprints': {
+      id: '/admin/desenvolvimento/sprints'
+      path: '/sprints'
+      fullPath: '/admin/desenvolvimento/sprints'
+      preLoaderRoute: typeof AdminDesenvolvimentoSprintsRouteImport
+      parentRoute: typeof AdminDesenvolvimentoRoute
+    }
+    '/admin/desenvolvimento/roadmap': {
+      id: '/admin/desenvolvimento/roadmap'
+      path: '/roadmap'
+      fullPath: '/admin/desenvolvimento/roadmap'
+      preLoaderRoute: typeof AdminDesenvolvimentoRoadmapRouteImport
+      parentRoute: typeof AdminDesenvolvimentoRoute
+    }
+    '/admin/desenvolvimento/metricas': {
+      id: '/admin/desenvolvimento/metricas'
+      path: '/metricas'
+      fullPath: '/admin/desenvolvimento/metricas'
+      preLoaderRoute: typeof AdminDesenvolvimentoMetricasRouteImport
+      parentRoute: typeof AdminDesenvolvimentoRoute
+    }
+    '/admin/desenvolvimento/implantacoes': {
+      id: '/admin/desenvolvimento/implantacoes'
+      path: '/implantacoes'
+      fullPath: '/admin/desenvolvimento/implantacoes'
+      preLoaderRoute: typeof AdminDesenvolvimentoImplantacoesRouteImport
+      parentRoute: typeof AdminDesenvolvimentoRoute
+    }
+    '/admin/desenvolvimento/dashboard': {
+      id: '/admin/desenvolvimento/dashboard'
+      path: '/dashboard'
+      fullPath: '/admin/desenvolvimento/dashboard'
+      preLoaderRoute: typeof AdminDesenvolvimentoDashboardRouteImport
+      parentRoute: typeof AdminDesenvolvimentoRoute
+    }
+    '/admin/desenvolvimento/correcoes': {
+      id: '/admin/desenvolvimento/correcoes'
+      path: '/correcoes'
+      fullPath: '/admin/desenvolvimento/correcoes'
+      preLoaderRoute: typeof AdminDesenvolvimentoCorrecoesRouteImport
+      parentRoute: typeof AdminDesenvolvimentoRoute
+    }
+    '/admin/desenvolvimento/base-conhecimento': {
+      id: '/admin/desenvolvimento/base-conhecimento'
+      path: '/base-conhecimento'
+      fullPath: '/admin/desenvolvimento/base-conhecimento'
+      preLoaderRoute: typeof AdminDesenvolvimentoBaseConhecimentoRouteImport
+      parentRoute: typeof AdminDesenvolvimentoRoute
+    }
+    '/admin/desenvolvimento/backlog': {
+      id: '/admin/desenvolvimento/backlog'
+      path: '/backlog'
+      fullPath: '/admin/desenvolvimento/backlog'
+      preLoaderRoute: typeof AdminDesenvolvimentoBacklogRouteImport
+      parentRoute: typeof AdminDesenvolvimentoRoute
+    }
+    '/admin/comunicacao/variaveis': {
+      id: '/admin/comunicacao/variaveis'
+      path: '/variaveis'
+      fullPath: '/admin/comunicacao/variaveis'
+      preLoaderRoute: typeof AdminComunicacaoVariaveisRouteImport
+      parentRoute: typeof AdminComunicacaoRoute
+    }
+    '/admin/comunicacao/teste-envio': {
+      id: '/admin/comunicacao/teste-envio'
+      path: '/teste-envio'
+      fullPath: '/admin/comunicacao/teste-envio'
+      preLoaderRoute: typeof AdminComunicacaoTesteEnvioRouteImport
+      parentRoute: typeof AdminComunicacaoRoute
+    }
+    '/admin/comunicacao/templates': {
+      id: '/admin/comunicacao/templates'
+      path: '/templates'
+      fullPath: '/admin/comunicacao/templates'
+      preLoaderRoute: typeof AdminComunicacaoTemplatesRouteImport
+      parentRoute: typeof AdminComunicacaoRoute
+    }
+    '/admin/comunicacao/smtp': {
+      id: '/admin/comunicacao/smtp'
+      path: '/smtp'
+      fullPath: '/admin/comunicacao/smtp'
+      preLoaderRoute: typeof AdminComunicacaoSmtpRouteImport
+      parentRoute: typeof AdminComunicacaoRoute
+    }
+    '/admin/comunicacao/resend': {
+      id: '/admin/comunicacao/resend'
+      path: '/resend'
+      fullPath: '/admin/comunicacao/resend'
+      preLoaderRoute: typeof AdminComunicacaoResendRouteImport
+      parentRoute: typeof AdminComunicacaoRoute
+    }
+    '/admin/comunicacao/preferencias': {
+      id: '/admin/comunicacao/preferencias'
+      path: '/preferencias'
+      fullPath: '/admin/comunicacao/preferencias'
+      preLoaderRoute: typeof AdminComunicacaoPreferenciasRouteImport
+      parentRoute: typeof AdminComunicacaoRoute
+    }
+    '/admin/comunicacao/logs': {
+      id: '/admin/comunicacao/logs'
+      path: '/logs'
+      fullPath: '/admin/comunicacao/logs'
+      preLoaderRoute: typeof AdminComunicacaoLogsRouteImport
+      parentRoute: typeof AdminComunicacaoRoute
+    }
+    '/admin/comunicacao/fila': {
+      id: '/admin/comunicacao/fila'
+      path: '/fila'
+      fullPath: '/admin/comunicacao/fila'
+      preLoaderRoute: typeof AdminComunicacaoFilaRouteImport
+      parentRoute: typeof AdminComunicacaoRoute
+    }
+    '/admin/comunicacao/eventos': {
+      id: '/admin/comunicacao/eventos'
+      path: '/eventos'
+      fullPath: '/admin/comunicacao/eventos'
+      preLoaderRoute: typeof AdminComunicacaoEventosRouteImport
+      parentRoute: typeof AdminComunicacaoRoute
+    }
+    '/admin/comunicacao/estatisticas': {
+      id: '/admin/comunicacao/estatisticas'
+      path: '/estatisticas'
+      fullPath: '/admin/comunicacao/estatisticas'
+      preLoaderRoute: typeof AdminComunicacaoEstatisticasRouteImport
+      parentRoute: typeof AdminComunicacaoRoute
+    }
+    '/admin/comunicacao/campanhas': {
+      id: '/admin/comunicacao/campanhas'
+      path: '/campanhas'
+      fullPath: '/admin/comunicacao/campanhas'
+      preLoaderRoute: typeof AdminComunicacaoCampanhasRouteImport
+      parentRoute: typeof AdminComunicacaoRoute
+    }
     '/lovable/email/queue/process': {
       id: '/lovable/email/queue/process'
       path: '/lovable/email/queue/process'
@@ -1257,6 +1730,63 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
+interface AdminComunicacaoRouteChildren {
+  AdminComunicacaoCampanhasRoute: typeof AdminComunicacaoCampanhasRoute
+  AdminComunicacaoEstatisticasRoute: typeof AdminComunicacaoEstatisticasRoute
+  AdminComunicacaoEventosRoute: typeof AdminComunicacaoEventosRoute
+  AdminComunicacaoFilaRoute: typeof AdminComunicacaoFilaRoute
+  AdminComunicacaoLogsRoute: typeof AdminComunicacaoLogsRoute
+  AdminComunicacaoPreferenciasRoute: typeof AdminComunicacaoPreferenciasRoute
+  AdminComunicacaoResendRoute: typeof AdminComunicacaoResendRoute
+  AdminComunicacaoSmtpRoute: typeof AdminComunicacaoSmtpRoute
+  AdminComunicacaoTemplatesRoute: typeof AdminComunicacaoTemplatesRoute
+  AdminComunicacaoTesteEnvioRoute: typeof AdminComunicacaoTesteEnvioRoute
+  AdminComunicacaoVariaveisRoute: typeof AdminComunicacaoVariaveisRoute
+}
+
+const AdminComunicacaoRouteChildren: AdminComunicacaoRouteChildren = {
+  AdminComunicacaoCampanhasRoute: AdminComunicacaoCampanhasRoute,
+  AdminComunicacaoEstatisticasRoute: AdminComunicacaoEstatisticasRoute,
+  AdminComunicacaoEventosRoute: AdminComunicacaoEventosRoute,
+  AdminComunicacaoFilaRoute: AdminComunicacaoFilaRoute,
+  AdminComunicacaoLogsRoute: AdminComunicacaoLogsRoute,
+  AdminComunicacaoPreferenciasRoute: AdminComunicacaoPreferenciasRoute,
+  AdminComunicacaoResendRoute: AdminComunicacaoResendRoute,
+  AdminComunicacaoSmtpRoute: AdminComunicacaoSmtpRoute,
+  AdminComunicacaoTemplatesRoute: AdminComunicacaoTemplatesRoute,
+  AdminComunicacaoTesteEnvioRoute: AdminComunicacaoTesteEnvioRoute,
+  AdminComunicacaoVariaveisRoute: AdminComunicacaoVariaveisRoute,
+}
+
+const AdminComunicacaoRouteWithChildren =
+  AdminComunicacaoRoute._addFileChildren(AdminComunicacaoRouteChildren)
+
+interface AdminDesenvolvimentoRouteChildren {
+  AdminDesenvolvimentoBacklogRoute: typeof AdminDesenvolvimentoBacklogRoute
+  AdminDesenvolvimentoBaseConhecimentoRoute: typeof AdminDesenvolvimentoBaseConhecimentoRoute
+  AdminDesenvolvimentoCorrecoesRoute: typeof AdminDesenvolvimentoCorrecoesRoute
+  AdminDesenvolvimentoDashboardRoute: typeof AdminDesenvolvimentoDashboardRoute
+  AdminDesenvolvimentoImplantacoesRoute: typeof AdminDesenvolvimentoImplantacoesRoute
+  AdminDesenvolvimentoMetricasRoute: typeof AdminDesenvolvimentoMetricasRoute
+  AdminDesenvolvimentoRoadmapRoute: typeof AdminDesenvolvimentoRoadmapRoute
+  AdminDesenvolvimentoSprintsRoute: typeof AdminDesenvolvimentoSprintsRoute
+}
+
+const AdminDesenvolvimentoRouteChildren: AdminDesenvolvimentoRouteChildren = {
+  AdminDesenvolvimentoBacklogRoute: AdminDesenvolvimentoBacklogRoute,
+  AdminDesenvolvimentoBaseConhecimentoRoute:
+    AdminDesenvolvimentoBaseConhecimentoRoute,
+  AdminDesenvolvimentoCorrecoesRoute: AdminDesenvolvimentoCorrecoesRoute,
+  AdminDesenvolvimentoDashboardRoute: AdminDesenvolvimentoDashboardRoute,
+  AdminDesenvolvimentoImplantacoesRoute: AdminDesenvolvimentoImplantacoesRoute,
+  AdminDesenvolvimentoMetricasRoute: AdminDesenvolvimentoMetricasRoute,
+  AdminDesenvolvimentoRoadmapRoute: AdminDesenvolvimentoRoadmapRoute,
+  AdminDesenvolvimentoSprintsRoute: AdminDesenvolvimentoSprintsRoute,
+}
+
+const AdminDesenvolvimentoRouteWithChildren =
+  AdminDesenvolvimentoRoute._addFileChildren(AdminDesenvolvimentoRouteChildren)
+
 interface AdminRouteChildren {
   AdminApisRoute: typeof AdminApisRoute
   AdminApuracaoCopaRoute: typeof AdminApuracaoCopaRoute
@@ -1265,8 +1795,10 @@ interface AdminRouteChildren {
   AdminBonusLoginRoute: typeof AdminBonusLoginRoute
   AdminCadastrosRoute: typeof AdminCadastrosRoute
   AdminCategoriasRoute: typeof AdminCategoriasRoute
+  AdminComunicacaoRoute: typeof AdminComunicacaoRouteWithChildren
   AdminConvitesRoute: typeof AdminConvitesRoute
   AdminDesafiosRoute: typeof AdminDesafiosRoute
+  AdminDesenvolvimentoRoute: typeof AdminDesenvolvimentoRouteWithChildren
   AdminEmailMarketingRoute: typeof AdminEmailMarketingRoute
   AdminEmpresasRoute: typeof AdminEmpresasRoute
   AdminInstagramVideosRoute: typeof AdminInstagramVideosRoute
@@ -1295,8 +1827,10 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminBonusLoginRoute: AdminBonusLoginRoute,
   AdminCadastrosRoute: AdminCadastrosRoute,
   AdminCategoriasRoute: AdminCategoriasRoute,
+  AdminComunicacaoRoute: AdminComunicacaoRouteWithChildren,
   AdminConvitesRoute: AdminConvitesRoute,
   AdminDesafiosRoute: AdminDesafiosRoute,
+  AdminDesenvolvimentoRoute: AdminDesenvolvimentoRouteWithChildren,
   AdminEmailMarketingRoute: AdminEmailMarketingRoute,
   AdminEmpresasRoute: AdminEmpresasRoute,
   AdminInstagramVideosRoute: AdminInstagramVideosRoute,
@@ -1354,6 +1888,8 @@ const rootRouteChildren: RootRouteChildren = {
   CriarRoute: CriarRoute,
   DesafiosRoute: DesafiosRoute,
   DesafiosEmpresasRoute: DesafiosEmpresasRoute,
+  EmailCancelarRoute: EmailCancelarRoute,
+  EmailPreferenciasRoute: EmailPreferenciasRoute,
   EmpresasRoute: EmpresasRoute,
   FaqRoute: FaqRoute,
   MissoesRoute: MissoesRoute,
@@ -1369,6 +1905,7 @@ const rootRouteChildren: RootRouteChildren = {
   AmigoRefRoute: AmigoRefRoute,
   EmpresaCriarRoute: EmpresaCriarRoute,
   PrevisaoIdRoute: PrevisaoIdRoute,
+  ApiResendWebhookRoute: ApiResendWebhookRoute,
   ApiPublicHooksApurarCopaRoute: ApiPublicHooksApurarCopaRoute,
   ApiPublicHooksFootballSyncRoute: ApiPublicHooksFootballSyncRoute,
   ApiPublicHooksTop100SnapshotRoute: ApiPublicHooksTop100SnapshotRoute,
@@ -1377,3 +1914,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

@@ -12,11 +12,8 @@ export const improveTitle = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => Input.parse(input))
   .handler(async ({ data }) => {
-    const key = process.env.LOVABLE_API_KEY;
-    if (!key) throw new Error("Missing LOVABLE_API_KEY");
-
-    const { createLovableAiGatewayProvider } = await import("./ai-gateway.server");
-    const gateway = createLovableAiGatewayProvider(key);
+    const { createAiTextModel } = await import("./ai-gateway.server");
+    const model = await createAiTextModel();
 
     const prompt = `Melhore o título do desafio de palpites abaixo, tornando-o mais chamativo, claro e engajador para participantes brasileiros. Mantenha curto (até 80 caracteres). Retorne APENAS o título melhorado, sem aspas extras, sem explicações e sem markdown.
 
@@ -24,7 +21,7 @@ Categoria: ${data.category || "Geral"}
 Título atual: ${data.title}`;
 
     const { text } = await generateText({
-      model: gateway("google/gemini-3-flash-preview"),
+      model,
       prompt,
     });
 
@@ -44,11 +41,8 @@ export const generateBannerTitle = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => BannerInput.parse(input))
   .handler(async ({ data }) => {
-    const key = process.env.LOVABLE_API_KEY;
-    if (!key) throw new Error("Missing LOVABLE_API_KEY");
-
-    const { createLovableAiGatewayProvider } = await import("./ai-gateway.server");
-    const gateway = createLovableAiGatewayProvider(key);
+    const { createAiTextModel } = await import("./ai-gateway.server");
+    const model = await createAiTextModel();
 
     const prompt = `Você cria títulos de banners promocionais para o site "Desafio dos Palpites".
 Gere UM título curto (até 60 caracteres), chamativo, em português brasileiro, sem aspas, sem emojis no início, sem markdown e sem explicações. Retorne APENAS o título.
@@ -60,7 +54,7 @@ Contexto:
 - Título atual: ${data.current || "(em branco)"}`;
 
     const { text } = await generateText({
-      model: gateway("google/gemini-3-flash-preview"),
+      model,
       prompt,
     });
 

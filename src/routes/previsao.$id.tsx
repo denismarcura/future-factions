@@ -7,6 +7,7 @@ import {
 import { toast } from "sonner";
 import { AppShell } from "@/components/layout/AppShell";
 import { formatTokens, getPrediction, PREDICTIONS, USERS, type Prediction, type Category, timeLeft } from "@/lib/mock-data";
+import { getDeadlineTimestamp } from "@/lib/date-utils";
 import { listMissions, listMyClaims, claimMission, type Mission, ACTION_LABEL } from "@/lib/missions";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -16,12 +17,14 @@ import { detectMatchFromText } from "@/lib/world-cup-matches";
 
 import { useAuth } from "@/hooks/use-auth";
 import { hasParticipated, saveParticipation } from "@/lib/my-participations";
+import { recordParticipationDebit } from "@/lib/participation-debit.functions";
 import { getTokenBalance } from "@/lib/balance";
 import { StarRating } from "@/components/StarRating";
 import { NextChallengeBanner } from "@/components/NextChallengeBanner";
 import { EarnMorePointsCTA } from "@/components/EarnMorePointsCTA";
 import { getRatings, rateChallenge, getMyRating } from "@/lib/ratings.functions";
 import { debugParticipate } from "@/lib/debug-participate";
+import { isDeadlineExpired } from "@/lib/date-utils";
 
 
 function corpToPrediction(c: CorpChallengeRecord): Prediction {
@@ -189,6 +192,7 @@ function PredictionPage() {
   const [p, setP] = useState<Prediction | null>(initial);
   const [resolving, setResolving] = useState<boolean>(!initial);
   const getCorpChallengeFn = useServerFn(getCorpChallenge);
+  const doRecordDebit = useServerFn(recordParticipationDebit);
 
   useEffect(() => {
     if (p) return;
@@ -374,8 +378,8 @@ function PredictionInner({ p }: { p: Prediction }) {
 
   const related = PREDICTIONS.filter((x) => x.id !== p.id && x.category === p.category).slice(0, 4);
 
-  const deadlineMs = mounted ? new Date(p.closesAt).getTime() - Date.now() : 1;
-  const isClosed = deadlineMs <= 0;
+  const deadlineMs = mounted ? getDeadlineTimestamp(p.closesAt) - Date.now() : 1;
+  const isClosed = mounted ? isDeadlineExpired(p.closesAt) : false;
   const inviteRef = mounted ? new URLSearchParams(window.location.search).get("ref") ?? undefined : undefined;
   const goToSignup = () => {
     toast.error("Faça login ou cadastre-se para participar deste desafio.");
@@ -419,6 +423,9 @@ function PredictionInner({ p }: { p: Prediction }) {
               answers: subAnswers, closesAt: p.closesAt,
               participatedAt: new Date().toISOString(),
             });
+            if (fee > 0) {
+              doRecordDebit({ data: { challengeId: p.id, entryFee: fee } }).catch(console.error);
+            }
             debugParticipate({ challengeId: p.id, reason: "confirm:success", message: `Participação confirmada (fee=${fee})`, context: { answers: subAnswers, fee } });
             toast.success(`🎯 Participação confirmada! ${fee} TKN debitados. +${CORRECT_PALPITE_REWARD_TKN} TKN por palpite acertado. Missões bônus liberadas!`);
 
@@ -432,6 +439,9 @@ function PredictionInner({ p }: { p: Prediction }) {
               answers: {}, optionLabel: sel.label, closesAt: p.closesAt,
               participatedAt: new Date().toISOString(),
             });
+            if (amount > 0) {
+              doRecordDebit({ data: { challengeId: p.id, entryFee: amount } }).catch(console.error);
+            }
             setConfirmed(true);
             toast.success(`✅ Palpite de ${amount} TKN em "${sel.label}" confirmada! +${CORRECT_PALPITE_REWARD_TKN} TKN por palpite acertado.`);
           }

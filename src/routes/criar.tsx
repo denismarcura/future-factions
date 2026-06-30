@@ -30,6 +30,7 @@ import { createCorpChallenge, type CorporateMission } from "@/lib/corp-challenge
 import { uploadCorpAsset, uploadCorpAssets } from "@/lib/corp-storage";
 import logoAsset from "@/assets/logo-desafio.png.asset.json";
 import { WORLD_CUP_MATCHES } from "@/lib/world-cup-matches";
+import { formatBrazilDateTimeLocalForInput, getDefaultChallengeDeadline } from "@/lib/date-utils";
 import { ArtsWizard } from "@/components/ArtsWizard";
 import { PrizesPicker, type PrizeSlot } from "@/components/PrizesPicker";
 import { CitiesAutocomplete, type SelectedCity } from "@/components/CitiesAutocomplete";
@@ -45,11 +46,7 @@ function getNextBrazilMatch() {
 }
 
 function kickoffToLocalDateTime(kickoff: string): string {
-  // kickoff is ISO with -03:00 offset, e.g. 2026-06-24T16:00:00-03:00
-  // datetime-local expects YYYY-MM-DDTHH:mm
-  const d = new Date(kickoff);
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  return formatBrazilDateTimeLocalForInput(kickoff);
 }
 
 export const Route = createFileRoute("/criar")({
@@ -79,6 +76,21 @@ const BRAZIL_BONUS = 10000;
 
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
+
+function readableAiError(error: unknown, fallback: string) {
+  const raw = error instanceof Error ? error.message : String(error ?? "");
+  if (/unauthorized|authorization|token/i.test(raw)) {
+    return "Entre na sua conta para usar a geração por IA.";
+  }
+  if (/LOVABLE_API_KEY|api key|missing/i.test(raw)) {
+    return "A chave da IA não está configurada no servidor.";
+  }
+  if (/402|credit|cr[eé]dito/i.test(raw)) {
+    return "Os créditos de IA acabaram. Adicione créditos para continuar.";
+  }
+  if (raw && raw !== "{}") return raw;
+  return fallback;
+}
 
 import { parseInstagramHandles } from "@/lib/instagram-handles";
 
@@ -171,7 +183,11 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
     if (!availableSubs.some(s => s.name === subcategory)) setSubcategory("");
   }, [availableSubs, subcategory]);
 
-  const [endsAt, setEndsAt] = useState(() => kickoffToLocalDateTime(getNextBrazilMatch().kickoff));
+  const [endsAt, setEndsAt] = useState(() => {
+    const nextBrazilMatch = getNextBrazilMatch();
+    const defaultDeadline = getDefaultChallengeDeadline([{ kickoff: nextBrazilMatch.kickoff }], Date.now());
+    return kickoffToLocalDateTime(defaultDeadline);
+  });
   const [prizeName, setPrizeName] = useState("");
   const [socialLink, setSocialLink] = useState("");
   const [missionStep, setMissionStep] = useState(0);
@@ -303,6 +319,10 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
 
   const handleInlineGenerate = async () => {
     setInlineAiError(null);
+    if (!user) {
+      setInlineAiError("Entre na sua conta para gerar palpites com IA.");
+      return;
+    }
     const want = Math.max(1, Number(inlineAiCount) || 1);
     setInlineAiLoading(true);
     try {
@@ -336,18 +356,22 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
         return out;
       });
     } catch (err) {
-      setInlineAiError(err instanceof Error ? err.message : "Não foi possível gerar agora.");
+      setInlineAiError(readableAiError(err, "Não foi possível gerar agora."));
     } finally {
       setInlineAiLoading(false);
     }
   };
 
 
-  const handleGenerateChallenge = async () => {
+  const handleGenerateChallenge = async (): Promise<boolean> => {
     setAiError(null);
+    if (!user) {
+      setAiError("Entre na sua conta para gerar desafios com IA.");
+      return false;
+    }
     if (!aiTheme.trim()) {
       setAiError("Descreva o tema do desafio.");
-      return;
+      return false;
     }
     setAiLoading(true);
     try {
@@ -379,8 +403,10 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
         })),
       );
       // mantém a janela aberta para o usuário revisar; ele fecha manualmente.
+      return true;
     } catch (err) {
-      setAiError(err instanceof Error ? err.message : "Não foi possível gerar agora.");
+      setAiError(readableAiError(err, "Não foi possível gerar agora."));
+      return false;
     } finally {
       setAiLoading(false);
     }
@@ -794,7 +820,10 @@ function Criar({ forCompany = false, bare = false }: { forCompany?: boolean; bar
                   <div className="flex flex-wrap gap-2 pt-2">
                     <button
                       type="button"
-                      onClick={async () => { await handleGenerateChallenge(); if (!aiError) setAiOpen(false); }}
+                      onClick={async () => {
+                        const ok = await handleGenerateChallenge();
+                        if (ok) setAiOpen(false);
+                      }}
                       disabled={aiLoading || !aiTheme.trim()}
                       className="inline-flex items-center gap-2 h-11 px-4 rounded-lg bg-gradient-brand text-primary-foreground font-bold shadow-glow disabled:opacity-50"
                     >

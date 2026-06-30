@@ -1,6 +1,6 @@
 // Builds a unified token movement history from the same sources used by
 // getTokenBalance(): welcome bonus, mission claims, challenge participations,
-// and prize redemptions.
+// referral bonuses, and prize redemptions.
 
 import { supabase } from "@/integrations/supabase/client";
 import { listMyClaims } from "@/lib/missions";
@@ -13,7 +13,7 @@ export type TokenMovement = {
   type: "credit" | "debit";
   amount: number; // always positive
   reason: string;
-  source: "welcome" | "mission" | "participation" | "redemption";
+  source: "welcome" | "mission" | "participation" | "redemption" | "referral";
   detail?: string;
   link?: { to: string; label: string };
   status?: "pending" | "approved" | "rejected" | "delivered";
@@ -35,7 +35,7 @@ export async function buildTokenHistory(): Promise<TokenHistory> {
     return { balance: 0, totalCredits: 0, totalDebits: 0, movements: [] };
   }
 
-  const [{ data: prof }, claims, reds] = await Promise.all([
+  const [{ data: prof }, claims, reds, { data: partTxs }, { data: refTxs }] = await Promise.all([
     supabase
       .from("profiles")
       .select("welcome_bonus, created_at")
@@ -43,11 +43,25 @@ export async function buildTokenHistory(): Promise<TokenHistory> {
       .maybeSingle(),
     listMyClaims().catch(() => []),
     listMyRedemptions().catch(() => []),
+    // Débitos de participação gravados no banco
+    supabase
+      .from("token_transactions")
+      .select("id, challenge_id, delta, created_at")
+      .eq("user_id", user.id)
+      .eq("reason", "participation")
+      .lt("delta", 0),
+    // Bônus de referral recebidos (quando o usuário foi o convidador)
+    supabase
+      .from("token_transactions")
+      .select("id, delta, created_at")
+      .eq("user_id", user.id)
+      .eq("reason", "referral_signup")
+      .gt("delta", 0),
   ]);
 
   const movements: TokenMovement[] = [];
 
-  // Welcome bonus
+  // ── Welcome bonus ────────────────────────────────────────────────────────
   const welcome = (prof?.welcome_bonus as number | undefined) ?? 0;
   if (welcome > 0) {
     movements.push({
@@ -61,7 +75,20 @@ export async function buildTokenHistory(): Promise<TokenHistory> {
     });
   }
 
-  // Mission claims (try to fetch mission titles in one round-trip)
+  // ── Referral bonuses ─────────────────────────────────────────────────────
+  for (const tx of (refTxs ?? []) as Array<{ id: string; delta: number; created_at: string }>) {
+    movements.push({
+      id: `referral:${tx.id}`,
+      date: tx.created_at,
+      type: "credit",
+      amount: tx.delta,
+      reason: "Bônus de convite: amigo se cadastrou",
+      source: "referral",
+      detail: "Você ganhou 500 TKN por convidar um amigo que criou uma conta.",
+    });
+  }
+
+  // ── Mission claims ───────────────────────────────────────────────────────
   const missionIds = Array.from(new Set(claims.map((c) => c.mission_id)));
   let titleById = new Map<string, string>();
   if (missionIds.length) {
@@ -86,11 +113,47 @@ export async function buildTokenHistory(): Promise<TokenHistory> {
     });
   }
 
-  // Participations (localStorage)
+  // ── Participation debits (banco) ─────────────────────────────────────────
+  const dbPartTxs = (partTxs ?? []) as Array<{
+    id: string;
+    challenge_id: string | null;
+    delta: number;
+    created_at: string;
+  }>;
+  const dbChallengeIds = new Set(dbPartTxs.map((t) => t.challenge_id).filter(Boolean));
+
+  // Busca títulos dos desafios em batch
+  const challengeIds = [...dbChallengeIds] as string[];
+  const challengeTitles = new Map<string, string>();
+  if (challengeIds.length) {
+    const { data: challenges } = await supabase
+      .from("challenges")
+      .select("id, title")
+      .in("id", challengeIds);
+    for (const c of (challenges ?? []) as Array<{ id: string; title: string }>) {
+      challengeTitles.set(c.id, c.title);
+    }
+  }
+
+  for (const tx of dbPartTxs) {
+    const title = tx.challenge_id ? (challengeTitles.get(tx.challenge_id) ?? "desafio") : "desafio";
+    movements.push({
+      id: `part:${tx.id}`,
+      date: tx.created_at,
+      type: "debit",
+      amount: Math.abs(tx.delta),
+      reason: `Palpite enviado: ${title}`,
+      source: "participation",
+      link: tx.challenge_id ? { to: `/previsao/${tx.challenge_id}`, label: "Ver desafio" } : undefined,
+    });
+  }
+
+  // ── Participation debits (localStorage — apenas os não registrados no banco) ──
   for (const p of listParticipations()) {
     if (!p.entryFee) continue;
+    if (dbChallengeIds.has(p.id)) continue; // já incluído via banco
     movements.push({
-      id: `part:${p.id}:${p.participatedAt}`,
+      id: `part:local:${p.id}:${p.participatedAt}`,
       date: p.participatedAt,
       type: "debit",
       amount: p.entryFee,
@@ -101,7 +164,7 @@ export async function buildTokenHistory(): Promise<TokenHistory> {
     });
   }
 
-  // Redemptions
+  // ── Redemptions ──────────────────────────────────────────────────────────
   for (const r of reds) {
     if (!r.cost_tokens) continue;
     const refunded = r.status === "rejected";

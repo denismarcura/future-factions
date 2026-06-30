@@ -5,6 +5,18 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
+function isProductionEnvironment() {
+  return process.env.NODE_ENV === 'production';
+}
+
+function createBlockedSupabaseAdminClient(message: string): ReturnType<typeof createSupabaseAdminClient> {
+  return new Proxy({} as ReturnType<typeof createSupabaseAdminClient>, {
+    get() {
+      throw new Error(message);
+    },
+  });
+}
+
 function createSupabaseAdminClient() {
   const SUPABASE_URL = process.env.SUPABASE_URL;
   const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -15,8 +27,15 @@ function createSupabaseAdminClient() {
       ...(!SUPABASE_SERVICE_ROLE_KEY ? ['SUPABASE_SERVICE_ROLE_KEY'] : []),
     ];
     const message = `Missing Supabase environment variable(s): ${missing.join(', ')}. Connect Supabase in Lovable Cloud.`;
-    console.error(`[Supabase] ${message}`);
-    throw new Error(message);
+
+    if (isProductionEnvironment()) {
+      console.error(`[Supabase] ${message}`);
+      throw new Error(message);
+    }
+
+    const devMessage = `${message} DEVELOPMENT SAFE mode enabled: supabaseAdmin operations are disabled until SUPABASE_SERVICE_ROLE_KEY is configured.`;
+    console.warn(`[Supabase] ${devMessage}`);
+    return createBlockedSupabaseAdminClient(devMessage);
   }
 
   return createClient<Database>(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {

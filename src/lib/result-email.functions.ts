@@ -148,7 +148,6 @@ export const generateResultEmail = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: Input) => data)
   .handler(async ({ data }): Promise<Output> => {
-    const key = process.env.LOVABLE_API_KEY;
     const winner =
       data.home_score > data.away_score
         ? data.home_team
@@ -159,26 +158,24 @@ export const generateResultEmail = createServerFn({ method: "POST" })
     let intro = `o jogo ${data.home_team} x ${data.away_team} terminou ${data.home_score}-${data.away_score} e já apuramos seus palpites. Confira abaixo seus acertos e o que você ganhou!`;
     let subject = `🏆 Resultado: ${data.home_team} ${data.home_score}x${data.away_score} ${data.away_team} — confira seus acertos`;
 
-    if (key) {
-      try {
-        const { createLovableAiGatewayProvider } = await import("./ai-gateway.server");
-        const { generateText } = await import("ai");
-        const gw = createLovableAiGatewayProvider(key);
-        const r = await generateText({
-          model: gw("google/gemini-3-flash-preview"),
-          prompt: `Escreva em PORTUGUÊS BR, tom animado e curto (máx 2 frases, 280 chars), uma introdução de e-mail para o jogador. Resultado: ${data.home_team} ${data.home_score} x ${data.away_score} ${data.away_team}. Vencedor: ${winner}. Comece direto, sem "Olá". Use 1 emoji. Mencione que vamos mostrar acertos, pontos e prêmios. Apenas o texto, sem aspas.`,
-        });
-        const txt = (r.text || "").trim().replace(/^["']|["']$/g, "");
-        if (txt) intro = txt;
-        const r2 = await generateText({
-          model: gw("google/gemini-3-flash-preview"),
-          prompt: `Escreva um assunto de e-mail curto (máx 70 chars) em PT-BR, animado, com 1 emoji, sobre o resultado: ${data.home_team} ${data.home_score}x${data.away_score} ${data.away_team}. Apenas o assunto, sem aspas.`,
-        });
-        const s = (r2.text || "").trim().replace(/^["']|["']$/g, "");
-        if (s) subject = s;
-      } catch {
-        /* fall back to defaults */
-      }
+    try {
+      const { createAiTextModel } = await import("./ai-gateway.server");
+      const { generateText } = await import("ai");
+      const model = await createAiTextModel();
+      const r = await generateText({
+        model,
+        prompt: `Escreva em PORTUGUÊS BR, tom animado e curto (máx 2 frases, 280 chars), uma introdução de e-mail para o jogador. Resultado: ${data.home_team} ${data.home_score} x ${data.away_score} ${data.away_team}. Vencedor: ${winner}. Comece direto, sem "Olá". Use 1 emoji. Mencione que vamos mostrar acertos, pontos e prêmios. Apenas o texto, sem aspas.`,
+      });
+      const txt = (r.text || "").trim().replace(/^["']|["']$/g, "");
+      if (txt) intro = txt;
+      const r2 = await generateText({
+        model,
+        prompt: `Escreva um assunto de e-mail curto (máx 70 chars) em PT-BR, animado, com 1 emoji, sobre o resultado: ${data.home_team} ${data.home_score}x${data.away_score} ${data.away_team}. Apenas o assunto, sem aspas.`,
+      });
+      const s = (r2.text || "").trim().replace(/^["']|["']$/g, "");
+      if (s) subject = s;
+    } catch {
+      /* fall back to defaults */
     }
 
     // Demo data for the email body (representative jogador)

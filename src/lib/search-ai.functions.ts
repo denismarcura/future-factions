@@ -19,11 +19,8 @@ const Input = z.object({
 export const aiSearchChallenges = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => Input.parse(input))
   .handler(async ({ data }): Promise<{ ids: string[] }> => {
-    const key = process.env.LOVABLE_API_KEY;
-    if (!key) throw new Error("Missing LOVABLE_API_KEY");
-
-    const { createLovableAiGatewayProvider } = await import("./ai-gateway.server");
-    const gateway = createLovableAiGatewayProvider(key);
+    const { createAiTextModel } = await import("./ai-gateway.server");
+    const model = await createAiTextModel();
 
     const list = data.items
       .map((it) => `${it.id} | ${it.category ?? "—"} | ${it.title}`)
@@ -42,7 +39,7 @@ Formato exato:
 {"ids":["id1","id2","..."]}`;
 
     const { text } = await generateText({
-      model: gateway("google/gemini-3-flash-preview"),
+      model,
       prompt,
     });
 

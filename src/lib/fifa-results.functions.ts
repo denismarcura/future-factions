@@ -51,11 +51,8 @@ async function askAiForResult(args: {
   matchDate?: string | null;
   pageText: string | null;
 }): Promise<FifaResult> {
-  const key = process.env.LOVABLE_API_KEY;
-  if (!key) throw new Error("Missing LOVABLE_API_KEY");
-
-  const { createLovableAiGatewayProvider } = await import("./ai-gateway.server");
-  const gateway = createLovableAiGatewayProvider(key);
+  const { createAiTextModel } = await import("./ai-gateway.server");
+  const model = await createAiTextModel();
 
   const ctx = args.pageText
     ? `Conteúdo extraído da página oficial da FIFA (use SOMENTE este texto):\n"""${args.pageText}"""`
@@ -80,7 +77,7 @@ Retorne SOMENTE JSON válido, sem markdown, sem explicação. Formato:
 {"match_found":true,"status":"finalizado","home_team":"${args.home}","away_team":"${args.away}","home_score":0,"away_score":0,"winner_team":"","is_draw":false,"source_url":"${FIFA_FIXTURES_URL}","confidence":0.95}`;
 
   const { text } = await generateText({
-    model: gateway("google/gemini-3-flash-preview"),
+    model,
     prompt,
   });
 

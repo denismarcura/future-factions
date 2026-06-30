@@ -20,6 +20,12 @@ const REQUIREMENTS = [
   "🎯 Convidar 5 amigos",
 ];
 
+const MOCK_BASE_DATE = new Date("2026-06-26T12:00:00-03:00").getTime();
+
+function createdAtDaysAgo(days: number) {
+  return new Date(MOCK_BASE_DATE - days * 86400000).toISOString();
+}
+
 function makeOptions(seed: number, labels: string[]): PredictionOption[] {
   return labels.map((label, i) => ({
     id: `o${i}`,
@@ -35,7 +41,7 @@ const DIAMANTES: Prediction[] = [
     description: `Quem levantará a taça?\n\nRequisitos:\n${REQUIREMENTS.join("\n")}\n\n🎁 Premiação: 📱 iPhone 17 Pro Max\n📅 Data limite para palpites: 01/07/2026\n💰 Valor para palpitar: 500 Tokens`,
     category: "Desafios Diamante",
     author: USERS[0],
-    createdAt: new Date(Date.now() - 2 * 86400000).toISOString(),
+    createdAt: createdAtDaysAgo(2),
     closesAt: "2026-07-01T20:00:00.000Z",
     minTokens: 500,
     entryFee: 500,
@@ -54,7 +60,7 @@ const DIAMANTES: Prediction[] = [
     description: `Qual será o placar da grande final?\n\n🎯 Acertar o 1º, 2º e 3º colocado\n${REQUIREMENTS.join("\n")}\n\n🎁 Premiação: 🎮 PlayStation 5 + 💰 75.000 Tokens\n📅 Data limite para palpites: 01/07/2026\n💰 Valor para palpitar: 500 Tokens`,
     category: "Desafios Diamante",
     author: USERS[1],
-    createdAt: new Date(Date.now() - 3 * 86400000).toISOString(),
+    createdAt: createdAtDaysAgo(3),
     closesAt: "2026-07-01T20:00:00.000Z",
     minTokens: 500,
     entryFee: 500,
@@ -73,7 +79,7 @@ const DIAMANTES: Prediction[] = [
     description: `Acertar a faixa de gols da Copa inteira\n\n🎯 Acertar o 1º, 2º e 3º colocado\n${REQUIREMENTS.join("\n")}\n\n🎁 Premiação: ⚽ Bola Oficial Adidas FIFA + 💰 75.000 Tokens\n📅 Data limite para palpites: 10/07/2026\n💰 Valor para palpitar: 200 Tokens`,
     category: "Desafios Diamante",
     author: USERS[2],
-    createdAt: new Date(Date.now() - 4 * 86400000).toISOString(),
+    createdAt: createdAtDaysAgo(4),
     closesAt: "2026-07-10T20:00:00.000Z",
     minTokens: 200,
     entryFee: 200,
@@ -92,7 +98,7 @@ const DIAMANTES: Prediction[] = [
     description: `Até onde o Brasil chegará?\n\nRequisitos:\n${REQUIREMENTS.join("\n")}\n\n🎁 Premiação: 👕 Camiseta Oficial do Brasil + 💰 30.000 Tokens\n📅 Data limite para palpites: 01/07/2026\n💰 Valor para palpitar: 200 Tokens`,
     category: "Desafios Diamante",
     author: USERS[3],
-    createdAt: new Date(Date.now() - 5 * 86400000).toISOString(),
+    createdAt: createdAtDaysAgo(5),
     closesAt: "2026-07-01T20:00:00.000Z",
     minTokens: 200,
     entryFee: 200,
@@ -111,7 +117,7 @@ const DIAMANTES: Prediction[] = [
     description: `Acertar o Campeão + Artilheiro + Melhor Jogador\n\nRequisitos:\n${REQUIREMENTS.join("\n")}\n\n🎁 Premiação: 💻 Notebook Gamer + 💰 150.000 Tokens\n📅 Data limite para palpites: 01/07/2026\n💰 Valor para palpitar: 500 Tokens`,
     category: "Desafios Diamante",
     author: USERS[4],
-    createdAt: new Date(Date.now() - 1 * 86400000).toISOString(),
+    createdAt: createdAtDaysAgo(1),
     closesAt: "2026-07-01T20:00:00.000Z",
     minTokens: 500,
     entryFee: 500,
@@ -135,7 +141,7 @@ const DIAMANTES: Prediction[] = [
     description: `⚽ Oitavas de Final\nQuantas seleções favoritas serão eliminadas?\n\nRequisitos:\n${REQUIREMENTS.join("\n")}\n\n🎁 Premiação: 💳 Vale-Compras R$ 1.000\n📅 Data limite para palpites: 01/07/2026\n💰 Valor para palpitar: 500 Tokens`,
     category: "Desafios Diamante",
     author: USERS[5],
-    createdAt: new Date(Date.now() - 6 * 86400000).toISOString(),
+    createdAt: createdAtDaysAgo(6),
     closesAt: "2026-07-01T20:00:00.000Z",
     minTokens: 500,
     entryFee: 500,
@@ -154,7 +160,7 @@ const DIAMANTES: Prediction[] = [
     description: `⚽ Quartas de Final\nQuantas partidas serão decididas nos pênaltis?\n\nRequisitos:\n${REQUIREMENTS.join("\n")}\n\n🎁 Premiação: 💳 Vale-Compras R$ 2.000\n📅 Data limite para palpites: 01/07/2026\n💰 Valor para palpitar: 500 Tokens`,
     category: "Desafios Diamante",
     author: USERS[6],
-    createdAt: new Date(Date.now() - 7 * 86400000).toISOString(),
+    createdAt: createdAtDaysAgo(7),
     closesAt: "2026-07-01T20:00:00.000Z",
     minTokens: 500,
     entryFee: 500,
@@ -173,7 +179,7 @@ const DIAMANTES: Prediction[] = [
     description: `⚽ Semifinal\nQual será a seleção com mais gols nas semifinais?\n\nRequisitos:\n${REQUIREMENTS.join("\n")}\n\n🎁 Premiação: 💳 Vale-Compras R$ 5.000\n📅 Data limite para palpites: 01/07/2026\n💰 Valor para palpitar: 500 Tokens`,
     category: "Desafios Diamante",
     author: USERS[7],
-    createdAt: new Date(Date.now() - 8 * 86400000).toISOString(),
+    createdAt: createdAtDaysAgo(8),
     closesAt: "2026-07-01T20:00:00.000Z",
     minTokens: 500,
     entryFee: 500,
@@ -192,7 +198,7 @@ const DIAMANTES: Prediction[] = [
     description: `⚽ Disputa do 3º Lugar\nQual será o placar da disputa do terceiro lugar?\n\nRequisitos:\n${REQUIREMENTS.join("\n")}\n\n🎁 Premiação: 💳 Vale-Compras R$ 3.000\n📅 Data limite para palpites: 01/07/2026\n💰 Valor para palpitar: 500 Tokens`,
     category: "Desafios Diamante",
     author: USERS[8],
-    createdAt: new Date(Date.now() - 9 * 86400000).toISOString(),
+    createdAt: createdAtDaysAgo(9),
     closesAt: "2026-07-01T20:00:00.000Z",
     minTokens: 500,
     entryFee: 500,

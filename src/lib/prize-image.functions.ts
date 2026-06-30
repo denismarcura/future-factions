@@ -11,9 +11,6 @@ const InputSchema = z.object({
 export const generatePrizeImage = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => InputSchema.parse(data))
   .handler(async ({ data }) => {
-    const key = process.env.LOVABLE_API_KEY;
-    if (!key) throw new Error("Missing LOVABLE_API_KEY");
-
     const lines: string[] = [];
     lines.push(`Pôster promocional quadrado 1:1 para o "Desafio dos Palpites".`);
     lines.push(`Título principal grande e legível: "${data.title}".`);
@@ -29,28 +26,7 @@ export const generatePrizeImage = createServerFn({ method: "POST" })
 
     const prompt = lines.join(" ");
 
-    const res = await fetch("https://ai.gateway.lovable.dev/v1/images/generations", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${key}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-3.1-flash-image-preview",
-        messages: [{ role: "user", content: prompt }],
-        modalities: ["image", "text"],
-      }),
-    });
-
-    if (!res.ok) {
-      const txt = await res.text().catch(() => "");
-      if (res.status === 429) throw new Error("Limite de requisições atingido. Tente novamente em alguns instantes.");
-      if (res.status === 402) throw new Error("Créditos de IA esgotados. Adicione créditos para continuar gerando imagens.");
-      throw new Error(`Falha ao gerar imagem (${res.status}): ${txt.slice(0, 200)}`);
-    }
-
-    const json = (await res.json()) as { data?: Array<{ b64_json?: string }> };
-    const b64 = json.data?.[0]?.b64_json;
-    if (!b64) throw new Error("A IA não retornou imagem. Tente novamente.");
-    return { dataUrl: `data:image/png;base64,${b64}` };
+    const { generateAiImage } = await import("./ai-gateway.server");
+    const dataUrl = await generateAiImage({ prompt });
+    return { dataUrl };
   });

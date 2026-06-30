@@ -24,10 +24,8 @@ export const generateCorporateChallenge = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => Input.parse(input))
   .handler(async ({ data }): Promise<GeneratedCorporateChallenge> => {
-    const key = process.env.LOVABLE_API_KEY;
-    if (!key) throw new Error("Missing LOVABLE_API_KEY");
-    const { createLovableAiGatewayProvider } = await import("./ai-gateway.server");
-    const gateway = createLovableAiGatewayProvider(key);
+    const { createAiTextModel } = await import("./ai-gateway.server");
+    const model = await createAiTextModel();
 
     const prompt = `Você gera campanhas promocionais corporativas para a plataforma "Desafio dos Palpites" em pt-BR.
 
@@ -48,7 +46,7 @@ Gere um desafio corporativo completo. Retorne APENAS JSON válido (sem markdown)
 }`;
 
     const { text } = await generateText({
-      model: gateway("google/gemini-3-flash-preview"),
+      model,
       prompt,
     });
     const cleaned = text.replace(/```json\s*|\s*```/g, "").trim();

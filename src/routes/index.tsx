@@ -37,7 +37,7 @@ function Feed() {
   const [userChallenges, setUserChallenges] = useState<Prediction[]>([]);
   const [mounted, setMounted] = useState(false);
   const [corpChallenges, setCorpChallenges] = useState<CorpChallengeRecord[]>([]);
-  const [corpPage, setCorpPage] = useState(0);
+  const [corpPage, setCorpPage] = useState(0);`n  const [homePage, setHomePage] = useState(0);
   const [nowTs, setNowTs] = useState<number>(0);
   const fetchCorp = useServerFn(listLatestCorpChallenges);
   const participatedIds = useParticipatedChallengeIds();
@@ -227,12 +227,11 @@ function Feed() {
           {[...PREDICTIONS]
             .filter((p) => new Date(p.closesAt).getTime() > (mounted ? Date.now() : 0))
             .filter(notParticipated)
-            .sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt))
-            .slice(0, 6)
+            .sort((a, b) => new Date(a.closesAt).getTime() - new Date(b.closesAt).getTime()).slice(homePage * 6, homePage * 6 + 6)
             .map((p) => (
               <PredictionCard key={p.id} prediction={p} hideOptions />
             ))}
-        </div>
+        <div className="flex items-center justify-center gap-3 mt-4"><button type="button" onClick={() => setHomePage((p) => Math.max(0, p - 1))} disabled={homePage === 0} className="flex items-center gap-1 px-4 py-2 rounded-full border border-border text-sm font-bold disabled:opacity-40 hover:bg-primary/10 transition"><ChevronLeft className="h-4 w-4" /> Anterior</button><span className="text-xs text-muted-foreground">Página {homePage + 1}</span><button type="button" onClick={() => setHomePage((p) => p + 1)} className="flex items-center gap-1 px-4 py-2 rounded-full border border-border text-sm font-bold disabled:opacity-40 hover:bg-primary/10 transition">Próximo <ChevronRight className="h-4 w-4" /></button></div></div>
       </section>
 
       {/* RECOMPENSA GRATUITA â€” 4 cards */}
@@ -967,6 +966,9 @@ function CategorizedChallenges({
     </section>
   );
 }
+
+
+
 
 
 

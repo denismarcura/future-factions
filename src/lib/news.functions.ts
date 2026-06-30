@@ -289,10 +289,8 @@ export const generateNewsArticle = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     await requireAdmin(context);
-    const key = process.env.LOVABLE_API_KEY;
-    if (!key) throw new Error("Missing LOVABLE_API_KEY");
-    const { createLovableAiGatewayProvider } = await import("./ai-gateway.server");
-    const gateway = createLovableAiGatewayProvider(key);
+    const { createAiTextModel } = await import("./ai-gateway.server");
+    const model = await createAiTextModel();
 
     const prompt = `Você é um jornalista e especialista em SEO. Escreva um artigo de notícia em português brasileiro sobre:
 
@@ -320,7 +318,7 @@ RETORNE EXATAMENTE NO FORMATO JSON (sem cercas de código):
 }`;
 
     const { text } = await generateText({
-      model: gateway("google/gemini-3-flash-preview"),
+      model,
       prompt,
     });
 
@@ -343,27 +341,11 @@ export const generateNewsImage = createServerFn({ method: "POST" })
   .inputValidator((i: unknown) => z.object({ prompt: z.string().min(3) }).parse(i))
   .handler(async ({ data, context }) => {
     await requireAdmin(context);
-    const key = process.env.LOVABLE_API_KEY;
-    if (!key) throw new Error("Missing LOVABLE_API_KEY");
-    const res = await fetch("https://ai.gateway.lovable.dev/v1/images/generations", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: "google/gemini-3.1-flash-image",
-        messages: [
-          {
-            role: "user",
-            content: `Imagem editorial 16:9 para um artigo de notícia: ${data.prompt}. Estilo fotojornalístico, alta qualidade, sem texto sobreposto.`,
-          },
-        ],
-        modalities: ["image", "text"],
-      }),
+    const { generateAiImage } = await import("./ai-gateway.server");
+    const dataUrl = await generateAiImage({
+      prompt: `Imagem editorial 16:9 para um artigo de notícia: ${data.prompt}. Estilo fotojornalístico, alta qualidade, sem texto sobreposto.`,
     });
-    if (!res.ok) throw new Error(`AI image failed: ${res.status}`);
-    const json = await res.json();
-    const b64 = json?.data?.[0]?.b64_json;
-    if (!b64) throw new Error("Sem imagem retornada");
-    return { dataUrl: `data:image/png;base64,${b64}` };
+    return { dataUrl };
   });
 
 // ============== Auto-post (admin trigger) ==============
@@ -375,21 +357,19 @@ export const aiAutoPostNews = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     await requireAdmin(context);
-    const key = process.env.LOVABLE_API_KEY;
-    if (!key) throw new Error("Missing LOVABLE_API_KEY");
-    const { createLovableAiGatewayProvider } = await import("./ai-gateway.server");
-    const gateway = createLovableAiGatewayProvider(key);
+    const { createAiTextModel } = await import("./ai-gateway.server");
+    const model = await createAiTextModel();
 
     // 1) ask AI for a fresh headline
     const titleRes = await generateText({
-      model: gateway("google/gemini-3-flash-preview"),
+      model,
       prompt: `Crie UM título de notícia em português brasileiro, atual, sobre o tema: "${data.theme}". Responda APENAS o título, sem aspas.`,
     });
     const title = titleRes.text.trim().replace(/^"|"$/g, "").slice(0, 140);
 
     // 2) generate body
     const bodyRes = await generateText({
-      model: gateway("google/gemini-3-flash-preview"),
+      model,
       prompt: `Escreva uma notícia em PT-BR (400-600 palavras) sobre: "${title}". Markdown com H2/H3. Retorne JSON:
 {"seo_title":"...","seo_description":"...","seo_keywords":"...","summary":"...","body":"...","tags":["..."]}`,
     });

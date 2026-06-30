@@ -167,12 +167,13 @@ export function detectMatchFromText(text: string): {
     away: away.name.replace(/\b\w/g, (c) => c.toUpperCase()),
     homeFlag: flagUrl(home.code),
     awayFlag: flagUrl(away.code),
-    kickoff: wc?.kickoff ?? new Date().toISOString(),
+    kickoff: wc?.kickoff ?? "2026-06-11T16:00:00.000Z",
     group: wc?.group ?? "—",
   };
 }
 
 const ENTRY_FEE = 100;
+const WC_CREATED_BASE = new Date("2026-06-26T12:00:00-03:00").getTime();
 const PRIZE_TIERS = [
   { hits: 5, tokens: 10000 },
   { hits: 4, tokens: 5000 },
@@ -241,7 +242,7 @@ export function buildWorldCupChallenges(): Prediction[] {
       description: `Grupo ${m.group} • Faça 5 palpites sobre ${m.home} x ${m.away}. Acerte mais e leve mais tokens!`,
       category: "Copa do Mundo 2026" as const,
       author: WC_AUTHOR,
-      createdAt: new Date().toISOString(),
+      createdAt: new Date(WC_CREATED_BASE - i * 60_000).toISOString(),
       closesAt,
       minTokens: ENTRY_FEE,
       options,

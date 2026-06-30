@@ -3,10 +3,48 @@ import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
 import { AppShell } from "@/components/layout/AppShell";
 import {
-  Users, KeyRound, Mail, LayoutDashboard, Shield, ListChecks, Sparkles, Target,
-  Loader2, Lock, FolderTree, Image as ImageIcon, Building2, UserPlus, Gift,
-  Sparkle, Store, Trophy, Bell, Coins, FileBarChart, ShieldAlert, ChevronLeft,
-  ChevronRight, Trophy as TrophyIcon, Menu, Instagram, Newspaper, ArrowLeftRight, Cable,
+  Users,
+  KeyRound,
+  Mail,
+  LayoutDashboard,
+  Shield,
+  ListChecks,
+  Sparkles,
+  Target,
+  Loader2,
+  Lock,
+  FolderTree,
+  Image as ImageIcon,
+  Building2,
+  UserPlus,
+  Gift,
+  Sparkle,
+  Store,
+  Trophy,
+  Bell,
+  Coins,
+  FileBarChart,
+  ShieldAlert,
+  ChevronLeft,
+  ChevronRight,
+  Trophy as TrophyIcon,
+  Menu,
+  Instagram,
+  Newspaper,
+  ArrowLeftRight,
+  Cable,
+  Settings,
+  MailCheck,
+  Layers3,
+  Send,
+  Inbox,
+  TerminalSquare,
+  BarChart3,
+  BellRing,
+  SlidersHorizontal,
+  Variable,
+  MailQuestion,
+  Code2,
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { checkIsAdmin, claimAdminIfNone } from "@/lib/admin.functions";
@@ -67,7 +105,19 @@ const ADMIN_GROUPS: NavGroup[] = [
   {
     label: "Comunicação",
     items: [
-      { to: "/admin/email-marketing", label: "E-mail Marketing", icon: Mail },
+      { to: "/admin/comunicacao", label: "Comunicação", icon: Mail },
+      { to: "/admin/comunicacao/smtp", label: "Configuração SMTP", icon: Settings },
+      { to: "/admin/comunicacao/resend", label: "Configuração Resend", icon: MailCheck },
+      { to: "/admin/comunicacao/templates", label: "Templates", icon: Layers3 },
+      { to: "/admin/comunicacao/campanhas", label: "Campanhas", icon: Send },
+      { to: "/admin/comunicacao/fila", label: "Fila", icon: Inbox },
+      { to: "/admin/comunicacao/logs", label: "Logs", icon: TerminalSquare },
+      { to: "/admin/comunicacao/estatisticas", label: "Estatísticas", icon: BarChart3 },
+      { to: "/admin/comunicacao/eventos", label: "Eventos", icon: BellRing },
+      { to: "/admin/comunicacao/preferencias", label: "Preferências", icon: SlidersHorizontal },
+      { to: "/admin/comunicacao/variaveis", label: "Variáveis", icon: Variable },
+      { to: "/admin/comunicacao/teste-envio", label: "Teste de envio", icon: MailQuestion },
+      { to: "/admin/email-marketing", label: "E-mail Marketing legado", icon: Mail },
       { to: "/admin/instagram-videos", label: "Vídeos Instagram", icon: Instagram },
       { to: "/admin/notificacoes", label: "Notificações", icon: Bell },
     ],
@@ -76,6 +126,7 @@ const ADMIN_GROUPS: NavGroup[] = [
     label: "Sistema",
     items: [
       { to: "/admin/regras-ia", label: "Regras IA", icon: Sparkles },
+      { to: "/admin/desenvolvimento", label: "Desenvolvimento", icon: Code2 },
       { to: "/admin/apis", label: "APIs", icon: KeyRound },
       { to: "/admin/tokens-config", label: "Config. Tokens", icon: Coins },
       { to: "/admin/relatorios", label: "Relatórios", icon: FileBarChart },
@@ -98,25 +149,40 @@ function AdminLayout() {
 
   useEffect(() => {
     if (loading) return;
-    if (!user) { navigate({ to: "/auth" }); return; }
+    if (!user) {
+      navigate({ to: "/auth" });
+      return;
+    }
     let cancelled = false;
     check()
-      .then((r) => { if (!cancelled) setStatus(r.isAdmin ? "admin" : "denied"); })
-      .catch(() => { if (!cancelled) setStatus("denied"); });
-    return () => { cancelled = true; };
+      .then((r) => {
+        if (!cancelled) setStatus(r.isAdmin ? "admin" : "denied");
+      })
+      .catch(() => {
+        if (!cancelled) setStatus("denied");
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [user, loading, navigate, check]);
 
-  useEffect(() => { setMobileOpen(false); }, [pathname]);
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
 
   async function handleClaim() {
     setClaiming(true);
     try {
       const r = await claim();
-      if (r.granted) { toast.success("Você agora é administrador!"); setStatus("admin"); }
-      else toast.error(r.reason ?? "Não foi possível conceder acesso.");
+      if (r.granted) {
+        toast.success("Você agora é administrador!");
+        setStatus("admin");
+      } else toast.error(r.reason ?? "Não foi possível conceder acesso.");
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Erro");
-    } finally { setClaiming(false); }
+    } finally {
+      setClaiming(false);
+    }
   }
 
   if (loading || status === "checking") {
@@ -175,7 +241,9 @@ function AdminLayout() {
             </div>
             <div>
               <h1 className="text-lg font-display font-black leading-tight">Administrativo</h1>
-              <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Painel de controle</p>
+              <p className="text-[10px] text-muted-foreground uppercase tracking-wider">
+                Painel de controle
+              </p>
             </div>
           </div>
           <button
@@ -198,8 +266,12 @@ function AdminLayout() {
               </div>
               {!collapsed && (
                 <div className="min-w-0 flex-1">
-                  <div className="text-sm font-display font-black leading-tight truncate">Administrativo</div>
-                  <div className="text-[10px] text-muted-foreground uppercase tracking-wider">Área restrita</div>
+                  <div className="text-sm font-display font-black leading-tight truncate">
+                    Administrativo
+                  </div>
+                  <div className="text-[10px] text-muted-foreground uppercase tracking-wider">
+                    Área restrita
+                  </div>
                 </div>
               )}
               <button
@@ -207,7 +279,11 @@ function AdminLayout() {
                 className="h-7 w-7 rounded-lg hover:bg-muted/40 grid place-items-center text-muted-foreground"
                 aria-label={collapsed ? "Expandir" : "Recolher"}
               >
-                {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+                {collapsed ? (
+                  <ChevronRight className="h-4 w-4" />
+                ) : (
+                  <ChevronLeft className="h-4 w-4" />
+                )}
               </button>
             </div>
             <NavGroups collapsed={collapsed} pathname={pathname} />
@@ -217,15 +293,22 @@ function AdminLayout() {
         {/* Mobile drawer */}
         {mobileOpen && (
           <div className="lg:hidden fixed inset-0 z-50">
-            <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" onClick={() => setMobileOpen(false)} />
+            <div
+              className="absolute inset-0 bg-background/80 backdrop-blur-sm"
+              onClick={() => setMobileOpen(false)}
+            />
             <aside className="absolute left-0 top-0 bottom-0 w-[280px] bg-card border-r border-border/60 p-3 overflow-y-auto">
               <div className="flex items-center gap-2 px-2 pb-3 border-b border-border/40 mb-2">
                 <div className="h-8 w-8 rounded-lg bg-gradient-brand grid place-items-center shadow-glow">
                   <Shield className="h-4 w-4 text-primary-foreground" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="text-sm font-display font-black leading-tight">Administrativo</div>
-                  <div className="text-[10px] text-muted-foreground uppercase tracking-wider">Área restrita</div>
+                  <div className="text-sm font-display font-black leading-tight">
+                    Administrativo
+                  </div>
+                  <div className="text-[10px] text-muted-foreground uppercase tracking-wider">
+                    Área restrita
+                  </div>
                 </div>
               </div>
               <NavGroups collapsed={false} pathname={pathname} />
@@ -253,7 +336,9 @@ function NavGroups({ collapsed, pathname }: { collapsed: boolean; pathname: stri
           )}
           <div className="space-y-0.5">
             {group.items.map(({ to, label, icon: Icon, exact }) => {
-              const active = exact ? pathname === to : pathname === to || pathname.startsWith(to + "/");
+              const active = exact
+                ? pathname === to
+                : pathname === to || pathname.startsWith(to + "/");
               return (
                 <Link
                   key={to}

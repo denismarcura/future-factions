@@ -13,11 +13,8 @@ export const generateInviteText = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => InviteInput.parse(input))
   .handler(async ({ data }) => {
-    const key = process.env.LOVABLE_API_KEY;
-    if (!key) throw new Error("Missing LOVABLE_API_KEY");
-
-    const { createLovableAiGatewayProvider } = await import("./ai-gateway.server");
-    const gateway = createLovableAiGatewayProvider(key);
+    const { createAiTextModel } = await import("./ai-gateway.server");
+    const model = await createAiTextModel();
 
     const palpitesList = data.palpites.length
       ? data.palpites.map((p, i) => `${i + 1}. ${p}`).join("\n")
@@ -43,7 +40,7 @@ Regras de escrita:
 - Não inclua assunto, assinatura ou placeholders entre colchetes — só o corpo do e-mail.`;
 
     const { text } = await generateText({
-      model: gateway("google/gemini-3-flash-preview"),
+      model,
       prompt,
     });
 

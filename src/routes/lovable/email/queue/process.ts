@@ -247,6 +247,25 @@ export const Route = createFileRoute("/lovable/email/queue/process")({
                 status: 'sent',
               })
 
+              if (
+                typeof payload.message_id === 'string' &&
+                payload.message_id.startsWith('marketing:')
+              ) {
+                await supabase
+                  .from('email_campaign_logs')
+                  .update({
+                    enviado: true,
+                    ultimo_evento: 'sent',
+                    data: new Date().toISOString(),
+                  })
+                  .eq('message_id', payload.message_id)
+
+                await supabase
+                  .from('email_queue')
+                  .update({ status: 'enviado' })
+                  .eq('message_id', payload.message_id)
+              }
+
               // Delete from queue
               const { error: delError } = await supabase.rpc('delete_email', {
                 queue_name: queue,

@@ -1,5 +1,6 @@
 import { USERS, type Prediction, type Category } from "@/lib/mock-data";
 import { detectMatchFromText } from "@/lib/world-cup-matches";
+import { toBrazilISOString } from "@/lib/date-utils";
 
 const KEY = "ddp:user-challenges";
 
@@ -65,7 +66,7 @@ export function saveUserChallenge(input: CreateChallengeInput): Prediction {
     category: input.category,
     author: USERS[0],
     createdAt: new Date().toISOString(),
-    closesAt: input.endsAt ? new Date(input.endsAt).toISOString() : new Date(Date.now() + 7 * 86400000).toISOString(),
+    closesAt: toBrazilISOString(input.endsAt) ?? new Date(Date.now() + 7 * 86400000).toISOString(),
     minTokens: 10,
     entryFee: 10,
     options: optionLabels.map((label, i) => ({

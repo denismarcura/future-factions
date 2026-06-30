@@ -3,6 +3,7 @@ import { z } from "zod";
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { toBrazilISOString } from "@/lib/date-utils";
 
 export type CorpChallengeRecord = {
   id: string;
@@ -164,7 +165,7 @@ export const createCorpChallenge = createServerFn({ method: "POST" })
         regulation: data.regulation ?? null,
         invite_reward_text: data.inviteRewardText ?? null,
         missions: data.missions ?? [],
-        ends_at: data.endsAt ? new Date(data.endsAt).toISOString() : null,
+        ends_at: toBrazilISOString(data.endsAt),
         status: "ativo",
       })
       .select("*")
