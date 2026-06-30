@@ -25,7 +25,7 @@ export const generateCorporateChallenge = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => Input.parse(input))
   .handler(async ({ data }): Promise<GeneratedCorporateChallenge> => {
     const { createAiTextModel } = await import("./ai-gateway.server");
-    const model = createAiTextModel();
+    const model = await createAiTextModel();
 
     const prompt = `Você gera campanhas promocionais corporativas para a plataforma "Desafio dos Palpites" em pt-BR.
 

@@ -22,7 +22,7 @@ export const generateInvitePromoText = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => InviteInput.parse(input))
   .handler(async ({ data }) => {
     const { createAiTextModel } = await import("./ai-gateway.server");
-    const model = createAiTextModel();
+    const model = await createAiTextModel();
 
     const renderList = (label: string, items: typeof data.myChallenges) =>
       items.length

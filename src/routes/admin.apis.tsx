@@ -1,163 +1,425 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
-import { KeyRound, Check, AlertTriangle, Eye, EyeOff, Sparkles, Mail, Bot } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
+import { useEffect, useState } from "react";
+import {
+  KeyRound,
+  Check,
+  AlertTriangle,
+  Eye,
+  EyeOff,
+  Sparkles,
+  Mail,
+  Bot,
+  Trash2,
+  Loader2,
+  RefreshCw,
+  ServerCrash,
+} from "lucide-react";
+import {
+  listApiSettings,
+  upsertApiSetting,
+  deleteApiSetting,
+  type ApiSettingRow,
+} from "@/lib/api-settings.functions";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/apis")({
+  head: () => ({ meta: [{ title: "APIs · Admin" }, { name: "robots", content: "noindex" }] }),
   component: ApisPage,
 });
 
-type ApiConfig = {
-  id: "chatgpt" | "resend" | "maritaca";
+// ── Definição das chaves gerenciadas ─────────────────────────────────────────
+type ApiGroup = {
+  id: string;
   name: string;
   description: string;
-  docsUrl: string;
   icon: typeof KeyRound;
-  placeholder: string;
-  fields: { key: string; label: string; secret?: boolean; placeholder: string }[];
+  fields: {
+    key_name: string;
+    label: string;
+    description: string;
+    placeholder: string;
+    secret?: boolean;
+  }[];
 };
 
-const APIS: ApiConfig[] = [
+const API_GROUPS: ApiGroup[] = [
   {
-    id: "chatgpt",
-    name: "ChatGPT (OpenAI)",
+    id: "anthropic",
+    name: "Anthropic (Claude)",
     description:
-      "Usada para gerar e-mails marketing personalizados, sugestões de palpites e moderação de conteúdo.",
-    docsUrl: "https://platform.openai.com/api-keys",
-    icon: Sparkles,
-    placeholder: "sk-...",
+      "IA principal para geração de desafios, palpites, textos, convites, regulamentos e análise de fraudes.",
+    icon: Bot,
     fields: [
-      { key: "key", label: "API Key", secret: true, placeholder: "sk-..." },
-      { key: "model", label: "Modelo padrão", placeholder: "gpt-4o-mini" },
+      {
+        key_name: "anthropic_api_key",
+        label: "API Key",
+        description: "Chave de API do Anthropic (console.anthropic.com)",
+        placeholder: "sk-ant-...",
+        secret: true,
+      },
+    ],
+  },
+  {
+    id: "openai",
+    name: "OpenAI",
+    description: "Usada para geração de imagens (artes de desafio, banners e fotos de prêmios).",
+    icon: Sparkles,
+    fields: [
+      {
+        key_name: "openai_api_key",
+        label: "API Key",
+        description: "Chave de API da OpenAI (platform.openai.com/api-keys)",
+        placeholder: "sk-...",
+        secret: true,
+      },
     ],
   },
   {
     id: "resend",
     name: "Resend",
     description: "Serviço de envio de e-mails transacionais e campanhas de marketing.",
-    docsUrl: "https://resend.com/api-keys",
     icon: Mail,
-    placeholder: "re_...",
     fields: [
-      { key: "key", label: "API Key", secret: true, placeholder: "re_..." },
-      { key: "from", label: "Remetente padrão", placeholder: "Desafio dos Palpites <no-reply@desafiodospalpites.com.br>" },
+      {
+        key_name: "resend_api_key",
+        label: "API Key",
+        description: "Chave de API do Resend (resend.com/api-keys)",
+        placeholder: "re_...",
+        secret: true,
+      },
     ],
   },
   {
-    id: "maritaca",
-    name: "Maritaca AI",
-    description: "IA brasileira focada em português — ótima para copy e mensagens em PT-BR.",
-    docsUrl: "https://plataforma.maritaca.ai/",
-    icon: Bot,
-    placeholder: "100...",
+    id: "smtp",
+    name: "SMTP",
+    description: "Servidor de e-mail alternativo via protocolo SMTP.",
+    icon: Mail,
     fields: [
-      { key: "key", label: "API Key", secret: true, placeholder: "100..." },
-      { key: "model", label: "Modelo padrão", placeholder: "sabiazinho-3" },
+      {
+        key_name: "smtp_host",
+        label: "Host",
+        description: "Endereço do servidor SMTP",
+        placeholder: "smtp.exemplo.com.br",
+      },
+      {
+        key_name: "smtp_port",
+        label: "Porta",
+        description: "Porta SMTP (geralmente 587 ou 465)",
+        placeholder: "587",
+      },
+      {
+        key_name: "smtp_user",
+        label: "Usuário",
+        description: "E-mail ou usuário de autenticação",
+        placeholder: "no-reply@exemplo.com.br",
+      },
+      {
+        key_name: "smtp_pass",
+        label: "Senha",
+        description: "Senha ou App Password do servidor SMTP",
+        placeholder: "senha secreta",
+        secret: true,
+      },
+    ],
+  },
+  {
+    id: "lovable",
+    name: "Lovable Gateway (fallback)",
+    description:
+      "Gateway de IA legado — usado como fallback quando Anthropic/OpenAI não estão configuradas.",
+    icon: KeyRound,
+    fields: [
+      {
+        key_name: "lovable_api_key",
+        label: "API Key",
+        description: "Chave do Lovable AI Gateway (fallback para texto e imagens)",
+        placeholder: "...",
+        secret: true,
+      },
     ],
   },
 ];
 
-function ApiCard({ api }: { api: ApiConfig }) {
+// ── Componente de card por grupo ──────────────────────────────────────────────
+function ApiGroupCard({
+  group,
+  rows,
+  onSaved,
+}: {
+  group: ApiGroup;
+  rows: ApiSettingRow[];
+  onSaved: () => void;
+}) {
+  const upsert = useServerFn(upsertApiSetting);
+  const remove = useServerFn(deleteApiSetting);
+
+  const Icon = group.icon;
   const [values, setValues] = useState<Record<string, string>>({});
   const [show, setShow] = useState<Record<string, boolean>>({});
-  const [saved, setSaved] = useState(false);
-  const Icon = api.icon;
+  const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState<string | null>(null);
+
+  // Configura os campos com "placeholder" de valor mascarado
+  const configuredCount = group.fields.filter((f) =>
+    rows.find((r) => r.key_name === f.key_name && r.is_configured),
+  ).length;
+  const allConfigured = configuredCount === group.fields.length;
+
+  async function handleSave() {
+    const entries = group.fields.filter((f) => values[f.key_name]?.trim());
+    if (!entries.length) {
+      toast.error("Preencha pelo menos um campo antes de salvar.");
+      return;
+    }
+    setSaving(true);
+    try {
+      await Promise.all(
+        entries.map((f) =>
+          upsert({
+            data: {
+              key_name: f.key_name,
+              key_value: values[f.key_name].trim(),
+              description: f.description,
+            },
+          }),
+        ),
+      );
+      setValues({});
+      toast.success("Chave(s) salva(s) com sucesso.");
+      onSaved();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Erro ao salvar.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleDelete(key_name: string) {
+    setDeleting(key_name);
+    try {
+      await remove({ data: { key_name } });
+      toast.success("Chave removida.");
+      onSaved();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Erro ao remover.");
+    } finally {
+      setDeleting(null);
+    }
+  }
 
   return (
     <div className="glass-card rounded-2xl p-6">
-      <div className="flex items-start justify-between gap-4">
+      {/* Header */}
+      <div className="flex items-start justify-between gap-4 mb-5">
         <div className="flex items-start gap-3">
-          <div className="h-10 w-10 rounded-xl bg-primary/15 grid place-items-center">
+          <div className="h-10 w-10 rounded-xl bg-primary/15 grid place-items-center shrink-0">
             <Icon className="h-5 w-5 text-primary" />
           </div>
           <div>
-            <h3 className="font-display font-bold text-lg">{api.name}</h3>
-            <p className="text-sm text-muted-foreground mt-1 max-w-xl">{api.description}</p>
-            <a
-              href={api.docsUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="text-xs text-primary hover:underline mt-2 inline-block"
-            >
-              Obter chave →
-            </a>
+            <h3 className="font-display font-bold text-lg leading-tight">{group.name}</h3>
+            <p className="text-sm text-muted-foreground mt-1 max-w-xl">{group.description}</p>
           </div>
         </div>
         <span
-          className={`px-2 py-1 rounded-full text-[10px] uppercase tracking-wider font-bold border ${
-            saved
-              ? "bg-primary/15 text-primary border-primary/30"
-              : "bg-muted/40 text-muted-foreground border-border"
+          className={`shrink-0 px-2.5 py-1 rounded-full text-[10px] uppercase tracking-wider font-bold border whitespace-nowrap ${
+            allConfigured
+              ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30"
+              : configuredCount > 0
+                ? "bg-gold/15 text-gold border-gold/30"
+                : "bg-muted/40 text-muted-foreground border-border"
           }`}
         >
-          {saved ? "Conectado" : "Não configurado"}
+          {allConfigured
+            ? "Configurado"
+            : configuredCount > 0
+              ? `${configuredCount}/${group.fields.length} campos`
+              : "Não configurado"}
         </span>
       </div>
 
-      <div className="grid sm:grid-cols-2 gap-3 mt-5">
-        {api.fields.map((f) => (
-          <label key={f.key} className="block">
-            <span className="text-xs uppercase tracking-wider text-muted-foreground">
-              {f.label}
-            </span>
-            <div className="relative mt-1">
-              <input
-                type={f.secret && !show[f.key] ? "password" : "text"}
-                placeholder={f.placeholder}
-                value={values[f.key] || ""}
-                onChange={(e) => setValues({ ...values, [f.key]: e.target.value })}
-                className="w-full h-10 px-3 pr-10 rounded-lg bg-card border border-border/60 text-sm focus:outline-none focus:ring-2 focus:ring-primary/60"
-              />
-              {f.secret && (
+      {/* Fields */}
+      <div className="grid sm:grid-cols-2 gap-3">
+        {group.fields.map((f) => {
+          const existing = rows.find((r) => r.key_name === f.key_name);
+          return (
+            <div key={f.key_name} className="space-y-1">
+              <div className="flex items-center justify-between">
+                <label className="text-xs uppercase tracking-wider text-muted-foreground">
+                  {f.label}
+                </label>
+                {existing?.is_configured && (
+                  <button
+                    type="button"
+                    onClick={() => handleDelete(f.key_name)}
+                    disabled={deleting === f.key_name}
+                    className="text-muted-foreground hover:text-destructive transition"
+                    title="Remover chave"
+                  >
+                    {deleting === f.key_name ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    ) : (
+                      <Trash2 className="h-3.5 w-3.5" />
+                    )}
+                  </button>
+                )}
+              </div>
+
+              {/* Valor atual (mascarado) */}
+              {existing?.is_configured && !values[f.key_name] && (
+                <div className="h-10 px-3 rounded-lg bg-muted/30 border border-border/40 flex items-center text-sm text-muted-foreground font-mono">
+                  {existing.masked_value}
+                </div>
+              )}
+
+              {/* Campo de edição */}
+              {(!existing?.is_configured || values[f.key_name] !== undefined) && (
+                <div className="relative">
+                  <input
+                    type={f.secret && !show[f.key_name] ? "password" : "text"}
+                    placeholder={existing?.is_configured ? "Nova chave (deixe vazio para manter)" : f.placeholder}
+                    value={values[f.key_name] ?? ""}
+                    onChange={(e) =>
+                      setValues((prev) => ({ ...prev, [f.key_name]: e.target.value }))
+                    }
+                    className="w-full h-10 px-3 pr-10 rounded-lg bg-card border border-border/60 text-sm focus:outline-none focus:ring-2 focus:ring-primary/60"
+                  />
+                  {f.secret && (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setShow((prev) => ({ ...prev, [f.key_name]: !prev[f.key_name] }))
+                      }
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    >
+                      {show[f.key_name] ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                    </button>
+                  )}
+                </div>
+              )}
+
+              {/* Botão "editar" quando já configurado e sem valor digitado */}
+              {existing?.is_configured && values[f.key_name] === undefined && (
                 <button
                   type="button"
-                  onClick={() => setShow({ ...show, [f.key]: !show[f.key] })}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  onClick={() => setValues((prev) => ({ ...prev, [f.key_name]: "" }))}
+                  className="text-xs text-primary hover:underline"
                 >
-                  {show[f.key] ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  Alterar chave
                 </button>
               )}
             </div>
-          </label>
-        ))}
+          );
+        })}
       </div>
 
-      <div className="flex items-center justify-between mt-5">
+      {/* Footer */}
+      <div className="flex items-center justify-between mt-5 pt-4 border-t border-border/40">
         <div className="text-xs text-muted-foreground flex items-center gap-1.5">
-          <AlertTriangle className="h-3.5 w-3.5 text-gold" />
-          As chaves serão armazenadas em ambiente seguro do servidor.
+          <AlertTriangle className="h-3.5 w-3.5 text-gold shrink-0" />
+          Armazenado com segurança no servidor — nunca exposto ao navegador.
         </div>
         <button
-          onClick={() => setSaved(true)}
-          className="h-10 px-5 rounded-full bg-gradient-brand text-primary-foreground font-bold text-sm shadow-glow hover:scale-[1.02] transition inline-flex items-center gap-2"
+          onClick={handleSave}
+          disabled={saving || !Object.values(values).some((v) => v?.trim())}
+          className="h-10 px-5 rounded-full bg-gradient-brand text-primary-foreground font-bold text-sm shadow-glow hover:scale-[1.02] transition inline-flex items-center gap-2 disabled:opacity-50 disabled:pointer-events-none"
         >
-          {saved ? <Check className="h-4 w-4" /> : <KeyRound className="h-4 w-4" />}
-          {saved ? "Salvo" : "Salvar chave"}
+          {saving ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Check className="h-4 w-4" />
+          )}
+          {saving ? "Salvando…" : "Salvar"}
         </button>
       </div>
     </div>
   );
 }
 
+// ── Página principal ──────────────────────────────────────────────────────────
 function ApisPage() {
+  const list = useServerFn(listApiSettings);
+  const [rows, setRows] = useState<ApiSettingRow[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  async function reload() {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await list();
+      setRows(data);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Erro ao carregar configurações.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => { reload(); }, [list]);
+
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-2">
-        <KeyRound className="h-5 w-5 text-primary" />
-        <h2 className="text-xl font-display font-bold">Cadastro de APIs</h2>
+      {/* Header */}
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center gap-2">
+          <KeyRound className="h-5 w-5 text-primary" />
+          <h2 className="text-xl font-display font-bold">Chaves de API</h2>
+        </div>
+        <button
+          onClick={reload}
+          disabled={loading}
+          className="h-8 px-3 rounded-lg border border-border/60 text-sm text-muted-foreground hover:text-foreground flex items-center gap-1.5 transition"
+        >
+          <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
+          Atualizar
+        </button>
       </div>
 
-      <div className="glass-card rounded-2xl p-4 border-gold/30">
-        <p className="text-sm text-muted-foreground">
-          Configure as chaves de integração utilizadas pela plataforma. Estas APIs alimentam o
-          e-mail marketing inteligente, geração de conteúdo e disparos transacionais.
-        </p>
+      {/* Info */}
+      <div className="glass-card rounded-2xl p-4 text-sm text-muted-foreground">
+        Configure aqui as integrações de IA e e-mail. As chaves ficam armazenadas no banco de dados
+        do servidor e nunca são enviadas ao navegador. O sistema usa o{" "}
+        <strong>.env</strong> como fallback caso a chave não esteja cadastrada aqui.
       </div>
 
-      <div className="grid gap-4">
-        {APIS.map((api) => (
-          <ApiCard key={api.id} api={api} />
-        ))}
-      </div>
+      {/* Error */}
+      {error && (
+        <div className="flex items-center gap-3 p-4 rounded-xl bg-destructive/10 border border-destructive/30 text-destructive text-sm">
+          <ServerCrash className="h-4 w-4 shrink-0" />
+          {error}
+        </div>
+      )}
+
+      {/* Skeleton */}
+      {loading && !rows.length && (
+        <div className="space-y-4">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="glass-card rounded-2xl p-6 animate-pulse">
+              <div className="h-5 w-40 bg-muted/40 rounded mb-3" />
+              <div className="h-4 w-72 bg-muted/30 rounded" />
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Cards */}
+      {!loading && (
+        <div className="grid gap-4">
+          {API_GROUPS.map((group) => (
+            <ApiGroupCard
+              key={group.id}
+              group={group}
+              rows={rows}
+              onSaved={reload}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

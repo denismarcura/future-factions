@@ -21,7 +21,7 @@ export const generateChallenges = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => Input.parse(input))
   .handler(async ({ data }) => {
     const { createAiTextModel } = await import("./ai-gateway.server");
-    const model = createAiTextModel();
+    const model = await createAiTextModel();
 
     const prompt = `Gere ${data.count} desafios de palpites em português do Brasil para a categoria "${data.category}"${data.context ? ` (contexto: ${data.context})` : ""}.
 

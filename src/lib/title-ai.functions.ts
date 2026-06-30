@@ -13,7 +13,7 @@ export const improveTitle = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => Input.parse(input))
   .handler(async ({ data }) => {
     const { createAiTextModel } = await import("./ai-gateway.server");
-    const model = createAiTextModel();
+    const model = await createAiTextModel();
 
     const prompt = `Melhore o título do desafio de palpites abaixo, tornando-o mais chamativo, claro e engajador para participantes brasileiros. Mantenha curto (até 80 caracteres). Retorne APENAS o título melhorado, sem aspas extras, sem explicações e sem markdown.
 
@@ -42,7 +42,7 @@ export const generateBannerTitle = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => BannerInput.parse(input))
   .handler(async ({ data }) => {
     const { createAiTextModel } = await import("./ai-gateway.server");
-    const model = createAiTextModel();
+    const model = await createAiTextModel();
 
     const prompt = `Você cria títulos de banners promocionais para o site "Desafio dos Palpites".
 Gere UM título curto (até 60 caracteres), chamativo, em português brasileiro, sem aspas, sem emojis no início, sem markdown e sem explicações. Retorne APENAS o título.

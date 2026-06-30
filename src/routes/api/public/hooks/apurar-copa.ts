@@ -93,7 +93,7 @@ async function runCheck(challengeId: string) {
 
   const { createAiTextModel } = await import("@/lib/ai-gateway.server");
   const { generateText } = await import("ai");
-  const model = createAiTextModel();
+  const model = await createAiTextModel();
 
   const prompt = `Você é um verificador de resultados esportivos.
 Fonte oficial: ${FIFA_FIXTURES_URL}

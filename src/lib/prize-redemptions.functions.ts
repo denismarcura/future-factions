@@ -267,7 +267,7 @@ Responda em JSON estrito:
 
     const { createAiTextModel } = await import("./ai-gateway.server");
     const { generateText } = await import("ai");
-    const model = createAiTextModel();
+    const model = await createAiTextModel();
     const aiRes = await generateText({
       model,
       system: "Você é um analista anti-fraude. Responda SEMPRE em JSON válido.",

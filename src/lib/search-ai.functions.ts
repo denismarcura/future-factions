@@ -20,7 +20,7 @@ export const aiSearchChallenges = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => Input.parse(input))
   .handler(async ({ data }): Promise<{ ids: string[] }> => {
     const { createAiTextModel } = await import("./ai-gateway.server");
-    const model = createAiTextModel();
+    const model = await createAiTextModel();
 
     const list = data.items
       .map((it) => `${it.id} | ${it.category ?? "—"} | ${it.title}`)

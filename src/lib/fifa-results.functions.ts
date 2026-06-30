@@ -52,7 +52,7 @@ async function askAiForResult(args: {
   pageText: string | null;
 }): Promise<FifaResult> {
   const { createAiTextModel } = await import("./ai-gateway.server");
-  const model = createAiTextModel();
+  const model = await createAiTextModel();
 
   const ctx = args.pageText
     ? `Conteúdo extraído da página oficial da FIFA (use SOMENTE este texto):\n"""${args.pageText}"""`

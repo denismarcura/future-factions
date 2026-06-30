@@ -290,7 +290,7 @@ export const generateNewsArticle = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await requireAdmin(context);
     const { createAiTextModel } = await import("./ai-gateway.server");
-    const model = createAiTextModel();
+    const model = await createAiTextModel();
 
     const prompt = `Você é um jornalista e especialista em SEO. Escreva um artigo de notícia em português brasileiro sobre:
 
@@ -358,7 +358,7 @@ export const aiAutoPostNews = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await requireAdmin(context);
     const { createAiTextModel } = await import("./ai-gateway.server");
-    const model = createAiTextModel();
+    const model = await createAiTextModel();
 
     // 1) ask AI for a fresh headline
     const titleRes = await generateText({

@@ -161,7 +161,7 @@ export const generateResultEmail = createServerFn({ method: "POST" })
     try {
       const { createAiTextModel } = await import("./ai-gateway.server");
       const { generateText } = await import("ai");
-      const model = createAiTextModel();
+      const model = await createAiTextModel();
       const r = await generateText({
         model,
         prompt: `Escreva em PORTUGUÊS BR, tom animado e curto (máx 2 frases, 280 chars), uma introdução de e-mail para o jogador. Resultado: ${data.home_team} ${data.home_score} x ${data.away_score} ${data.away_team}. Vencedor: ${winner}. Comece direto, sem "Olá". Use 1 emoji. Mencione que vamos mostrar acertos, pontos e prêmios. Apenas o texto, sem aspas.`,

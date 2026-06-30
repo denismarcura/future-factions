@@ -36,7 +36,7 @@ export const generateChallenge = createServerFn({ method: "POST" })
     let model: any;
     try {
       const { createAiTextModel } = await import("./ai-gateway.server");
-      model = createAiTextModel();
+      model = await createAiTextModel();
     } catch {
       return buildFallbackChallenge(data);
     }
@@ -250,7 +250,7 @@ export const improveDescription = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     const { createAiTextModel } = await import("./ai-gateway.server");
-    const model = createAiTextModel();
+    const model = await createAiTextModel();
 
     const { text } = await generateText({
       model,
@@ -273,7 +273,7 @@ export const generateWhatsAppInvite = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     const { createAiTextModel } = await import("./ai-gateway.server");
-    const model = createAiTextModel();
+    const model = await createAiTextModel();
 
     const prompt = `Escreva uma mensagem de WhatsApp curta (em português do Brasil) convidando alguém para participar de um desafio de palpites GRATUITO na plataforma "Desafio dos Palpites".
 
@@ -313,7 +313,7 @@ export const generateTiebreaker = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     const { createAiTextModel } = await import("./ai-gateway.server");
-    const model = createAiTextModel();
+    const model = await createAiTextModel();
 
     const prompt = `Escreva os "Critérios de Desempate" para um desafio de palpites em português do Brasil.
 ${data.challengeName ? `Desafio: ${data.challengeName}` : ""}
@@ -350,7 +350,7 @@ export const generateRegulation = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     const { createAiTextModel } = await import("./ai-gateway.server");
-    const model = createAiTextModel();
+    const model = await createAiTextModel();
 
     const prompt = `Gere um "Regulamento Oficial" para a promoção/desafio de palpites abaixo, em português do Brasil.
 

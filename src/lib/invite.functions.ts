@@ -14,7 +14,7 @@ export const generateInviteText = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => InviteInput.parse(input))
   .handler(async ({ data }) => {
     const { createAiTextModel } = await import("./ai-gateway.server");
-    const model = createAiTextModel();
+    const model = await createAiTextModel();
 
     const palpitesList = data.palpites.length
       ? data.palpites.map((p, i) => `${i + 1}. ${p}`).join("\n")

@@ -10,7 +10,7 @@ export const askAiOpinion = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => Input.parse(input))
   .handler(async ({ data }): Promise<{ opinion: string; pick: string; confidence: string; reasoning: string }> => {
     const { createAiTextModel } = await import("./ai-gateway.server");
-    const model = createAiTextModel();
+    const model = await createAiTextModel();
 
     const prompt = `Você é um analista esportivo e de palpites experiente, em português do Brasil. Dê uma SEGUNDA OPINIÃO sobre o desafio/palpite abaixo. Seja direto, equilibrado e honesto sobre incertezas.
 
