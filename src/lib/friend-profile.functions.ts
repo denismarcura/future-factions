@@ -135,6 +135,31 @@ export const getFriendProfile = createServerFn({ method: "GET" })
     };
   });
 
+/** Resolves an invite slug/ref to the referrer's user ID.
+ *  Returns null if no matching profile is found. */
+export const resolveInviteRef = createServerFn({ method: "GET" })
+  .inputValidator((i: unknown) => z.object({ ref: z.string().min(1).max(40) }).parse(i))
+  .handler(async ({ data }) => {
+    const ref = normalizeInviteSlug(data.ref);
+    if (!ref) return { referrerId: null };
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: profiles } = await supabaseAdmin
+      .from("profiles")
+      .select("id, email, instagram, full_name")
+      .order("created_at", { ascending: true })
+      .limit(10000);
+    const match = (profiles ?? []).find((p: any) => {
+      if (String(p.id).toLowerCase().startsWith(ref)) return true;
+      return inviteSlugFromProfile({
+        id: p.id,
+        email: p.email,
+        instagram: p.instagram,
+        full_name: p.full_name,
+      }) === ref;
+    }) as any | undefined;
+    return { referrerId: match?.id ?? null };
+  });
+
 export const getChallengeInvite = createServerFn({ method: "GET" })
   .inputValidator((i: unknown) => z.object({ id: z.string().min(4).max(64) }).parse(i))
   .handler(async ({ data }) => {

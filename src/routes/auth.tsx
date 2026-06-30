@@ -4,7 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { prepareSignup } from "@/lib/signup.functions";
-import { getChallengeInvite } from "@/lib/friend-profile.functions";
+import { getChallengeInvite, resolveInviteRef } from "@/lib/friend-profile.functions";
 import { savePendingAvatar } from "@/lib/avatar-upload";
 import {
   Loader2, Mail, Lock, User as UserIcon, Phone, AlertCircle, Instagram, ShieldCheck,
@@ -52,6 +52,7 @@ function AuthPage() {
   const { user, loading } = useAuth();
   const prepare = useServerFn(prepareSignup);
   const fetchInvite = useServerFn(getChallengeInvite);
+  const resolveRef = useServerFn(resolveInviteRef);
   const search = Route.useSearch();
   const [invite, setInvite] = useState<any>(null);
   const [mode, setMode] = useState<"login" | "signup">(search.mode ?? (search.d || search.ref ? "signup" : "login"));
@@ -187,6 +188,17 @@ function AuthPage() {
         }
         const acceptedAt = new Date().toISOString();
 
+        // Resolve referrer slug → UUID (silencioso se falhar)
+        let referrerId: string | undefined;
+        if (search.ref) {
+          try {
+            const resolved = await resolveRef({ data: { ref: search.ref } });
+            referrerId = resolved?.referrerId ?? undefined;
+          } catch {
+            // Não bloqueia o signup se a resolução falhar
+          }
+        }
+
         // 2. Create the auth user (Supabase sends the confirmation email)
         const { error } = await supabase.auth.signUp({
           email,
@@ -202,6 +214,7 @@ function AuthPage() {
               signup_city: city,
               terms_accepted_at: acceptedAt,
               marketing_opt_in: marketing,
+              ...(referrerId ? { referrer_id: referrerId } : {}),
             },
           },
         });

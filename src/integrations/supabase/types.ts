@@ -1297,6 +1297,7 @@ export type Database = {
           status: string
           terms_accepted_at: string | null
           updated_at: string
+          referrer_id: string | null
           welcome_bonus: number
           whatsapp: string | null
         }
@@ -1323,6 +1324,7 @@ export type Database = {
           status?: string
           terms_accepted_at?: string | null
           updated_at?: string
+          referrer_id?: string | null
           welcome_bonus?: number
           whatsapp?: string | null
         }
@@ -1349,6 +1351,7 @@ export type Database = {
           status?: string
           terms_accepted_at?: string | null
           updated_at?: string
+          referrer_id?: string | null
           welcome_bonus?: number
           whatsapp?: string | null
         }

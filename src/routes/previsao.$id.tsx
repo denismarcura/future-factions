@@ -17,6 +17,7 @@ import { detectMatchFromText } from "@/lib/world-cup-matches";
 
 import { useAuth } from "@/hooks/use-auth";
 import { hasParticipated, saveParticipation } from "@/lib/my-participations";
+import { recordParticipationDebit } from "@/lib/participation-debit.functions";
 import { getTokenBalance } from "@/lib/balance";
 import { StarRating } from "@/components/StarRating";
 import { NextChallengeBanner } from "@/components/NextChallengeBanner";
@@ -195,6 +196,7 @@ function PredictionPage() {
   const [p, setP] = useState<Prediction | null>(initial);
   const [resolving, setResolving] = useState<boolean>(!initial);
   const getCorpChallengeFn = useServerFn(getCorpChallenge);
+  const doRecordDebit = useServerFn(recordParticipationDebit);
 
   useEffect(() => {
     if (p) return;
@@ -425,6 +427,9 @@ function PredictionInner({ p }: { p: Prediction }) {
               answers: subAnswers, closesAt: p.closesAt,
               participatedAt: new Date().toISOString(),
             });
+            if (fee > 0) {
+              doRecordDebit({ data: { challengeId: p.id, entryFee: fee } }).catch(console.error);
+            }
             debugParticipate({ challengeId: p.id, reason: "confirm:success", message: `Participação confirmada (fee=${fee})`, context: { answers: subAnswers, fee } });
             toast.success(`🎯 Participação confirmada! ${fee} TKN debitados. +${CORRECT_PALPITE_REWARD_TKN} TKN por palpite acertado. Missões bônus liberadas!`);
 
@@ -438,6 +443,9 @@ function PredictionInner({ p }: { p: Prediction }) {
               answers: {}, optionLabel: sel.label, closesAt: p.closesAt,
               participatedAt: new Date().toISOString(),
             });
+            if (amount > 0) {
+              doRecordDebit({ data: { challengeId: p.id, entryFee: amount } }).catch(console.error);
+            }
             setConfirmed(true);
             toast.success(`✅ Palpite de ${amount} TKN em "${sel.label}" confirmada! +${CORRECT_PALPITE_REWARD_TKN} TKN por palpite acertado.`);
           }
