@@ -37,7 +37,8 @@ function Feed() {
   const [userChallenges, setUserChallenges] = useState<Prediction[]>([]);
   const [mounted, setMounted] = useState(false);
   const [corpChallenges, setCorpChallenges] = useState<CorpChallengeRecord[]>([]);
-  const [corpPage, setCorpPage] = useState(0);`n  const [homePage, setHomePage] = useState(0);
+  const [corpPage, setCorpPage] = useState(0);
+  const [homePage, setHomePage] = useState(0);
   const [nowTs, setNowTs] = useState<number>(0);
   const fetchCorp = useServerFn(listLatestCorpChallenges);
   const participatedIds = useParticipatedChallengeIds();
@@ -231,7 +232,7 @@ function Feed() {
             .map((p) => (
               <PredictionCard key={p.id} prediction={p} hideOptions />
             ))}
-        <div className="flex items-center justify-center gap-3 mt-4"><button type="button" onClick={() => setHomePage((p) => Math.max(0, p - 1))} disabled={homePage === 0} className="flex items-center gap-1 px-4 py-2 rounded-full border border-border text-sm font-bold disabled:opacity-40 hover:bg-primary/10 transition"><ChevronLeft className="h-4 w-4" /> Anterior</button><span className="text-xs text-muted-foreground">Página {homePage + 1}</span><button type="button" onClick={() => setHomePage((p) => p + 1)} className="flex items-center gap-1 px-4 py-2 rounded-full border border-border text-sm font-bold disabled:opacity-40 hover:bg-primary/10 transition">Próximo <ChevronRight className="h-4 w-4" /></button></div></div>
+        <div className="flex items-center justify-center gap-3 mt-4"><button type="button" onClick={() => setHomePage((p) => Math.max(0, p - 1))} disabled={homePage === 0} className="flex items-center gap-1 px-4 py-2 rounded-full border border-border text-sm font-bold disabled:opacity-40 hover:bg-primary/10 transition"><ChevronLeft className="h-4 w-4" /> Anterior</button><span className="text-xs text-muted-foreground">Pï¿½gina {homePage + 1}</span><button type="button" onClick={() => setHomePage((p) => p + 1)} className="flex items-center gap-1 px-4 py-2 rounded-full border border-border text-sm font-bold disabled:opacity-40 hover:bg-primary/10 transition">Prï¿½ximo <ChevronRight className="h-4 w-4" /></button></div></div>
       </section>
 
       {/* RECOMPENSA GRATUITA â€” 4 cards */}

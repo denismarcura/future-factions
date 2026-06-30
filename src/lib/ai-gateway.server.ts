@@ -145,8 +145,8 @@ export async function generateAiImageEdit(params: {
     const json = (await res.json()) as {
       data?: Array<{ b64_json?: string; url?: string }>;
     };
-    const b64 = json.data?.[0]?.b64_json;
-    if (b64) return `data:image/png;base64,${b64}`;
+    const imgB64 = json.data?.[0]?.b64_json;
+    if (imgB64) return `data:image/png;base64,${imgB64}`;
     const url = json.data?.[0]?.url;
     if (url) return url;
     throw new Error("A IA não retornou imagem. Tente novamente.");
