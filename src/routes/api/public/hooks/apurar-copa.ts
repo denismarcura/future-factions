@@ -91,11 +91,9 @@ async function runCheck(challengeId: string) {
     }
   } catch {}
 
-  const key = process.env.LOVABLE_API_KEY;
-  if (!key) throw new Error("Missing LOVABLE_API_KEY");
-  const { createLovableAiGatewayProvider } = await import("@/lib/ai-gateway.server");
+  const { createAiTextModel } = await import("@/lib/ai-gateway.server");
   const { generateText } = await import("ai");
-  const gateway = createLovableAiGatewayProvider(key);
+  const model = createAiTextModel();
 
   const prompt = `Você é um verificador de resultados esportivos.
 Fonte oficial: ${FIFA_FIXTURES_URL}
@@ -110,7 +108,7 @@ Retorne SOMENTE JSON: {"match_found":true,"status":"finalizado","home_team":"","
   let result: any;
   try {
     const { text } = await generateText({
-      model: gateway("google/gemini-3-flash-preview"),
+      model,
       prompt,
     });
     const cleaned = text.replace(/```json\s*|\s*```/g, "").trim();

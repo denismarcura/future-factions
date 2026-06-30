@@ -9,11 +9,8 @@ const Input = z.object({
 export const askAiOpinion = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => Input.parse(input))
   .handler(async ({ data }): Promise<{ opinion: string; pick: string; confidence: string; reasoning: string }> => {
-    const key = process.env.LOVABLE_API_KEY;
-    if (!key) throw new Error("Missing LOVABLE_API_KEY");
-
-    const { createLovableAiGatewayProvider } = await import("./ai-gateway.server");
-    const gateway = createLovableAiGatewayProvider(key);
+    const { createAiTextModel } = await import("./ai-gateway.server");
+    const model = createAiTextModel();
 
     const prompt = `Você é um analista esportivo e de palpites experiente, em português do Brasil. Dê uma SEGUNDA OPINIÃO sobre o desafio/palpite abaixo. Seja direto, equilibrado e honesto sobre incertezas.
 
@@ -29,7 +26,7 @@ Retorne APENAS um JSON válido (sem markdown) com:
 }`;
 
     const { text } = await generateText({
-      model: gateway("google/gemini-3-flash-preview"),
+      model,
       prompt,
     });
 

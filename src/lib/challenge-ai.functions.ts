@@ -32,11 +32,14 @@ export const generateChallenge = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => Input.parse(input))
   .handler(async ({ data, context }): Promise<GeneratedChallengeResult> => {
-    const key = process.env.LOVABLE_API_KEY;
-    if (!key) return buildFallbackChallenge(data);
-
-    const { createLovableAiGatewayProvider } = await import("./ai-gateway.server");
-    const gateway = createLovableAiGatewayProvider(key);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let model: any;
+    try {
+      const { createAiTextModel } = await import("./ai-gateway.server");
+      model = createAiTextModel();
+    } catch {
+      return buildFallbackChallenge(data);
+    }
 
     // Carrega a base de times/jogos cadastrados para ancorar a IA
     let teamsContext = "";
@@ -115,9 +118,9 @@ Retorne APENAS um JSON válido (sem markdown, sem comentários) no formato exato
     let text: string;
     try {
       const result = await generateText({
-        model: gateway("google/gemini-3-flash-preview"),
+        model,
         prompt,
-        temperature: 1.1,
+        temperature: 1.0,
       });
       text = result.text;
     } catch (error) {
@@ -246,13 +249,11 @@ export const improveDescription = createServerFn({ method: "POST" })
     }).parse(input),
   )
   .handler(async ({ data }) => {
-    const key = process.env.LOVABLE_API_KEY;
-    if (!key) throw new Error("Missing LOVABLE_API_KEY");
-    const { createLovableAiGatewayProvider } = await import("./ai-gateway.server");
-    const gateway = createLovableAiGatewayProvider(key);
+    const { createAiTextModel } = await import("./ai-gateway.server");
+    const model = createAiTextModel();
 
     const { text } = await generateText({
-      model: gateway("google/gemini-3-flash-preview"),
+      model,
       prompt: `Reescreva a descrição abaixo de um desafio privado de palpites em português do Brasil. Tom amigável, claro e empolgante. Máximo 300 caracteres. Sem emojis em excesso (máx 2). Retorne APENAS o texto reescrito, sem aspas nem markdown.${data.context ? `\nContexto: ${data.context}` : ""}\n\nDescrição:\n${data.text}`,
     });
     return { text: text.trim().replace(/^["']|["']$/g, "") };
@@ -271,10 +272,8 @@ export const generateWhatsAppInvite = createServerFn({ method: "POST" })
     }).parse(input),
   )
   .handler(async ({ data }) => {
-    const key = process.env.LOVABLE_API_KEY;
-    if (!key) throw new Error("Missing LOVABLE_API_KEY");
-    const { createLovableAiGatewayProvider } = await import("./ai-gateway.server");
-    const gateway = createLovableAiGatewayProvider(key);
+    const { createAiTextModel } = await import("./ai-gateway.server");
+    const model = createAiTextModel();
 
     const prompt = `Escreva uma mensagem de WhatsApp curta (em português do Brasil) convidando alguém para participar de um desafio de palpites GRATUITO na plataforma "Desafio dos Palpites".
 
@@ -296,7 +295,7 @@ Regras:
 - Retorne APENAS o texto da mensagem.`;
 
     const { text } = await generateText({
-      model: gateway("google/gemini-3-flash-preview"),
+      model,
       prompt,
     });
     return { text: text.trim() };
@@ -313,10 +312,8 @@ export const generateTiebreaker = createServerFn({ method: "POST" })
     }).parse(input),
   )
   .handler(async ({ data }) => {
-    const key = process.env.LOVABLE_API_KEY;
-    if (!key) throw new Error("Missing LOVABLE_API_KEY");
-    const { createLovableAiGatewayProvider } = await import("./ai-gateway.server");
-    const gateway = createLovableAiGatewayProvider(key);
+    const { createAiTextModel } = await import("./ai-gateway.server");
+    const model = createAiTextModel();
 
     const prompt = `Escreva os "Critérios de Desempate" para um desafio de palpites em português do Brasil.
 ${data.challengeName ? `Desafio: ${data.challengeName}` : ""}
@@ -331,7 +328,7 @@ Regras:
 - Retorne APENAS o texto.`;
 
     const { text } = await generateText({
-      model: gateway("google/gemini-3-flash-preview"),
+      model,
       prompt,
     });
     return { text: text.trim() };
@@ -352,10 +349,8 @@ export const generateRegulation = createServerFn({ method: "POST" })
     }).parse(input),
   )
   .handler(async ({ data }) => {
-    const key = process.env.LOVABLE_API_KEY;
-    if (!key) throw new Error("Missing LOVABLE_API_KEY");
-    const { createLovableAiGatewayProvider } = await import("./ai-gateway.server");
-    const gateway = createLovableAiGatewayProvider(key);
+    const { createAiTextModel } = await import("./ai-gateway.server");
+    const model = createAiTextModel();
 
     const prompt = `Gere um "Regulamento Oficial" para a promoção/desafio de palpites abaixo, em português do Brasil.
 
@@ -386,7 +381,7 @@ Estruture com as seções numeradas:
 Tom formal, claro, sem emojis, sem markdown (apenas títulos numerados e parágrafos). Retorne APENAS o texto do regulamento.`;
 
     const { text } = await generateText({
-      model: gateway("google/gemini-3-flash-preview"),
+      model,
       prompt,
     });
     return { text: text.trim() };

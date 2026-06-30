@@ -177,8 +177,7 @@ export const runAiFraudCheck = createServerFn({ method: "POST" })
   .inputValidator((d: { redemption_id: string }) => d)
   .handler(async ({ data, context }) => {
     await ensureAdmin(context);
-    const key = process.env.LOVABLE_API_KEY;
-    if (!key) throw new Error("LOVABLE_API_KEY ausente");
+    // AI key resolved automatically via createAiTextModel()
 
     const { data: red, error } = await context.supabase
       .from("prize_redemptions" as never)
@@ -266,30 +265,19 @@ Responda em JSON estrito:
   "analysis": "<parágrafo explicando em português>"
 }`;
 
-    const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Lovable-API-Key": key,
-      },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        messages: [
-          { role: "system", content: "Você é um analista anti-fraude. Responda SEMPRE em JSON válido." },
-          { role: "user", content: prompt },
-        ],
-        response_format: { type: "json_object" },
-      }),
+    const { createAiTextModel } = await import("./ai-gateway.server");
+    const { generateText } = await import("ai");
+    const model = createAiTextModel();
+    const aiRes = await generateText({
+      model,
+      system: "Você é um analista anti-fraude. Responda SEMPRE em JSON válido.",
+      prompt,
     });
-    if (!res.ok) {
-      const txt = await res.text();
-      throw new Error(`AI falhou: ${res.status} ${txt.slice(0, 200)}`);
-    }
-    const json = (await res.json()) as any;
-    const content = json?.choices?.[0]?.message?.content ?? "{}";
+    const content = aiRes.text.trim();
     let parsed: { score: number; verdict: string; signals: string[]; analysis: string };
     try {
-      parsed = JSON.parse(content);
+      const match = content.match(/\{[\s\S]*\}/);
+      parsed = JSON.parse(match ? match[0] : content);
     } catch {
       parsed = { score: 0, verdict: "limpo", signals: [], analysis: content };
     }

@@ -21,11 +21,8 @@ export const generateInvitePromoText = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => InviteInput.parse(input))
   .handler(async ({ data }) => {
-    const key = process.env.LOVABLE_API_KEY;
-    if (!key) throw new Error("LOVABLE_API_KEY não configurada.");
-
-    const { createLovableAiGatewayProvider } = await import("./ai-gateway.server");
-    const gateway = createLovableAiGatewayProvider(key);
+    const { createAiTextModel } = await import("./ai-gateway.server");
+    const model = createAiTextModel();
 
     const renderList = (label: string, items: typeof data.myChallenges) =>
       items.length
@@ -83,7 +80,7 @@ ${channelRules}
 Retorne SOMENTE o texto final, sem comentários nem cabeçalhos.`;
 
     const { text } = await generateText({
-      model: gateway("google/gemini-3-flash-preview"),
+      model,
       prompt,
     });
 

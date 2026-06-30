@@ -22,9 +22,6 @@ const SIZE_MAP: Record<string, "1024x1536" | "1536x1024" | "1024x1024"> = {
 export const generateChallengeArt = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => InputSchema.parse(d))
   .handler(async ({ data }) => {
-    const key = process.env.LOVABLE_API_KEY;
-    if (!key) throw new Error("Missing LOVABLE_API_KEY");
-
     const orientation =
       data.format === "banner" ? "horizontal banner format" :
       data.format === "story" ? "vertical 9:16 story format" :
@@ -46,30 +43,7 @@ export const generateChallengeArt = createServerFn({ method: "POST" })
 
     const prompt = lines.join(" ");
 
-    const res = await fetch("https://ai.gateway.lovable.dev/v1/images/generations", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${key}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "openai/gpt-image-2",
-        prompt,
-        size: SIZE_MAP[data.format],
-        quality: "low",
-        n: 1,
-      }),
-    });
-
-    if (!res.ok) {
-      const txt = await res.text().catch(() => "");
-      if (res.status === 429) throw new Error("Limite de requisições atingido. Tente novamente em alguns instantes.");
-      if (res.status === 402) throw new Error("Créditos de IA esgotados. Adicione créditos para continuar.");
-      throw new Error(`Falha ao gerar arte (${res.status}): ${txt.slice(0, 200)}`);
-    }
-
-    const json = (await res.json()) as { data?: Array<{ b64_json?: string }> };
-    const b64 = json.data?.[0]?.b64_json;
-    if (!b64) throw new Error("A IA não retornou imagem. Tente novamente.");
-    return { dataUrl: `data:image/png;base64,${b64}`, format: data.format };
+    const { generateAiImage } = await import("./ai-gateway.server");
+    const dataUrl = await generateAiImage({ prompt, size: SIZE_MAP[data.format], quality: "low" });
+    return { dataUrl, format: data.format };
   });

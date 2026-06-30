@@ -20,11 +20,8 @@ export const generateChallenges = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => Input.parse(input))
   .handler(async ({ data }) => {
-    const key = process.env.LOVABLE_API_KEY;
-    if (!key) throw new Error("Missing LOVABLE_API_KEY");
-
-    const { createLovableAiGatewayProvider } = await import("./ai-gateway.server");
-    const gateway = createLovableAiGatewayProvider(key);
+    const { createAiTextModel } = await import("./ai-gateway.server");
+    const model = createAiTextModel();
 
     const prompt = `Gere ${data.count} desafios de palpites em português do Brasil para a categoria "${data.category}"${data.context ? ` (contexto: ${data.context})` : ""}.
 
@@ -40,7 +37,7 @@ Retorne APENAS um JSON válido no formato:
 Não inclua comentários, texto fora do JSON, nem markdown.`;
 
     const { text } = await generateText({
-      model: gateway("google/gemini-3-flash-preview"),
+      model,
       prompt,
     });
 
